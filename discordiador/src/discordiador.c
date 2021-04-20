@@ -12,6 +12,10 @@
 #include <stdlib.h>
 
 int main(void) {
+
+
 	puts("!!!hola soy el discordiador!!!"); /* prints !!!Hello World!!! */
 	return EXIT_SUCCESS;
+
+
 }
