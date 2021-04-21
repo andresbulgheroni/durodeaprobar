@@ -13,6 +13,24 @@
 #include "i_Mongo_Store.h"
 
 int main(void) {
+
+	t_config* config;
+
 	puts("!!!soy Imongo!!"); /* prints !!!Hello World!!! */
-	return EXIT_SUCCESS;
+
+	config = leer_config();
+
+	return 0;
+
+
+}
+
+t_config* leer_config(void)
+{
+
+	t_config* config = config_create("mongo.config");
+	puts("!!!funca!!");
+
+	return config;
+
 }
