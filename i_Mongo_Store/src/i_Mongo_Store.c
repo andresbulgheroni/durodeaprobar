@@ -1,6 +1,6 @@
 /*
  ============================================================================
- Name        : i-Mongo-Store.c
+ Name        : i_Mongo_Store.c
  Author      : duroDeAProbar
  Version     :
  Copyright   : Your copyright notice
@@ -10,8 +10,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "i_Mongo_Store.h"
 
 int main(void) {
-	puts("!!!soy imongo!!!"); /* prints !!!Hello World!!! */
+	puts("!!!soy Imongo!!"); /* prints !!!Hello World!!! */
 	return EXIT_SUCCESS;
 }
