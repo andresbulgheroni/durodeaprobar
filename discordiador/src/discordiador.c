@@ -1,29 +1,20 @@
 /*
  ============================================================================
  Name        : discordiador.c
- Author      : yoNoFuiFueUnVIrus
+ Author      : DuroDeAProbar
  Version     :
  Copyright   : Your copyright notice
  Description : Hello World in C, Ansi-style
  ============================================================================
  */
 #include "discordiador.h"
-#include <stdio.h>
-#include <stdlib.h>
-
-
-
-t_config*config;
 
 
 
 int main(void){
-
 	inicializarConfig(config);
-
 	puts("!!!hola soy el discordiador!!!"); /* prints !!!Hello World!!! */
 	return EXIT_SUCCESS;
-
 }
 
 
@@ -55,5 +46,11 @@ void inicializarConfig(t_config* config){
 	printf("el valor es: %d\n",DURACION_SABOTAJE);
 	printf("el valor es: %d\n",RETARDO_CICLO_CPU);
 
+
+}
+
+void inicializarSemaforoPlanificador(){			//Maneja el multiprocesamiento
+
+	sem_init(&sem_planificar, 0, GRADO_MULTITAREA);
 
 }

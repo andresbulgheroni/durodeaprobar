@@ -12,8 +12,13 @@
 #include<commons/collections/queue.h>
 #include<pthread.h>
 #include<semaphore.h>
+#include <signal.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netdb.h>
 
 
+t_config*config;
 
 char*IP_MI_RAM_HQ;
 char*PUERTO_MI_RAM_HQ;
@@ -25,7 +30,10 @@ int QUANTUM;
 int DURACION_SABOTAJE;
 int RETARDO_CICLO_CPU;
 
+sem_t sem_planificar;
+
 void inicializarConfig(t_config*);
+void inicializarSemaforoPlanificador();
 
 
 #endif /* DISCORDIADOR_H_ */
