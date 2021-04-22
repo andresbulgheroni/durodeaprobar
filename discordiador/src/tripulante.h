@@ -51,19 +51,6 @@ typedef struct
 	uint32_t posY;
 } t_coordenadas;
 
-
-typedef struct
-{
-	uint32_t id_tripulante;
-	t_coordenadas* coordenadas;
-	t_status_code estado;
-
-	t_sabotaje sabotaje;		//TODO
-
-	uint32_t misCiclosDeCPU;
-
-} t_tripulante;
-
 typedef struct
 {
 	uint32_t id_sabotaje;		//TODO
@@ -71,6 +58,21 @@ typedef struct
 
 
 } t_sabotaje;
+
+
+typedef struct
+{
+	uint32_t id_tripulante;
+	t_coordenadas* coordenadas;
+	t_status_code estado;
+
+	t_sabotaje* sabotaje;		//TODO
+
+	uint32_t misCiclosDeCPU;
+
+} t_tripulante;
+
+
 
 typedef struct
 {

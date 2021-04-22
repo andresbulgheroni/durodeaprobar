@@ -32,6 +32,18 @@ int RETARDO_CICLO_CPU;
 
 sem_t sem_planificar;
 
+
+typedef enum{
+    INICIAR_PATOTA= 1,
+    LISTAR_TRIPULANTES= 2,
+    EXPULSAR_TRIPULANTE = 3,
+    INICIAR_PLANIFICACION = 4,
+    PAUSAR_PLANIFICACION = 5,
+	OBTENER_BITACORA=6
+}opCode;
+
+
+
 void inicializarConfig(t_config*);
 void inicializarSemaforoPlanificador();
 

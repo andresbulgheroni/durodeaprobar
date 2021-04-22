@@ -54,3 +54,79 @@ void inicializarSemaforoPlanificador(){			//Maneja el multiprocesamiento
 	sem_init(&sem_planificar, 0, GRADO_MULTITAREA);
 
 }
+
+void leer_consola(uint32_t* socket_server)
+{
+	char* leido = readline(">");
+
+	while(strcmp(leido, "") != 0){
+
+
+		char** mensaje = string_n_split(leido, 10, " ");
+
+		char* codigo = string_from_format("%s %s",mensaje[0], mensaje[1]);
+
+		opCode codigo_mensaje = string_a_op_code(codigo);
+
+		switch(codigo_mensaje){
+			case INICIAR_PATOTA: {
+
+				break;
+			case LISTAR_TRIPULANTES: {
+
+			break;
+			}
+			case EXPULSAR_TRIPULANTE: {
+
+							break;
+			}
+			case INICIAR_PLANIFICACION: {
+
+							break;
+			}
+			case PAUSAR_PLANIFICACION: {
+
+							break;
+						}
+			case OBTENER_BITACORA: {
+
+							break;
+						}
+			default:{
+
+				break;
+		}
+    }
+
+			leido = readline("\n>");
+		}
+
+				free(leido);
+	}
+
+}
+
+
+
+	opCode string_a_op_code (char* string){
+
+		if(strcmp(string, "INICIAR_PATOTA") == 0){
+			return INICIAR_PATOTA;
+		}
+		if(strcmp(string, "LISTAR_TRIPULANTES")  == 0){
+			return LISTAR_TRIPULANTES;
+		}
+		if(strcmp(string, "EXPULSAR_TRIPULANTE")  == 0){
+			return EXPULSAR_TRIPULANTE;
+		}
+		if(strcmp(string, "INICIAR_PLANIFICACION")  == 0){
+			return INICIAR_PLANIFICACION;
+		}
+		if(strcmp(string, "PAUSAR_PLANIFICACION")  == 0){
+			return PAUSAR_PLANIFICACION;
+		}
+		if(strcmp(string, "OBTENER_BITACORA") == 0){
+			return OBTENER_BITACORA;
+		}
+
+	}

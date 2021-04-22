@@ -93,10 +93,10 @@ int llegoAlSabotaje(t_tripulante* tripulante){
 	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
 	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
 
-	uint32_t posicionXRestaurante = tripulante->sabotaje->coordenadas->posX;
-	uint32_t posicionYRestaurante = tripulante->sabotaje->coordenadas->posY;
+	uint32_t posicionXsabotaje = tripulante->sabotaje->coordenadas->posX;
+	uint32_t posicionYsabotaje = tripulante->sabotaje->coordenadas->posY;
 
-	return (posicionXtripulante == posicionXRestaurante) && (posicionYtripulante == posicionYRestaurante);
+	return (posicionXtripulante == posicionXsabotaje) && (posicionYtripulante == posicionYsabotaje);
 }
 
 
