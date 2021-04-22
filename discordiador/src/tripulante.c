@@ -21,16 +21,6 @@ uint32_t generar_id_tripulante() {
 
 ///////////////////////////////////////FUNCIONES GENERALES///////////////
 
-
-
-
-void liberarArray(char** array)
-{
-	for(int i = 0; i < cantidadElementosArray(array); i++)
-		free(array[i]);
-	free(array);
-}
-
 int cantidadElementosArray(char** array)
 {
 	int i = 0;
@@ -41,13 +31,18 @@ int cantidadElementosArray(char** array)
 	return i;
 }
 
-
+void liberarArray(char** array)
+{
+	for(int i = 0; i < cantidadElementosArray(array); i++)
+		free(array[i]);
+	free(array);
+}
 
 void sacarTripulanteDeLista(t_tripulante* tripulante, t_list* lista){
 	int a = list_size(lista);
 	for(int i=0; i<a ; i++){
 		t_tripulante* tripulanteDeLista = list_get(lista, i);
-		if(tripulante->id_tripulante == tripulanteDeLista->id_tripulante){
+		if(tripulante->idTripulante == tripulanteDeLista->idTripulante){
 			list_remove(lista, i);
 			break;
 		}
@@ -63,7 +58,7 @@ int getIndexTripulanteEnLista(t_list* lista, t_tripulante* tripulante) {
 
 	int index = 0;
 	while(element != NULL) {
-		if (otroTripulante->id_tripulante == tripulante->id_tripulante)
+		if (otroTripulante->idTripulante == tripulante->idTripulante)
 			return index;
 
 		element = element->next;

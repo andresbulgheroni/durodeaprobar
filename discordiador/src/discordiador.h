@@ -17,7 +17,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-
+t_log* log;
 t_config*config;
 
 char*IP_MI_RAM_HQ;
@@ -34,18 +34,30 @@ sem_t sem_planificar;
 
 
 typedef enum{
-    INICIAR_PATOTA= 1,
-    LISTAR_TRIPULANTES= 2,
-    EXPULSAR_TRIPULANTE = 3,
-    INICIAR_PLANIFICACION = 4,
-    PAUSAR_PLANIFICACION = 5,
-	OBTENER_BITACORA=6
+	INICIAR_PATOTA= 1,
+	LISTAR_TRIPULANTES= 2,
+	EXPULSAR_TRIPULANTE = 3,
+	INICIAR_PLANIFICACION = 4,
+	PAUSAR_PLANIFICACION = 5,
+	OBTENER_BITACORA=6,
+	ERROR_CODIGO=7
 }opCode;
+
+typedef struct{
+
+	int  cantPatota;
+	int numeroPatota;
+	t_list*tripulantes;
+	char*tareas;		//TODO
+
+} t_iniciarPatotaMsg;
 
 
 
 void inicializarConfig(t_config*);
 void inicializarSemaforoPlanificador();
+void leer_consola(uint32_t*);
+opCode string_a_op_code (char*);
 
 
 #endif /* DISCORDIADOR_H_ */
