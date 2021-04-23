@@ -15,22 +15,29 @@
 int main(void) {
 
 	t_config* config;
-
-	puts("!!!soy Imongo!!"); /* prints !!!Hello World!!! */
+	t_log* logger;
 
 	config = leer_config();
+	logger = crear_log(config_get_string_value(config, "LOG"));
+
+	uint32_t socket = iniciarServidor(config_get_string_value(config, "IP"), config_get_string_value(config, "PUERTO"));
+
+	uint32_t socketCliente = esperarCliente(socket);
+
+	log_debug(logger, "%d", socketCliente);
 
 	return 0;
-
-
 }
 
 t_config* leer_config(void)
 {
 
-	t_config* config = config_create("mongo.config");
-	puts("!!!funca!!");
+	return config_create("mongo.config");
 
-	return config;
+}
+
+t_log* crear_log(char* dir){
+
+	return log_create(dir, "MONGO", TRUE, LOG_LEVEL_DEBUG);
 
 }
