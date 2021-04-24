@@ -32,8 +32,11 @@ int RETARDO_CICLO_CPU;
 
 sem_t sem_planificar;
 
+t_list*tareas;
+
 
 typedef enum{
+
 	INICIAR_PATOTA= 1,
 	LISTAR_TRIPULANTES= 2,
 	EXPULSAR_TRIPULANTE = 3,
@@ -41,6 +44,7 @@ typedef enum{
 	PAUSAR_PLANIFICACION = 5,
 	OBTENER_BITACORA=6,
 	ERROR_CODIGO=7
+
 }opCode;
 
 typedef struct{
@@ -51,6 +55,41 @@ typedef struct{
 	char*tareas;		//TODO
 
 } t_iniciarPatotaMsg;
+
+typedef struct
+{
+	uint32_t posX;
+	uint32_t posY;
+} t_coordenadas;
+
+
+typedef struct
+{
+	uint32_t id_sabotaje;		//TODO
+	t_coordenadas* coordenadas;
+
+} t_sabotaje;
+
+
+typedef struct
+{
+	uint32_t idTripulante;
+	uint32_t idPatota;
+	t_coordenadas* coordenadas;
+	t_status_code estado;
+	t_sabotaje* sabotaje;		//TODO
+	uint32_t misCiclosDeCPU;
+	t_tarea*tareaAsignada;
+
+} t_tripulante;
+
+typedef struct
+{
+	uint32_t nombreTarea;		//TODO
+	t_coordenadas* coordenadas;
+	uint32_t duracion;
+
+} t_tarea;
 
 
 

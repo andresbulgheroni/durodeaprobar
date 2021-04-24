@@ -57,38 +57,102 @@ void inicializarSemaforoPlanificador(){			//Maneja el multiprocesamiento
 
 void leer_consola(uint32_t* socket_server)
 {
-	char* leido = readline(">");
 
+	char* leido;
+	leido=readline(">");
 	while(strcmp(leido, "") != 0){
 
-
 		char** mensaje = string_n_split(leido, 10, " ");
+		log_debug(log, leido);
 
 		char* codigo = string_from_format("%s %s",mensaje[0], mensaje[1]);
 
 		opCode codigo_mensaje = string_a_op_code(codigo);
 
 		switch(codigo_mensaje){
+
 			case INICIAR_PATOTA: {
+
+				t_iniciarPatotaMsg*patota;
+				int totalPatota=mensaje[1];
+				patota->cantPatota=totalPatota;
+				char*tarea[1000];
+				FILE*fileTarea;
+
+				if((fileTarea=fopen(mensaje[2],"r"))==NULL){
+					printf("Error no se pudo abrir el file");
+					//separar tareas por enter y separar atributos por ;
+
+				}else{
+					while(fileTarea!=NULL){
+						fscanf(fileTarea,"%[^\n]",tarea);
+						list_add(tareas,tarea);		//si sobreescribe, piola!
+					}
+				}
+				fclose(fileTarea);
+
+
+
+
+
+
+
+
+
+
+
+
+
+//				int variableTripulante=0;
+//
+//				if(mensaje[3]==NULL){
+//					int tripulantesPosicionDefault=totalPatota-variableTripulante;
+//					crearTripulantesEnPosicionCero();  //TODO
+//				}else{
+//
+//				while((variableTripulante+totalPatota)<=0){
+//
+//				}
+//
+//				}
+
+
+				//aca creo al tripulante
+
+
+
+
+
+
+
+
+
 
 				break;
 			case LISTAR_TRIPULANTES: {
-
+				//	fput(tripulantes);
 			break;
 			}
 			case EXPULSAR_TRIPULANTE: {
 
-							break;
-			}
-			case INICIAR_PLANIFICACION: {
+				//conseguirTripulante;
+				//list_add(listaFinalizados,tripulante);
+				//enviarMensaje();
 
 							break;
 			}
-			case PAUSAR_PLANIFICACION: {
+			case INICIAR_PLANIFICACION: {		//Con este comando se dará inicio a la planificación (es un semaforo sem init)
+
+							break;
+			}
+			case PAUSAR_PLANIFICACION: {		//Este comando lo que busca es detener la planificación en cualquier momento(semaforo)
 
 							break;
 						}
-			case OBTENER_BITACORA: {
+			case OBTENER_BITACORA: {			//Este comando obtendrá la bitácora del tripulante pasado por parámetro a través de una consulta a i-Mongo-Store.
+
+				//enviarMensaje();
+				//recibirMensaje();
 
 							break;
 						}
@@ -128,5 +192,5 @@ void leer_consola(uint32_t* socket_server)
 		if(strcmp(string, "OBTENER_BITACORA") == 0){
 			return OBTENER_BITACORA;
 		}
-
-	}
+		return ERROR_CODIGO;
+		}
