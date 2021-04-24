@@ -33,6 +33,7 @@ int RETARDO_CICLO_CPU;
 sem_t sem_planificar;
 
 t_list*tareas;
+t_list*posicionesTripulantes;
 
 
 typedef enum{
