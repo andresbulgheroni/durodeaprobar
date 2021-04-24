@@ -10,10 +10,23 @@
 #include "discordiador.h"
 
 
+pthread_mutex_t mutex_id_tripulantes = PTHREAD_MUTEX_INITIALIZER;
+
+pthread_mutex_t mutex_tripulantes = PTHREAD_MUTEX_INITIALIZER;
+
+pthread_mutex_t mutex_listaNuevos= PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_listaReady = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_listaBloqueados = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_listaEjecutando = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_listaFinalizados = PTHREAD_MUTEX_INITIALIZER;
+
+
 
 int main(void){
 	inicializarConfig(config);
-	puts("!!!hola soy el discordiador!!!"); /* prints !!!Hello World!!! */
+	puts("!!!hola soy el discordiador!!!");
+
+
 	return EXIT_SUCCESS;
 }
 
@@ -55,8 +68,8 @@ void inicializarSemaforoPlanificador(){			//Maneja el multiprocesamiento
 
 }
 
-void leer_consola(uint32_t* socket_server)
-{
+void leer_consola(uint32_t* socket_server){
+
 	posicionesTripulantes= list_create();
 	char* leido;
 	leido=readline(">");
@@ -75,9 +88,12 @@ void leer_consola(uint32_t* socket_server)
 								    //ALGORITMO PARA CONSEGUIR UNA LISTA DE POSICIONES
 									//SACO TRIPULANTES DE LAS POSICIONES Y CREO STRUCT DE TRIPULANTES Y LOS AGREGO A LAS LISTAS.
 									//ENVIO MENSAJES DE TODOS LOS DATOS A MI RAM HQ.
+
+
+
 				t_iniciarPatotaMsg*patota;
-				int totalPatota=mensaje[1];
-				patota->cantPatota=totalPatota;
+				int totalPatota=atoi(mensaje[1]);
+				patota->cantPatota=(totalPatota);		//le estoy pasando un string
 				char*tarea[1000];
 				FILE*fileTarea;
 
@@ -94,37 +110,56 @@ void leer_consola(uint32_t* socket_server)
 				fclose(fileTarea);
 
 				if(sizeof(mensaje) != (3+totalPatota) ){
+
+				}
 					for(int i=0; i<(3+totalPatota-sizeof(mensaje)); i++){
 						list_add(posicionesTripulantes,"0|0");
 
 					}
 
 					int contadorLista=0;
-					int sizeListaMensaje=3+contadorLista;
-				while(sizeof(mensaje)!=sizeListaMensaje){
-					list_add(posicionesTripulantes,mensaje[sizeListaMensaje]);
+					int sizeListaMensajeHarcodeada=3+contadorLista;
+				while(sizeof(mensaje)!=sizeListaMensajeHarcodeada){
+					list_add(posicionesTripulantes,mensaje[sizeListaMensajeHarcodeada]);
 					contadorLista++;
 				}
 				contadorLista=0;
 
-				crearTripulantes();
-
+				//MOMENTO DE CREAR TRIPULANTES
 
 				tripulantes = list_create();	//creamos la lista de tripulantes
 
-				int i = 0, j = 0;
 
-				while (posicionesTripulantes[i] != NULL) {		//1|2,2|2;
-						t_tripulante tripulante;
+
+					for(int i=0; i<(list_size(posicionesTripulantes)) ; i++){		//TODO
+
+
+						t_tripulante*tripulante;
 						char* posicion = list_get(posicionesTripulantes,i);
-						tripulante->coordenadas->posX=atoi(posicion[i][0]);
-						tripulante->coordenadas->posY=atoi(posicion[i][2]);
+
+						tripulante->coordenadas->posX=atoi(posicion[0]);		//TODO
+						tripulante->coordenadas->posY=atoi(posicion[2]);
 
 
-				}
+					pthread_mutex_lock(&mutex_tripulantes);
+								list_add(tripulantes, tripulante);
+								pthread_mutex_unlock(&mutex_tripulantes);
+
+								pthread_mutex_lock(&mutex_listaNuevos);
+								list_add(listaNuevos, tripulante);
+								pthread_mutex_unlock(&mutex_listaNuevos);
+
+
+					}
+
+
+
+
+
+
 
 				/*
-				    void ponerRepartidoresEnLista() {
+				    void ponertripulantesEnLista() {
 
 
 
@@ -206,43 +241,10 @@ void leer_consola(uint32_t* socket_server)
 
 
 
-
-
-
-
-
-
-
-
-
-//				int variableTripulante=0;
-//
-//				if(mensaje[3]==NULL){
-//					int tripulantesPosicionDefault=totalPatota-variableTripulante;
-//					crearTripulantesEnPosicionCero();  //TODO
-//				}else{
-//
-//				while((variableTripulante+totalPatota)<=0){
-//
-//				}
-//
-//				}
-
-
-				//aca creo al tripulante
-
-
-
-
-
-
-
-
-
-
 				break;
 			case LISTAR_TRIPULANTES: {
 				//	fput(tripulantes);
+				//date
 			break;
 			}
 			case EXPULSAR_TRIPULANTE: {
@@ -305,4 +307,5 @@ void leer_consola(uint32_t* socket_server)
 			return OBTENER_BITACORA;
 		}
 		return ERROR_CODIGO;
-		}
+	}
+

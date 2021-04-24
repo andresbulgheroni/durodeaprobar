@@ -3,19 +3,7 @@
 
 #include "discordiador.h"
 
-uint32_t ID_TRIPULANTES;
-t_list*tripulantes;
-t_list*hilosTripulantes;
 
-extern pthread_mutex_t mutex_id_tripulantes;
-extern pthread_mutex_t mutex_tripulantes;
-
-
-extern pthread_mutex_t mutex_listaNuevos;
-extern pthread_mutex_t mutex_listaReady;
-extern pthread_mutex_t mutex_listaBloqueados;
-extern pthread_mutex_t mutex_listaEjecutando;
-extern pthread_mutex_t mutex_listaFinalizados;
 
 
 //EJECUCUION DEL REPARTIDOR
@@ -29,15 +17,7 @@ sem_t semaforoFinCicloCPU;
 
 
 
-typedef enum{
 
-    NEW = 1,
-    READY = 2,
-    BLOCKED = 3,
-    EXEC = 4,
-    FINISHED = 5
-
-}t_status_code;
 
 
 typedef enum{

@@ -17,7 +17,19 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
+extern pthread_mutex_t mutex_id_tripulantes;
+extern pthread_mutex_t mutex_tripulantes;
+
+extern pthread_mutex_t mutex_listaNuevos;
+extern pthread_mutex_t mutex_listaReady;
+extern pthread_mutex_t mutex_listaBloqueados;
+extern pthread_mutex_t mutex_listaEjecutando;
+extern pthread_mutex_t mutex_listaFinalizados;
+
+
+
 t_log* log;
+
 t_config*config;
 
 char*IP_MI_RAM_HQ;
@@ -32,8 +44,21 @@ int RETARDO_CICLO_CPU;
 
 sem_t sem_planificar;
 
+uint32_t ID_TRIPULANTES;
+
 t_list*tareas;
 t_list*posicionesTripulantes;
+
+t_list*tripulantes;
+t_list*hilosTripulantes;
+
+
+
+t_list* listaNuevos;
+t_list* listaReady;
+t_list* listaBloqueados;
+//t_list* listaEjecutando;
+t_list* listaFinalizados;
 
 
 typedef enum{
@@ -71,6 +96,25 @@ typedef struct
 
 } t_sabotaje;
 
+typedef enum{
+
+    NEW = 1,
+    READY = 2,
+    BLOCKED = 3,
+    EXEC = 4,
+    FINISHED = 5
+
+}t_status_code;
+
+typedef struct
+{
+	uint32_t nombreTarea;		//TODO
+	t_coordenadas* coordenadas;
+	uint32_t duracion;
+
+} t_tarea;
+
+
 
 typedef struct
 {
@@ -84,13 +128,7 @@ typedef struct
 
 } t_tripulante;
 
-typedef struct
-{
-	uint32_t nombreTarea;		//TODO
-	t_coordenadas* coordenadas;
-	uint32_t duracion;
 
-} t_tarea;
 
 
 

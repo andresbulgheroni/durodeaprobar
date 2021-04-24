@@ -1,14 +1,6 @@
 #include "tripulante.h"
 
-pthread_mutex_t mutex_id_tripulantes = PTHREAD_MUTEX_INITIALIZER;
 
-pthread_mutex_t mutex_tripulantes = PTHREAD_MUTEX_INITIALIZER;
-
-pthread_mutex_t mutex_listaNuevos= PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mutex_listaReady = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mutex_listaBloqueados = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mutex_listaEjecutando = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mutex_listaFinalizados = PTHREAD_MUTEX_INITIALIZER;
 
 uint32_t generar_id_tripulante() {
 	pthread_mutex_lock(&mutex_id_tripulantes);
