@@ -1,40 +1,53 @@
 #include "utils.h"
 
-void serializarVariable(void* stream, void* variable, uint32_t size, uint32_t* offset) {
+t_coordenadas* get_coordenadas(char* posicion){
+
+	char** posicionesSplit = string_split(posicion, "|");
+
+	t_coordenadas* coordenadas = malloc(sizeof(t_coordenadas));
+
+	coordenadas->posX = atoi(posicionesSplit[0]);
+	coordenadas->posY = atoi(posicionesSplit[1]);
+
+	return coordenadas;
+}
+
+
+void serializar_variable(void* stream, void* variable, uint32_t size, uint32_t* offset) {
 
 	memcpy(stream + *offset, variable, size);
 	*offset += size;
 
 }
 
-void serializarString(void* stream, tString* string, uint32_t* offset) {
+void serializar_string(void* stream, t_string* string, uint32_t* offset) {
 
-	serializarVariable(stream, &(string->length),sizeof(string->length), offset);
-	serializarVariable(stream, string->string, string->length, offset);
+	serializar_variable(stream, &(string->length),sizeof(string->length), offset);
+	serializar_variable(stream, string->string, string->length, offset);
 
 }
 
-void deserializarVariable(void* stream, void* variable, uint32_t size, uint32_t* offset){
+void deserializar_variable(void* stream, void* variable, uint32_t size, uint32_t* offset){
 
 	memcpy(variable, stream + *offset, size);
 	*offset += size;
 
 }
 
-tString* deserializarString(void* stream, uint32_t* offset){
+t_string* deserializar_string(void* stream, uint32_t* offset){
 
-	tString* stringRespuesta = malloc(sizeof(tString));
+	t_string* stringRespuesta = malloc(sizeof(t_string));
 
-	deserializarVariable(stream, &(stringRespuesta->length), sizeof(uint32_t), offset);
+	deserializar_variable(stream, &(stringRespuesta->length), sizeof(uint32_t), offset);
 	char* string = malloc(stringRespuesta->length);
-	deserializarVariable(stream, string, stringRespuesta->length, offset);
+	deserializar_variable(stream, string, stringRespuesta->length, offset);
 
 	stringRespuesta->string = string;
 
 	return stringRespuesta;
 }
 
-opCode stringToOpCode (char* string){
+op_code string_to_op_code (char* string){
 
 		if(strcmp(string, "INICIAR_PATOTA") == 0){
 			return INICIAR_PATOTA;
@@ -59,7 +72,7 @@ opCode stringToOpCode (char* string){
 
 }
 
-uint32_t iniciarServidor(char *ip, char *puerto){
+uint32_t iniciar_servidor(char *ip, char *puerto){
 
 	int socket_servidor;
 
@@ -93,7 +106,7 @@ uint32_t iniciarServidor(char *ip, char *puerto){
 
 }
 
-uint32_t esperarCliente(uint32_t socketServidor){
+uint32_t esperar_cliente(uint32_t socketServidor){
 
 	struct sockaddr_in dir_cliente;
 
@@ -106,7 +119,7 @@ uint32_t esperarCliente(uint32_t socketServidor){
 }
 
 
-int crearConexion(char *ip, char* puerto){
+int crear_conexion(char *ip, char* puerto){
 
 	struct addrinfo hints;
 	struct addrinfo *server_info;
@@ -129,8 +142,9 @@ int crearConexion(char *ip, char* puerto){
 
 }
 
-void liberaConexion(uint32_t socketCliente){
+void liberar_conexion(uint32_t socketCliente){
 
 	close(socketCliente);
 
 }
+

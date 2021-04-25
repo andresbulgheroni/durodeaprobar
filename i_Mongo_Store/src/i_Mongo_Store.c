@@ -20,9 +20,9 @@ int main(void) {
 	config = leer_config();
 	logger = crear_log(config_get_string_value(config, "LOG"));
 
-	uint32_t socket = iniciarServidor(config_get_string_value(config, "IP"), config_get_string_value(config, "PUERTO"));
+	uint32_t socket = iniciar_servidor(config_get_string_value(config, "IP"), config_get_string_value(config, "PUERTO"));
 
-	uint32_t socketCliente = esperarCliente(socket);
+	uint32_t socketCliente = esperar_cliente(socket);
 
 	log_debug(logger, "%d", socketCliente);
 

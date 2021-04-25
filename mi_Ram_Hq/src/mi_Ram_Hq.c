@@ -18,9 +18,9 @@ int main(void) {
 	config = leer_config();
 	logger = crear_log(config_get_string_value(config, "LOG"));
 
-	uint32_t socket = crearConexion(config_get_string_value(config, "IP"), config_get_string_value(config, "PUERTO"));
+	t_coordenadas* coordenadas = get_coordenadas("1|0");
 
-	liberaConexion(socket);
+	log_debug(logger, "%d %d", coordenadas->posX, coordenadas->posY);
 
 	return 0;
 }
