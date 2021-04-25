@@ -93,7 +93,7 @@ typedef struct
 typedef struct {
 
 	uint32_t cantidadTripulantes;
-	char* direccionTareas;
+	t_string* direccionTareas;
 	t_list* listaPosiciones;
 
 } iniciar_patota_msg;
@@ -114,7 +114,7 @@ typedef struct {
 
 	uint32_t idTripulante;
 	uint32_t idPatota;
-	char* status;
+	t_string* status;
 
 } tripulante_data_msg;
 
@@ -126,7 +126,7 @@ typedef struct {
 
 typedef struct {
 
-	char* bitacora;
+	t_string* bitacora;
 
 } obtener_bitacora_rta;
 
@@ -139,8 +139,8 @@ typedef struct {
 
 typedef struct {
 
-	char* nombre;
-	char* parametros;
+	t_string* nombre;
+	t_string* parametros;
 	t_coordenadas* coordenadas;
 	uint32_t duracion;
 
@@ -175,14 +175,14 @@ typedef struct {
 typedef struct{
 
 	uint32_t idTripulante;
-	char* nombreTarea;
+	t_string* nombreTarea;
 
 } inicio_tarea_msg;
 
 typedef struct{
 
 	uint32_t idTripulante;
-	char* nombreTarea;
+	t_string* nombreTarea;
 
 } fin_tarea_msg;
 
@@ -212,19 +212,54 @@ void enviar_mensaje(void* mensaje, op_code codigo, uint32_t socketCliente);
 uint32_t iniciar_servidor(char *ip, char *puerto);
 uint32_t esperar_cliente(uint32_t socketServidor);
 void liberar_conexion(uint32_t socketCliente);
+t_paquete* recibir_paquete(uint32_t socket); //TODO
 
 op_code string_to_op_code (char* string);
+t_paquete* crear_paquete(op_code codigo, void* mensaje); //TODO
 void* serializar_paquete(t_paquete* paquete);
 void serializar_variable(void* stream, void* variable, uint32_t size, uint32_t* offset);
 void serializar_string(void* stream, t_string* string, uint32_t* offset);
+
+void* deserializar_paquete(t_paquete* paquete);
 void deserializar_variable(void* stream, void* variable, uint32_t size, uint32_t* offset);
 t_string* deserializar_string(void* stream, uint32_t* offset);
-
+t_string* get_t_string(char* string); //TODO
 
 //SERIALIZADO MENSAJES
 
+t_buffer* serializar_iniciar_patota_msg(iniciar_patota_msg* mensaje); //TODO
+t_buffer* serializar_expulsar_tripulante_msg(expulsar_tripulante_msg* mensaje); //TODO
+t_buffer* serializar_obtener_bitacora_msg(obtener_bitacora_msg* mensaje); //TODO
+t_buffer* serializar_listar_tripulantes_rta(listar_tripulantes_rta* mensaje); //TODO
+t_buffer* serializar_obtener_bitacora_rta(obtener_bitacora_rta* mensaje); //TODO
+t_buffer* serializar_iniciar_tripulante_msg(iniciar_tripulante_msg* mensaje); //TODO
+t_buffer* serializar_iniciar_tripulante_tareas_msg(iniciar_tripulante_tareas_msg* mensaje); //TODO
+t_buffer* serializar_solicitar_siguiente_tarea_msg(solicitar_siguiente_tarea_msg* mensaje); //TODO
+t_buffer* serializar_solicitar_siguiente_tarea_rta(solicitar_siguiente_tarea_rta* mensaje); //TODO
+t_buffer* serializar_informar_movimiento_msg(informar_movimiento_msg* mensaje); //TODO
+t_buffer* serializar_inicio_tarea_msg(inicio_tarea_msg* mensaje); //TODO
+t_buffer* serializar_resolucion_sabotaje_msg(resolucion_sabotaje_msg* mensaje); //TODO
+t_buffer* serializar_notificar_sabotaje_msg(notificar_sabotaje_msg* mensaje); //TODO
 
 
+//DESERIALIZADO MENSAJES
+
+iniciar_patota_msg desserializar_iniciar_patota_msg(void* stream); //TODO
+expulsar_tripulante_msg desserializar_expulsar_tripulante_msg(void* stream); //TODO
+obtener_bitacora_msg desserializar_obtener_bitacora_msg(void* stream); //TODO
+listar_tripulantes_rta desserializar_listar_tripulantes_rta(void* stream); //TODO
+obtener_bitacora_rta desserializar_obtener_bitacora_rta(void* stream); //TODO
+iniciar_tripulante_msg desserializar_iniciar_tripulante_msg(void* stream); //TODO
+iniciar_tripulante_tareas_msg desserializar_iniciar_tripulante_tareas_msg(void* stream); //TODO
+solicitar_siguiente_tarea_msg desserializar_solicitar_siguiente_tarea_msg(void* stream); //TODO
+solicitar_siguiente_tarea_rta desserializar_solicitar_siguiente_tarea_rta(void* stream); //TODO
+informar_movimiento_msg desserializar_informar_movimiento_msg(void* stream); //TODO
+inicio_tarea_msg desserializar_inicio_tarea_msg(void* stream); //TODO
+resolucion_sabotaje_msg desserializar_resolucion_sabotaje_msg(void* stream); //TODO
+notificar_sabotaje_msg desserializar_notificar_sabotaje_msg(void* stream); //TODO
+
+
+//MISC
 
 t_coordenadas* get_coordenadas(char* posicion);
 
