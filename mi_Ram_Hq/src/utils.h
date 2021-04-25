@@ -191,7 +191,7 @@ typedef struct{
 	uint32_t idTripulante;
 	uint32_t idSabotaje;
 
-} atender_sabotaje;
+} atender_sabotaje_msg;
 
 typedef struct{
 
@@ -219,6 +219,11 @@ void serializar_variable(void* stream, void* variable, uint32_t size, uint32_t* 
 void serializar_string(void* stream, t_string* string, uint32_t* offset);
 void deserializar_variable(void* stream, void* variable, uint32_t size, uint32_t* offset);
 t_string* deserializar_string(void* stream, uint32_t* offset);
+
+
+//SERIALIZADO MENSAJES
+
+
 
 
 t_coordenadas* get_coordenadas(char* posicion);
