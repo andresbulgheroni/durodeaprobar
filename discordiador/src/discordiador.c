@@ -30,7 +30,7 @@ int main(void){
 
 	consolita();
 
-	puts("puto");
+	puts("LLEGO AL FIN DEL PROGRAMA");
 
 	return EXIT_SUCCESS;
 }
@@ -113,12 +113,14 @@ int consolita(){
 
 		log_debug(log, leido);
 
-		char** mensaje = string_split(leido, ",");
+		char** mensaje = string_split(leido, " ");
 
-		char* codigo = string_from_format("%s %s",mensaje[0], mensaje[1]);
+		opCode codigo_mensaje = string_a_op_code(mensaje[0]);
 
-		opCode codigo_mensaje = string_a_op_code(codigo);
+		int cantidadMensaje=atoi(mensaje[1]);
 
+
+		printf("el valor es: %d\n",cantidadMensaje);
 		switch(codigo_mensaje){
 
 		case INICIAR_PATOTA: {
@@ -127,6 +129,7 @@ int consolita(){
 		}
 
 		case LISTAR_TRIPULANTES: {
+			puts("hola soy LISTAR_TRIPULANTES");
 			break;
 		}
 		case EXPULSAR_TRIPULANTE: {
