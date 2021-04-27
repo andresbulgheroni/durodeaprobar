@@ -129,7 +129,7 @@ typedef struct
 } t_tripulante;
 
 
-void consolita();
+int consolita();
 
 void iniciarLog();
 
