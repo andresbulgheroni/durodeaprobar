@@ -129,8 +129,9 @@ typedef struct
 } t_tripulante;
 
 
+void consolita();
 
-
+void iniciarLog();
 
 void inicializarConfig(t_config*);
 void inicializarSemaforoPlanificador();
