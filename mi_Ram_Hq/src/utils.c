@@ -78,101 +78,101 @@ t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje){
 				paquete->buffer = serializar_iniciar_patota_msg(mensaje);
 				break;
 			}
-			/*
 			case EXPULSAR_TRIPULANTE:{
 
-				paquete->buffer = serializar_expulsar_tripulante_msg(paquete->buffer->stream);
+				paquete->buffer = serializar_expulsar_tripulante_msg(mensaje);
 
 				break;
 
 			}
+			/*
 			case OBTENER_BITACORA:{
 
-				paquete->buffer = serializar_obtener_bitacora_msg(paquete->buffer->stream);
+				paquete->buffer = serializar_obtener_bitacora_msg(mensaje);
 
 				break;
 
 			}
 			case LISTAR_TRIPULANTES_RTA:{
 
-				paquete->buffer = serializar_listar_tripulantes_rta(paquete->buffer->stream);
+				paquete->buffer = serializar_listar_tripulantes_rta(mensaje);
 
 				break;
 
 			}
 			case OBTENER_BITACORA_RTA:{
 
-				paquete->buffer = serializar_obtener_bitacora_rta(paquete->buffer->stream);
+				paquete->buffer = serializar_obtener_bitacora_rta(mensaje);
 
 				break;
 
 			}
 			case INICIAR_TRIPULANTE:{
 
-				paquete->buffer = serializar_iniciar_tripulante_msg(paquete->buffer->stream);
+				paquete->buffer = serializar_iniciar_tripulante_msg(mensaje);
 
 				break;
 
 			}
 			case INICIAR_TRIPULANTE_TAREAS:{
 
-				paquete->buffer = serializar_iniciar_tripulante_tareas_msg(paquete->buffer->stream);
+				paquete->buffer = serializar_iniciar_tripulante_tareas_msg(mensaje);
 
 				break;
 
 			}
 			case SOLICITAR_SIGUIENTE_TAREA:{
 
-				paquete->buffer = serializar_solicitar_siguiente_tarea_msg(paquete->buffer->stream);
+				paquete->buffer = serializar_solicitar_siguiente_tarea_msg(mensaje);
 
 				break;
 
 			}
 			case SOLICITAR_SIGUIENTE_TAREA_RTA:{
 
-				paquete->buffer = serializar_solicitar_siguiente_tarea_rta(paquete->buffer->stream);
+				paquete->buffer = serializar_solicitar_siguiente_tarea_rta(mensaje);
 
 				break;
 
 			}
 			case INFORMAR_MOVIMIENTO:{
 
-				paquete->buffer = serializar_informar_movimiento_msg(paquete->buffer->stream);
+				paquete->buffer = serializar_informar_movimiento_msg(mensaje);
 
 				break;
 
 			}
 			case INICIO_TAREA:{
 
-				paquete->buffer = serializar_inicio_tarea_msg(paquete->buffer->stream);
+				paquete->buffer = serializar_inicio_tarea_msg(mensaje);
 
 				break;
 
 			}
 			case FIN_TAREA:{
 
-				paquete->buffer = serializar_fin_tarea_msg(paquete->buffer->stream);
+				paquete->buffer = serializar_fin_tarea_msg(mensaje);
 
 				break;
 
 			}
 			case ATENDER_SABOTAJE:{
 
-				paquete->buffer = serializar_atender_sabotaje_msg(paquete->buffer->stream);
+				paquete->buffer = serializar_atender_sabotaje_msg(mensaje);
 
 				break;
 
 			}
 			case RESOLUCION_SABOTAJE:{
 
-				paquete->buffer = serializar_resolucion_sabotaje_msg(paquete->buffer->stream);
+				paquete->buffer = serializar_resolucion_sabotaje_msg(mensaje);
 
 				break;
 
 			}
 			case NOTIFICAR_SABOTAJE:{
 
-				paquete->buffer = serializar_notificar_sabotaje_msg(paquete->buffer->stream);
+				paquete->buffer = serializar_notificar_sabotaje_msg(mensaje);
 
 				break;
 
@@ -290,7 +290,6 @@ void* deserializar_paquete(t_paquete* paquete){
 			break;
 
 		}
-		/*
 		case EXPULSAR_TRIPULANTE:{
 
 			mensaje = desserializar_expulsar_tripulante_msg(paquete->buffer->stream);
@@ -298,6 +297,7 @@ void* deserializar_paquete(t_paquete* paquete){
 			break;
 
 		}
+		/*
 		case OBTENER_BITACORA:{
 
 			mensaje = desserializar_obtener_bitacora_msg(paquete->buffer->stream);
@@ -445,6 +445,22 @@ t_buffer* serializar_iniciar_patota_msg(iniciar_patota_msg* mensaje){
 
 }
 
+t_buffer* serializar_expulsar_tripulante_msg(expulsar_tripulante_msg* mensaje){
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+
+	buffer->size = sizeof(mensaje->idTripulante);
+
+	buffer->stream = malloc(buffer->size);
+
+	uint32_t offset = 0;
+
+	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(uint32_t), &offset);
+
+	return buffer;
+
+}
+
 
 //DESERIALIZDO MENSAJES
 
@@ -469,6 +485,15 @@ iniciar_patota_msg* desserializar_iniciar_patota_msg(void* stream){
 
 }
 
+expulsar_tripulante_msg* desserializar_expulsar_tripulante_msg(void* stream){
+
+	expulsar_tripulante_msg* mensaje = malloc(sizeof(expulsar_tripulante_msg));
+
+	uint32_t offset = 0;
+	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+
+	return mensaje;
+}
 
 
 //CONEXION

@@ -28,7 +28,7 @@ int main(void) {
 
 	/*
 
-	Prueba Iniciar Patota
+	//Prueba Iniciar Patota
 
 	iniciar_patota_msg* mensaje = deserializar_paquete(paquete);
 
@@ -53,6 +53,16 @@ int main(void) {
 
 
 	*/
+
+	/*
+	//Prueba Expulsar Tripulante
+
+	expulsar_tripulante_msg* mensaje = deserializar_paquete(paquete);
+
+	log_debug(logger, "%d", mensaje->idTripulante);
+
+	free(mensaje);
+	 */
 
 	return 0;
 }

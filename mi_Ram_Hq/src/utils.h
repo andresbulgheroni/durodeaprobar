@@ -208,14 +208,14 @@ typedef struct{
 
 //Funciones
 int crear_conexion(char* ip, char* puerto);
-int32_t enviar_paquete(void* mensaje, op_code codigo, uint32_t socketCliente);//TODO
+int32_t enviar_paquete(void* mensaje, op_code codigo, uint32_t socketCliente);
 uint32_t iniciar_servidor(char *ip, char *puerto);
 uint32_t esperar_cliente(uint32_t socketServidor);
 void liberar_conexion(uint32_t socketCliente);
-t_paquete* recibir_paquete(uint32_t socket); //TODO
+t_paquete* recibir_paquete(uint32_t socket);
 
 op_code string_to_op_code (char* string);
-t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje); //TODO
+t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje);
 void* serializar_paquete(t_paquete* paquete);
 void serializar_variable(void* stream, void* variable, uint32_t size, uint32_t* offset);
 void serializar_string(void* stream, t_string* string, uint32_t* offset);
@@ -227,8 +227,8 @@ t_string* deserializar_string(void* stream, uint32_t* offset);
 
 //SERIALIZADO MENSAJES
 
-t_buffer* serializar_iniciar_patota_msg(iniciar_patota_msg* mensaje); //TODO
-t_buffer* serializar_expulsar_tripulante_msg(expulsar_tripulante_msg* mensaje); //TODO
+t_buffer* serializar_iniciar_patota_msg(iniciar_patota_msg* mensaje);
+t_buffer* serializar_expulsar_tripulante_msg(expulsar_tripulante_msg* mensaje);
 t_buffer* serializar_obtener_bitacora_msg(obtener_bitacora_msg* mensaje); //TODO
 t_buffer* serializar_listar_tripulantes_rta(listar_tripulantes_rta* mensaje); //TODO
 t_buffer* serializar_obtener_bitacora_rta(obtener_bitacora_rta* mensaje); //TODO
@@ -246,8 +246,8 @@ t_buffer* serializar_notificar_sabotaje_msg(notificar_sabotaje_msg* mensaje); //
 
 //DESERIALIZADO MENSAJES
 
-iniciar_patota_msg* desserializar_iniciar_patota_msg(void* stream); //TODO
-expulsar_tripulante_msg* desserializar_expulsar_tripulante_msg(void* stream); //TODO
+iniciar_patota_msg* desserializar_iniciar_patota_msg(void* stream);
+expulsar_tripulante_msg* desserializar_expulsar_tripulante_msg(void* stream);
 obtener_bitacora_msg* desserializar_obtener_bitacora_msg(void* stream); //TODO
 listar_tripulantes_rta* desserializar_listar_tripulantes_rta(void* stream); //TODO
 obtener_bitacora_rta* desserializar_obtener_bitacora_rta(void* stream); //TODO

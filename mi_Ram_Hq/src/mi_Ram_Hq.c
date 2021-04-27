@@ -22,7 +22,7 @@ int main(void) {
 
 	/*
 
-	Prueba Iniciar Patota
+	//Prueba Iniciar Patota
 
 	iniciar_patota_msg* mensaje = malloc(sizeof(iniciar_patota_msg));
 
@@ -46,6 +46,18 @@ int main(void) {
 	list_destroy_and_destroy_elements(mensaje->listaPosiciones, free_list);
 	free(mensaje);
 
+	*/
+
+	/*
+	//Prueba Expulsar Tripulante
+
+	expulsar_tripulante_msg* mensaje = malloc(sizeof(expulsar_tripulante_msg));
+
+	mensaje->idTripulante = 5;
+
+	enviar_paquete(mensaje, EXPULSAR_TRIPULANTE, conexion);
+
+	free(mensaje);
 	*/
 
 	liberar_conexion(conexion);
