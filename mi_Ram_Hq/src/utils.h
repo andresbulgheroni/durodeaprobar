@@ -21,32 +21,32 @@ typedef enum{
 typedef enum{
 
 	//CONSOLA
-	INICIAR_PATOTA= 1,
+	INICIAR_PATOTA= 1, // MANDA DATA
 	LISTAR_TRIPULANTES= 2,
-	EXPULSAR_TRIPULANTE = 3,
+	EXPULSAR_TRIPULANTE = 3, //MANDA DATA
 	INICIAR_PLANIFICACION = 4,
 	PAUSAR_PLANIFICACION = 5,
-	OBTENER_BITACORA=6,
+	OBTENER_BITACORA=6, // MANDA DATA
 	ERROR_CODIGO=7,
 	//RESPUESTA CONSOLA
-	LISTAR_TRIPULANTES_RTA= 8,
-	OBTENER_BITACORA_RTA= 9,
+	LISTAR_TRIPULANTES_RTA= 8, // MANDA DATA
+	OBTENER_BITACORA_RTA= 9, //MANDA DATA
 	//TRIPULANTE CON RAM
-	INICIAR_TRIPULANTE= 10,
+	INICIAR_TRIPULANTE= 10, // MANDA DATA
 	RAM_NECESITA_TAREAS= 11,
 	RAM_NO_NECESITA_TAREAS= 12,
-	INICIAR_TRIPULANTE_TAREAS= 13,
-	SOLICITAR_SIGUIENTE_TAREA= 14,
-	SOLICITAR_SIGUIENTE_TAREA_RTA= 15,
+	INICIAR_TRIPULANTE_TAREAS= 13, // MANDA DATA
+	SOLICITAR_SIGUIENTE_TAREA= 14, // MANDA DATA
+	SOLICITAR_SIGUIENTE_TAREA_RTA= 15, // MANDA DATA
 	//TRIPULANTE CON MONGO Y RAM
-	INFORMAR_MOVIMIENTO= 16,
+	INFORMAR_MOVIMIENTO= 16, // MANDA DATA
 	//TRIPULANTE CON MONGO
-	INICIO_TAREA= 17,
-	FIN_TAREA= 18,
-	ATENDER_SABOTAJE= 19,
-	RESOLUCION_SABOTAJE= 20,
+	INICIO_TAREA= 17, // MANDA DATA
+	FIN_TAREA= 18, // MANDA DATA
+	ATENDER_SABOTAJE= 19, // MANDA DATA
+	RESOLUCION_SABOTAJE= 20, // MANDA DATA
 	//MONGO A DISCORD
-	NOTIFICAR_SABOTAJE= 21
+	NOTIFICAR_SABOTAJE= 21 // MANDA DATA
 
 } op_code;
 
@@ -208,14 +208,14 @@ typedef struct{
 
 //Funciones
 int crear_conexion(char* ip, char* puerto);
-void enviar_mensaje(void* mensaje, op_code codigo, uint32_t socketCliente);
+int32_t enviar_paquete(void* mensaje, op_code codigo, uint32_t socketCliente);//TODO
 uint32_t iniciar_servidor(char *ip, char *puerto);
 uint32_t esperar_cliente(uint32_t socketServidor);
 void liberar_conexion(uint32_t socketCliente);
 t_paquete* recibir_paquete(uint32_t socket); //TODO
 
 op_code string_to_op_code (char* string);
-t_paquete* crear_paquete(op_code codigo, void* mensaje); //TODO
+t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje); //TODO
 void* serializar_paquete(t_paquete* paquete);
 void serializar_variable(void* stream, void* variable, uint32_t size, uint32_t* offset);
 void serializar_string(void* stream, t_string* string, uint32_t* offset);
@@ -223,7 +223,7 @@ void serializar_string(void* stream, t_string* string, uint32_t* offset);
 void* deserializar_paquete(t_paquete* paquete);
 void deserializar_variable(void* stream, void* variable, uint32_t size, uint32_t* offset);
 t_string* deserializar_string(void* stream, uint32_t* offset);
-t_string* get_t_string(char* string); //TODO
+
 
 //SERIALIZADO MENSAJES
 
@@ -238,29 +238,35 @@ t_buffer* serializar_solicitar_siguiente_tarea_msg(solicitar_siguiente_tarea_msg
 t_buffer* serializar_solicitar_siguiente_tarea_rta(solicitar_siguiente_tarea_rta* mensaje); //TODO
 t_buffer* serializar_informar_movimiento_msg(informar_movimiento_msg* mensaje); //TODO
 t_buffer* serializar_inicio_tarea_msg(inicio_tarea_msg* mensaje); //TODO
+t_buffer* serializar_fin_tarea_msg(fin_tarea_msg* mensaje); //TODO
+t_buffer* serializar_atender_sabotaje_msg(atender_sabotaje_msg* mensaje); //TODO
 t_buffer* serializar_resolucion_sabotaje_msg(resolucion_sabotaje_msg* mensaje); //TODO
 t_buffer* serializar_notificar_sabotaje_msg(notificar_sabotaje_msg* mensaje); //TODO
 
 
 //DESERIALIZADO MENSAJES
 
-iniciar_patota_msg desserializar_iniciar_patota_msg(void* stream); //TODO
-expulsar_tripulante_msg desserializar_expulsar_tripulante_msg(void* stream); //TODO
-obtener_bitacora_msg desserializar_obtener_bitacora_msg(void* stream); //TODO
-listar_tripulantes_rta desserializar_listar_tripulantes_rta(void* stream); //TODO
-obtener_bitacora_rta desserializar_obtener_bitacora_rta(void* stream); //TODO
-iniciar_tripulante_msg desserializar_iniciar_tripulante_msg(void* stream); //TODO
-iniciar_tripulante_tareas_msg desserializar_iniciar_tripulante_tareas_msg(void* stream); //TODO
-solicitar_siguiente_tarea_msg desserializar_solicitar_siguiente_tarea_msg(void* stream); //TODO
-solicitar_siguiente_tarea_rta desserializar_solicitar_siguiente_tarea_rta(void* stream); //TODO
-informar_movimiento_msg desserializar_informar_movimiento_msg(void* stream); //TODO
-inicio_tarea_msg desserializar_inicio_tarea_msg(void* stream); //TODO
-resolucion_sabotaje_msg desserializar_resolucion_sabotaje_msg(void* stream); //TODO
-notificar_sabotaje_msg desserializar_notificar_sabotaje_msg(void* stream); //TODO
+iniciar_patota_msg* desserializar_iniciar_patota_msg(void* stream); //TODO
+expulsar_tripulante_msg* desserializar_expulsar_tripulante_msg(void* stream); //TODO
+obtener_bitacora_msg* desserializar_obtener_bitacora_msg(void* stream); //TODO
+listar_tripulantes_rta* desserializar_listar_tripulantes_rta(void* stream); //TODO
+obtener_bitacora_rta* desserializar_obtener_bitacora_rta(void* stream); //TODO
+iniciar_tripulante_msg* desserializar_iniciar_tripulante_msg(void* stream); //TODO
+iniciar_tripulante_tareas_msg* desserializar_iniciar_tripulante_tareas_msg(void* stream); //TODO
+solicitar_siguiente_tarea_msg* desserializar_solicitar_siguiente_tarea_msg(void* stream); //TODO
+solicitar_siguiente_tarea_rta* desserializar_solicitar_siguiente_tarea_rta(void* stream); //TODO
+informar_movimiento_msg* desserializar_informar_movimiento_msg(void* stream); //TODO
+inicio_tarea_msg* desserializar_inicio_tarea_msg(void* stream); //TODO
+fin_tarea_msg* desserializar_fin_tarea_msg(void* stream); //TODO
+atender_sabotaje_msg* desserializar_atender_abotaje_msg(void* stream); //TODO
+resolucion_sabotaje_msg* desserializar_resolucion_sabotaje_msg(void* stream); //TODO
+notificar_sabotaje_msg* desserializar_notificar_sabotaje_msg(void* stream); //TODO
 
 
 //MISC
 
 t_coordenadas* get_coordenadas(char* posicion);
+t_string* get_t_string(char* string);
+boolean leer_buffer(op_code codigo_operacion);
 
 #endif

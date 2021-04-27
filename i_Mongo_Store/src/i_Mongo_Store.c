@@ -24,7 +24,35 @@ int main(void) {
 
 	uint32_t socketCliente = esperar_cliente(socket);
 
-	log_debug(logger, "%d", socketCliente);
+	t_paquete* paquete = recibir_paquete(socketCliente);
+
+	/*
+
+	Prueba Iniciar Patota
+
+	iniciar_patota_msg* mensaje = deserializar_paquete(paquete);
+
+	log_debug(logger, "%d", mensaje->cantidadTripulantes);
+	log_debug(logger, mensaje->direccionTareas->string);
+
+	void mostrar_strings(t_string* string){
+
+		log_debug(logger, string->string);
+
+	}
+
+	list_iterate(mensaje->listaPosiciones, mostrar_strings);
+
+		void free_list(t_string* string){
+		free(string);
+	}
+
+	free(mensaje->direccionTareas);
+	list_destroy_and_destroy_elements(mensaje->listaPosiciones, free_list);
+	free(mensaje);
+
+
+	*/
 
 	return 0;
 }

@@ -18,9 +18,37 @@ int main(void) {
 	config = leer_config();
 	logger = crear_log(config_get_string_value(config, "LOG"));
 
-	t_coordenadas* coordenadas = get_coordenadas("1|0");
+	int32_t conexion = crear_conexion(config_get_string_value(config, "IP"), config_get_string_value(config, "PUERTO"));
 
-	log_debug(logger, "%d %d", coordenadas->posX, coordenadas->posY);
+	/*
+
+	Prueba Iniciar Patota
+
+	iniciar_patota_msg* mensaje = malloc(sizeof(iniciar_patota_msg));
+
+	mensaje->cantidadTripulantes = 5;
+	mensaje->direccionTareas = get_t_string("src/tareas");
+	mensaje->listaPosiciones = list_create();
+
+	list_add(mensaje->listaPosiciones, get_t_string("5|8"));
+	list_add(mensaje->listaPosiciones, get_t_string("3|1"));
+	list_add(mensaje->listaPosiciones, get_t_string("0|7"));
+	list_add(mensaje->listaPosiciones, get_t_string("0|0"));
+	list_add(mensaje->listaPosiciones, get_t_string("0|0"));
+
+	enviar_paquete(mensaje, INICIAR_PATOTA, conexion);
+
+	void free_list(t_string* string){
+		free(string);
+	}
+
+	free(mensaje->direccionTareas);
+	list_destroy_and_destroy_elements(mensaje->listaPosiciones, free_list);
+	free(mensaje);
+
+	*/
+
+	liberar_conexion(conexion);
 
 	return 0;
 }
