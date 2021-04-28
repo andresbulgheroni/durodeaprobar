@@ -121,14 +121,10 @@ void agregarAtributosATripulante(){
 
 		t_tripulante* tripulante = malloc(sizeof(t_tripulante));
 		char* posicion = list_get(posicionesTripulantes,i);
-		t_coordenadas* coordenadas = get_coordenadas(posicion);
-
-		tripulante->coordenadas->posX = coordenadas->posX; //SEGMENTATION FAULT
-		tripulante->coordenadas->posY = coordenadas->posY; //SEGMENTATION FAULT
+		tripulante->coordenadas = get_coordenadas(posicion);
 
 		list_add(tripulantes,tripulante);
-		char* tripu = list_get(tripulantes, i);
-		log_info(logger,tripu);
+		t_tripulante* tripu = list_get(tripulantes, i);
 
 	}
 
@@ -185,7 +181,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 					log_info(logger,posiciones);
 				}
 
-//				agregarAtributosATripulante(); ROMPE POR SEGMENTATION FAULT
+				agregarAtributosATripulante();
 
 				fclose(fileTarea);
 
