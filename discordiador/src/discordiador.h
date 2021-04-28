@@ -125,10 +125,9 @@ void iniciarLog();
 void inicializarConfig(t_config*);
 void inicializarSemaforoPlanificador();
 void leer_consola();
-void agregarAtributosATripulante();
+void inicializarAtributosATripulante();
 t_coordenadas* get_coordenadas(char*);
 opCode string_a_op_code (char*);
-uint32_t generar_id(uint32_t);
 
 
 #endif /* DISCORDIADOR_H_ */

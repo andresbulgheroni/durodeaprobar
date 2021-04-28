@@ -20,8 +20,8 @@ pthread_mutex_t mutex_listaBloqueados = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaEjecutando = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaFinalizados = PTHREAD_MUTEX_INITIALIZER;
 
-uint32_t ID_TRIPULANTES = 0;
-uint32_t ID_PATOTA = 0;
+uint32_t id_tripulante = 0;
+uint32_t id_patota = 0;
 
 
 int main(void){
@@ -80,14 +80,6 @@ void inicializarSemaforoPlanificador(){			//Maneja el multiprocesamiento
 
 }
 
-uint32_t generar_id(uint32_t id) {
-	pthread_mutex_lock(&mutex_id_tripulantes);
-	uint32_t id_generado = id++;
-	pthread_mutex_unlock(&mutex_id_tripulantes);
-
-	return id_generado;
-}
-
 opCode string_a_op_code (char* string){
 
 	if(strcmp(string, "INICIAR_PATOTA") == 0){
@@ -123,7 +115,7 @@ t_coordenadas* get_coordenadas(char* posicion){
 	return coordenadas;
 }
 
-void agregarAtributosATripulante(){
+void inicializarAtributosATripulante(){
 
 	tripulantes = list_create();
 
@@ -132,13 +124,16 @@ void agregarAtributosATripulante(){
 		t_tripulante* tripulante = malloc(sizeof(t_tripulante));
 		char* posicion = list_get(posicionesTripulantes,i);
 		tripulante->coordenadas = get_coordenadas(posicion);
-		tripulante->idTripulante = generar_id(ID_TRIPULANTES);
-		tripulante->idPatota = ID_PATOTA;
+		tripulante->idTripulante = id_tripulante;
+		id_tripulante++;
+		tripulante->idPatota = id_patota;
+		tripulante->misCiclosDeCPU = 0;
+		tripulante->estado = NEW;
 
 		list_add(tripulantes,tripulante);
 
 	}
-	ID_PATOTA++;
+	id_patota++;
 
 }
 
@@ -154,9 +149,6 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 		char** mensaje = string_split(leido, " ");
 		opCode codigo_mensaje = string_a_op_code(mensaje[0]);
-		int cantidadMensaje=atoi(mensaje[1]);
-
-		printf("el valor es: %d\n",cantidadMensaje);
 
 		switch(codigo_mensaje){
 
@@ -193,7 +185,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 					log_info(logger,posiciones);
 				}
 
-				agregarAtributosATripulante();
+				inicializarAtributosATripulante();
 
 				fclose(fileTarea);
 
@@ -204,10 +196,22 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			break;
 
 		}
-
 		case LISTAR_TRIPULANTES: {
-			//	fput(tripulantes);
-			//date
+
+			time_t tiempo = time(0);
+			struct tm *tlocal = localtime(&tiempo);
+			char output[128];
+			strftime(output,128,"%d/%m/%y %H:%M:%S",tlocal);
+			printf("\nEstado de la Nave: %s",output);
+			int i = 0;
+
+			for(i=0; i<list_size(tripulantes);i++){
+				t_tripulante* tripulante = list_get(tripulantes, i);
+				printf("\nTripulante: %s Patota: %s Status: %s",
+						string_itoa(tripulante->idTripulante),
+						string_itoa(tripulante->idPatota),
+						string_itoa(tripulante->estado));
+			}
 			break;
 		}
 		case EXPULSAR_TRIPULANTE: {
