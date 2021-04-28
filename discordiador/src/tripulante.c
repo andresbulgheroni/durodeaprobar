@@ -1,16 +1,5 @@
 #include "tripulante.h"
 
-
-
-uint32_t generar_id_tripulante() {
-	pthread_mutex_lock(&mutex_id_tripulantes);
-	uint32_t id_generado = ID_TRIPULANTES++;
-	pthread_mutex_unlock(&mutex_id_tripulantes);
-
-	return id_generado;
-}
-
-
 ///////////////////////////////////////FUNCIONES GENERALES///////////////
 
 int cantidadElementosArray(char** array)
@@ -118,10 +107,7 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante){
 
 	}
 
-
 	tripulante->misCiclosDeCPU++;
-
-
 
 }
 

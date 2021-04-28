@@ -3,22 +3,13 @@
 
 #include "discordiador.h"
 
-
-
-
 //EJECUCUION DEL REPARTIDOR
 t_list* sem_tripulantes_ejecutar;
 sem_t sem_buscartripulanteMasCercano;
 sem_t sem_tripulanteMoviendose;
 
-
 sem_t semaforoInicioCicloCPU; //= malloc(sizeof(sem_t));
 sem_t semaforoFinCicloCPU;
-
-
-
-
-
 
 typedef enum{
 
@@ -37,10 +28,6 @@ const static struct {
 
 };
 
-
-
-
-
 void moverAlTripulanteHastaElSabotaje(t_tripulante*);
 int llegoAlSabotaje(t_tripulante*);
 int distanciaA(t_coordenadas*, t_coordenadas*);
@@ -48,6 +35,5 @@ int getIndexTripulanteEnLista(t_list* , t_tripulante* );
 void liberarArray(char**);
 int cantidadElementosArray(char**);
 void sacarTripulanteDeLista(t_tripulante* , t_list* );
-uint32_t generar_id_tripulante();
 
 #endif /* TRIPULANTE_H_ */

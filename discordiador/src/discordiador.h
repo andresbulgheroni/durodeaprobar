@@ -26,8 +26,6 @@ extern pthread_mutex_t mutex_listaBloqueados;
 extern pthread_mutex_t mutex_listaEjecutando;
 extern pthread_mutex_t mutex_listaFinalizados;
 
-
-
 t_log* logger;
 
 t_config*config;
@@ -44,22 +42,17 @@ int RETARDO_CICLO_CPU;
 
 sem_t sem_planificar;
 
-uint32_t ID_TRIPULANTES;
-
 t_list* tareas;
 t_list* posicionesTripulantes;
 
 t_list* tripulantes;
 t_list* hilosTripulantes;
 
-
-
 t_list* listaNuevos;
 t_list* listaReady;
 t_list* listaBloqueados;
 //t_list* listaEjecutando;
 t_list* listaFinalizados;
-
 
 typedef enum{
 
@@ -114,8 +107,6 @@ typedef struct
 
 } t_tarea;
 
-
-
 typedef struct
 {
 	uint32_t idTripulante;
@@ -137,6 +128,7 @@ void leer_consola();
 void agregarAtributosATripulante();
 t_coordenadas* get_coordenadas(char*);
 opCode string_a_op_code (char*);
+uint32_t generar_id(uint32_t);
 
 
 #endif /* DISCORDIADOR_H_ */

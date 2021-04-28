@@ -20,6 +20,8 @@ pthread_mutex_t mutex_listaBloqueados = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaEjecutando = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaFinalizados = PTHREAD_MUTEX_INITIALIZER;
 
+uint32_t ID_TRIPULANTES = 0;
+uint32_t ID_PATOTA = 0;
 
 
 int main(void){
@@ -78,6 +80,14 @@ void inicializarSemaforoPlanificador(){			//Maneja el multiprocesamiento
 
 }
 
+uint32_t generar_id(uint32_t id) {
+	pthread_mutex_lock(&mutex_id_tripulantes);
+	uint32_t id_generado = id++;
+	pthread_mutex_unlock(&mutex_id_tripulantes);
+
+	return id_generado;
+}
+
 opCode string_a_op_code (char* string){
 
 	if(strcmp(string, "INICIAR_PATOTA") == 0){
@@ -122,11 +132,13 @@ void agregarAtributosATripulante(){
 		t_tripulante* tripulante = malloc(sizeof(t_tripulante));
 		char* posicion = list_get(posicionesTripulantes,i);
 		tripulante->coordenadas = get_coordenadas(posicion);
+		tripulante->idTripulante = generar_id(ID_TRIPULANTES);
+		tripulante->idPatota = ID_PATOTA;
 
 		list_add(tripulantes,tripulante);
-		t_tripulante* tripu = list_get(tripulantes, i);
 
 	}
+	ID_PATOTA++;
 
 }
 
