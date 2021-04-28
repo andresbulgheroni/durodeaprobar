@@ -1,0 +1,111 @@
+[INFO] 23:07:17:810 discordiador/(4220:4220): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 23:30:42:107 discordiador/(4816:4816): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 23:33:51:415 discordiador/(5005:5005): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 23:34:49:193 discordiador/(5051:5051): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 23:35:29:51 discordiador/(5098:5098): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 23:36:47:66 discordiador/(5149:5149): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 23:41:00:917 discordiador/(5295:5295): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 23:41:52:661 discordiador/(5347:5347): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 23:47:08:738 discordiador/(5571:5571): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 23:49:00:678 discordiador/(5699:5699): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 23:55:47:716 discordiador/(5850:5850): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 23:56:48:757 discordiador/(5896:5896): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 23:57:32:919 discordiador/(5933:5933): for(int i = 0; i< list_size(posicionesTripulantes);i++){
+[INFO] 23:57:32:920 discordiador/(5933:5933): char* posiciones = list_get(posicionesTripulantes, i);
+[INFO] 23:57:32:920 discordiador/(5933:5933): puts(posiciones);
+[INFO] 23:57:45:747 discordiador/(5947:5947): for(int i = 0; i< list_size(posicionesTripulantes);i++){
+[INFO] 23:57:45:748 discordiador/(5947:5947): char* posiciones = list_get(posicionesTripulantes, i);
+[INFO] 23:57:45:748 discordiador/(5947:5947): puts(posiciones);
+[INFO] 23:58:03:876 discordiador/(5968:5968): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:00:46:852 discordiador/(6076:6076): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:02:17:429 discordiador/(6123:6123): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:03:56:17 discordiador/(6296:6296): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:05:30:756 discordiador/(6357:6357): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:21:10:568 discordiador/(6765:6765): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:21:10:591 discordiador/(6765:6765): 1|1
+[INFO] 00:21:10:591 discordiador/(6765:6765): 2|1
+[INFO] 00:21:10:591 discordiador/(6765:6765): 0|0
+[INFO] 00:21:10:591 discordiador/(6765:6765): 0|0
+[INFO] 00:21:10:591 discordiador/(6765:6765): 0|0
+[INFO] 00:21:49:426 discordiador/(6791:6791): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:22:01:90 discordiador/(6791:6791): 1|1
+[INFO] 00:22:02:322 discordiador/(6791:6791): 2|1
+[INFO] 00:22:03:141 discordiador/(6791:6791): 0|0
+[INFO] 00:22:03:881 discordiador/(6791:6791): 0|0
+[INFO] 00:22:04:669 discordiador/(6791:6791): 0|0
+[INFO] 00:29:10:165 discordiador/(7079:7079): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:29:10:184 discordiador/(7079:7079): 1|1
+[INFO] 00:29:10:184 discordiador/(7079:7079): 2|1
+[INFO] 00:29:10:184 discordiador/(7079:7079): 0|0
+[INFO] 00:29:10:184 discordiador/(7079:7079): 0|0
+[INFO] 00:29:10:184 discordiador/(7079:7079): 0|0
+[INFO] 00:30:29:54 discordiador/(7156:7156): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:30:29:65 discordiador/(7156:7156): 1|1
+[INFO] 00:30:29:65 discordiador/(7156:7156): 2|1
+[INFO] 00:30:29:65 discordiador/(7156:7156): 0|0
+[INFO] 00:30:29:65 discordiador/(7156:7156): 0|0
+[INFO] 00:30:29:65 discordiador/(7156:7156): 0|0
+[INFO] 00:33:28:345 discordiador/(7277:7277): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:33:28:370 discordiador/(7277:7277): 1|1
+[INFO] 00:33:28:370 discordiador/(7277:7277): 2|1
+[INFO] 00:33:28:370 discordiador/(7277:7277): 0|0
+[INFO] 00:33:28:370 discordiador/(7277:7277): 0|0
+[INFO] 00:33:28:370 discordiador/(7277:7277): 0|0
+[INFO] 00:33:28:370 discordiador/(7277:7277): 
+[INFO] 00:33:28:370 discordiador/(7277:7277): 
+[INFO] 00:33:28:370 discordiador/(7277:7277): 
+[INFO] 00:33:28:370 discordiador/(7277:7277): 
+[INFO] 00:33:28:370 discordiador/(7277:7277): 
+[INFO] 00:37:22:91 discordiador/(7396:7396): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:37:22:91 discordiador/(7396:7396): 1|1
+[INFO] 00:37:22:91 discordiador/(7396:7396): 2|1
+[INFO] 00:37:22:92 discordiador/(7396:7396): 0|0
+[INFO] 00:37:22:92 discordiador/(7396:7396): 0|0
+[INFO] 00:37:22:92 discordiador/(7396:7396): 0|0
+[INFO] 00:38:36:715 discordiador/(7454:7454): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:38:36:715 discordiador/(7454:7454): 1|1
+[INFO] 00:38:36:715 discordiador/(7454:7454): 2|1
+[INFO] 00:38:36:715 discordiador/(7454:7454): 0|0
+[INFO] 00:38:36:715 discordiador/(7454:7454): 0|0
+[INFO] 00:38:36:715 discordiador/(7454:7454): 0|0
+[INFO] 00:39:20:933 discordiador/(7485:7485): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:39:31:53 discordiador/(7485:7485): 1|1
+[INFO] 00:39:31:905 discordiador/(7485:7485): 2|1
+[INFO] 00:39:32:816 discordiador/(7485:7485): 0|0
+[INFO] 00:39:33:772 discordiador/(7485:7485): 0|0
+[INFO] 00:39:34:828 discordiador/(7485:7485): 0|0
+[INFO] 00:52:13:487 discordiador/(7796:7796): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:52:13:487 discordiador/(7796:7796): 1|1
+[INFO] 00:52:13:487 discordiador/(7796:7796): 2|1
+[INFO] 00:52:13:487 discordiador/(7796:7796): 0|0
+[INFO] 00:52:13:487 discordiador/(7796:7796): 0|0
+[INFO] 00:52:13:487 discordiador/(7796:7796): 0|0
+[INFO] 00:52:13:487 discordiador/(7796:7796): 
+[INFO] 00:52:13:487 discordiador/(7796:7796): 
+[INFO] 00:52:13:487 discordiador/(7796:7796): 
+[INFO] 00:52:13:487 discordiador/(7796:7796): 
+[INFO] 00:52:13:487 discordiador/(7796:7796): 
+[INFO] 00:55:32:886 discordiador/(7922:7922): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:55:32:911 discordiador/(7922:7922): 1|1
+[INFO] 00:55:32:911 discordiador/(7922:7922): 2|1
+[INFO] 00:55:32:911 discordiador/(7922:7922): 0|0
+[INFO] 00:55:32:911 discordiador/(7922:7922): 0|0
+[INFO] 00:55:32:911 discordiador/(7922:7922): 0|0
+[INFO] 00:57:45:277 discordiador/(7992:7992): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 00:57:45:278 discordiador/(7992:7992): 1|1
+[INFO] 00:57:45:278 discordiador/(7992:7992): 2|1
+[INFO] 00:57:45:278 discordiador/(7992:7992): 0|0
+[INFO] 00:57:45:278 discordiador/(7992:7992): 0|0
+[INFO] 00:57:45:278 discordiador/(7992:7992): 0|0
+[INFO] 00:58:31:388 discordiador/(8028:8028): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 01:00:29:374 discordiador/(8028:8028): 1|1
+[INFO] 01:00:30:595 discordiador/(8028:8028): 2|1
+[INFO] 01:00:31:554 discordiador/(8028:8028): 0|0
+[INFO] 01:00:32:684 discordiador/(8028:8028): 0|0
+[INFO] 01:00:33:852 discordiador/(8028:8028): 0|0
+[INFO] 01:05:04:982 discordiador/(8266:8266): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 01:05:05:7 discordiador/(8266:8266): 1|1
+[INFO] 01:05:05:7 discordiador/(8266:8266): 2|1
+[INFO] 01:05:05:7 discordiador/(8266:8266): 0|0
+[INFO] 01:05:05:7 discordiador/(8266:8266): 0|0
+[INFO] 01:05:05:7 discordiador/(8266:8266): 0|0

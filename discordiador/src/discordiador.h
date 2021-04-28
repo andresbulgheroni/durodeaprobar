@@ -28,7 +28,7 @@ extern pthread_mutex_t mutex_listaFinalizados;
 
 
 
-t_log* log;
+t_log* logger;
 
 t_config*config;
 
@@ -46,11 +46,11 @@ sem_t sem_planificar;
 
 uint32_t ID_TRIPULANTES;
 
-t_list*tareas;
-t_list*posicionesTripulantes;
+t_list* tareas;
+t_list* posicionesTripulantes;
 
-t_list*tripulantes;
-t_list*hilosTripulantes;
+t_list* tripulantes;
+t_list* hilosTripulantes;
 
 
 
@@ -77,8 +77,8 @@ typedef struct{
 
 	int  cantPatota;
 	int numeroPatota;
-	t_list*tripulantes;
-	char*tareas;		//TODO
+	t_list* tripulantes;
+	char* tareas;		//TODO
 
 } t_iniciarPatotaMsg;
 
@@ -124,18 +124,18 @@ typedef struct
 	t_status_code estado;
 	t_sabotaje* sabotaje;		//TODO
 	uint32_t misCiclosDeCPU;
-	t_tarea*tareaAsignada;
+	t_tarea* tareaAsignada;
 
 } t_tripulante;
 
-
-int consolita();
 
 void iniciarLog();
 
 void inicializarConfig(t_config*);
 void inicializarSemaforoPlanificador();
-void leer_consola(uint32_t*);
+void leer_consola();
+void agregarAtributosATripulante();
+t_coordenadas* get_coordenadas(char*);
 opCode string_a_op_code (char*);
 
 

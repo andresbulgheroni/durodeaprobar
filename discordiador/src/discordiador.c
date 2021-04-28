@@ -28,7 +28,7 @@ int main(void){
 
 	iniciarLog();
 
-	consolita();
+	leer_consola();
 
 	puts("LLEGO AL FIN DEL PROGRAMA");
 
@@ -37,7 +37,6 @@ int main(void){
 
 
 void inicializarConfig(t_config* config){
-
 
 	config= config_create("discord.config");
 	if( config==NULL){
@@ -64,12 +63,13 @@ void inicializarConfig(t_config* config){
 	printf("el valor es: %d\n",DURACION_SABOTAJE);
 	printf("el valor es: %d\n",RETARDO_CICLO_CPU);
 
-
 }
 
 void iniciarLog(){
-	log = log_create("discordiador.log", "discordiador", 1, LOG_LEVEL_INFO);
+
+	logger = log_create("discordiador.log", "discordiador", 1, LOG_LEVEL_INFO);
 	puts("log creado");
+
 }
 
 void inicializarSemaforoPlanificador(){			//Maneja el multiprocesamiento
@@ -101,51 +101,129 @@ opCode string_a_op_code (char* string){
 	return ERROR_CODIGO;
 }
 
+t_coordenadas* get_coordenadas(char* posicion){
+
+	char** posicionesSplit = string_split(posicion, "|");
+
+	t_coordenadas* coordenadas = malloc(sizeof(t_coordenadas));
+
+	coordenadas->posX = atoi(posicionesSplit[0]);
+	coordenadas->posY = atoi(posicionesSplit[1]);
+
+	return coordenadas;
+}
+
+void agregarAtributosATripulante(){
+
+	tripulantes = list_create();
+
+	for(int i=0; i<(list_size(posicionesTripulantes)) ; i++){
+
+		t_tripulante* tripulante = malloc(sizeof(t_tripulante));
+		char* posicion = list_get(posicionesTripulantes,i);
+		t_coordenadas* coordenadas = get_coordenadas(posicion);
+
+		tripulante->coordenadas->posX = coordenadas->posX; //SEGMENTATION FAULT
+		tripulante->coordenadas->posY = coordenadas->posY; //SEGMENTATION FAULT
+
+		list_add(tripulantes,tripulante);
+		char* tripu = list_get(tripulantes, i);
+		log_info(logger,tripu);
+
+	}
+
+}
 
 
+void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
-
-int consolita(){
-
-	//posicionesTripulantes= list_create();
+	posicionesTripulantes= list_create();
 	char* leido=readline(">");
+
 	while(strcmp(leido, "") != 0){
 
-		log_debug(log, leido);
+		log_info(logger, leido);
 
 		char** mensaje = string_split(leido, " ");
-
 		opCode codigo_mensaje = string_a_op_code(mensaje[0]);
-
 		int cantidadMensaje=atoi(mensaje[1]);
 
-
 		printf("el valor es: %d\n",cantidadMensaje);
+
 		switch(codigo_mensaje){
 
 		case INICIAR_PATOTA: {
-			puts("hola soy INICIAR_PATOTA");
+
+			t_iniciarPatotaMsg* patota = malloc(sizeof(t_iniciarPatotaMsg*));
+			patota->cantPatota = atoi(mensaje[1]);
+			char* rutaTarea = string_new();
+			string_append(&rutaTarea,mensaje[2]);
+			FILE* fileTarea = fopen(rutaTarea,"r");
+
+			if(fileTarea != NULL){
+
+				int contadorLista = 0;
+
+				while(mensaje[3+contadorLista]!= NULL){
+					list_add(posicionesTripulantes,mensaje[3+contadorLista]);
+					contadorLista++;
+				}
+
+				contadorLista=0;
+				while(mensaje[contadorLista]!= NULL){
+					contadorLista++;
+				}
+
+				for(int j=0; j <(3 + patota->cantPatota - contadorLista); j++){
+
+					list_add(posicionesTripulantes,"0|0");
+
+				}
+
+				for(int i = 0; i< list_size(posicionesTripulantes);i++){
+					char* posiciones = list_get(posicionesTripulantes, i);
+					log_info(logger,posiciones);
+				}
+
+//				agregarAtributosATripulante(); ROMPE POR SEGMENTATION FAULT
+
+				fclose(fileTarea);
+
+			}else{
+				log_info(logger, "No existe la tarea");
+			}
+
 			break;
+
 		}
 
 		case LISTAR_TRIPULANTES: {
-			puts("hola soy LISTAR_TRIPULANTES");
+			//	fput(tripulantes);
+			//date
 			break;
 		}
 		case EXPULSAR_TRIPULANTE: {
+			//conseguirTripulante;
+			//list_add(listaFinalizados,tripulante);
+			//enviarMensaje();
 			break;
 		}
-		case INICIAR_PLANIFICACION: {		//Con este comando se dará inicio a la planificación (es un semaforo sem init)
+		case INICIAR_PLANIFICACION: { //Con este comando se dará inicio a la planificación (es un semaforo sem init)
 			break;
 		}
-		case PAUSAR_PLANIFICACION: {		//Este comando lo que busca es detener la planificación en cualquier momento(semaforo)
+		case PAUSAR_PLANIFICACION: { //Este comando lo que busca es detener la planificación en cualquier momento(semaforo)
 			break;
 		}
-		case OBTENER_BITACORA: {
+		case OBTENER_BITACORA: { //Este comando obtendrá la bitácora del tripulante pasado por parámetro a través de una consulta a i-Mongo-Store.
+
+			//enviarMensaje();
+			//recibirMensaje();
+
 			break;
 		}
 		case ERROR_CODIGO: {
-			return 0;
+
+			break;
 		}
 		}
 
@@ -154,140 +232,5 @@ int consolita(){
 	}
 
 	free(leido);
-	return 0;
 
 }
-
-//void leer_consola(uint32_t* socket_server){
-//
-//	posicionesTripulantes= list_create();
-//	char* leido;
-//	leido=readline(">");
-//	while(strcmp(leido, "") != 0){
-//
-//		char** mensaje = string_n_split(leido, 10, " ");
-//		log_debug(log, leido);
-//
-//		char* codigo = string_from_format("%s %s",mensaje[0], mensaje[1]);
-//
-//		opCode codigo_mensaje = string_a_op_code(codigo);
-//
-//		switch(codigo_mensaje){
-//
-//		case INICIAR_PATOTA: {  //LEO INICIAR_PATOTA, LEO SU CANTIDAD,LEO LA CANTIDAD DE TAREAS Y LAS METO DENTRO DE UNA LISTA DE TAREAS,
-//			//ALGORITMO PARA CONSEGUIR UNA LISTA DE POSICIONES
-//			//SACO TRIPULANTES DE LAS POSICIONES Y CREO STRUCT DE TRIPULANTES Y LOS AGREGO A LAS LISTAS.
-//			//ENVIO MENSAJES DE TODOS LOS DATOS A MI RAM HQ.
-//
-//
-//
-//			t_iniciarPatotaMsg*patota;
-//			int totalPatota=atoi(mensaje[1]);
-//			patota->cantPatota=(totalPatota);		//le estoy pasando un string
-//			char*tarea[1000];
-//			FILE*fileTarea;
-//
-//			if((fileTarea=fopen(mensaje[2],"r")) == NULL){
-//				printf("Error no se pudo abrir el file");
-//				//separar tareas por enter y separar atributos por ;
-//
-//			}else{
-//				while(fileTarea != NULL){
-//					//	fscanf(fileTarea,"%[^\n]",tarea);							//TO DO
-//					list_add(tareas,tarea);		//si sobreescribe, piola!
-//				}
-//			}
-//			fclose(fileTarea);
-//
-//			if(sizeof(mensaje) != (3+totalPatota) ){
-//
-//			}
-//			for(int i=0; i<(3+totalPatota-sizeof(mensaje)); i++){		//TO DO
-//				list_add(posicionesTripulantes,"0|0");
-//
-//			}
-//
-//			int contadorLista=0;
-//			int sizeListaMensajeHarcodeada=3+contadorLista;
-//			while(sizeof(mensaje)!=sizeListaMensajeHarcodeada){
-//				list_add(posicionesTripulantes,mensaje[sizeListaMensajeHarcodeada]);
-//				contadorLista++;
-//			}
-//			contadorLista=0;
-//
-//			//MOMENTO DE CREAR TRIPULANTES
-//
-//			tripulantes = list_create();	//creamos la lista de tripulantes
-//
-//
-//
-//			for(int i=0; i<(list_size(posicionesTripulantes)) ; i++){		//TODO
-//
-//
-//				t_tripulante*tripulante=malloc(sizeof(t_tripulante));;
-//				char* posicion = list_get(posicionesTripulantes,i);
-//				char** posicionesSplit = string_split(posicion, "|");
-//
-//				tripulante->coordenadas->posX= atoi(posicionesSplit[0]);		//TODO
-//
-//
-//
-//				tripulante->coordenadas->posY=atoi(posicionesSplit[1]);
-//
-//				//				pthread_mutex_lock(&mutex_tripulantes);
-//				//				list_add(tripulantes, tripulante);
-//				//				pthread_mutex_unlock(&mutex_tripulantes);
-//				//
-//				//				pthread_mutex_lock(&mutex_listaNuevos);
-//				//				list_add(listaNuevos, tripulante);
-//				//				pthread_mutex_unlock(&mutex_listaNuevos);
-//
-//
-//			}
-//
-//
-//			break;
-//		}
-//		case LISTAR_TRIPULANTES: {
-//			//	fput(tripulantes);
-//			//date
-//			break;
-//		}
-//		case EXPULSAR_TRIPULANTE: {
-//
-//			//conseguirTripulante;
-//			//list_add(listaFinalizados,tripulante);
-//			//enviarMensaje();
-//
-//			break;
-//		}
-//		case INICIAR_PLANIFICACION: {		//Con este comando se dará inicio a la planificación (es un semaforo sem init)
-//
-//			break;
-//		}
-//		case PAUSAR_PLANIFICACION: {		//Este comando lo que busca es detener la planificación en cualquier momento(semaforo)
-//
-//			break;
-//		}
-//		case OBTENER_BITACORA: {			//Este comando obtendrá la bitácora del tripulante pasado por parámetro a través de una consulta a i-Mongo-Store.
-//
-//			//enviarMensaje();
-//			//recibirMensaje();
-//
-//			break;
-//		}
-//		default:{
-//
-//			break;
-//		}
-//		}
-//
-//		leido = readline("\n>");
-//	}
-//
-//	free(leido);
-//}
-
-
-
-
