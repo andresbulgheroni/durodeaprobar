@@ -20,8 +20,8 @@ pthread_mutex_t mutex_listaBloqueados = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaEjecutando = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaFinalizados = PTHREAD_MUTEX_INITIALIZER;
 
-uint32_t id_tripulante = 0;
-uint32_t id_patota = 0;
+uint32_t id_tripulante = 1;
+uint32_t id_patota = 1;
 
 
 int main(void){
@@ -29,6 +29,7 @@ int main(void){
 	puts("!!!hola soy el discordiador!!!");
 
 	iniciarLog();
+	inicializarListasGlobales();
 
 	leer_consola();
 
@@ -36,7 +37,10 @@ int main(void){
 
 	return EXIT_SUCCESS;
 }
+void inicializarListasGlobales(){
 
+	tripulantes = list_create();
+}
 
 void inicializarConfig(t_config* config){
 
@@ -80,6 +84,27 @@ void inicializarSemaforoPlanificador(){			//Maneja el multiprocesamiento
 
 }
 
+int getIndexTripulanteEnLista(t_list* lista, t_tripulante* tripulante) {
+	if (lista->head == NULL)
+		return -1;
+
+	t_link_element *element = lista->head;
+	t_tripulante* otroTripulante = (t_tripulante*) (lista->head->data);
+
+	int index = 0;
+	while(element != NULL) {
+		if (otroTripulante->idTripulante == tripulante->idTripulante)
+			return index;
+
+		element = element->next;
+		otroTripulante = element == NULL ? NULL : element->data;
+		index++;
+	}
+
+	return -1;
+}
+
+
 opCode string_a_op_code (char* string){
 
 	if(strcmp(string, "INICIAR_PATOTA") == 0){
@@ -115,9 +140,8 @@ t_coordenadas* get_coordenadas(char* posicion){
 	return coordenadas;
 }
 
-void inicializarAtributosATripulante(){
 
-	tripulantes = list_create();
+void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 
 	for(int i=0; i<(list_size(posicionesTripulantes)) ; i++){
 
@@ -133,14 +157,14 @@ void inicializarAtributosATripulante(){
 		list_add(tripulantes,tripulante);
 
 	}
-	id_patota++;
 
+	id_patota++;
 }
 
 
 void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
-	posicionesTripulantes= list_create();
+
 	char* leido=readline(">");
 
 	while(strcmp(leido, "") != 0){
@@ -154,7 +178,8 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 		case INICIAR_PATOTA: {
 
-			t_iniciarPatotaMsg* patota = malloc(sizeof(t_iniciarPatotaMsg*));
+			t_list* posicionesTripulantes = list_create();
+			t_patota* patota = malloc(sizeof(t_patota));
 			patota->cantPatota = atoi(mensaje[1]);
 			char* rutaTarea = string_new();
 			string_append(&rutaTarea,mensaje[2]);
@@ -185,9 +210,11 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 					log_info(logger,posiciones);
 				}
 
-				inicializarAtributosATripulante();
+				inicializarAtributosATripulante(posicionesTripulantes);
+
 
 				fclose(fileTarea);
+				list_destroy(posicionesTripulantes);
 
 			}else{
 				log_info(logger, "No existe la tarea");
@@ -214,10 +241,21 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			}
 			break;
 		}
+
 		case EXPULSAR_TRIPULANTE: {
-			//conseguirTripulante;
+
 			//list_add(listaFinalizados,tripulante);
 			//enviarMensaje();
+
+			int id=atoi(mensaje[1]);
+
+			bool tieneMismoNombre(void*elemento){
+				t_tripulante*tripulante= (t_tripulante*) elemento;
+				return tripulante->idTripulante==id;
+			}
+
+			list_remove_by_condition(tripulantes,tieneMismoNombre);
+
 			break;
 		}
 		case INICIAR_PLANIFICACION: { //Con este comando se dará inicio a la planificación (es un semaforo sem init)

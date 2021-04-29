@@ -30,25 +30,7 @@ void sacarTripulanteDeLista(t_tripulante* tripulante, t_list* lista){
 	}
 }
 
-int getIndexTripulanteEnLista(t_list* lista, t_tripulante* tripulante) {
-	if (lista->head == NULL)
-		return -1;
 
-	t_link_element *element = lista->head;
-	t_tripulante* otroTripulante = (t_tripulante*) (lista->head->data);
-
-	int index = 0;
-	while(element != NULL) {
-		if (otroTripulante->idTripulante == tripulante->idTripulante)
-			return index;
-
-		element = element->next;
-		otroTripulante = element == NULL ? NULL : element->data;
-		index++;
-	}
-
-	return -1;
-}
 
 
 int distanciaA(t_coordenadas* desde, t_coordenadas* hasta){

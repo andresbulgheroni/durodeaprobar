@@ -132,3 +132,92 @@
 [INFO] 01:38:37:464 discordiador/(4178:4178): 0|0
 [INFO] 01:38:37:464 discordiador/(4178:4178): 0|0
 [INFO] 01:38:37:464 discordiador/(4178:4178): 0|0
+[INFO] 14:36:32:584 discordiador/(5538:5538): INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 14:36:32:584 discordiador/(5538:5538): 1|1
+[INFO] 14:36:32:584 discordiador/(5538:5538): 2|1
+[INFO] 21:23:06:749 discordiador/(3738:3738): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 21:23:06:753 discordiador/(3738:3738): 1|1
+[INFO] 21:23:06:754 discordiador/(3738:3738): 2|1
+[INFO] 21:23:06:754 discordiador/(3738:3738): 0|0
+[INFO] 21:23:06:754 discordiador/(3738:3738): 0|0
+[INFO] 21:23:06:754 discordiador/(3738:3738): 0|0
+[INFO] 21:23:35:471 discordiador/(3762:3762): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 21:23:35:471 discordiador/(3762:3762): 1|1
+[INFO] 21:23:35:471 discordiador/(3762:3762): 2|1
+[INFO] 21:23:35:471 discordiador/(3762:3762): 0|0
+[INFO] 21:23:35:471 discordiador/(3762:3762): 0|0
+[INFO] 21:23:35:471 discordiador/(3762:3762): 0|0
+[INFO] 21:23:44:767 discordiador/(3762:3762): LISTAR_TRIPULANTES
+[INFO] 21:24:16:24 discordiador/(3762:3762): INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 5|5 3|4
+[INFO] 21:24:16:24 discordiador/(3762:3762): 1|1
+[INFO] 21:24:16:24 discordiador/(3762:3762): 2|1
+[INFO] 21:24:16:24 discordiador/(3762:3762): 0|0
+[INFO] 21:24:16:25 discordiador/(3762:3762): 0|0
+[INFO] 21:24:16:25 discordiador/(3762:3762): 0|0
+[INFO] 21:24:16:25 discordiador/(3762:3762): 5|5
+[INFO] 21:24:16:25 discordiador/(3762:3762): 3|4
+[INFO] 21:24:30:337 discordiador/(3762:3762): LISTAR_TRIPULANTES
+[INFO] 21:35:54:798 discordiador/(4129:4129): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 21:35:54:799 discordiador/(4129:4129): 1|1
+[INFO] 21:35:54:799 discordiador/(4129:4129): 2|1
+[INFO] 21:35:54:799 discordiador/(4129:4129): 0|0
+[INFO] 21:35:54:799 discordiador/(4129:4129): 0|0
+[INFO] 21:35:54:799 discordiador/(4129:4129): 0|0
+[INFO] 21:36:14:244 discordiador/(4129:4129): LISTAR_TRIPULANTES
+[INFO] 21:36:37:593 discordiador/(4129:4129): INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 5|5 3|4
+[INFO] 21:36:37:593 discordiador/(4129:4129): 1|1
+[INFO] 21:36:37:593 discordiador/(4129:4129): 2|1
+[INFO] 21:36:37:593 discordiador/(4129:4129): 0|0
+[INFO] 21:36:37:593 discordiador/(4129:4129): 0|0
+[INFO] 21:36:37:593 discordiador/(4129:4129): 0|0
+[INFO] 21:36:37:593 discordiador/(4129:4129): 5|5
+[INFO] 21:36:37:593 discordiador/(4129:4129): 3|4
+[INFO] 21:36:57:148 discordiador/(4129:4129): LISTAR_TRIPULANTES
+[INFO] 22:13:55:27 discordiador/(5762:5762): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 22:13:55:28 discordiador/(5762:5762): 1|1
+[INFO] 22:13:55:28 discordiador/(5762:5762): 2|1
+[INFO] 22:13:55:28 discordiador/(5762:5762): 0|0
+[INFO] 22:13:55:28 discordiador/(5762:5762): 0|0
+[INFO] 22:13:55:28 discordiador/(5762:5762): 0|0
+[INFO] 22:14:02:157 discordiador/(5762:5762): LISTAR_TRIPULANTES
+[INFO] 22:14:13:149 discordiador/(5762:5762): INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 3|3 2|1
+[INFO] 22:14:13:149 discordiador/(5762:5762): 3|3
+[INFO] 22:14:13:149 discordiador/(5762:5762): 2|1
+[INFO] 22:14:22:628 discordiador/(5762:5762): LISTAR_TRIPULANTES
+[INFO] 22:22:15:568 discordiador/(6063:6063): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 22:22:15:568 discordiador/(6063:6063): 1|1
+[INFO] 22:22:15:568 discordiador/(6063:6063): 2|1
+[INFO] 22:22:15:568 discordiador/(6063:6063): 0|0
+[INFO] 22:22:15:568 discordiador/(6063:6063): 0|0
+[INFO] 22:22:15:568 discordiador/(6063:6063): 0|0
+[INFO] 22:22:27:606 discordiador/(6063:6063): LISTAR_TRIPULANTES
+[INFO] 22:22:42:572 discordiador/(6063:6063): INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 4|4
+[INFO] 22:22:42:572 discordiador/(6063:6063): 4|4
+[INFO] 22:22:53:983 discordiador/(6063:6063): LISTAR_TRIPULANTES
+[INFO] 22:23:16:146 discordiador/(6063:6063): INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 3|3 2|1
+[INFO] 22:23:16:146 discordiador/(6063:6063): 3|3
+[INFO] 22:23:16:146 discordiador/(6063:6063): 2|1
+[INFO] 22:23:24:52 discordiador/(6063:6063): LISTAR_TRIPULANTES
+[INFO] 23:35:46:222 discordiador/(8492:8492): INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+[INFO] 23:35:46:227 discordiador/(8492:8492): 1|1
+[INFO] 23:35:46:227 discordiador/(8492:8492): 2|1
+[INFO] 23:35:46:227 discordiador/(8492:8492): 0|0
+[INFO] 23:35:46:227 discordiador/(8492:8492): 0|0
+[INFO] 23:35:46:227 discordiador/(8492:8492): 0|0
+[INFO] 23:35:57:71 discordiador/(8492:8492): LISTAR_TRIPULANTES
+[INFO] 23:36:15:802 discordiador/(8492:8492): EXPULSAR_TRIPULANTE 5
+[INFO] 23:36:33:282 discordiador/(8492:8492): LISTAR_TRIPULANTES
+[INFO] 23:36:46:25 discordiador/(8492:8492): EXPULSAR_TRIPULANTES 4
+[INFO] 23:36:51:615 discordiador/(8492:8492): LISTAR_TRIPULANTES
+[INFO] 23:37:04:603 discordiador/(8492:8492): EXPULSAR_TRIPULANTES 4
+[INFO] 23:37:08:114 discordiador/(8492:8492): LISTAR_TRIPULANTES
+[INFO] 23:37:33:77 discordiador/(8492:8492): EXPULSAR_TRIPULANTE 4
+[INFO] 23:37:38:753 discordiador/(8492:8492): LISTAR_TRIPULANTE
+[INFO] 23:38:11:350 discordiador/(8492:8492): LISTAR_TRIPULANTES
+[INFO] 23:38:19:550 discordiador/(8492:8492): EXPULSAR_TRIPULANTE 2
+[INFO] 23:38:23:212 discordiador/(8492:8492): LISTAR_TRIPULANTES
+[INFO] 23:41:44:624 discordiador/(8628:8628): 1|1
+[INFO] 23:41:44:625 discordiador/(8628:8628): 2|1
+[INFO] 23:41:44:625 discordiador/(8628:8628): 0|0
+[INFO] 23:41:44:625 discordiador/(8628:8628): 0|0
+[INFO] 23:41:44:625 discordiador/(8628:8628): 0|0

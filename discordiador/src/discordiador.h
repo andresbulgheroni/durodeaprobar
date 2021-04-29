@@ -30,6 +30,8 @@ t_log* logger;
 
 t_config*config;
 
+//int cantidadTripulantesEnLista=0;
+
 char*IP_MI_RAM_HQ;
 char*PUERTO_MI_RAM_HQ;
 char*IP_I_MONGO_STORE;
@@ -43,7 +45,8 @@ int RETARDO_CICLO_CPU;
 sem_t sem_planificar;
 
 t_list* tareas;
-t_list* posicionesTripulantes;
+
+
 
 t_list* tripulantes;
 t_list* hilosTripulantes;
@@ -67,13 +70,12 @@ typedef enum{
 }opCode;
 
 typedef struct{
-
-	int  cantPatota;
-	int numeroPatota;
+	uint32_t cantPatota;
+	uint32_t idPatota;
 	t_list* tripulantes;
 	char* tareas;		//TODO
 
-} t_iniciarPatotaMsg;
+} t_patota;
 
 typedef struct
 {
@@ -119,13 +121,13 @@ typedef struct
 
 } t_tripulante;
 
-
+int getIndexTripulanteEnLista(t_list* , t_tripulante* );
 void iniciarLog();
-
+void inicializarListasGlobales();
 void inicializarConfig(t_config*);
 void inicializarSemaforoPlanificador();
 void leer_consola();
-void inicializarAtributosATripulante();
+void inicializarAtributosATripulante(t_list*);
 t_coordenadas* get_coordenadas(char*);
 opCode string_a_op_code (char*);
 
