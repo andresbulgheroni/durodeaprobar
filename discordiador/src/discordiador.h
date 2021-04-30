@@ -30,7 +30,7 @@ t_log* logger;
 
 t_config*config;
 
-//int cantidadTripulantesEnLista=0;
+int estaPlanificando;
 
 char*IP_MI_RAM_HQ;
 char*PUERTO_MI_RAM_HQ;

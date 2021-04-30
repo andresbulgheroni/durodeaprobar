@@ -39,6 +39,7 @@ int main(void){
 }
 void inicializarListasGlobales(){
 
+	estaPlanificando=1;
 	tripulantes = list_create();
 }
 
@@ -196,7 +197,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 		switch(codigo_mensaje){
 
-		case INICIAR_PATOTA: {
+		case INICIAR_PATOTA: {		////INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
 
 			t_list* posicionesTripulantes = list_create();
 			t_patota* patota = malloc(sizeof(t_patota));
@@ -279,9 +280,20 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			break;
 		}
 		case INICIAR_PLANIFICACION: { //Con este comando se dará inicio a la planificación (es un semaforo sem init)
+
+			if(estaPlanificando== 1){
+				inicializarSemaforoPlanificador();
+			}else{
+				estaPlanificando= 1;
+			}
+
 			break;
 		}
 		case PAUSAR_PLANIFICACION: { //Este comando lo que busca es detener la planificación en cualquier momento(semaforo)
+
+			estaPlanificando=0;
+			//ACA QUITARIA A LOS TRIPULANTES DE LAS RESPECTIVAS LISTAS EN ORDEN. LIST FILTER Y LIST SORT
+
 			break;
 		}
 		case OBTENER_BITACORA: { //Este comando obtendrá la bitácora del tripulante pasado por parámetro a través de una consulta a i-Mongo-Store.
