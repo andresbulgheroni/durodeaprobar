@@ -104,6 +104,26 @@ int getIndexTripulanteEnLista(t_list* lista, t_tripulante* tripulante) {
 	return -1;
 }
 
+char* convertirEnumAString (t_status_code code){
+
+	if(strcmp(string_itoa(code), "1") == 0){
+		return "NEW";
+	}
+	if(strcmp(string_itoa(code), "2") == 0){
+		return "READY";
+	}
+	if(strcmp(string_itoa(code), "3") == 0){
+		return "BLOCKED";
+	}
+	if(strcmp(string_itoa(code), "4") == 0){
+		return "EXEC";
+	}
+	if(strcmp(string_itoa(code), "5") == 0){
+		return "FINISHED";
+	}
+	return "ERROR";
+
+}
 
 opCode string_a_op_code (char* string){
 
@@ -237,7 +257,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 				printf("\nTripulante: %s Patota: %s Status: %s",
 						string_itoa(tripulante->idTripulante),
 						string_itoa(tripulante->idPatota),
-						string_itoa(tripulante->estado));
+						convertirEnumAString(tripulante->estado));
 			}
 			break;
 		}
