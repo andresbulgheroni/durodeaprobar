@@ -100,12 +100,14 @@ typedef struct {
 
 typedef struct {
 
+	uint32_t idPatota;
 	uint32_t idTripulante;
 
 } expulsar_tripulante_msg;
 
 typedef struct {
 
+	uint32_t idPatota;
 	uint32_t idTripulante;
 
 } obtener_bitacora_msg;
@@ -114,7 +116,8 @@ typedef struct {
 
 	uint32_t idTripulante;
 	uint32_t idPatota;
-	t_string* status;
+	uint32_t* status;
+	t_coordenadas* coordenadas;
 
 } tripulante_data_msg;
 
@@ -140,7 +143,7 @@ typedef struct {
 typedef struct {
 
 	t_string* nombre;
-	t_string* parametros;
+	uint32_t* parametros;
 	t_coordenadas* coordenadas;
 	uint32_t duracion;
 
@@ -154,6 +157,7 @@ typedef struct {
 
 typedef struct {
 
+	uint32_t idPatota;
 	uint32_t idTripulante;
 
 } solicitar_siguiente_tarea_msg;
@@ -166,6 +170,7 @@ typedef struct {
 
 typedef struct {
 
+	uint32_t idPatota;
 	uint32_t idTripulante;
 	t_coordenadas* coordenadasOrigen;
 	t_coordenadas* coordenadasDestino;
@@ -229,11 +234,11 @@ t_string* deserializar_string(void* stream, uint32_t* offset);
 
 t_buffer* serializar_iniciar_patota_msg(iniciar_patota_msg* mensaje);
 t_buffer* serializar_expulsar_tripulante_msg(expulsar_tripulante_msg* mensaje);
-t_buffer* serializar_obtener_bitacora_msg(obtener_bitacora_msg* mensaje); //TODO
-t_buffer* serializar_listar_tripulantes_rta(listar_tripulantes_rta* mensaje); //TODO
-t_buffer* serializar_obtener_bitacora_rta(obtener_bitacora_rta* mensaje); //TODO
-t_buffer* serializar_iniciar_tripulante_msg(iniciar_tripulante_msg* mensaje); //TODO
-t_buffer* serializar_iniciar_tripulante_tareas_msg(iniciar_tripulante_tareas_msg* mensaje); //TODO
+t_buffer* serializar_obtener_bitacora_msg(obtener_bitacora_msg* mensaje);
+t_buffer* serializar_listar_tripulantes_rta(listar_tripulantes_rta* mensaje);
+t_buffer* serializar_obtener_bitacora_rta(obtener_bitacora_rta* mensaje);
+t_buffer* serializar_iniciar_tripulante_msg(iniciar_tripulante_msg* mensaje);
+t_buffer* serializar_iniciar_tripulante_tareas_msg(iniciar_tripulante_tareas_msg* mensaje);
 t_buffer* serializar_solicitar_siguiente_tarea_msg(solicitar_siguiente_tarea_msg* mensaje); //TODO
 t_buffer* serializar_solicitar_siguiente_tarea_rta(solicitar_siguiente_tarea_rta* mensaje); //TODO
 t_buffer* serializar_informar_movimiento_msg(informar_movimiento_msg* mensaje); //TODO
@@ -248,11 +253,11 @@ t_buffer* serializar_notificar_sabotaje_msg(notificar_sabotaje_msg* mensaje); //
 
 iniciar_patota_msg* desserializar_iniciar_patota_msg(void* stream);
 expulsar_tripulante_msg* desserializar_expulsar_tripulante_msg(void* stream);
-obtener_bitacora_msg* desserializar_obtener_bitacora_msg(void* stream); //TODO
-listar_tripulantes_rta* desserializar_listar_tripulantes_rta(void* stream); //TODO
-obtener_bitacora_rta* desserializar_obtener_bitacora_rta(void* stream); //TODO
-iniciar_tripulante_msg* desserializar_iniciar_tripulante_msg(void* stream); //TODO
-iniciar_tripulante_tareas_msg* desserializar_iniciar_tripulante_tareas_msg(void* stream); //TODO
+obtener_bitacora_msg* desserializar_obtener_bitacora_msg(void* stream);
+listar_tripulantes_rta* desserializar_listar_tripulantes_rta(void* stream);
+obtener_bitacora_rta* desserializar_obtener_bitacora_rta(void* stream);
+iniciar_tripulante_msg* desserializar_iniciar_tripulante_msg(void* stream);
+iniciar_tripulante_tareas_msg* desserializar_iniciar_tripulante_tareas_msg(void* stream);
 solicitar_siguiente_tarea_msg* desserializar_solicitar_siguiente_tarea_msg(void* stream); //TODO
 solicitar_siguiente_tarea_rta* desserializar_solicitar_siguiente_tarea_rta(void* stream); //TODO
 informar_movimiento_msg* desserializar_informar_movimiento_msg(void* stream); //TODO
