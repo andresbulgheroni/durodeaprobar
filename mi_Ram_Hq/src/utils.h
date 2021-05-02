@@ -239,14 +239,14 @@ t_buffer* serializar_listar_tripulantes_rta(listar_tripulantes_rta* mensaje);
 t_buffer* serializar_obtener_bitacora_rta(obtener_bitacora_rta* mensaje);
 t_buffer* serializar_iniciar_tripulante_msg(iniciar_tripulante_msg* mensaje);
 t_buffer* serializar_iniciar_tripulante_tareas_msg(iniciar_tripulante_tareas_msg* mensaje);
-t_buffer* serializar_solicitar_siguiente_tarea_msg(solicitar_siguiente_tarea_msg* mensaje); //TODO
-t_buffer* serializar_solicitar_siguiente_tarea_rta(solicitar_siguiente_tarea_rta* mensaje); //TODO
-t_buffer* serializar_informar_movimiento_msg(informar_movimiento_msg* mensaje); //TODO
-t_buffer* serializar_inicio_tarea_msg(inicio_tarea_msg* mensaje); //TODO
-t_buffer* serializar_fin_tarea_msg(fin_tarea_msg* mensaje); //TODO
-t_buffer* serializar_atender_sabotaje_msg(atender_sabotaje_msg* mensaje); //TODO
-t_buffer* serializar_resolucion_sabotaje_msg(resolucion_sabotaje_msg* mensaje); //TODO
-t_buffer* serializar_notificar_sabotaje_msg(notificar_sabotaje_msg* mensaje); //TODO
+t_buffer* serializar_solicitar_siguiente_tarea_msg(solicitar_siguiente_tarea_msg* mensaje);
+t_buffer* serializar_solicitar_siguiente_tarea_rta(solicitar_siguiente_tarea_rta* mensaje);
+t_buffer* serializar_informar_movimiento_msg(informar_movimiento_msg* mensaje);
+t_buffer* serializar_inicio_tarea_msg(inicio_tarea_msg* mensaje);
+t_buffer* serializar_fin_tarea_msg(fin_tarea_msg* mensaje);
+t_buffer* serializar_atender_sabotaje_msg(atender_sabotaje_msg* mensaje);
+t_buffer* serializar_resolucion_sabotaje_msg(resolucion_sabotaje_msg* mensaje);
+t_buffer* serializar_notificar_sabotaje_msg(notificar_sabotaje_msg* mensaje);
 
 
 //DESERIALIZADO MENSAJES
@@ -258,15 +258,14 @@ listar_tripulantes_rta* desserializar_listar_tripulantes_rta(void* stream);
 obtener_bitacora_rta* desserializar_obtener_bitacora_rta(void* stream);
 iniciar_tripulante_msg* desserializar_iniciar_tripulante_msg(void* stream);
 iniciar_tripulante_tareas_msg* desserializar_iniciar_tripulante_tareas_msg(void* stream);
-solicitar_siguiente_tarea_msg* desserializar_solicitar_siguiente_tarea_msg(void* stream); //TODO
-solicitar_siguiente_tarea_rta* desserializar_solicitar_siguiente_tarea_rta(void* stream); //TODO
-informar_movimiento_msg* desserializar_informar_movimiento_msg(void* stream); //TODO
-inicio_tarea_msg* desserializar_inicio_tarea_msg(void* stream); //TODO
-fin_tarea_msg* desserializar_fin_tarea_msg(void* stream); //TODO
-atender_sabotaje_msg* desserializar_atender_abotaje_msg(void* stream); //TODO
-resolucion_sabotaje_msg* desserializar_resolucion_sabotaje_msg(void* stream); //TODO
-notificar_sabotaje_msg* desserializar_notificar_sabotaje_msg(void* stream); //TODO
-
+solicitar_siguiente_tarea_msg* desserializar_solicitar_siguiente_tarea_msg(void* stream);
+solicitar_siguiente_tarea_rta* desserializar_solicitar_siguiente_tarea_rta(void* stream);
+informar_movimiento_msg* desserializar_informar_movimiento_msg(void* stream);
+inicio_tarea_msg* desserializar_inicio_tarea_msg(void* stream);
+fin_tarea_msg* desserializar_fin_tarea_msg(void* stream);
+atender_sabotaje_msg* desserializar_atender_abotaje_msg(void* stream);
+resolucion_sabotaje_msg* desserializar_resolucion_sabotaje_msg(void* stream);
+notificar_sabotaje_msg* desserializar_notificar_sabotaje_msg(void* stream);
 
 //MISC
 

@@ -21,7 +21,6 @@ int main(void) {
 	int32_t conexion = crear_conexion(config_get_string_value(config, "IP"), config_get_string_value(config, "PUERTO"));
 
 
-/*
 	//Prueba Iniciar Patota
 
 	iniciar_patota_msg* mensaje = malloc(sizeof(iniciar_patota_msg));
@@ -46,7 +45,7 @@ int main(void) {
 	list_destroy_and_destroy_elements(mensaje->listaPosiciones, free_list);
 	free(mensaje);
 
- 	 */
+
 	/*
 	//Prueba Expulsar Tripulante
 

@@ -120,7 +120,6 @@ t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje){
 				break;
 
 			}
-			/*
 			case SOLICITAR_SIGUIENTE_TAREA:{
 
 				paquete->buffer = serializar_solicitar_siguiente_tarea_msg(mensaje);
@@ -177,7 +176,6 @@ t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje){
 				break;
 
 			}
-			*/
 			default: break;
 
 		}
@@ -332,7 +330,6 @@ void* deserializar_paquete(t_paquete* paquete){
 			break;
 
 		}
-		/*
 		case SOLICITAR_SIGUIENTE_TAREA:{
 
 			mensaje = desserializar_solicitar_siguiente_tarea_msg(paquete->buffer->stream);
@@ -389,7 +386,6 @@ void* deserializar_paquete(t_paquete* paquete){
 			break;
 
 		}
-		*/
 		default: break;
 
 	}
@@ -460,7 +456,7 @@ t_buffer* serializar_expulsar_tripulante_msg(expulsar_tripulante_msg* mensaje){
 
 }
 
-t_buffer* serializar_obtener_bitacora_msg(obtener_bitacora_msg mensaje){
+t_buffer* serializar_obtener_bitacora_msg(obtener_bitacora_msg* mensaje){
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
@@ -474,6 +470,7 @@ t_buffer* serializar_obtener_bitacora_msg(obtener_bitacora_msg mensaje){
 	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 
 	return buffer;
+
 }
 
 t_buffer* serializar_listar_tripulantes_rta(listar_tripulantes_rta* mensaje){
@@ -494,6 +491,7 @@ t_buffer* serializar_listar_tripulantes_rta(listar_tripulantes_rta* mensaje){
 	list_iterate(mensaje->tripulantes, get_list_items_size);
 
 	buffer->size = sizeTripulantes;
+	buffer->stream = malloc(buffer->size);
 
 	uint32_t offset = 0;
 	uint32_t cantLista = list_size(mensaje->tripulantes);
@@ -569,6 +567,7 @@ t_buffer* serializar_iniciar_tripulante_tareas_msg(iniciar_tripulante_tareas_msg
 	list_iterate(mensaje->tareas, get_list_items_size);
 
 	buffer->size = sizeTareas;
+	buffer->stream = malloc(buffer->size);
 
 	uint32_t offset = 0;
 	uint32_t cantLista = list_size(mensaje->tareas);
@@ -585,6 +584,158 @@ t_buffer* serializar_iniciar_tripulante_tareas_msg(iniciar_tripulante_tareas_msg
 	}
 
 	list_iterate(mensaje->tareas, serializar_lista);
+
+	return buffer;
+
+}
+
+
+t_buffer* serializar_solicitar_siguiente_tarea_msg(solicitar_siguiente_tarea_msg* mensaje){
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+
+	buffer->size = sizeof(mensaje->idPatota) + sizeof(mensaje->idTripulante);
+
+	buffer->stream = malloc(buffer->size);
+
+	uint32_t offset = 0;
+
+	serializar_variable(buffer->stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
+	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+
+	return buffer;
+
+}
+
+
+t_buffer* serializar_solicitar_siguiente_tarea_rta(solicitar_siguiente_tarea_rta* mensaje){
+
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+
+	buffer->size = sizeof(mensaje->tarea->nombre->length) + mensaje->tarea->nombre->length
+					+ sizeof(mensaje->tarea->parametros) + sizeof(mensaje->tarea->coordenadas->posX)
+					+ sizeof(mensaje->tarea->coordenadas->posY) + sizeof(mensaje->tarea->duracion);
+
+	buffer->stream = malloc(buffer->size);
+
+	uint32_t offset = 0;
+
+	serializar_string(buffer->stream,  mensaje->tarea->nombre, &offset);
+	serializar_variable(buffer->stream, &(mensaje->tarea->parametros), sizeof(mensaje->tarea->parametros), &offset);
+	serializar_variable(buffer->stream, &(mensaje->tarea->coordenadas->posX), sizeof(mensaje->tarea->coordenadas->posX), &offset);
+	serializar_variable(buffer->stream, &(mensaje->tarea->coordenadas->posY), sizeof(mensaje->tarea->coordenadas->posY), &offset);
+	serializar_variable(buffer->stream, &(mensaje->tarea->duracion), sizeof(mensaje->tarea->duracion), &offset);
+
+	return buffer;
+
+}
+
+
+t_buffer* serializar_informar_movimiento_msg(informar_movimiento_msg* mensaje){
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+
+	buffer->size = sizeof(mensaje->idPatota) + sizeof(mensaje->idTripulante) +
+			       2 * sizeof(mensaje->coordenadasDestino->posX) + 2 * sizeof(mensaje->coordenadasDestino->posX);
+
+	buffer->stream = malloc(buffer->size);
+
+	uint32_t offset = 0;
+
+	serializar_variable(buffer->stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
+	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	serializar_variable(buffer->stream, &(mensaje->coordenadasOrigen->posX), sizeof(mensaje->coordenadasOrigen->posX), &offset);
+	serializar_variable(buffer->stream, &(mensaje->coordenadasOrigen->posY), sizeof(mensaje->coordenadasOrigen->posY), &offset);
+	serializar_variable(buffer->stream, &(mensaje->coordenadasDestino->posX), sizeof(mensaje->coordenadasDestino->posX), &offset);
+	serializar_variable(buffer->stream, &(mensaje->coordenadasDestino->posY), sizeof(mensaje->coordenadasDestino->posY), &offset);
+
+	return buffer;
+
+}
+
+t_buffer* serializar_inicio_tarea_msg(inicio_tarea_msg* mensaje){
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+
+	buffer->size = sizeof(mensaje->idTripulante) + sizeof(mensaje->nombreTarea->length) + mensaje->nombreTarea->length ;
+
+	buffer->stream = malloc(buffer->size);
+
+	uint32_t offset = 0;
+
+	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	serializar_string(buffer->stream, mensaje->nombreTarea, &offset);
+
+	return buffer;
+
+}
+
+
+t_buffer* serializar_fin_tarea_msg(fin_tarea_msg* mensaje){
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+
+	buffer->size = sizeof(mensaje->idTripulante) + sizeof(mensaje->nombreTarea->length) + mensaje->nombreTarea->length ;
+
+	buffer->stream = malloc(buffer->size);
+
+	uint32_t offset = 0;
+
+	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	serializar_string(buffer->stream, mensaje->nombreTarea, &offset);
+
+	return buffer;
+
+}
+
+
+t_buffer* serializar_atender_sabotaje_msg(atender_sabotaje_msg* mensaje){
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+
+	buffer->size = sizeof(mensaje->idSabotaje) + sizeof(mensaje->idTripulante);
+
+	buffer->stream = malloc(buffer->size);
+
+	uint32_t offset = 0;
+
+	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	serializar_variable(buffer->stream, &(mensaje->idSabotaje), sizeof(mensaje->idSabotaje), &offset);
+
+	return buffer;
+
+}
+
+
+t_buffer* serializar_resolucion_sabotaje_msg(resolucion_sabotaje_msg* mensaje){
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+
+	buffer->size = sizeof(mensaje->idSabotaje) + sizeof(mensaje->idTripulante);
+
+	buffer->stream = malloc(buffer->size);
+
+	uint32_t offset = 0;
+
+	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	serializar_variable(buffer->stream, &(mensaje->idSabotaje), sizeof(mensaje->idSabotaje), &offset);
+
+	return buffer;
+
+}
+
+t_buffer* serializar_notificar_sabotaje_msg(notificar_sabotaje_msg* mensaje){
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+
+	buffer->size = sizeof(mensaje->idSabotaje);
+
+	buffer->stream = malloc(buffer->size);
+
+	uint32_t offset = 0;
+
+	serializar_variable(buffer->stream, &(mensaje->idSabotaje), sizeof(mensaje->idSabotaje), &offset);
 
 	return buffer;
 
@@ -720,8 +871,128 @@ iniciar_tripulante_tareas_msg* desserializar_iniciar_tripulante_tareas_msg(void*
 
 	return mensaje;
 
+}
+
+
+solicitar_siguiente_tarea_msg* desserializar_solicitar_siguiente_tarea_msg(void* stream){
+
+	solicitar_siguiente_tarea_msg* mensaje = malloc(sizeof(solicitar_siguiente_tarea_msg));
+
+	uint32_t offset = 0;
+
+	deserializar_variable(stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
+	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+
+	return mensaje;
 
 }
+
+
+solicitar_siguiente_tarea_rta* desserializar_solicitar_siguiente_tarea_rta(void* stream){
+
+	solicitar_siguiente_tarea_rta* mensaje = malloc(sizeof(solicitar_siguiente_tarea_rta));
+
+	uint32_t offset = 0;
+
+	tarea_data_msg* tarea = malloc(sizeof(tarea_data_msg));
+	tarea->coordenadas = malloc(sizeof(t_coordenadas));
+	mensaje->tarea = tarea;
+
+	tarea->nombre = deserializar_string(stream, &offset);
+	deserializar_variable(stream, &(tarea->parametros), sizeof(tarea->parametros), &offset);
+	deserializar_variable(stream, &(tarea->coordenadas->posX), sizeof(tarea->coordenadas->posX), &offset);
+	deserializar_variable(stream, &(tarea->coordenadas->posY), sizeof(tarea->coordenadas->posY), &offset);
+	deserializar_variable(stream, &(tarea->duracion), sizeof(tarea->duracion), &offset);
+
+	return mensaje;
+
+}
+
+informar_movimiento_msg* desserializar_informar_movimiento_msg(void* stream){
+
+	informar_movimiento_msg* mensaje = malloc(sizeof(informar_movimiento_msg));
+
+	uint32_t offset = 0;
+
+	deserializar_variable(stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
+	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	deserializar_variable(stream, &(mensaje->coordenadasOrigen->posX), sizeof(mensaje->coordenadasOrigen->posX), &offset);
+	deserializar_variable(stream, &(mensaje->coordenadasOrigen->posY), sizeof(mensaje->coordenadasOrigen->posY), &offset);
+	deserializar_variable(stream, &(mensaje->coordenadasDestino->posX), sizeof(mensaje->coordenadasDestino->posX), &offset);
+	deserializar_variable(stream, &(mensaje->coordenadasDestino->posY), sizeof(mensaje->coordenadasDestino->posY), &offset);
+
+	return mensaje;
+
+}
+
+
+inicio_tarea_msg* desserializar_inicio_tarea_msg(void* stream){
+
+	inicio_tarea_msg* mensaje = malloc(sizeof(inicio_tarea_msg));
+
+	uint32_t offset = 0;
+
+	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	mensaje->nombreTarea = deserializar_string(stream, &offset);
+
+	return mensaje;
+
+}
+
+
+fin_tarea_msg* desserializar_fin_tarea_msg(void* stream){
+
+	fin_tarea_msg* mensaje = malloc(sizeof(fin_tarea_msg));
+
+	uint32_t offset = 0;
+
+	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	mensaje->nombreTarea = deserializar_string(stream, &offset);
+
+	return mensaje;
+
+}
+
+atender_sabotaje_msg* desserializar_atender_abotaje_msg(void* stream){
+
+	atender_sabotaje_msg* mensaje = malloc(sizeof(atender_sabotaje_msg));
+
+	uint32_t offset = 0;
+
+	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	deserializar_variable(stream, &(mensaje->idSabotaje), sizeof(mensaje->idSabotaje), &offset);
+
+	return mensaje;
+
+}
+
+
+resolucion_sabotaje_msg* desserializar_resolucion_sabotaje_msg(void* stream){
+
+	resolucion_sabotaje_msg* mensaje = malloc(sizeof(resolucion_sabotaje_msg));
+
+	uint32_t offset = 0;
+
+	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	deserializar_variable(stream, &(mensaje->idSabotaje), sizeof(mensaje->idSabotaje), &offset);
+
+	return mensaje;
+
+}
+
+
+notificar_sabotaje_msg* desserializar_notificar_sabotaje_msg(void* stream){
+
+	notificar_sabotaje_msg* mensaje = malloc(sizeof(notificar_sabotaje_msg));
+
+	uint32_t offset = 0;
+
+	deserializar_variable(stream, &(mensaje->idSabotaje), sizeof(mensaje->idSabotaje), &offset);
+
+	return mensaje;
+
+}
+
 
 //CONEXION
 

@@ -27,7 +27,6 @@ int main(void) {
 	t_paquete* paquete = recibir_paquete(socketCliente);
 
 
-	/*
 	//Prueba Iniciar Patota
 
 	iniciar_patota_msg* mensaje = deserializar_paquete(paquete);
@@ -52,7 +51,6 @@ int main(void) {
 	free(mensaje);
 
 
-	*/
 	/*
 	//Prueba Expulsar Tripulante
 
