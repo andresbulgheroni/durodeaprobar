@@ -57,7 +57,6 @@ int llegoAlSabotaje(t_tripulante* tripulante){
 	return (posicionXtripulante == posicionXsabotaje) && (posicionYtripulante == posicionYsabotaje);
 }
 
-
 void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante){
 
 
@@ -93,3 +92,48 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante){
 
 }
 
+int llegoATarea(t_tripulante* tripulante){
+
+	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
+	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
+
+	uint32_t posicionXtarea = tripulante->tareaAsignada->coordenadas->posX;
+	uint32_t posicionYtarea = tripulante->tareaAsignada->coordenadas->posY;
+
+	return (posicionXtripulante == posicionXtarea) && (posicionYtripulante == posicionYtarea);
+}
+
+void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
+
+
+	sleep(RETARDO_CICLO_CPU);
+
+	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
+	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
+
+	uint32_t posicionXtarea = tripulante->tareaAsignada->coordenadas->posX;
+	uint32_t posicionYtarea = tripulante->tareaAsignada->coordenadas->posY;
+
+	if (posicionXtripulante != posicionXtarea) {
+
+		int diferenciaEnX = posicionXtarea - posicionXtripulante;
+		if (diferenciaEnX > 0) {
+			tripulante->coordenadas->posX = posicionXtripulante + 1;
+		} else if (diferenciaEnX < 0) {
+			tripulante->coordenadas->posX = posicionXtripulante - 1;
+		}
+
+	} else if (posicionYtripulante != posicionYtarea) {
+
+		int diferenciaEnY = posicionYtarea - posicionYtripulante;
+		if (diferenciaEnY > 0) {
+			tripulante->coordenadas->posY = posicionYtripulante + 1;
+		} else if (diferenciaEnY < 0) {
+			tripulante->coordenadas->posY = posicionYtripulante - 1;
+		}
+
+	}
+
+	tripulante->misCiclosDeCPU++;
+
+}

@@ -17,7 +17,6 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-extern pthread_mutex_t mutex_id_tripulantes;
 extern pthread_mutex_t mutex_tripulantes;
 
 extern pthread_mutex_t mutex_listaNuevos;
@@ -54,8 +53,11 @@ t_list* hilosTripulantes;
 t_list* listaNuevos;
 t_list* listaReady;
 t_list* listaBloqueados;
-//t_list* listaEjecutando;
+t_list*listaBloqueadosPorSabotaje;
+
 t_list* listaFinalizados;
+
+t_list* sem_tripulantes_ejecutar;
 
 typedef enum{
 
@@ -130,6 +132,8 @@ void leer_consola();
 void inicializarAtributosATripulante(t_list*);
 t_coordenadas* get_coordenadas(char*);
 opCode string_a_op_code (char*);
+void crearHilosTripulantes();
+void ejecutarTripulante(t_tripulante*);
 
 
 #endif /* DISCORDIADOR_H_ */

@@ -35,5 +35,6 @@ int getIndexTripulanteEnLista(t_list* , t_tripulante* );
 void liberarArray(char**);
 int cantidadElementosArray(char**);
 void sacarTripulanteDeLista(t_tripulante* , t_list* );
-
+void moverAlTripulanteHastaLaTarea(t_tripulante*);
+int llegoATarea(t_tripulante*);
 #endif /* TRIPULANTE_H_ */

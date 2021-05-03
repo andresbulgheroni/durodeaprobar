@@ -9,11 +9,7 @@
  */
 #include "discordiador.h"
 
-
-pthread_mutex_t mutex_id_tripulantes = PTHREAD_MUTEX_INITIALIZER;
-
 pthread_mutex_t mutex_tripulantes = PTHREAD_MUTEX_INITIALIZER;
-
 pthread_mutex_t mutex_listaNuevos= PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaReady = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaBloqueados = PTHREAD_MUTEX_INITIALIZER;
@@ -40,6 +36,14 @@ int main(void){
 void inicializarListasGlobales(){
 
 	estaPlanificando=1;
+
+	listaNuevos = list_create();
+	listaReady = list_create();
+	listaBloqueados= list_create();
+	listaBloqueadosPorSabotaje= list_create();
+
+	listaFinalizados = list_create();
+
 	tripulantes = list_create();
 }
 
@@ -315,4 +319,42 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 	free(leido);
 
+}
+
+
+
+void crearHilosTripulantes() {
+
+	hilosTripulantes = list_create();
+	sem_tripulantes_ejecutar = list_create();
+
+	pthread_mutex_lock(&mutex_tripulantes);
+	int cantidadTripulantes = list_size(tripulantes);
+	pthread_t pthread_id[cantidadTripulantes];
+
+	for (int i = 0; i < cantidadTripulantes; i++) {
+
+		t_tripulante* tripulante = (t_tripulante*) list_get(tripulantes, i); //(t_tripulante*) list_get(Tripulantes, i);
+		sem_t* semaforoDelTripulante = malloc(sizeof(sem_t));
+
+		sem_init(semaforoDelTripulante, 0, 0);
+
+		list_add(sem_tripulantes_ejecutar, (void*) semaforoDelTripulante);
+
+		pthread_create(&pthread_id[i], NULL, (void*) ejecutarTripulante, tripulante);
+
+		pthread_detach(pthread_id[i]);
+
+		list_add(hilosTripulantes, &pthread_id[i]);
+	}
+	pthread_mutex_unlock(&mutex_tripulantes);
+
+}
+
+void ejecutarTripulante(t_tripulante* tripulante){
+	while(1){
+
+		sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
+				sem_wait(semaforoDelTripulante);
+	}
 }
