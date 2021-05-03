@@ -178,7 +178,7 @@ t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
 
 
 		pthread_mutex_lock(&mutex_listaNuevos);
-		sacartripulanteDeLista(tripulanteMasCercanoNew, listaNuevos);
+		sacarTripulanteDeLista(tripulanteMasCercanoNew, listaNuevos);
 		pthread_mutex_unlock(&mutex_listaNuevos);
 
 		return tripulanteMasCercanoNew;
