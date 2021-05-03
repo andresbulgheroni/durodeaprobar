@@ -13,8 +13,10 @@
 #include<commons/string.h>
 #include<commons/config.h>
 #include<readline/readline.h>
+#include "utils.h"
 
 t_config* leer_config(void);
+t_log* crear_log(char* dir);
 
 
 #endif /* I_MONGO_STORE_H_ */
