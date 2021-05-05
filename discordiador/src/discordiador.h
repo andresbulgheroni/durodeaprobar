@@ -17,6 +17,8 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
+#include <sys/stat.h>
+
 extern pthread_mutex_t mutex_tripulantes;
 
 extern pthread_mutex_t mutex_listaNuevos;
