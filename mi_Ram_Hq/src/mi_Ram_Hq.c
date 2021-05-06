@@ -24,7 +24,7 @@ int main(void) {
 
 		int32_t socket_cliente = esperar_cliente(socket_servidor);
 		pthread_t hilo_mensaje;
-		pthread_create(&hilo_mensaje,NULL,(void*)recibir_mensaje, (void*) socket_cliente);
+		pthread_create(&hilo_mensaje,NULL,(void*)recibir_mensaje, (void*) (&socket_cliente));
 		pthread_detach(hilo_mensaje);
 
 	}
@@ -36,8 +36,29 @@ int main(void) {
 
 void recibir_mensaje(int32_t* conexion){
 
+	bool terminado = false;
+	while (!terminado){
 
+		t_paquete* paquete = recibir_paquete(*conexion);
 
+		switch(paquete->codigo){
+
+			case EXPULSAR_TRIPULANTE:{
+				expulsar_tripulante_msg* mensaje = desserializar_expulsar_tripulante_msg(paquete->buffer->stream);
+
+				log_debug(logger, "%d", mensaje->idTripulante);
+
+				free(mensaje);
+
+				break;
+
+			}
+			default: terminado = true; break;
+		}
+	}
+
+	free(conexion);
+	pthread_exit(NULL);
 }
 
 void init (){
