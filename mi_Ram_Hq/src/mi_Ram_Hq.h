@@ -36,5 +36,6 @@ t_log* logger;
 void init ();
 void terminar ();
 int32_t get_esquema_memoria(char* esquema_config);
+void recibir_mensaje(int32_t* conexion);
 
 #endif /* MI_RAM_HQ_H_ */

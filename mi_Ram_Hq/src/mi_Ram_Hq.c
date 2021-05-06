@@ -18,9 +18,26 @@ int main(void) {
 
 	init();
 
+	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
+
+	while(true){
+
+		int32_t socket_cliente = esperar_cliente(socket_servidor);
+		pthread_t hilo_mensaje;
+		pthread_create(&hilo_mensaje,NULL,(void*)recibir_mensaje, (void*) socket_cliente);
+		pthread_detach(hilo_mensaje);
+
+	}
+
 	terminar();
 
 	return EXIT_SUCCESS;
+}
+
+void recibir_mensaje(int32_t* conexion){
+
+
+
 }
 
 void init (){
