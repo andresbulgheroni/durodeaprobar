@@ -27,6 +27,7 @@ int main(void){
 
 	iniciarLog();
 	inicializarListasGlobales();
+	//uint32_t socket = iniciar_servidor(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
 
 	leer_consola();
 
@@ -135,7 +136,7 @@ char* convertirEnumAString (t_status_code code){
 
 }
 
-opCode string_a_op_code (char* string){
+/*opCode string_a_op_code (char* string){
 
 	if(strcmp(string, "INICIAR_PATOTA") == 0){
 		return INICIAR_PATOTA;
@@ -169,6 +170,7 @@ t_coordenadas* get_coordenadas(char* posicion){
 
 	return coordenadas;
 }
+*/
 
 
 void inicializarAtributosATripulante(t_list* posicionesTripulantes){
@@ -202,7 +204,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 		log_info(logger, leido);
 
 		char** mensaje = string_split(leido, " ");
-		opCode codigo_mensaje = string_a_op_code(mensaje[0]);
+		op_code codigo_mensaje = string_to_op_code(mensaje[0]);
 
 		switch(codigo_mensaje){
 
@@ -223,7 +225,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 				char* buffer = calloc(1, stat_file.st_size + 1);
 				fread(buffer, stat_file.st_size, 1, fileTarea);
 
-				printf("el valor es: %s\n",buffer);
+				printf("tareas que van a ser asignadas son:%s",buffer);
 				int contadorLista = 0;
 
 				while(mensaje[3+contadorLista]!= NULL){
