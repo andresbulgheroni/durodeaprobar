@@ -52,6 +52,7 @@ t_list* tareas;
 
 
 t_list* tripulantes;
+uint32_t numeroHiloTripulante;
 t_list* hilosTripulantes;
 
 t_list* listaNuevos;
@@ -117,6 +118,7 @@ typedef struct
 	t_sabotaje* sabotaje;		//TODO
 	uint32_t misCiclosDeCPU;
 	t_tarea* tareaAsignada;
+	uint32_t quantumDisponible;
 
 } t_tripulante;
 
@@ -127,8 +129,6 @@ void inicializarConfig(t_config*);
 void inicializarSemaforoPlanificador();
 void leer_consola();
 void inicializarAtributosATripulante(t_list*);
-//t_coordenadas* get_coordenadas(char*);
-//opCode string_a_op_code (char*);
 void crearHilosTripulantes();
 void ejecutarTripulante(t_tripulante*);
 

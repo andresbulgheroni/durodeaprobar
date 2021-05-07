@@ -9,6 +9,8 @@
  */
 #include "discordiador.h"
 
+int a=1;
+
 
 pthread_mutex_t mutex_tripulantes = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaNuevos= PTHREAD_MUTEX_INITIALIZER;
@@ -42,6 +44,7 @@ int main(void){
 void inicializarListasGlobales(){
 
 	estaPlanificando=1;
+	numeroHiloTripulante=0;
 
 	listaNuevos = list_create();
 	listaReady = list_create();
@@ -51,6 +54,9 @@ void inicializarListasGlobales(){
 	listaFinalizados = list_create();
 
 	tripulantes = list_create();
+
+	hilosTripulantes = list_create();
+	sem_tripulantes_ejecutar = list_create();
 }
 
 void inicializarConfig(t_config* config){
@@ -70,15 +76,15 @@ void inicializarConfig(t_config* config){
 	DURACION_SABOTAJE=config_get_int_value(config,"DURACION_SABOTAJE");
 	RETARDO_CICLO_CPU=config_get_int_value(config,"RETARDO_CICLO_CPU");
 
-	printf("el valor es: %s\n",IP_MI_RAM_HQ);
-	printf("el valor es: %s\n",PUERTO_MI_RAM_HQ);
-	printf("el valor es: %s\n",IP_I_MONGO_STORE);
-	printf("el valor es: %s\n",ALGORITMO);
-	printf("el valor es: %s\n",PUERTO_I_MONGO_STORE);
-	printf("el valor es: %d\n",GRADO_MULTITAREA);
-	printf("el valor es: %d\n",QUANTUM);
-	printf("el valor es: %d\n",DURACION_SABOTAJE);
-	printf("el valor es: %d\n",RETARDO_CICLO_CPU);
+	printf("el valor IP RAM: %s\n",IP_MI_RAM_HQ);
+	printf("el valor PUERO RAM: %s\n",PUERTO_MI_RAM_HQ);
+	printf("el valor IP IMONGO: %s\n",IP_I_MONGO_STORE);
+	printf("el valor ALGORITMO: %s\n",ALGORITMO);
+	printf("el valor PUERTO IMONGO: %s\n",PUERTO_I_MONGO_STORE);
+	printf("el valor MULTITAREA: %d\n",GRADO_MULTITAREA);
+	printf("el valor QUANTUM: %d\n",QUANTUM);
+	printf("el valor SABOTAJE: %d\n",DURACION_SABOTAJE);
+	printf("el valor RETARDO: %d\n",RETARDO_CICLO_CPU);
 
 }
 
@@ -136,44 +142,12 @@ char* convertirEnumAString (t_status_code code){
 
 }
 
-/*opCode string_a_op_code (char* string){
-
-	if(strcmp(string, "INICIAR_PATOTA") == 0){
-		return INICIAR_PATOTA;
-	}
-	if(strcmp(string, "LISTAR_TRIPULANTES")  == 0){
-		return LISTAR_TRIPULANTES;
-	}
-	if(strcmp(string, "EXPULSAR_TRIPULANTE")  == 0){
-		return EXPULSAR_TRIPULANTE;
-	}
-	if(strcmp(string, "INICIAR_PLANIFICACION")  == 0){
-		return INICIAR_PLANIFICACION;
-	}
-	if(strcmp(string, "PAUSAR_PLANIFICACION")  == 0){
-		return PAUSAR_PLANIFICACION;
-	}
-	if(strcmp(string, "OBTENER_BITACORA") == 0){
-		return OBTENER_BITACORA;
-	}
-	return ERROR_CODIGO;
-}
-
-t_coordenadas* get_coordenadas(char* posicion){
-
-	char** posicionesSplit = string_split(posicion, "|");
-
-	t_coordenadas* coordenadas = malloc(sizeof(t_coordenadas));
-
-	coordenadas->posX = atoi(posicionesSplit[0]);
-	coordenadas->posY = atoi(posicionesSplit[1]);
-
-	return coordenadas;
-}
-*/
-
 
 void inicializarAtributosATripulante(t_list* posicionesTripulantes){
+
+		int cantidadTripulantes = list_size(posicionesTripulantes);
+		pthread_t pthread_id[cantidadTripulantes+numeroHiloTripulante];
+
 
 	for(int i=0; i<(list_size(posicionesTripulantes)) ; i++){
 
@@ -185,9 +159,22 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 		tripulante->idPatota = id_patota;
 		tripulante->misCiclosDeCPU = 0;
 		tripulante->estado = NEW;
+		tripulante->quantumDisponible = QUANTUM;
 
 		list_add(tripulantes,tripulante);
 
+		//LE CREO UN HILO.
+		pthread_mutex_lock(&mutex_tripulantes);
+		sem_t* semaforoDelTripulante = malloc(sizeof(sem_t));
+		sem_init(semaforoDelTripulante, 0, 0);
+		list_add(sem_tripulantes_ejecutar, (void*) semaforoDelTripulante);
+		pthread_create(&pthread_id[numeroHiloTripulante], NULL, (void*) ejecutarTripulante, tripulante);
+		pthread_detach(pthread_id[numeroHiloTripulante]);
+
+		list_add(hilosTripulantes, &pthread_id[numeroHiloTripulante]);
+
+		numeroHiloTripulante++;
+		pthread_mutex_unlock(&mutex_tripulantes);
 	}
 
 	id_patota++;
@@ -208,7 +195,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 		switch(codigo_mensaje){
 
-		case INICIAR_PATOTA: {		////INICIAR_PATOTA 5 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+		case INICIAR_PATOTA: {		////	INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
 
 			t_list* posicionesTripulantes = list_create();
 			t_patota* patota = malloc(sizeof(t_patota));
@@ -329,6 +316,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 		}
 		}
 
+
 		free(leido);
 		leido = readline("\n>");
 	}
@@ -338,12 +326,8 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 }
 
 
-
+/*
 void crearHilosTripulantes() {
-
-	hilosTripulantes = list_create();
-	sem_tripulantes_ejecutar = list_create();
-
 	pthread_mutex_lock(&mutex_tripulantes);
 	int cantidadTripulantes = list_size(tripulantes);
 	pthread_t pthread_id[cantidadTripulantes];
@@ -352,27 +336,40 @@ void crearHilosTripulantes() {
 
 		t_tripulante* tripulante = (t_tripulante*) list_get(tripulantes, i); //(t_tripulante*) list_get(Tripulantes, i);
 		sem_t* semaforoDelTripulante = malloc(sizeof(sem_t));
-
 		sem_init(semaforoDelTripulante, 0, 0);
-
 		list_add(sem_tripulantes_ejecutar, (void*) semaforoDelTripulante);
-
 		pthread_create(&pthread_id[i], NULL, (void*) ejecutarTripulante, tripulante);
-
 		pthread_detach(pthread_id[i]);
 
 		list_add(hilosTripulantes, &pthread_id[i]);
 	}
 	pthread_mutex_unlock(&mutex_tripulantes);
-
 }
-
+*/
 void ejecutarTripulante(t_tripulante* tripulante){
 	while(1){
+		pthread_mutex_lock(&mutex_tripulantes);
+		if(a==3&&tripulante->quantumDisponible==QUANTUM){
+			printf("hola soy que se yo un tripulante: %d\n",tripulante->idTripulante);
+						a=0;
+		}
+		if(a==2 &&tripulante->quantumDisponible==QUANTUM){
+			printf("hola soy el segundo tripulante: %d\n",tripulante->idTripulante);
+			a=3;
+			tripulante->quantumDisponible=5;
+		}
+		if(a==1){
+			puts("hola");
+			printf("hola soy el primer tripulante: %d\n",tripulante->idTripulante);
+			a=2;
+			tripulante->quantumDisponible=5;
+		}
+		pthread_mutex_unlock(&mutex_tripulantes);
+						}
+		//sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
+		//		sem_wait(semaforoDelTripulante);
 
-		sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
-				sem_wait(semaforoDelTripulante);
-
+		//if(tripulante->tareaAsignada==NULL){}
 
 	}
-}
+
