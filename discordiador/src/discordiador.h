@@ -1,6 +1,8 @@
 #ifndef DISCORDIADOR_H_
 #define DISCORDIADOR_H_
 
+#include "utils.h"
+
 #include<stdio.h>
 #include<stdint.h>
 #include<stdlib.h>
@@ -16,6 +18,8 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netdb.h>
+
+#include <sys/stat.h>
 
 extern pthread_mutex_t mutex_tripulantes;
 
@@ -59,7 +63,7 @@ t_list* listaFinalizados;
 
 t_list* sem_tripulantes_ejecutar;
 
-typedef enum{
+/*typedef enum{
 
 	INICIAR_PATOTA= 1,
 	LISTAR_TRIPULANTES= 2,
@@ -70,7 +74,7 @@ typedef enum{
 	ERROR_CODIGO=7
 
 }opCode;
-
+*/
 typedef struct{
 	uint32_t cantPatota;
 	uint32_t idPatota;
@@ -81,18 +85,11 @@ typedef struct{
 
 typedef struct
 {
-	uint32_t posX;
-	uint32_t posY;
-} t_coordenadas;
-
-
-typedef struct
-{
 	uint32_t id_sabotaje;		//TODO
 	t_coordenadas* coordenadas;
 
 } t_sabotaje;
-
+/*
 typedef enum{
 
     NEW = 1,
@@ -102,7 +99,7 @@ typedef enum{
     FINISHED = 5
 
 }t_status_code;
-
+*/
 typedef struct
 {
 	uint32_t nombreTarea;		//TODO
@@ -130,8 +127,8 @@ void inicializarConfig(t_config*);
 void inicializarSemaforoPlanificador();
 void leer_consola();
 void inicializarAtributosATripulante(t_list*);
-t_coordenadas* get_coordenadas(char*);
-opCode string_a_op_code (char*);
+//t_coordenadas* get_coordenadas(char*);
+//opCode string_a_op_code (char*);
 void crearHilosTripulantes();
 void ejecutarTripulante(t_tripulante*);
 

@@ -37,4 +37,5 @@ int cantidadElementosArray(char**);
 void sacarTripulanteDeLista(t_tripulante* , t_list* );
 void moverAlTripulanteHastaLaTarea(t_tripulante*);
 int llegoATarea(t_tripulante*);
+t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje*);
 #endif /* TRIPULANTE_H_ */

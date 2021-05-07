@@ -137,3 +137,49 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 	tripulante->misCiclosDeCPU++;
 
 }
+
+
+t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
+	t_tripulante* tripulanteTemporal;
+
+	int distanciaTemporal;
+
+
+	pthread_mutex_lock(&mutex_listaNuevos);
+	t_list* tripulantes_new = list_duplicate(listaNuevos);
+	pthread_mutex_unlock(&mutex_listaNuevos);
+
+	t_tripulante* tripulanteMasCercanoNew;
+	int menorDistanciaNew = 1000;
+
+	if(!list_is_empty(tripulantes_new)){
+		tripulanteMasCercanoNew = list_get(tripulantes_new, 0);
+		menorDistanciaNew = distanciaA(tripulanteMasCercanoNew->coordenadas, sabotaje->coordenadas);
+
+
+		for(int i = 1; i < tripulantes_new->elements_count; i++){
+
+			if(menorDistanciaNew == 0){
+				break;
+			}
+
+			tripulanteTemporal = list_get(tripulantes_new, i);
+			distanciaTemporal = distanciaA(tripulanteTemporal->coordenadas, sabotaje->coordenadas);
+
+			if(distanciaTemporal < menorDistanciaNew){
+				tripulanteMasCercanoNew = tripulanteTemporal;
+				menorDistanciaNew = distanciaTemporal;
+			}
+
+		}
+	}
+
+	list_destroy(tripulantes_new);
+
+
+		pthread_mutex_lock(&mutex_listaNuevos);
+		sacarTripulanteDeLista(tripulanteMasCercanoNew, listaNuevos);
+		pthread_mutex_unlock(&mutex_listaNuevos);
+
+		return tripulanteMasCercanoNew;
+}

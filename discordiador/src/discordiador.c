@@ -9,6 +9,7 @@
  */
 #include "discordiador.h"
 
+
 pthread_mutex_t mutex_tripulantes = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaNuevos= PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaReady = PTHREAD_MUTEX_INITIALIZER;
@@ -26,12 +27,17 @@ int main(void){
 
 	iniciarLog();
 	inicializarListasGlobales();
+	//uint32_t socket = iniciar_servidor(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
 
 	leer_consola();
 
 	puts("LLEGO AL FIN DEL PROGRAMA");
 
 	return EXIT_SUCCESS;
+
+
+
+
 }
 void inicializarListasGlobales(){
 
@@ -78,7 +84,7 @@ void inicializarConfig(t_config* config){
 
 void iniciarLog(){
 
-	logger = log_create("discordiador.log", "discordiador", 1, LOG_LEVEL_INFO);
+	logger = log_create("discordiador.log", "discordiador", 0, LOG_LEVEL_INFO);
 	puts("log creado");
 
 }
@@ -130,7 +136,7 @@ char* convertirEnumAString (t_status_code code){
 
 }
 
-opCode string_a_op_code (char* string){
+/*opCode string_a_op_code (char* string){
 
 	if(strcmp(string, "INICIAR_PATOTA") == 0){
 		return INICIAR_PATOTA;
@@ -164,6 +170,7 @@ t_coordenadas* get_coordenadas(char* posicion){
 
 	return coordenadas;
 }
+*/
 
 
 void inicializarAtributosATripulante(t_list* posicionesTripulantes){
@@ -197,7 +204,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 		log_info(logger, leido);
 
 		char** mensaje = string_split(leido, " ");
-		opCode codigo_mensaje = string_a_op_code(mensaje[0]);
+		op_code codigo_mensaje = string_to_op_code(mensaje[0]);
 
 		switch(codigo_mensaje){
 
@@ -210,8 +217,15 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			string_append(&rutaTarea,mensaje[2]);
 			FILE* fileTarea = fopen(rutaTarea,"r");
 
+
 			if(fileTarea != NULL){
 
+				struct stat stat_file;
+				stat(rutaTarea, &stat_file);
+				char* buffer = calloc(1, stat_file.st_size + 1);
+				fread(buffer, stat_file.st_size, 1, fileTarea);
+
+				printf("tareas que van a ser asignadas son:%s",buffer);
 				int contadorLista = 0;
 
 				while(mensaje[3+contadorLista]!= NULL){
@@ -285,6 +299,8 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 		}
 		case INICIAR_PLANIFICACION: { //Con este comando se dará inicio a la planificación (es un semaforo sem init)
 
+			//armar un hilo y utilizar flags. armar antes.
+
 			if(estaPlanificando== 1){
 				inicializarSemaforoPlanificador();
 			}else{
@@ -356,5 +372,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 		sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
 				sem_wait(semaforoDelTripulante);
+
+
 	}
 }
