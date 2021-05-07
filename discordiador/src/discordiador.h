@@ -64,18 +64,24 @@ t_list* listaFinalizados;
 
 t_list* sem_tripulantes_ejecutar;
 
-/*typedef enum{
+typedef enum{
 
-	INICIAR_PATOTA= 1,
-	LISTAR_TRIPULANTES= 2,
-	EXPULSAR_TRIPULANTE = 3,
-	INICIAR_PLANIFICACION = 4,
-	PAUSAR_PLANIFICACION = 5,
-	OBTENER_BITACORA=6,
-	ERROR_CODIGO=7
+    FIFO = 1,
+    RR = 2,
+	ERROR_CODIGO_ALGORITMO = 3
 
-}opCode;
-*/
+}algoritmo_code;
+
+const static struct {
+
+	algoritmo_code codigo_algoritmo;
+	const char* str;
+}conversionAlgoritmo[] = {
+		{FIFO, "FIFO"},
+		{RR, "RR"},
+
+};
+
 typedef struct{
 	uint32_t cantPatota;
 	uint32_t idPatota;
@@ -90,17 +96,7 @@ typedef struct
 	t_coordenadas* coordenadas;
 
 } t_sabotaje;
-/*
-typedef enum{
 
-    NEW = 1,
-    READY = 2,
-    BLOCKED = 3,
-    EXEC = 4,
-    FINISHED = 5
-
-}t_status_code;
-*/
 typedef struct
 {
 	uint32_t nombreTarea;		//TODO
@@ -120,6 +116,10 @@ typedef struct
 	t_tarea* tareaAsignada;
 	uint32_t quantumDisponible;
 
+	//uint32_t cantidadDeTareasAsignadas;
+	//uint32_t flagDeSabotaje; 1 o 0
+	//uint32_t fueExpulsado; 1 o 0
+
 } t_tripulante;
 
 int getIndexTripulanteEnLista(t_list* , t_tripulante* );
@@ -128,9 +128,17 @@ void inicializarListasGlobales();
 void inicializarConfig(t_config*);
 void inicializarSemaforoPlanificador();
 void leer_consola();
+
+//TRIPULANTES
 void inicializarAtributosATripulante(t_list*);
 void crearHilosTripulantes();
 void ejecutarTripulante(t_tripulante*);
+
+//PLANIFICACION
+algoritmo_code stringACodigoAlgoritmo(const char* );
+void planificarSegun();
+void planificarSegunFIFO();
+void planificarSegunRR();
 
 
 #endif /* DISCORDIADOR_H_ */

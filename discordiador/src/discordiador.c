@@ -25,12 +25,13 @@ uint32_t id_patota = 1;
 
 int main(void){
 	inicializarConfig(config);
-	puts("!!!hola soy el discordiador!!!");
 
 	iniciarLog();
 	inicializarListasGlobales();
-	//uint32_t socket = iniciar_servidor(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
+	//uint32_t socket = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
 
+
+	puts("hola viajero, soy el discordiador, en que puedo ayudarte?");
 	leer_consola();
 
 	puts("LLEGO AL FIN DEL PROGRAMA");
@@ -91,7 +92,7 @@ void inicializarConfig(t_config* config){
 void iniciarLog(){
 
 	logger = log_create("discordiador.log", "discordiador", 0, LOG_LEVEL_INFO);
-	puts("log creado");
+	puts("Se creo el log del discordiador");
 
 }
 
@@ -270,10 +271,15 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 		case EXPULSAR_TRIPULANTE: {
 
-			//list_add(listaFinalizados,tripulante);
-			//enviarMensaje();
 
+			//ENVIO MENSAJE
+			uint32_t socket = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 			int id=atoi(mensaje[1]);
+
+			expulsar_tripulante_msg* mensaje=malloc(sizeof(expulsar_tripulante_msg));
+			mensaje->idPatota=0;
+			mensaje->idTripulante=id;
+			enviar_paquete(mensaje,EXPULSAR_TRIPULANTE,socket);
 
 			bool tieneMismoNombre(void*elemento){
 				t_tripulante*tripulante= (t_tripulante*) elemento;
@@ -288,10 +294,16 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			//armar un hilo y utilizar flags. armar antes.
 
-			if(estaPlanificando== 1){
-				inicializarSemaforoPlanificador();
-			}else{
+
+			if(estaPlanificando ==1){
+				pthread_t hiloPlanificador;
+				pthread_create(&hiloPlanificador, NULL, (void*) planificarSegun,NULL);
+				pthread_detach(hiloPlanificador);
+
+			}
+			if(estaPlanificando ==0){
 				estaPlanificando= 1;
+				//sem post a algo
 			}
 
 			break;
@@ -346,6 +358,54 @@ void crearHilosTripulantes() {
 	pthread_mutex_unlock(&mutex_tripulantes);
 }
 */
+algoritmo_code stringACodigoAlgoritmo(const char* string) {
+	for (int i = 0;
+			i < sizeof(conversionAlgoritmo) / sizeof(conversionAlgoritmo[0]);
+			i++) {
+		if (!strcmp(string, conversionAlgoritmo[i].str))
+			return conversionAlgoritmo[i].codigo_algoritmo;
+	}
+	return ERROR_CODIGO_ALGORITMO;
+}
+
+void planificarSegun() {
+
+	switch (stringACodigoAlgoritmo(ALGORITMO)) {
+
+		case FIFO:
+			planificarSegunFIFO();
+
+			break;
+
+		case RR:
+			planificarSegunRR();
+			break;
+
+
+
+		case ERROR_CODIGO_ALGORITMO:
+			break;
+
+		default:
+			break;
+
+	}
+
+}
+
+
+
+
+
+void planificarSegunFIFO(){
+	puts("hola soy FIFO");
+
+}
+void planificarSegunRR(){
+	puts("hola soy RR");
+}
+
+
 void ejecutarTripulante(t_tripulante* tripulante){
 	while(1){
 		pthread_mutex_lock(&mutex_tripulantes);
