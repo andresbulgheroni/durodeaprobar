@@ -386,6 +386,11 @@ void* deserializar_paquete(t_paquete* paquete){
 			break;
 
 		}
+		case GENERAR_OXIGENO: {
+			mensaje = desserializar_notificar_sabotaje_msg(paquete->buffer->stream);
+
+			break;
+		}
 		default: break;
 
 	}

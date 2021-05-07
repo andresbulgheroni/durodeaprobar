@@ -46,7 +46,14 @@ typedef enum{
 	ATENDER_SABOTAJE= 19, // MANDA DATA
 	RESOLUCION_SABOTAJE= 20, // MANDA DATA
 	//MONGO A DISCORD
-	NOTIFICAR_SABOTAJE= 21 // MANDA DATA
+	NOTIFICAR_SABOTAJE= 21, // MANDA DATA
+	//DATOS MONGO
+	GENERAR_OXIGENO = 22,
+	CONSUMIR_OXIGENO = 23,
+	GENERAR_COMIDA = 24,
+	CONSUMIR_COMIDA = 25,
+	GENERAR_BASURA = 26,
+	DESCARTAR_BASURA = 27
 
 } op_code;
 
@@ -143,7 +150,7 @@ typedef struct {
 typedef struct {
 
 	t_string* nombre;
-	uint32_t* parametros;
+	uint32_t parametros;
 	t_coordenadas* coordenadas;
 	uint32_t duracion;
 
@@ -210,6 +217,8 @@ typedef struct{
 	uint32_t idSabotaje;
 
 } notificar_sabotaje_msg;
+
+
 
 //Funciones
 int crear_conexion(char* ip, char* puerto);
