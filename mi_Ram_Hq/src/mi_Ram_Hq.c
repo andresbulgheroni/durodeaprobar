@@ -22,6 +22,7 @@ int main(void) {
 
 
 	//Prueba Iniciar Patota
+/*
 
 	iniciar_patota_msg* mensaje = malloc(sizeof(iniciar_patota_msg));
 
@@ -44,6 +45,7 @@ int main(void) {
 	free(mensaje->direccionTareas);
 	list_destroy_and_destroy_elements(mensaje->listaPosiciones, free_list);
 	free(mensaje);
+*/
 
 
 	/*

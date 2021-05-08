@@ -26,6 +26,7 @@ int main(void) {
 
 	t_paquete* paquete = recibir_paquete(socketCliente);
 
+/*
 
 	//Prueba Iniciar Patota
 
@@ -50,6 +51,7 @@ int main(void) {
 	list_destroy_and_destroy_elements(mensaje->listaPosiciones, free_list);
 	free(mensaje);
 
+*/
 
 	/*
 	//Prueba Expulsar Tripulante
