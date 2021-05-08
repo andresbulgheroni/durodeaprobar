@@ -88,6 +88,25 @@ void config_set_value_propio(t_dictionary *self, char *key, char *value) {
 	dictionary_put(self, key, (void*)duplicate_value);
 }
 
+int contar_caracteres(char* path){
+
+	FILE* fp = fopen(path, "r");
+
+	int count = 0;
+	char c;
+	for (c = getc(fp); c != EOF; c = getc(fp))
+
+		// Increment count for this character
+		count = count + 1;
+
+	// Close the file
+	fclose(fp);
+
+	return count;
+
+}
+
+
 char* generar_oxigeno(tarea_data_msg* tarea){
 
 	char oxigeno = 'O' ;
@@ -127,15 +146,21 @@ char* consumir_oxigeno(tarea_data_msg* tarea){
 	string_append(&rutaTarea, "/Oxigeno.ims");
 	if(access(rutaTarea, F_OK) != -1){ //Si existe
 		uint32_t cantCaracteres;
-		if(false){
 
-			//borrar esa cantidad de caracteres
+		char oxigeno = 'O' ;
+		int diferencia_caracteres = contar_caracteres(rutaTarea) - cantCaracteres;
 
+		remove(rutaTarea);
+		FILE* fp = fopen(rutaTarea,"w+b");
 
+		if(diferencia_caracteres >= 0){
+
+			for(int i=0; i < diferencia_caracteres; i++){
+				fwrite(&oxigeno, sizeof(char),1, fp);
+			}
+			fclose(fp);
 		}else{
 
-			remove(rutaTarea);
-			FILE* fp = fopen(rutaTarea,"w+b");
 			fclose(fp);
 
 			log_info(logger,"Se quieren borrar mas caracteres de los que hay");
@@ -190,24 +215,28 @@ char* consumir_comida(tarea_data_msg* tarea){
 	string_append(&rutaTarea, "/Comida.ims");
 	if(access(rutaTarea, F_OK) != -1){ //Si existe
 		uint32_t caracteres;
-		if(false){
+		char comida = 'C' ;
 
-			//borrar esa cantidad de caracteres
+		int diferencia_caracteres = contar_caracteres(rutaTarea) - caracteres;
 
+		remove(rutaTarea);
+		FILE* fp = fopen(rutaTarea,"w+b");
 
+		if(diferencia_caracteres >= 0){
+
+			for(int i=0; i < diferencia_caracteres; i++){
+				fwrite(&comida, sizeof(char),1, fp);
+			}
+			fclose(fp);
 		}else{
 
-			remove(rutaTarea);
-			FILE* fp = fopen(rutaTarea,"w+b");
 			fclose(fp);
-
 			log_info(logger,"Se quieren borrar mas caracteres de los que hay");
-
 		}
 
 	}else{
 
-		log_info(logger,"no existe el archivo");
+		log_info(logger,"No existe el archivo");
 
 	}
 	return "BORRO";
