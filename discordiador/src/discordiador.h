@@ -34,6 +34,7 @@ t_log* logger;
 t_config*config;
 
 int estaPlanificando;
+int haySabotaje;
 
 char*IP_MI_RAM_HQ;
 char*PUERTO_MI_RAM_HQ;
@@ -115,10 +116,11 @@ typedef struct
 	uint32_t misCiclosDeCPU;
 	t_tarea* tareaAsignada;
 	uint32_t quantumDisponible;
-
+	uint32_t socketTripulanteRam;
+	uint32_t socketTripulanteImongo;
 	//uint32_t cantidadDeTareasAsignadas;
 	//uint32_t flagDeSabotaje; 1 o 0
-	//uint32_t fueExpulsado; 1 o 0
+	uint32_t fueExpulsado; //1 o 0
 
 } t_tripulante;
 
