@@ -61,10 +61,8 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante){
 
 
 	sleep(RETARDO_CICLO_CPU);
-	informar_movimiento_msg*mensajeMovimientoSabotaje=malloc(sizeof(informar_movimiento_msg));
-	mensajeMovimientoSabotaje->idPatota = tripulante->idPatota;
-	mensajeMovimientoSabotaje->idPatota = tripulante->idTripulante;
-	mensajeMovimientoSabotaje->coordenadasOrigen = tripulante->coordenadas;
+	informar_movimiento_ram_msg* mensajeMovimientoSabotaje=malloc(sizeof(informar_movimiento_ram_msg));
+	mensajeMovimientoSabotaje->idTripulante = tripulante->idTripulante;
 
 	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
 	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
@@ -95,7 +93,7 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante){
 	mensajeMovimientoSabotaje->coordenadasDestino=tripulante->coordenadas;
 
 	tripulante->misCiclosDeCPU++;
-	enviar_paquete(mensajeMovimientoSabotaje,INFORMAR_MOVIMIENTO,tripulante->socketTripulanteRam);
+	enviar_paquete(mensajeMovimientoSabotaje,INFORMAR_MOVIMIENTO_RAM,tripulante->socketTripulanteRam);
 
 
 }
@@ -115,10 +113,9 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 
 	sleep(RETARDO_CICLO_CPU);
-	informar_movimiento_msg*mensajeMovimientoTarea = malloc(sizeof(informar_movimiento_msg));
-	mensajeMovimientoTarea->idPatota = tripulante->idPatota;
-	mensajeMovimientoTarea->idPatota = tripulante->idTripulante;
-	mensajeMovimientoTarea->coordenadasOrigen = tripulante->coordenadas;
+	informar_movimiento_ram_msg*mensajeMovimientoTarea = malloc(sizeof(informar_movimiento_ram_msg));
+	mensajeMovimientoTarea->idTripulante = tripulante->idTripulante;
+
 
 	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
 	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
@@ -148,7 +145,7 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 	mensajeMovimientoTarea->coordenadasDestino=tripulante->coordenadas;
 
 	tripulante->misCiclosDeCPU++;
-	enviar_paquete(mensajeMovimientoTarea,INFORMAR_MOVIMIENTO,tripulante->socketTripulanteRam);
+	enviar_paquete(mensajeMovimientoTarea,INFORMAR_MOVIMIENTO_RAM,tripulante->socketTripulanteRam);
 	tripulante->misCiclosDeCPU++;
 
 }

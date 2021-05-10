@@ -193,7 +193,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 		log_info(logger, leido);
 
 		char** mensaje = string_split(leido, " ");
-		op_code codigo_mensaje = string_to_op_code(mensaje[0]);
+		op_code_consola codigo_mensaje = string_to_op_code(mensaje[0]);
 
 		switch(codigo_mensaje){
 
@@ -278,7 +278,6 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			int id=atoi(mensaje[1]);
 
 			expulsar_tripulante_msg* mensajeExpulsar=malloc(sizeof(expulsar_tripulante_msg));
-			mensajeExpulsar->idPatota=0;
 			mensajeExpulsar->idTripulante=id;
 			enviar_paquete(mensajeExpulsar,EXPULSAR_TRIPULANTE,socketExpulsar);
 
@@ -325,7 +324,6 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			int id=atoi(mensaje[1]);
 
 			obtener_bitacora_msg*mensajeBitacora=malloc(sizeof(obtener_bitacora_msg));
-			mensajeBitacora->idPatota=0;
 			mensajeBitacora->idTripulante=id;
 
 			enviar_paquete(mensajeBitacora,OBTENER_BITACORA,socketBitacora);
@@ -334,7 +332,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			break;
 		}
-		case ERROR_CODIGO: {
+		case ERROR_CODIGO_CONSOLA: {
 
 			break;
 		}
@@ -419,18 +417,14 @@ void planificarSegunRR(){
 
 
 void ejecutarTripulante(t_tripulante* tripulante){
+
+	int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
+	int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
+	tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
+	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
+
+
 	while(tripulante->estado == FINISHED || tripulante->fueExpulsado == 1){
-
-
-		if(tripulante->socketTripulanteImongo == NULL && tripulante->socketTripulanteRam == NULL){
-
-		int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
-		int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
-		tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
-		tripulante->socketTripulanteRam = socketDelTripulanteConRam;
-
-		}
-
 
 		sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
 				sem_wait(semaforoDelTripulante);
