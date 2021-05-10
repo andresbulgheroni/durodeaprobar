@@ -29,12 +29,12 @@ int main(void) {
 
 	tarea_data_msg* tarea = malloc(sizeof(tarea_data_msg));
 	tarea->parametros = 5;
-	char* data = generar_oxigeno(tarea);
-	data = generar_comida(tarea);
-	// data = generar_basura(tarea);
-	data = descartar_basura(tarea);
-	data = consumir_oxigeno(tarea);
-	data = consumir_comida(tarea);
+	//char* data = generar_oxigeno(tarea);
+	//data = generar_comida(tarea);
+	//data = generar_basura(tarea);
+	//data = descartar_basura(tarea);
+	char* data = consumir_oxigeno(tarea);
+	//data = consumir_comida(tarea);
 	puts(data);
 
 	return 0;
@@ -145,7 +145,7 @@ char* consumir_oxigeno(tarea_data_msg* tarea){
 	crearDirectorio(rutaTarea);
 	string_append(&rutaTarea, "/Oxigeno.ims");
 	if(access(rutaTarea, F_OK) != -1){ //Si existe
-		uint32_t cantCaracteres;
+		uint32_t cantCaracteres = tarea->parametros;
 
 		char oxigeno = 'O' ;
 		int diferencia_caracteres = contar_caracteres(rutaTarea) - cantCaracteres;
@@ -214,7 +214,7 @@ char* consumir_comida(tarea_data_msg* tarea){
 	crearDirectorio(rutaTarea);
 	string_append(&rutaTarea, "/Comida.ims");
 	if(access(rutaTarea, F_OK) != -1){ //Si existe
-		uint32_t caracteres;
+		uint32_t caracteres = tarea->parametros;
 		char comida = 'C' ;
 
 		int diferencia_caracteres = contar_caracteres(rutaTarea) - caracteres;
