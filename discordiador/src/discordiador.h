@@ -65,6 +65,13 @@ t_list* listaFinalizados;
 
 t_list* sem_tripulantes_ejecutar;
 
+
+sem_t sem_buscartripulanteMasCercano;
+sem_t sem_tripulanteMoviendose;
+
+sem_t semaforoInicioCicloCPU; //= malloc(sizeof(sem_t));
+sem_t semaforoFinCicloCPU;
+
 typedef enum{
 
     FIFO = 1,
@@ -142,5 +149,16 @@ void planificarSegun();
 void planificarSegunFIFO();
 void planificarSegunRR();
 
+
+void moverAlTripulanteHastaElSabotaje(t_tripulante*);
+int llegoAlSabotaje(t_tripulante*);
+int distanciaA(t_coordenadas*, t_coordenadas*);
+int getIndexTripulanteEnLista(t_list* , t_tripulante* );
+void liberarArray(char**);
+int cantidadElementosArray(char**);
+void sacarTripulanteDeLista(t_tripulante* , t_list* );
+void moverAlTripulanteHastaLaTarea(t_tripulante*);
+int llegoATarea(t_tripulante*);
+t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje*);
 
 #endif /* DISCORDIADOR_H_ */

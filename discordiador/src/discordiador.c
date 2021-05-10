@@ -28,7 +28,8 @@ int main(void){
 
 	iniciarLog();
 	inicializarListasGlobales();
-	//uint32_t socket = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
+	//iniciarHiloSabotaje();
+
 
 
 	puts("hola viajero, soy el discordiador, en que puedo ayudarte?");
@@ -37,8 +38,6 @@ int main(void){
 	puts("LLEGO AL FIN DEL PROGRAMA");
 
 	return EXIT_SUCCESS;
-
-
 
 
 }
@@ -102,6 +101,25 @@ void inicializarSemaforoPlanificador(){			//Maneja el multiprocesamiento
 	sem_init(&sem_planificar, 0, GRADO_MULTITAREA);
 
 }
+/*
+void iniciarHiloSabotaje(){
+	pthread_t hiloSabotaje;
+	pthread_create(&hiloSabotaje, NULL, (void*) planificarSabotaje,NULL);
+	pthread_detach(hiloSabotaje);
+}
+void planificarSabotaje(){
+	while(true){
+	uint32_t socketSabotaje = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
+	t_paquete*mensaje=recibir_paquete(socketSabotaje);
+	haySabotaje=1;
+	pasarATodosLosRepartidoresAListaBloqueado();
+	PasarAEjecutarAlRepartidorMasCercano();
+	ponerATodosLosRepartidoresAReady();
+	haySabotaje=0;
+	liberar_conexion(socketSabotaje);
+	}
+}
+*/
 
 int getIndexTripulanteEnLista(t_list* lista, t_tripulante* tripulante) {
 	if (lista->head == NULL)
@@ -286,7 +304,23 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 				return tripulante->idTripulante==id;
 			}
 
-			list_remove_by_condition(tripulantes,tieneMismoNombre);
+			t_tripulante*tripulanteExpulsado = list_find(tripulantes,tieneMismoNombre);
+
+			//LO SACO DE TODAS LAS LISTAS Y LO SACO DEL WHILE DEL HILO
+			tripulanteExpulsado->fueExpulsado=1;
+
+			if(list_any_satisfy(listaReady,tieneMismoNombre)){
+				sacarTripulanteDeLista(tripulanteExpulsado,listaReady);
+			}
+			if(list_any_satisfy(listaBloqueados,tieneMismoNombre)){
+				sacarTripulanteDeLista(tripulanteExpulsado,listaBloqueados);
+			}
+			if(list_any_satisfy(listaBloqueadosPorSabotaje,tieneMismoNombre)){
+				sacarTripulanteDeLista(tripulanteExpulsado,listaBloqueadosPorSabotaje);
+			}
+
+				list_remove_by_condition(tripulantes,tieneMismoNombre);
+			printf("fui expulsado mi id era:%d",tripulanteExpulsado->idTripulante);
 
 			liberar_conexion(socketExpulsar);
 
@@ -328,7 +362,10 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			enviar_paquete(mensajeBitacora,OBTENER_BITACORA,socketBitacora);
 
-			//recibirMensaje();
+
+			//recibirMensaje()
+			t_paquete*paqueteBitacora=recibir_paquete(socketBitacora);
+			//printf("el contenido es:%s",paqueteBitacora);
 
 			break;
 		}
@@ -347,6 +384,201 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 }
 
+///////////////////////////////////////FUNCIONES GENERALES///////////////
+
+int cantidadElementosArray(char** array)
+{
+	int i = 0;
+	while(array[i])
+	{
+		i++;
+	}
+	return i;
+}
+
+void liberarArray(char** array)
+{
+	for(int i = 0; i < cantidadElementosArray(array); i++)
+		free(array[i]);
+	free(array);
+}
+
+void sacarTripulanteDeLista(t_tripulante* tripulante, t_list* lista){
+	int a = list_size(lista);
+	for(int i=0; i<a ; i++){
+		t_tripulante* tripulanteDeLista = list_get(lista, i);
+		if(tripulante->idTripulante == tripulanteDeLista->idTripulante){
+			list_remove(lista, i);
+			break;
+		}
+	}
+}
+
+
+
+
+int distanciaA(t_coordenadas* desde, t_coordenadas* hasta){
+
+	if (desde == NULL || hasta == NULL) {
+		return -1;
+	}
+
+	int distanciaX = abs(desde->posX - hasta->posX);
+	int distanciaY = abs(desde->posY - hasta->posY);
+
+	return distanciaX + distanciaY;
+
+}
+
+int llegoAlSabotaje(t_tripulante* tripulante){
+
+	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
+	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
+
+	uint32_t posicionXsabotaje = tripulante->sabotaje->coordenadas->posX;
+	uint32_t posicionYsabotaje = tripulante->sabotaje->coordenadas->posY;
+
+	return (posicionXtripulante == posicionXsabotaje) && (posicionYtripulante == posicionYsabotaje);
+}
+
+void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante){
+
+
+	sleep(RETARDO_CICLO_CPU);
+	informar_movimiento_ram_msg* mensajeMovimientoSabotaje=malloc(sizeof(informar_movimiento_ram_msg));
+	mensajeMovimientoSabotaje->idTripulante = tripulante->idTripulante;
+
+	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
+	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
+
+	uint32_t posicionXsabotaje = tripulante->sabotaje->coordenadas->posX;
+	uint32_t posicionYsabotaje = tripulante->sabotaje->coordenadas->posY;
+
+	if (posicionXtripulante != posicionXsabotaje) {
+
+		int diferenciaEnX = posicionXsabotaje - posicionXtripulante;
+		if (diferenciaEnX > 0) {
+			tripulante->coordenadas->posX = posicionXtripulante + 1;
+		} else if (diferenciaEnX < 0) {
+			tripulante->coordenadas->posX = posicionXtripulante - 1;
+		}
+
+	} else if (posicionYtripulante != posicionYsabotaje) {
+
+		int diferenciaEnY = posicionYsabotaje - posicionYtripulante;
+		if (diferenciaEnY > 0) {
+			tripulante->coordenadas->posY = posicionYtripulante + 1;
+		} else if (diferenciaEnY < 0) {
+			tripulante->coordenadas->posY = posicionYtripulante - 1;
+		}
+
+	}
+
+	mensajeMovimientoSabotaje->coordenadasDestino=tripulante->coordenadas;
+
+	tripulante->misCiclosDeCPU++;
+	enviar_paquete(mensajeMovimientoSabotaje,INFORMAR_MOVIMIENTO_RAM,tripulante->socketTripulanteRam);
+
+
+}
+
+int llegoATarea(t_tripulante* tripulante){
+
+	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
+	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
+
+	uint32_t posicionXtarea = tripulante->tareaAsignada->coordenadas->posX;
+	uint32_t posicionYtarea = tripulante->tareaAsignada->coordenadas->posY;
+
+	return (posicionXtripulante == posicionXtarea) && (posicionYtripulante == posicionYtarea);
+}
+
+void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
+
+
+	sleep(RETARDO_CICLO_CPU);
+	informar_movimiento_ram_msg*mensajeMovimientoTarea = malloc(sizeof(informar_movimiento_ram_msg));
+	mensajeMovimientoTarea->idTripulante = tripulante->idTripulante;
+
+
+	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
+	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
+
+	uint32_t posicionXtarea = tripulante->tareaAsignada->coordenadas->posX;
+	uint32_t posicionYtarea = tripulante->tareaAsignada->coordenadas->posY;
+
+	if (posicionXtripulante != posicionXtarea) {
+
+		int diferenciaEnX = posicionXtarea - posicionXtripulante;
+		if (diferenciaEnX > 0) {
+			tripulante->coordenadas->posX = posicionXtripulante + 1;
+		} else if (diferenciaEnX < 0) {
+			tripulante->coordenadas->posX = posicionXtripulante - 1;
+		}
+
+	} else if (posicionYtripulante != posicionYtarea) {
+
+		int diferenciaEnY = posicionYtarea - posicionYtripulante;
+		if (diferenciaEnY > 0) {
+			tripulante->coordenadas->posY = posicionYtripulante + 1;
+		} else if (diferenciaEnY < 0) {
+			tripulante->coordenadas->posY = posicionYtripulante - 1;
+		}
+
+	}
+	mensajeMovimientoTarea->coordenadasDestino=tripulante->coordenadas;
+
+	tripulante->misCiclosDeCPU++;
+	enviar_paquete(mensajeMovimientoTarea,INFORMAR_MOVIMIENTO_RAM,tripulante->socketTripulanteRam);
+	tripulante->misCiclosDeCPU++;
+
+}
+
+
+t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
+	t_tripulante* tripulanteTemporal;
+
+	int distanciaTemporal;
+
+
+	pthread_mutex_lock(&mutex_listaNuevos);
+	t_list* tripulantes_new = list_duplicate(listaNuevos);
+	pthread_mutex_unlock(&mutex_listaNuevos);
+
+	t_tripulante* tripulanteMasCercanoNew;
+	int menorDistanciaNew = 1000;
+
+	if(!list_is_empty(tripulantes_new)){
+		tripulanteMasCercanoNew = list_get(tripulantes_new, 0);
+		menorDistanciaNew = distanciaA(tripulanteMasCercanoNew->coordenadas, sabotaje->coordenadas);
+
+
+		for(int i = 1; i < tripulantes_new->elements_count; i++){
+
+			if(menorDistanciaNew == 0){
+				break;
+			}
+
+			tripulanteTemporal = list_get(tripulantes_new, i);
+			distanciaTemporal = distanciaA(tripulanteTemporal->coordenadas, sabotaje->coordenadas);
+
+			if(distanciaTemporal < menorDistanciaNew){
+				tripulanteMasCercanoNew = tripulanteTemporal;
+				menorDistanciaNew = distanciaTemporal;
+			}
+
+		}
+	}
+
+	list_destroy(tripulantes_new);
+
+
+		pthread_mutex_lock(&mutex_listaNuevos);
+		sacarTripulanteDeLista(tripulanteMasCercanoNew, listaNuevos);
+		pthread_mutex_unlock(&mutex_listaNuevos);
+
+		return tripulanteMasCercanoNew;
+}
 
 /*
 void crearHilosTripulantes() {
@@ -434,4 +666,6 @@ void ejecutarTripulante(t_tripulante* tripulante){
 		}
 	}
 	}
+
+
 
