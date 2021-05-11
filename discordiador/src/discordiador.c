@@ -353,7 +353,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			t_tripulante*tripulanteExpulsado = list_find(tripulantes,tieneMismoNombre);
 
 			//LO SACO DE TODAS LAS LISTAS Y LO SACO DEL WHILE DEL HILO
-			tripulanteExpulsado->fueExpulsado=1;
+			tripulanteExpulsado->fueExpulsado=1;		//ESTO ES UN FLAG.
 
 			if(list_any_satisfy(listaReady,tieneMismoNombre)){
 				sacarTripulanteDeLista(tripulanteExpulsado,listaReady);
@@ -774,9 +774,9 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
 
 
-	agregarTripulanteAListaReadyYAvisar(tripulante);
+	//agregarTripulanteAListaReadyYAvisar(tripulante);
 
-	if(tripulante->tareaAsignada == NULL){
+	/*if(tripulante->tareaAsignada == NULL){
 
 					solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
 					mensajeTarea->idTripulante=tripulante->idTripulante;
@@ -785,9 +785,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 					t_paquete*paqueteTarea = recibir_paquete(tripulante->socketTripulanteRam);
 					obtener_bitacora_rta*mensajeTareaRecibida=deserializar_paquete(paqueteTarea);
-
-
-	}
+	}*/
 
 
 
