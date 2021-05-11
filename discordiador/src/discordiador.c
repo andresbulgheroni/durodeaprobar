@@ -321,7 +321,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			expulsar_tripulante_msg* mensajeExpulsar=malloc(sizeof(expulsar_tripulante_msg));
 			mensajeExpulsar->idTripulante=id;
-			enviar_paquete(mensajeExpulsar,EXPULSAR_TRIPULANTE,socketExpulsar);
+			enviar_paquete(mensajeExpulsar,EXPULSAR_TRIPULANTE_MSG,socketExpulsar);
 
 			bool tieneMismoNombre(void*elemento){
 				t_tripulante*tripulante= (t_tripulante*) elemento;
@@ -384,16 +384,24 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			obtener_bitacora_msg*mensajeBitacora=malloc(sizeof(obtener_bitacora_msg));
 			mensajeBitacora->idTripulante=id;
 
-			enviar_paquete(mensajeBitacora,OBTENER_BITACORA,socketBitacora);
+			enviar_paquete(mensajeBitacora,OBTENER_BITACORA_MSG,socketBitacora);
 
 
 			//recibirMensaje()
-			t_paquete*paqueteBitacora=recibir_paquete(socketBitacora);
-			//printf("el contenido es:%s",paqueteBitacora);
+			t_paquete*paqueteBitacora = recibir_paquete(socketBitacora);
+			obtener_bitacora_rta*mensajeBitacoraRta=deserializar_paquete(paqueteBitacora);
+
+
+			printf("el contenido de la bitacora es:%s",mensajeBitacoraRta->bitacora->string);
+
+			liberar_conexion(socketBitacora);
+
 
 			break;
 		}
 		case ERROR_CODIGO_CONSOLA: {
+
+			puts(" error en el codigo consola");
 
 			break;
 		}
