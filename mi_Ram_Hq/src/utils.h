@@ -87,7 +87,7 @@ typedef struct
 typedef struct {
 
 	uint32_t idPatota;
-	t_string tareas; // Pasar tal cual esta en el archivo
+	t_string* tareas; // Pasar tal cual esta en el archivo
 
 } iniciar_patota_msg;
 
