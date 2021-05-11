@@ -1,4 +1,3 @@
-
 #ifndef UTILS_H_
 #define UTILS_H_
 
@@ -21,19 +20,6 @@ typedef enum{
 typedef enum{
 
 	//CONSOLA
-	INICIAR_PATOTA= 1, // MANDA DATA
-	LISTAR_TRIPULANTES= 2,
-	EXPULSAR_TRIPULANTE = 3, //MANDA DATA
-	INICIAR_PLANIFICACION = 4,
-	PAUSAR_PLANIFICACION = 5,
-	OBTENER_BITACORA=6, // MANDA DATA
-	ERROR_CODIGO_CONSOLA=7
-
-} op_code_consola;
-
-typedef enum{
-
-	//CONSOLA
 	INICIAR_PATOTA_MSG= 1, // MANDA DATA
 	EXPULSAR_TRIPULANTE_MSG = 3, //MANDA DATA
 	OBTENER_BITACORA_MSG=6, // MANDA DATA
@@ -44,6 +30,7 @@ typedef enum{
 	INICIAR_TRIPULANTE= 10, // MANDA DATA
 	SOLICITAR_SIGUIENTE_TAREA= 14, // MANDA DATA
 	SOLICITAR_SIGUIENTE_TAREA_RTA= 15, // MANDA DATA
+	CAMBIO_ESTADO= 12,
 	//TRIPULANTE CON MONGO Y RAM
 	INFORMAR_MOVIMIENTO_RAM= 16, // MANDA DATA
 	INFORMAR_MOVIMIENTO_MONGO= 11, // MANDA DATA
@@ -149,6 +136,13 @@ typedef struct {
 
 } solicitar_siguiente_tarea_rta;
 
+typedef struct{
+
+	uint32_t idTripulante;
+	uint32_t estado;
+
+} cambio_estado_msg;
+
 typedef struct {
 
 	uint32_t idTripulante;
@@ -228,6 +222,7 @@ t_buffer* serializar_obtener_bitacora_rta(obtener_bitacora_rta* mensaje);
 t_buffer* serializar_iniciar_tripulante_msg(iniciar_tripulante_msg* mensaje);
 t_buffer* serializar_solicitar_siguiente_tarea_msg(solicitar_siguiente_tarea_msg* mensaje);
 t_buffer* serializar_solicitar_siguiente_tarea_rta(solicitar_siguiente_tarea_rta* mensaje);
+t_buffer* serializar_cambio_estado_msg(cambio_estado_msg* mensaje);
 t_buffer* serializar_informar_movimiento_ram_msg(informar_movimiento_ram_msg* mensaje);
 t_buffer* serializar_informar_movimiento_mongo_msg(informar_movimiento_mongo_msg* mensaje);
 t_buffer* serializar_inicio_tarea_msg(inicio_tarea_msg* mensaje);
@@ -246,6 +241,7 @@ obtener_bitacora_rta* desserializar_obtener_bitacora_rta(void* stream);
 iniciar_tripulante_msg* desserializar_iniciar_tripulante_msg(void* stream);
 solicitar_siguiente_tarea_msg* desserializar_solicitar_siguiente_tarea_msg(void* stream);
 solicitar_siguiente_tarea_rta* desserializar_solicitar_siguiente_tarea_rta(void* stream);
+cambio_estado_msg* desserializar_cambio_estado_msg(void* stream);
 informar_movimiento_ram_msg* desserializar_informar_movimiento_ram_msg(void* stream);
 informar_movimiento_mongo_msg* desserializar_informar_movimiento_mongo_msg(void* stream);
 inicio_tarea_msg* desserializar_inicio_tarea_msg(void* stream);

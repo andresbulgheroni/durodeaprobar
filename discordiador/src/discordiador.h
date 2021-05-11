@@ -29,6 +29,19 @@ extern pthread_mutex_t mutex_listaBloqueados;
 extern pthread_mutex_t mutex_listaEjecutando;
 extern pthread_mutex_t mutex_listaFinalizados;
 
+typedef enum{
+
+	//CONSOLA
+	INICIAR_PATOTA= 1, // MANDA DATA
+	LISTAR_TRIPULANTES= 2,
+	EXPULSAR_TRIPULANTE = 3, //MANDA DATA
+	INICIAR_PLANIFICACION = 4,
+	PAUSAR_PLANIFICACION = 5,
+	OBTENER_BITACORA=6, // MANDA DATA
+	ERROR_CODIGO_CONSOLA=7
+
+} op_code_consola;
+
 t_log* logger;
 
 t_config*config;
@@ -130,6 +143,9 @@ typedef struct
 	uint32_t fueExpulsado; //1 o 0
 
 } t_tripulante;
+
+
+op_code_consola string_to_op_code_consola (char* );
 
 int getIndexTripulanteEnLista(t_list* , t_tripulante* );
 void iniciarLog();

@@ -13,7 +13,7 @@ t_coordenadas* get_coordenadas(char* posicion){
 
 	return coordenadas;
 }
-
+/*
 op_code string_to_op_code (char* string){
 		if(strcmp(string, "INICIAR_PATOTA") == 0){
 			return INICIAR_PATOTA;
@@ -35,7 +35,7 @@ op_code string_to_op_code (char* string){
 		}else{
 			return ERROR_CODIGO;
 		}
-}
+}*/
 
 t_string* get_t_string(char* string){
 
@@ -113,6 +113,13 @@ t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje){
 		case SOLICITAR_SIGUIENTE_TAREA_RTA:{
 
 			paquete->buffer = serializar_solicitar_siguiente_tarea_rta(mensaje);
+
+			break;
+
+		}
+		case CAMBIO_ESTADO:{
+
+			paquete->buffer = serializar_cambio_estado_msg(mensaje);
 
 			break;
 
@@ -297,6 +304,13 @@ void* deserializar_paquete(t_paquete* paquete){
 		case SOLICITAR_SIGUIENTE_TAREA_RTA:{
 
 			mensaje = desserializar_solicitar_siguiente_tarea_rta(paquete->buffer->stream);
+
+			break;
+
+		}
+		case CAMBIO_ESTADO:{
+
+			mensaje = desserializar_cambio_estado_msg(paquete->buffer->stream);
 
 			break;
 
@@ -486,6 +500,24 @@ t_buffer* serializar_solicitar_siguiente_tarea_rta(solicitar_siguiente_tarea_rta
 	return buffer;
 
 }
+
+t_buffer* serializar_cambio_estado_msg(cambio_estado_msg* mensaje){
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+
+	buffer->size = sizeof(mensaje->idTripulante) + sizeof(mensaje->estado);
+
+	buffer->stream = malloc(buffer->size);
+
+	uint32_t offset = 0;
+
+	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	serializar_variable(buffer->stream, &(mensaje->estado), sizeof(mensaje->estado), &offset);
+
+	return buffer;
+
+}
+
 
 t_buffer* serializar_informar_movimiento_ram_msg(informar_movimiento_ram_msg* mensaje){
 
@@ -709,6 +741,20 @@ solicitar_siguiente_tarea_rta* desserializar_solicitar_siguiente_tarea_rta(void*
 	return mensaje;
 
 }
+
+cambio_estado_msg* desserializar_cambio_estado_msg(void* stream){
+
+	cambio_estado_msg* mensaje = malloc(sizeof(cambio_estado_msg));
+
+	uint32_t offset = 0;
+
+	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	deserializar_variable(stream, &(mensaje->estado), sizeof(mensaje->estado), &offset);
+
+	return mensaje;
+
+}
+
 
 informar_movimiento_ram_msg* desserializar_informar_movimiento_ram_msg(void* stream){
 

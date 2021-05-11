@@ -39,8 +39,8 @@ int main(void){
 
 	return EXIT_SUCCESS;
 
-
 }
+
 void inicializarListasGlobales(){
 
 	estaPlanificando=1;
@@ -100,6 +100,29 @@ void inicializarSemaforoPlanificador(){			//Maneja el multiprocesamiento
 
 	sem_init(&sem_planificar, 0, GRADO_MULTITAREA);
 
+}
+
+op_code_consola string_to_op_code_consola (char* string){
+		if(strcmp(string, "INICIAR_PATOTA") == 0){
+			return INICIAR_PATOTA;
+		}
+		if(strcmp(string, "LISTAR_TRIPULANTES")  == 0){
+			return LISTAR_TRIPULANTES;
+		}
+		if(strcmp(string, "EXPULSAR_TRIPULANTE")  == 0){
+			return EXPULSAR_TRIPULANTE;
+		}
+		if(strcmp(string, "INICIAR_PLANIFICACION")  == 0){
+			return INICIAR_PLANIFICACION;
+		}
+		if(strcmp(string, "PAUSAR_PLANIFICACION")  == 0){
+			return PAUSAR_PLANIFICACION;
+		}
+		if(strcmp(string, "OBTENER_BITACORA") == 0){
+			return OBTENER_BITACORA;
+		}else{
+			return ERROR_CODIGO;
+		}
 }
 /*
 void iniciarHiloSabotaje(){
@@ -211,7 +234,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 		log_info(logger, leido);
 
 		char** mensaje = string_split(leido, " ");
-		op_code_consola codigo_mensaje = string_to_op_code(mensaje[0]);
+		op_code_consola codigo_mensaje = string_to_op_code_consola(mensaje[0]);
 
 		switch(codigo_mensaje){
 
