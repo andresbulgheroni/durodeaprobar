@@ -26,6 +26,7 @@ extern pthread_mutex_t mutex_tripulantes;
 extern pthread_mutex_t mutex_listaNuevos;
 extern pthread_mutex_t mutex_listaReady;
 extern pthread_mutex_t mutex_listaBloqueados;
+extern pthread_mutex_t mutex_listaBloqueadosPorSabotaje;
 extern pthread_mutex_t mutex_listaEjecutando;
 extern pthread_mutex_t mutex_listaFinalizados;
 
@@ -158,6 +159,10 @@ void leer_consola();
 void inicializarAtributosATripulante(t_list*);
 void crearHilosTripulantes();
 void ejecutarTripulante(t_tripulante*);
+void agregarTripulanteAListaReadyYAvisar(t_tripulante*);
+void agregarTripulanteAListaExecYAvisar(t_tripulante*);
+void agregarTripulanteAListaBloqueadosYAvisar(t_tripulante*);
+void agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(t_tripulante*);
 
 //PLANIFICACION
 algoritmo_code stringACodigoAlgoritmo(const char* );

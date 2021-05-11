@@ -16,6 +16,7 @@ pthread_mutex_t mutex_tripulantes = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaNuevos= PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaReady = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaBloqueados = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_listaBloqueadosPorSabotaje = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaEjecutando = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaFinalizados = PTHREAD_MUTEX_INITIALIZER;
 
@@ -427,6 +428,7 @@ void liberarArray(char** array)
 }
 
 void sacarTripulanteDeLista(t_tripulante* tripulante, t_list* lista){
+
 	int a = list_size(lista);
 	for(int i=0; i<a ; i++){
 		t_tripulante* tripulanteDeLista = list_get(lista, i);
@@ -435,9 +437,73 @@ void sacarTripulanteDeLista(t_tripulante* tripulante, t_list* lista){
 			break;
 		}
 	}
+
 }
 
 
+void agregarTripulanteAListaReadyYAvisar(t_tripulante* tripulante){
+
+	tripulante->estado=READY;
+
+	pthread_mutex_lock(&mutex_listaReady);
+	list_add(listaReady,tripulante);
+	pthread_mutex_unlock(&mutex_listaReady);
+
+	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
+	mensaje->idTripulante=tripulante->idTripulante;
+	mensaje->estado=tripulante->estado;
+
+enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
+
+}
+
+
+void agregarTripulanteAListaExecYAvisar(t_tripulante* tripulante){
+
+	tripulante->estado=EXEC;
+
+	//pthread_mutex_lock(&mutex_listaEjecutando);
+	//list_add(listaExec,tripulante);				TODO
+	//pthread_mutex_lock(&mutex_listaEjecutando);
+
+	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
+	mensaje->idTripulante=tripulante->idTripulante;
+	mensaje->estado=tripulante->estado;
+
+enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
+
+}
+
+
+void agregarTripulanteAListaBloqueadosYAvisar(t_tripulante* tripulante){
+
+	tripulante->estado=BLOCKED;
+
+	pthread_mutex_lock(&mutex_listaBloqueados);
+	list_add(listaBloqueados,tripulante);
+	pthread_mutex_unlock(&mutex_listaBloqueados);
+
+	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
+	mensaje->idTripulante=tripulante->idTripulante;
+	mensaje->estado=tripulante->estado;
+
+enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
+
+}
+void agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(t_tripulante* tripulante){
+
+	tripulante->estado=BLOCKED;
+
+	pthread_mutex_lock(&mutex_listaBloqueadosPorSabotaje);
+	list_add(listaBloqueadosPorSabotaje,tripulante);
+	pthread_mutex_lock(&mutex_listaBloqueadosPorSabotaje);
+
+	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
+	mensaje->idTripulante=tripulante->idTripulante;
+	mensaje->estado=tripulante->estado;
+enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
+
+}
 
 
 int distanciaA(t_coordenadas* desde, t_coordenadas* hasta){
@@ -559,48 +625,47 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 
 t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
+	t_tripulante* tripulanteMasCercanoSabotaje;
 	t_tripulante* tripulanteTemporal;
 
 	int distanciaTemporal;
+	int menorDistanciaSabotaje = 1000;
 
 
 	pthread_mutex_lock(&mutex_listaNuevos);
-	t_list* tripulantes_new = list_duplicate(listaNuevos);
+	t_list* tripulantesBloqueadosSabotaje = list_duplicate(listaBloqueadosPorSabotaje);
 	pthread_mutex_unlock(&mutex_listaNuevos);
 
-	t_tripulante* tripulanteMasCercanoNew;
-	int menorDistanciaNew = 1000;
-
-	if(!list_is_empty(tripulantes_new)){
-		tripulanteMasCercanoNew = list_get(tripulantes_new, 0);
-		menorDistanciaNew = distanciaA(tripulanteMasCercanoNew->coordenadas, sabotaje->coordenadas);
+	if(!list_is_empty(tripulantesBloqueadosSabotaje)){
+		tripulanteMasCercanoSabotaje = list_get(tripulantesBloqueadosSabotaje, 0);
+		menorDistanciaSabotaje = distanciaA(tripulanteMasCercanoSabotaje->coordenadas, sabotaje->coordenadas);
 
 
-		for(int i = 1; i < tripulantes_new->elements_count; i++){
+		for(int i = 1; i < tripulantesBloqueadosSabotaje->elements_count; i++){
 
-			if(menorDistanciaNew == 0){
+			if(menorDistanciaSabotaje == 0){
 				break;
 			}
 
-			tripulanteTemporal = list_get(tripulantes_new, i);
+			tripulanteTemporal = list_get(tripulantesBloqueadosSabotaje, i);
 			distanciaTemporal = distanciaA(tripulanteTemporal->coordenadas, sabotaje->coordenadas);
 
-			if(distanciaTemporal < menorDistanciaNew){
-				tripulanteMasCercanoNew = tripulanteTemporal;
-				menorDistanciaNew = distanciaTemporal;
+			if(distanciaTemporal < menorDistanciaSabotaje){
+				tripulanteMasCercanoSabotaje = tripulanteTemporal;
+				menorDistanciaSabotaje = distanciaTemporal;
 			}
 
 		}
 	}
 
-	list_destroy(tripulantes_new);
+	list_destroy(tripulantesBloqueadosSabotaje);
 
 
-		pthread_mutex_lock(&mutex_listaNuevos);
-		sacarTripulanteDeLista(tripulanteMasCercanoNew, listaNuevos);
-		pthread_mutex_unlock(&mutex_listaNuevos);
+		pthread_mutex_lock(&mutex_listaBloqueadosPorSabotaje);
+		sacarTripulanteDeLista(tripulanteMasCercanoSabotaje, listaBloqueadosPorSabotaje);
+		pthread_mutex_unlock(&mutex_listaBloqueadosPorSabotaje);
 
-		return tripulanteMasCercanoNew;
+		return tripulanteMasCercanoSabotaje;
 }
 
 /*
@@ -677,6 +742,9 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
 	tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
 	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
+
+	tripulante->estado=READY;
+
 
 
 	while(tripulante->estado == FINISHED || tripulante->fueExpulsado == 1){
