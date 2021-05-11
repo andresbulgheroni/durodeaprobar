@@ -94,6 +94,16 @@ typedef enum{
 
 }algoritmo_code;
 
+typedef enum{
+	GENERAR_OXIGENO = 22,
+	CONSUMIR_OXIGENO = 23,
+	GENERAR_COMIDA = 24,
+	CONSUMIR_COMIDA = 25,
+	GENERAR_BASURA = 26,
+	DESCARTAR_BASURA = 27,
+	TAREA_CPU=28
+}op_code_tareas;
+
 const static struct {
 
 	algoritmo_code codigo_algoritmo;
@@ -147,6 +157,7 @@ typedef struct
 
 
 op_code_consola string_to_op_code_consola (char* );
+op_code_tareas string_to_op_code_tareas (char*);
 
 int getIndexTripulanteEnLista(t_list* , t_tripulante* );
 void iniciarLog();

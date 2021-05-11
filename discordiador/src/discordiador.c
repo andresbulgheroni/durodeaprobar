@@ -125,6 +125,28 @@ op_code_consola string_to_op_code_consola (char* string){
 			return ERROR_CODIGO;
 		}
 }
+op_code_tareas string_to_op_code_tareas (char* string){
+		if(strcmp(string, "GENERAR_OXIGENO") == 0){
+			return GENERAR_OXIGENO;
+		}
+		if(strcmp(string, "CONSUMIR_OXIGENO")  == 0){
+			return CONSUMIR_OXIGENO;
+		}
+		if(strcmp(string, "GENERAR_COMIDA")  == 0){
+			return GENERAR_COMIDA;
+		}
+		if(strcmp(string, "CONSUMIR_COMIDA")  == 0){
+			return CONSUMIR_COMIDA;
+		}
+		if(strcmp(string, "GENERAR_BASURA")  == 0){
+			return GENERAR_BASURA;
+		}
+		if(strcmp(string, "DESCARTAR_BASURA") == 0){
+			return DESCARTAR_BASURA;
+		}else{
+			return TAREA_CPU;
+		}
+}
 /*
 void iniciarHiloSabotaje(){
 	pthread_t hiloSabotaje;
@@ -751,7 +773,21 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
 	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
 
-	tripulante->estado=READY;
+
+	agregarTripulanteAListaReadyYAvisar(tripulante);
+
+	if(tripulante->tareaAsignada == NULL){
+
+					solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
+					mensajeTarea->idTripulante=tripulante->idTripulante;
+
+					enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
+
+					t_paquete*paqueteTarea = recibir_paquete(tripulante->socketTripulanteRam);
+					obtener_bitacora_rta*mensajeTareaRecibida=deserializar_paquete(paqueteTarea);
+
+
+	}
 
 
 
