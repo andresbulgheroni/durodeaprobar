@@ -42,9 +42,70 @@ void recibir_mensaje(int32_t* conexion){
 		t_paquete* paquete = recibir_paquete(*conexion);
 
 		switch(paquete->codigo){
+			case INICIAR_PATOTA_MSG:{
 
-			case EXPULSAR_TRIPULANTE:{
-				expulsar_tripulante_msg* mensaje = desserializar_expulsar_tripulante_msg(paquete->buffer->stream);
+				iniciar_patota_msg* mensaje = deserializar_paquete(paquete);
+
+				log_debug(logger, "%d", mensaje->idPatota);
+				log_debug(logger, mensaje->tareas->string);
+
+				free(mensaje->tareas);
+				free(mensaje);
+
+				break;
+
+			}
+			case INICIAR_TRIPULANTE:{
+
+				iniciar_tripulante_msg* mensaje = deserializar_paquete(paquete);
+
+				log_debug(logger, "%d", mensaje->idPatota);
+				log_debug(logger, "%d", mensaje->idTripulante);
+				log_debug(logger, "%d", mensaje->coordenadas->posX);
+				log_debug(logger, "%d", mensaje->coordenadas->posY);
+
+				free(mensaje->coordenadas);
+				free(mensaje);
+
+				break;
+
+			}
+			case INFORMAR_MOVIMIENTO_RAM:{
+
+				informar_movimiento_ram_msg* mensaje = deserializar_paquete(paquete);
+
+				log_debug(logger, "%d", mensaje->idTripulante);
+				log_debug(logger, "%d", mensaje->coordenadasDestino->posX);
+				log_debug(logger, "%d", mensaje->coordenadasDestino->posY);
+
+				free(mensaje->coordenadasDestino);
+				free(mensaje);
+
+				break;
+
+			}
+			case CAMBIO_ESTADO:{
+
+				cambio_estado_msg* mensaje = deserializar_paquete(paquete);
+
+				log_debug(logger, "%d", mensaje->estado);
+				log_debug(logger, "%d", mensaje->idTripulante);
+
+				free(mensaje);
+
+				break;
+
+			}
+			case SOLICITAR_SIGUIENTE_TAREA:{
+
+				solicitar_siguiente_tarea_msg* mensaje = deserializar_paquete(paquete);
+
+				log_debug(logger, "%d", mensaje->idTripulante);
+
+				break;
+			}
+			case EXPULSAR_TRIPULANTE_MSG:{
+				expulsar_tripulante_msg* mensaje = deserializar_paquete(paquete);
 
 				log_debug(logger, "%d", mensaje->idTripulante);
 
@@ -57,7 +118,6 @@ void recibir_mensaje(int32_t* conexion){
 		}
 	}
 
-	free(conexion);
 	pthread_exit(NULL);
 }
 
