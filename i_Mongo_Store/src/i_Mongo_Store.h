@@ -20,6 +20,7 @@
 #include<signal.h>
 #include <commons/txt.h>
 #include "utils.h"
+#include<pthread.h>
 
 #define MAX_BUFFER 512
 
@@ -33,23 +34,35 @@ uint32_t BLOCKS;
 t_log* logger;
 t_config* config;
 
+typedef enum{
+	GENERAR_OXIGENO = 0,
+	CONSUMIR_OXIGENO = 1,
+	GENERAR_COMIDA = 2,
+	CONSUMIR_COMIDA = 3,
+	GENERAR_BASURA = 4,
+	DESCARTAR_BASURA = 5,
+	ERROR=6
+}op_code_tareas;
+
 void crear_log();
 void leerConfig();
 void crearDirectorio(char*);
 void inicializarFS();
-void crearMetadata();
+void crearSuperBloque();
 void crearTodosLosBloquesEnFS();
 void escribir_archivo(char*, char*);
-void crearSuperBloque();
-int chequearMetadata();
+int chequearSuperBloque();
 bool existeArchivo(char* path);
-void buscarMensaje(t_paquete*, uint32_t);
-char* generar_oxigeno(tarea_data_msg*);
-char* consumir_oxigeno(tarea_data_msg*);
-char* generar_comida(tarea_data_msg*);
-char* consumir_comida(tarea_data_msg*);
-char* generar_basura(tarea_data_msg*);
-char* descartar_basura(tarea_data_msg*);
+op_code_tareas string_to_op_code_tareas (char*);
+void buscarMensaje(inicio_tarea_msg*);
+void funcionPruebaDisc(int32_t*);
+void funcionPruebaTrip(int32_t*);
+char* generar_oxigeno(int32_t);
+char* consumir_oxigeno(int32_t);
+char* generar_comida(int32_t);
+char* consumir_comida(int32_t);
+char* generar_basura(int32_t);
+char* descartar_basura();
 
 
 #endif /* I_MONGO_STORE_H_ */
