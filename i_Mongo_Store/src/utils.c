@@ -427,7 +427,8 @@ t_buffer* serializar_iniciar_tripulante_msg(iniciar_tripulante_msg* mensaje){
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
-	buffer->size = sizeof(mensaje->idPatota) + sizeof(mensaje->idTripulante);
+	buffer->size = sizeof(mensaje->idPatota) + sizeof(mensaje->idTripulante) +
+					sizeof(mensaje->coordenadas->posX) + sizeof(mensaje->coordenadas->posY);
 
 	buffer->stream = malloc(buffer->size);
 
@@ -435,6 +436,8 @@ t_buffer* serializar_iniciar_tripulante_msg(iniciar_tripulante_msg* mensaje){
 
 	serializar_variable(buffer->stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	serializar_variable(buffer->stream, &(mensaje->coordenadas->posX), sizeof(mensaje->coordenadas->posX), &offset);
+	serializar_variable(buffer->stream, &(mensaje->coordenadas->posY), sizeof(mensaje->coordenadas->posY), &offset);
 
 	return buffer;
 
@@ -679,11 +682,14 @@ obtener_bitacora_rta* desserializar_obtener_bitacora_rta(void* stream){
 iniciar_tripulante_msg* desserializar_iniciar_tripulante_msg(void* stream){
 
 	iniciar_tripulante_msg* mensaje = malloc(sizeof(iniciar_tripulante_msg));
+	mensaje->coordenadas = malloc(sizeof(t_coordenadas));
 
 	uint32_t offset = 0;
 
 	deserializar_variable(stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	deserializar_variable(stream, &(mensaje->coordenadas->posX), sizeof(mensaje->coordenadas->posX), &offset);
+	deserializar_variable(stream, &(mensaje->coordenadas->posY), sizeof(mensaje->coordenadas->posY), &offset);
 
 	return mensaje;
 
@@ -738,6 +744,7 @@ cambio_estado_msg* desserializar_cambio_estado_msg(void* stream){
 informar_movimiento_ram_msg* desserializar_informar_movimiento_ram_msg(void* stream){
 
 	informar_movimiento_ram_msg* mensaje = malloc(sizeof(informar_movimiento_ram_msg));
+	mensaje->coordenadasDestino = malloc(sizeof(t_coordenadas));
 
 	uint32_t offset = 0;
 
@@ -752,6 +759,8 @@ informar_movimiento_ram_msg* desserializar_informar_movimiento_ram_msg(void* str
 informar_movimiento_mongo_msg* desserializar_informar_movimiento_mongo_msg(void* stream){
 
 	informar_movimiento_mongo_msg* mensaje = malloc(sizeof(informar_movimiento_mongo_msg));
+	mensaje->coordenadasOrigen = malloc(sizeof(t_coordenadas));
+	mensaje->coordenadasDestino = malloc(sizeof(t_coordenadas));
 
 	uint32_t offset = 0;
 
