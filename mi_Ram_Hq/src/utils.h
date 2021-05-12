@@ -114,6 +114,7 @@ typedef struct {
 
 	uint32_t idPatota;
 	uint32_t idTripulante;
+	t_coordenadas* coordenadas;
 
 } iniciar_tripulante_msg;
 
