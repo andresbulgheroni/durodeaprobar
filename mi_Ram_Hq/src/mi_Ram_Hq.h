@@ -13,6 +13,7 @@
 #include <nivel-gui/tad_nivel.h>
 #include <commons/config.h>
 #include <commons/log.h>
+#include <pthread.h>
 
 typedef enum{
 	SEGMENTACION_PURA = 1,
