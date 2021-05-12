@@ -13,31 +13,6 @@ t_coordenadas* get_coordenadas(char* posicion){
 
 	return coordenadas;
 }
-/*
-op_code string_to_op_code (char* string){
-
-		if(strcmp(string, "INICIAR_PATOTA") == 0){
-			return INICIAR_PATOTA;
-		}
-		if(strcmp(string, "LISTAR_TRIPULANTES")  == 0){
-			return LISTAR_TRIPULANTES;
-		}
-		if(strcmp(string, "EXPULSAR_TRIPULANTE")  == 0){
-			return EXPULSAR_TRIPULANTE;
-		}
-		if(strcmp(string, "INICIAR_PLANIFICACION")  == 0){
-			return INICIAR_PLANIFICACION;
-		}
-		if(strcmp(string, "PAUSAR_PLANIFICACION")  == 0){
-			return PAUSAR_PLANIFICACION;
-		}
-		if(strcmp(string, "OBTENER_BITACORA") == 0){
-			return OBTENER_BITACORA;
-		}else{
-			return ERROR_CODIGO;
-		}
-
-}*/
 
 t_string* get_t_string(char* string){
 
@@ -200,7 +175,7 @@ void* serializar_paquete(t_paquete* paquete){
 	return stream;
 }
 
-int32_t enviar_paquete(void* mensaje, op_code codigo, uint32_t socketCliente){
+int32_t enviar_paquete(void* mensaje, op_code codigo, int32_t socketCliente){
 
 	t_paquete* paquete = crear_paquete_a_serializar(codigo, mensaje);
 	void* stream  = serializar_paquete(paquete);
@@ -239,7 +214,7 @@ t_string* deserializar_string(void* stream, uint32_t* offset){
 	return stringRespuesta;
 }
 
-t_paquete* recibir_paquete(uint32_t socket){
+t_paquete* recibir_paquete(int32_t socket){
 
 	t_paquete* paquete = malloc(sizeof(t_paquete));
 
@@ -565,7 +540,8 @@ t_buffer* serializar_inicio_tarea_msg(inicio_tarea_msg* mensaje){
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
-	buffer->size = sizeof(mensaje->idTripulante) + sizeof(mensaje->nombreTarea->length) + mensaje->nombreTarea->length ;
+	buffer->size = 	sizeof(mensaje->idTripulante) + sizeof(mensaje->nombreTarea->length) + mensaje->nombreTarea->length
+				 	+ sizeof(mensaje->parametros);
 
 	buffer->stream = malloc(buffer->size);
 
@@ -573,6 +549,7 @@ t_buffer* serializar_inicio_tarea_msg(inicio_tarea_msg* mensaje){
 
 	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 	serializar_string(buffer->stream, mensaje->nombreTarea, &offset);
+	serializar_variable(buffer->stream, mensaje->parametros, sizeof(mensaje->parametros), &offset);
 
 	return buffer;
 
@@ -796,6 +773,7 @@ inicio_tarea_msg* desserializar_inicio_tarea_msg(void* stream){
 
 	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 	mensaje->nombreTarea = deserializar_string(stream, &offset);
+	deserializar_variable(stream, &(mensaje->parametros), sizeof(mensaje->parametros), &offset);
 
 	return mensaje;
 
@@ -861,7 +839,7 @@ notificar_sabotaje_msg* desserializar_notificar_sabotaje_msg(void* stream){
 
 //CONEXION
 
-uint32_t iniciar_servidor(char *ip, char *puerto){
+int32_t iniciar_servidor(char *ip, char *puerto){
 
 	int socket_servidor;
 
@@ -895,7 +873,7 @@ uint32_t iniciar_servidor(char *ip, char *puerto){
 
 }
 
-uint32_t esperar_cliente(uint32_t socketServidor){
+int32_t esperar_cliente(int32_t socketServidor){
 
 	struct sockaddr_in dir_cliente;
 

@@ -164,6 +164,7 @@ typedef struct{
 
 	uint32_t idTripulante;
 	t_string* nombreTarea;
+	int32_t parametros;
 
 } inicio_tarea_msg;
 
@@ -197,11 +198,11 @@ typedef struct{
 
 //Funciones
 int crear_conexion(char* ip, char* puerto);
-int32_t enviar_paquete(void* mensaje, op_code codigo, uint32_t socketCliente);
-uint32_t iniciar_servidor(char *ip, char *puerto);
-uint32_t esperar_cliente(uint32_t socketServidor);
+int32_t enviar_paquete(void* mensaje, op_code codigo, int32_t socketCliente);
+int32_t iniciar_servidor(char *ip, char *puerto);
+int32_t esperar_cliente(int32_t socketServidor);
 void liberar_conexion(uint32_t socketCliente);
-t_paquete* recibir_paquete(uint32_t socket);
+t_paquete* recibir_paquete(int32_t socket);
 
 op_code string_to_op_code (char* string);
 t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje);

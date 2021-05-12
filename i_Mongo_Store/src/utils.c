@@ -13,31 +13,6 @@ t_coordenadas* get_coordenadas(char* posicion){
 
 	return coordenadas;
 }
-/*
-op_code string_to_op_code (char* string){
-
-		if(strcmp(string, "INICIAR_PATOTA") == 0){
-			return INICIAR_PATOTA;
-		}
-		if(strcmp(string, "LISTAR_TRIPULANTES")  == 0){
-			return LISTAR_TRIPULANTES;
-		}
-		if(strcmp(string, "EXPULSAR_TRIPULANTE")  == 0){
-			return EXPULSAR_TRIPULANTE;
-		}
-		if(strcmp(string, "INICIAR_PLANIFICACION")  == 0){
-			return INICIAR_PLANIFICACION;
-		}
-		if(strcmp(string, "PAUSAR_PLANIFICACION")  == 0){
-			return PAUSAR_PLANIFICACION;
-		}
-		if(strcmp(string, "OBTENER_BITACORA") == 0){
-			return OBTENER_BITACORA;
-		}else{
-			return ERROR_CODIGO;
-		}
-
-}*/
 
 t_string* get_t_string(char* string){
 
@@ -119,6 +94,13 @@ t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje){
 			break;
 
 		}
+		case CAMBIO_ESTADO:{
+
+			paquete->buffer = serializar_cambio_estado_msg(mensaje);
+
+			break;
+
+		}
 		case INFORMAR_MOVIMIENTO_RAM:{
 
 			paquete->buffer = serializar_informar_movimiento_ram_msg(mensaje);
@@ -193,7 +175,7 @@ void* serializar_paquete(t_paquete* paquete){
 	return stream;
 }
 
-int32_t enviar_paquete(void* mensaje, op_code codigo, uint32_t socketCliente){
+int32_t enviar_paquete(void* mensaje, op_code codigo, int32_t socketCliente){
 
 	t_paquete* paquete = crear_paquete_a_serializar(codigo, mensaje);
 	void* stream  = serializar_paquete(paquete);
@@ -232,7 +214,7 @@ t_string* deserializar_string(void* stream, uint32_t* offset){
 	return stringRespuesta;
 }
 
-t_paquete* recibir_paquete(uint32_t socket){
+t_paquete* recibir_paquete(int32_t socket){
 
 	t_paquete* paquete = malloc(sizeof(t_paquete));
 
@@ -299,6 +281,13 @@ void* deserializar_paquete(t_paquete* paquete){
 		case SOLICITAR_SIGUIENTE_TAREA_RTA:{
 
 			mensaje = desserializar_solicitar_siguiente_tarea_rta(paquete->buffer->stream);
+
+			break;
+
+		}
+		case CAMBIO_ESTADO:{
+
+			mensaje = desserializar_cambio_estado_msg(paquete->buffer->stream);
 
 			break;
 
@@ -489,6 +478,24 @@ t_buffer* serializar_solicitar_siguiente_tarea_rta(solicitar_siguiente_tarea_rta
 
 }
 
+t_buffer* serializar_cambio_estado_msg(cambio_estado_msg* mensaje){
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+
+	buffer->size = sizeof(mensaje->idTripulante) + sizeof(mensaje->estado);
+
+	buffer->stream = malloc(buffer->size);
+
+	uint32_t offset = 0;
+
+	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	serializar_variable(buffer->stream, &(mensaje->estado), sizeof(mensaje->estado), &offset);
+
+	return buffer;
+
+}
+
+
 t_buffer* serializar_informar_movimiento_ram_msg(informar_movimiento_ram_msg* mensaje){
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
@@ -533,7 +540,8 @@ t_buffer* serializar_inicio_tarea_msg(inicio_tarea_msg* mensaje){
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
-	buffer->size = sizeof(mensaje->idTripulante) + sizeof(mensaje->nombreTarea->length) + mensaje->nombreTarea->length ;
+	buffer->size = 	sizeof(mensaje->idTripulante) + sizeof(mensaje->nombreTarea->length) + mensaje->nombreTarea->length
+				 	+ sizeof(mensaje->parametros);
 
 	buffer->stream = malloc(buffer->size);
 
@@ -541,6 +549,7 @@ t_buffer* serializar_inicio_tarea_msg(inicio_tarea_msg* mensaje){
 
 	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 	serializar_string(buffer->stream, mensaje->nombreTarea, &offset);
+	serializar_variable(buffer->stream, mensaje->parametros, sizeof(mensaje->parametros), &offset);
 
 	return buffer;
 
@@ -712,6 +721,20 @@ solicitar_siguiente_tarea_rta* desserializar_solicitar_siguiente_tarea_rta(void*
 
 }
 
+cambio_estado_msg* desserializar_cambio_estado_msg(void* stream){
+
+	cambio_estado_msg* mensaje = malloc(sizeof(cambio_estado_msg));
+
+	uint32_t offset = 0;
+
+	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
+	deserializar_variable(stream, &(mensaje->estado), sizeof(mensaje->estado), &offset);
+
+	return mensaje;
+
+}
+
+
 informar_movimiento_ram_msg* desserializar_informar_movimiento_ram_msg(void* stream){
 
 	informar_movimiento_ram_msg* mensaje = malloc(sizeof(informar_movimiento_ram_msg));
@@ -750,6 +773,7 @@ inicio_tarea_msg* desserializar_inicio_tarea_msg(void* stream){
 
 	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 	mensaje->nombreTarea = deserializar_string(stream, &offset);
+	deserializar_variable(stream, &(mensaje->parametros), sizeof(mensaje->parametros), &offset);
 
 	return mensaje;
 
@@ -815,7 +839,7 @@ notificar_sabotaje_msg* desserializar_notificar_sabotaje_msg(void* stream){
 
 //CONEXION
 
-uint32_t iniciar_servidor(char *ip, char *puerto){
+int32_t iniciar_servidor(char *ip, char *puerto){
 
 	int socket_servidor;
 
@@ -849,7 +873,7 @@ uint32_t iniciar_servidor(char *ip, char *puerto){
 
 }
 
-uint32_t esperar_cliente(uint32_t socketServidor){
+int32_t esperar_cliente(int32_t socketServidor){
 
 	struct sockaddr_in dir_cliente;
 
