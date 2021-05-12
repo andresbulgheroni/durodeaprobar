@@ -263,12 +263,15 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 		case INICIAR_PATOTA: {		////	INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
 
+			uint32_t socketPatota = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
+
 			t_list* posicionesTripulantes = list_create();
 			t_patota* patota = malloc(sizeof(t_patota));
 			patota->cantPatota = atoi(mensaje[1]);
 			char* rutaTarea = string_new();
 			string_append(&rutaTarea,mensaje[2]);
 			FILE* fileTarea = fopen(rutaTarea,"r");
+
 
 
 			if(fileTarea != NULL){
@@ -279,6 +282,13 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 				fread(buffer, stat_file.st_size, 1, fileTarea);
 
 				printf("tareas que van a ser asignadas son:%s",buffer);
+
+				iniciar_patota_msg* mensajePatota=malloc(sizeof(iniciar_patota_msg));
+				mensajePatota->idPatota=id_patota;
+				mensajePatota->tareas-=get_t_string(buffer);
+				enviar_paquete(mensajePatota,INICIAR_PATOTA_MSG,socketPatota);
+
+
 				int contadorLista = 0;
 
 				while(mensaje[3+contadorLista]!= NULL){
@@ -307,6 +317,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 				fclose(fileTarea);
 				list_destroy(posicionesTripulantes);
+				liberar_conexion(socketPatota);
 
 			}else{
 				log_info(logger, "No existe la tarea");
