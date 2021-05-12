@@ -118,7 +118,6 @@ void recibir_mensaje(int32_t* conexion){
 		}
 	}
 
-	free(conexion);
 	pthread_exit(NULL);
 }
 
