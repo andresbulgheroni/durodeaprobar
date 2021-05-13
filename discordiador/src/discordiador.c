@@ -33,7 +33,7 @@ int main(void){
 
 
 
-	puts("hola viajero, soy el discordiador, en que puedo ayudarte?");
+	puts("hola viajero, soy el discordiador, ¿En que puedo ayudarte?");
 	leer_consola();
 
 	puts("LLEGO AL FIN DEL PROGRAMA");
@@ -285,7 +285,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 				iniciar_patota_msg* mensajePatota=malloc(sizeof(iniciar_patota_msg));
 				mensajePatota->idPatota=id_patota;
-				mensajePatota->tareas-=get_t_string(buffer);
+				mensajePatota->tareas=get_t_string(buffer);
 				enviar_paquete(mensajePatota,INICIAR_PATOTA_MSG,socketPatota);
 
 
@@ -317,6 +317,10 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 				fclose(fileTarea);
 				list_destroy(posicionesTripulantes);
+
+				free(mensajePatota->tareas);
+				free(mensajePatota);
+
 				liberar_conexion(socketPatota);
 
 			}else{
@@ -379,6 +383,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 				list_remove_by_condition(tripulantes,tieneMismoNombre);
 			printf("fui expulsado mi id era:%d",tripulanteExpulsado->idTripulante);
 
+			free(mensajeExpulsar);
 			liberar_conexion(socketExpulsar);
 
 			break;
@@ -709,26 +714,7 @@ t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
 		return tripulanteMasCercanoSabotaje;
 }
 
-/*
-void crearHilosTripulantes() {
-	pthread_mutex_lock(&mutex_tripulantes);
-	int cantidadTripulantes = list_size(tripulantes);
-	pthread_t pthread_id[cantidadTripulantes];
 
-	for (int i = 0; i < cantidadTripulantes; i++) {
-
-		t_tripulante* tripulante = (t_tripulante*) list_get(tripulantes, i); //(t_tripulante*) list_get(Tripulantes, i);
-		sem_t* semaforoDelTripulante = malloc(sizeof(sem_t));
-		sem_init(semaforoDelTripulante, 0, 0);
-		list_add(sem_tripulantes_ejecutar, (void*) semaforoDelTripulante);
-		pthread_create(&pthread_id[i], NULL, (void*) ejecutarTripulante, tripulante);
-		pthread_detach(pthread_id[i]);
-
-		list_add(hilosTripulantes, &pthread_id[i]);
-	}
-	pthread_mutex_unlock(&mutex_tripulantes);
-}
-*/
 algoritmo_code stringACodigoAlgoritmo(const char* string) {
 	for (int i = 0;
 			i < sizeof(conversionAlgoritmo) / sizeof(conversionAlgoritmo[0]);
@@ -779,28 +765,44 @@ void planificarSegunRR(){
 
 void ejecutarTripulante(t_tripulante* tripulante){
 
-	int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
-	int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
-	tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
-	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
+//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|2
+
+	printf("hola soy:%d\n",tripulante->idTripulante);
+//	//int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
+//	//tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
+//
+		int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
+		tripulante->socketTripulanteRam = socketDelTripulanteConRam;
 
 
-	//agregarTripulanteAListaReadyYAvisar(tripulante);
+		cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
+		mensaje->idTripulante=tripulante->idTripulante;
+		mensaje->estado=tripulante->estado;
 
-	/*if(tripulante->tareaAsignada == NULL){
+		pthread_mutex_lock(&mutex_tripulantes);
+	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
+	pthread_mutex_unlock(&mutex_tripulantes);
 
-					solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
-					mensajeTarea->idTripulante=tripulante->idTripulante;
-
-					enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
-
-					t_paquete*paqueteTarea = recibir_paquete(tripulante->socketTripulanteRam);
-					obtener_bitacora_rta*mensajeTareaRecibida=deserializar_paquete(paqueteTarea);
-	}*/
+			//agregarTripulanteAListaReadyYAvisar(tripulante);
 
 
+	solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
+	mensajeTarea->idTripulante=tripulante->idTripulante;
+	pthread_mutex_lock(&mutex_tripulantes);
+	enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
+	pthread_mutex_unlock(&mutex_tripulantes);
 
-	while(tripulante->estado == FINISHED || tripulante->fueExpulsado == 1){
+
+	printf("se mando una tarea del tripulante:%d\n",tripulante->idTripulante);
+//			//		t_paquete*paqueteTarea = recibir_paquete(tripulante->socketTripulanteRam);
+//			//		obtener_bitacora_rta*mensajeTareaRecibida=deserializar_paquete(paqueteTarea);
+
+
+
+	pthread_mutex_unlock(&mutex_tripulantes);
+
+
+	/*while(tripulante->estado == FINISHED || tripulante->fueExpulsado == 1){
 
 		sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
 				sem_wait(semaforoDelTripulante);
@@ -809,6 +811,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 		}
 	}
+	*/
 	}
 
 
