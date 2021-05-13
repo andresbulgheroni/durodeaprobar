@@ -39,6 +39,24 @@ void* memoria_principal;
 t_config* config;
 t_log* logger;
 
+typedef struct {
+
+	uint32_t pid;
+	uint32_t direccion_tareas;
+
+} t_pcb;
+
+typedef struct {
+
+	uint32_t tid;
+	char estado;
+	uint32_t posX;
+	uint32_t posY;
+	uint32_t proxima_instruccion;
+	uint32_t direccion_patota;
+
+} t_tcb;
+
 void init ();
 void iniciarMapa();
 void terminar ();
