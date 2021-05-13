@@ -14,6 +14,11 @@
 #include <commons/config.h>
 #include <commons/log.h>
 #include <pthread.h>
+#include <curses.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <curses.h>
+#include <commons/collections/list.h>
 
 typedef enum{
 	SEGMENTACION_PURA = 1,
@@ -34,7 +39,26 @@ void* memoria_principal;
 t_config* config;
 t_log* logger;
 
+typedef struct {
+
+	uint32_t pid;
+	uint32_t direccion_tareas;
+
+} t_pcb;
+
+typedef struct {
+
+	uint32_t tid;
+	char estado;
+	uint32_t posX;
+	uint32_t posY;
+	uint32_t proxima_instruccion;
+	uint32_t direccion_patota;
+
+} t_tcb;
+
 void init ();
+void iniciarMapa();
 void terminar ();
 int32_t get_esquema_memoria(char* esquema_config);
 void recibir_mensaje(int32_t* conexion);
