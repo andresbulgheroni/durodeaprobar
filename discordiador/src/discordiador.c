@@ -245,7 +245,7 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 		numeroHiloTripulante++;
 		pthread_mutex_unlock(&mutex_tripulantes);
 
-		usleep(300);
+		usleep(400);
 	}
 
 	id_patota++;
