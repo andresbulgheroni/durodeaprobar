@@ -22,6 +22,7 @@
 #include <sys/stat.h>
 
 extern pthread_mutex_t mutex_tripulantes;
+extern pthread_mutex_t mutex_sockets;
 
 extern pthread_mutex_t mutex_listaNuevos;
 extern pthread_mutex_t mutex_listaReady;
@@ -61,6 +62,8 @@ int DURACION_SABOTAJE;
 int RETARDO_CICLO_CPU;
 
 sem_t sem_planificar;
+
+sem_t hilosTripulante;
 
 t_list* tareas;
 

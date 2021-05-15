@@ -13,6 +13,7 @@ int a=1;
 
 
 pthread_mutex_t mutex_tripulantes = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_sockets = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaNuevos= PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaReady = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_listaBloqueados = PTHREAD_MUTEX_INITIALIZER;
@@ -32,11 +33,13 @@ int main(void){
 	//iniciarHiloSabotaje();
 
 
-
 	puts("hola viajero, soy el discordiador, ¿En que puedo ayudarte?");
 	leer_consola();
 
 	puts("LLEGO AL FIN DEL PROGRAMA");
+
+	//config_destroy(config);
+	log_destroy(logger);
 
 	return EXIT_SUCCESS;
 
@@ -63,7 +66,7 @@ void inicializarListasGlobales(){
 
 void inicializarConfig(t_config* config){
 
-	config= config_create("discord.config");
+	config= config_create("../discord.config");
 	if( config==NULL){
 		printf("no se pudo leer archivo config");
 		exit(2);
@@ -158,9 +161,9 @@ void planificarSabotaje(){
 	uint32_t socketSabotaje = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
 	t_paquete*mensaje=recibir_paquete(socketSabotaje);
 	haySabotaje=1;
-	pasarATodosLosRepartidoresAListaBloqueado();
-	PasarAEjecutarAlRepartidorMasCercano();
-	ponerATodosLosRepartidoresAReady();
+	pasarATodosLosTripulantesAListaBloqueado();
+	PasarAEjecutarAlTripulanteMasCercano();
+	ponerATodosLosTripulantesAReady();
 	haySabotaje=0;
 	liberar_conexion(socketSabotaje);
 	}
@@ -241,6 +244,8 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 
 		numeroHiloTripulante++;
 		pthread_mutex_unlock(&mutex_tripulantes);
+
+		usleep(300);
 	}
 
 	id_patota++;
@@ -261,7 +266,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 		switch(codigo_mensaje){
 
-		case INICIAR_PATOTA: {		////	INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+		case INICIAR_PATOTA: {	//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
 
 			uint32_t socketPatota = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 
@@ -757,62 +762,179 @@ void planificarSegun() {
 void planificarSegunFIFO(){
 	puts("hola soy FIFO");
 
+	int distancia;
+
+		sem_wait(&sem_planificar);
+
+		t_tripulante* tripulante = (t_tripulante*) list_remove(listaReady, 0);
+
+
+
+		tripulante->estado = EXEC;
+
+
+			sem_init(&sem_tripulanteMoviendose, 0, 0);
+			sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
+			sem_post(semaforoDelTripulante);
+			sem_wait(&sem_tripulanteMoviendose);
+			distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
+
+			while (distancia != 0 && distancia != -1) {
+				sem_post(semaforoDelTripulante);
+				sem_wait(&sem_tripulanteMoviendose);
+				distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : NULL);
+			}
+			sem_destroy(&sem_tripulanteMoviendose);
+
 }
 void planificarSegunRR(){
 	puts("hola soy RR");
+
+	int distancia;
+
+		sem_wait(&sem_planificar);
+
+
+		t_tripulante* tripulante = (t_tripulante*) list_remove(listaReady, 0);
+
+		tripulante->estado = EXEC;
+
+		sem_init(&sem_tripulanteMoviendose, 0, 0);
+				sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
+				sem_post(semaforoDelTripulante);
+
+				sem_wait(&sem_tripulanteMoviendose);
+				distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
+
+				tripulante->quantumDisponible -=1;
+
+				while (((distancia != 0) && (tripulante->quantumDisponible)>0) && (distancia != -1)) {
+					sem_post(semaforoDelTripulante);
+					sem_wait(&sem_tripulanteMoviendose);
+					distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
+					tripulante->quantumDisponible -= 1;
+				}
+
+				sem_destroy(&sem_tripulanteMoviendose);
+
+				if(((tripulante->quantumDisponible)==0) && ((tripulante->tareaAsignada != NULL ? !llegoATarea(tripulante) : 0))){
+					list_add(listaReady, tripulante);
+					tripulante->estado = READY;
+				//	log_tripulante_cambio_de_cola_planificacion(tripulante->idTripulante, "se le terminó el quantum", "READY");
+
+					tripulante->quantumDisponible = QUANTUM;
+
+					sem_post(&sem_planificar);
 }
-
-
+}
 void ejecutarTripulante(t_tripulante* tripulante){
+	//INICIAR_PATOTA 4 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|2
 
-//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|2
 
-	printf("hola soy:%d\n",tripulante->idTripulante);
-//	//int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
-//	//tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
-//
+
+		printf("hola soy:%d\n",tripulante->idTripulante);
+
+
 		int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 		tripulante->socketTripulanteRam = socketDelTripulanteConRam;
 
 
-		cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
-		mensaje->idTripulante=tripulante->idTripulante;
-		mensaje->estado=tripulante->estado;
-
-		pthread_mutex_lock(&mutex_tripulantes);
-	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
-	pthread_mutex_unlock(&mutex_tripulantes);
-
-			//agregarTripulanteAListaReadyYAvisar(tripulante);
+		cambio_estado_msg*mensajeEstado=malloc(sizeof(cambio_estado_msg));
+		mensajeEstado->idTripulante=tripulante->idTripulante;
+		mensajeEstado->estado=tripulante->estado;
 
 
-	solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
-	mensajeTarea->idTripulante=tripulante->idTripulante;
-	pthread_mutex_lock(&mutex_tripulantes);
-	enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
-	pthread_mutex_unlock(&mutex_tripulantes);
+		enviar_paquete(mensajeEstado,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
+
+		printf("paqueteEnviado:%d\n",tripulante->idTripulante);
+
+		solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
+		mensajeTarea->idTripulante=tripulante->idTripulante;
 
 
-	printf("se mando una tarea del tripulante:%d\n",tripulante->idTripulante);
-//			//		t_paquete*paqueteTarea = recibir_paquete(tripulante->socketTripulanteRam);
-//			//		obtener_bitacora_rta*mensajeTareaRecibida=deserializar_paquete(paqueteTarea);
+		enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
+		printf("se mando una tarea del tripulante:%d\n",tripulante->idTripulante);
+
+
+		free(mensajeEstado);
+		free(mensajeTarea);
+
+
+}
 
 
 
-	pthread_mutex_unlock(&mutex_tripulantes);
 
 
-	/*while(tripulante->estado == FINISHED || tripulante->fueExpulsado == 1){
 
-		sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
-				sem_wait(semaforoDelTripulante);
 
-		if(tripulante->tareaAsignada==NULL && estaPlanificando == 1 && haySabotaje == 0){
 
-		}
-	}
-	*/
-	}
+
+
+
+
+
+
+
+
+
+
+
+
+//void ejecutarTripulante(t_tripulante* tripulante){
+//
+//	//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|2
+//	pthread_mutex_lock(&mutex_listaNuevos);
+//
+//	pthread_mutex_lock(&mutex_sockets);
+//	printf("hola soy:%d\n",tripulante->idTripulante);
+//	pthread_mutex_unlock(&mutex_sockets);
+//
+//	//int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
+//	//tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
+//	int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
+//	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
+//
+//
+//	cambio_estado_msg*mensajeEstado=malloc(sizeof(cambio_estado_msg));
+//	mensajeEstado->idTripulante=tripulante->idTripulante;
+//	mensajeEstado->estado=tripulante->estado;
+//
+//	pthread_mutex_lock(&mutex_sockets);
+//	enviar_paquete(mensajeEstado,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
+//	pthread_mutex_unlock(&mutex_sockets);
+//
+//	//agregarTripulanteAListaReadyYAvisar(tripulante);
+//
+//	//solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
+//	//mensajeTarea->idTripulante=tripulante->idTripulante;
+//	//pthread_mutex_lock(&mutex_sockets);
+//	//enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
+//
+//	//printf("se mando una tarea del tripulante:%d\n",tripulante->idTripulante);
+//	//pthread_mutex_unlock(&mutex_sockets);
+//
+//	free(mensajeEstado);
+//	//free(mensajeTarea);
+//
+//	pthread_mutex_unlock(&mutex_listaNuevos);
+//
+//	/*			//		t_paquete*paqueteTarea = recibir_paquete(tripulante->socketTripulanteRam);
+////			//		obtener_bitacora_rta*mensajeTareaRecibida=deserializar_paquete(paqueteTarea);
+//
+//
+//
+//	while(tripulante->estado == FINISHED || tripulante->fueExpulsado == 1){
+//
+//		sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
+//				sem_wait(semaforoDelTripulante);
+//
+//		if(tripulante->tareaAsignada==NULL && estaPlanificando == 1 && haySabotaje == 0){
+//
+//		}
+//	}
+//	 */
+//}
 
 
 
