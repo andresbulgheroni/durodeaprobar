@@ -8,11 +8,9 @@
  ============================================================================
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "mi_Ram_Hq.h"
 
-
+NIVEL* mapa;
 
 int main(void) {
 
@@ -137,6 +135,20 @@ void init (){
 
 	memoria_principal = malloc(TAMANIO_MEMORIA);
 
+	iniciarMapa();
+
+}
+
+void iniciarMapa(){
+
+	int columnas, filas;
+
+	//nivel_gui_inicializar();
+
+	//nivel_gui_get_area_nivel(&columnas, &filas);
+
+	//mapa = nivel_crear("Nave");
+
 }
 
 void terminar(){
@@ -144,6 +156,7 @@ void terminar(){
 	log_destroy(logger);
 	config_destroy(config);
 	free(memoria_principal);
+	//nivel_gui_terminar();
 
 }
 
