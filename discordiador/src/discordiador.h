@@ -63,7 +63,7 @@ int RETARDO_CICLO_CPU;
 
 sem_t sem_planificar;
 
-sem_t hilosTripulante;
+sem_t sem_hiloTripulante;
 
 t_list* tareas;
 

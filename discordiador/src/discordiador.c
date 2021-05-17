@@ -62,11 +62,13 @@ void inicializarListasGlobales(){
 
 	hilosTripulantes = list_create();
 	sem_tripulantes_ejecutar = list_create();
+
+	sem_init(&sem_hiloTripulante,0,1);
 }
 
 void inicializarConfig(t_config* config){
 
-	config= config_create("../discord.config");
+	config= config_create("../discord.config");		///tp-2021-1c-DuroDeAprobar/discordiador
 	if( config==NULL){
 		printf("no se pudo leer archivo config");
 		exit(2);
@@ -234,6 +236,7 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 
 		//LE CREO UN HILO.
 		pthread_mutex_lock(&mutex_tripulantes);
+		sem_wait(&sem_hiloTripulante);
 		sem_t* semaforoDelTripulante = malloc(sizeof(sem_t));
 		sem_init(semaforoDelTripulante, 0, 0);
 		list_add(sem_tripulantes_ejecutar, (void*) semaforoDelTripulante);
@@ -245,7 +248,7 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 		numeroHiloTripulante++;
 		pthread_mutex_unlock(&mutex_tripulantes);
 
-		usleep(400);
+		usleep(150);
 	}
 
 	id_patota++;
@@ -858,6 +861,8 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 		free(mensajeEstado);
 		free(mensajeTarea);
+
+		sem_post(&sem_hiloTripulante);
 
 
 }
