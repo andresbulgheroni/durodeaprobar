@@ -134,7 +134,7 @@ typedef struct
 
 typedef struct
 {
-	uint32_t nombreTarea;		//TODO
+	char* nombreTarea;		//TODO
 	t_coordenadas* coordenadas;
 	uint32_t duracion;
 
@@ -155,6 +155,7 @@ typedef struct
 	//uint32_t cantidadDeTareasAsignadas;
 	//uint32_t flagDeSabotaje; 1 o 0
 	uint32_t fueExpulsado; //1 o 0
+	bool llegoALaTarea;
 
 } t_tripulante;
 
@@ -173,6 +174,7 @@ void leer_consola();
 void inicializarAtributosATripulante(t_list*);
 void crearHilosTripulantes();
 void ejecutarTripulante(t_tripulante*);
+void enviarMensajeDeInicioDeTripulante(t_tripulante*);
 void agregarTripulanteAListaReadyYAvisar(t_tripulante*);
 void agregarTripulanteAListaExecYAvisar(t_tripulante*);
 void agregarTripulanteAListaBloqueadosYAvisar(t_tripulante*);

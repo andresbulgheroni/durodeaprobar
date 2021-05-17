@@ -68,7 +68,7 @@ void inicializarListasGlobales(){
 
 void inicializarConfig(t_config* config){
 
-	config= config_create("../discord.config");		///tp-2021-1c-DuroDeAprobar/discordiador
+	config= config_create("../discord.config"); //tp-2021-1c-DuroDeAprobar/discordiador
 	if( config==NULL){
 		printf("no se pudo leer archivo config");
 		exit(2);
@@ -509,6 +509,9 @@ void agregarTripulanteAListaReadyYAvisar(t_tripulante* tripulante){
 
 enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
 
+printf("cambioDeEstadoAReady:%d\n",tripulante->idTripulante);
+free(mensaje);
+
 }
 
 
@@ -525,6 +528,8 @@ void agregarTripulanteAListaExecYAvisar(t_tripulante* tripulante){
 	mensaje->estado=tripulante->estado;
 
 enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
+
+free(mensaje);
 
 }
 
@@ -543,6 +548,8 @@ void agregarTripulanteAListaBloqueadosYAvisar(t_tripulante* tripulante){
 
 enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
 
+free(mensaje);
+
 }
 void agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(t_tripulante* tripulante){
 
@@ -556,6 +563,7 @@ void agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(t_tripulante* tripulant
 	mensaje->idTripulante=tripulante->idTripulante;
 	mensaje->estado=tripulante->estado;
 enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
+free(mensaje);
 
 }
 
@@ -830,6 +838,21 @@ void planificarSegunRR(){
 					sem_post(&sem_planificar);
 }
 }
+
+void enviarMensajeDeInicioDeTripulante(t_tripulante*tripulante){
+	iniciar_tripulante_msg* mensajeIniciarTripulante=malloc(sizeof(iniciar_tripulante_msg));
+	mensajeIniciarTripulante->idPatota=tripulante->idPatota;
+	mensajeIniciarTripulante->idTripulante=tripulante->idTripulante;
+	mensajeIniciarTripulante->coordenadas->posX=tripulante->coordenadas->posX;
+	mensajeIniciarTripulante->coordenadas->posY=tripulante->coordenadas->posY;
+
+
+	enviar_paquete(mensajeIniciarTripulante,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
+	printf("se inicio al tripulante:%d\n",tripulante->idTripulante);
+
+	free(mensajeIniciarTripulante);
+}
+
 void ejecutarTripulante(t_tripulante* tripulante){
 	//INICIAR_PATOTA 4 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|2
 
@@ -841,29 +864,37 @@ void ejecutarTripulante(t_tripulante* tripulante){
 		int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 		tripulante->socketTripulanteRam = socketDelTripulanteConRam;
 
+		enviarMensajeDeInicioDeTripulante(tripulante);
+		usleep(50);
+		agregarTripulanteAListaReadyYAvisar(tripulante);
 
-		cambio_estado_msg*mensajeEstado=malloc(sizeof(cambio_estado_msg));
-		mensajeEstado->idTripulante=tripulante->idTripulante;
-		mensajeEstado->estado=tripulante->estado;
-
-
-		enviar_paquete(mensajeEstado,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
-
-		printf("paqueteEnviado:%d\n",tripulante->idTripulante);
 
 		solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
 		mensajeTarea->idTripulante=tripulante->idTripulante;
-
-
 		enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
-		printf("se mando una tarea del tripulante:%d\n",tripulante->idTripulante);
+		printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
 
 
-		free(mensajeEstado);
+
 		free(mensajeTarea);
+
+		t_tarea*tareaPrueba;
+		tareaPrueba->nombreTarea="generar_oxigeno";
+		tareaPrueba->coordenadas->posX=2;
+		tareaPrueba->coordenadas->posY=3;
+		tareaPrueba->duracion=5;
+
+		tripulante->tareaAsignada=tareaPrueba;
 
 		sem_post(&sem_hiloTripulante);
 
+		while(tripulante->llegoALaTarea!=true){
+		moverAlTripulanteHastaLaTarea(tripulante);
+		puts("me movi");
+		}
+		if(tripulante->llegoALaTarea==true){
+			puts("llegue a la tarea");
+		}
 
 }
 
