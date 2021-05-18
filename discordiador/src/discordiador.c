@@ -248,7 +248,7 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 		numeroHiloTripulante++;
 		pthread_mutex_unlock(&mutex_tripulantes);
 
-		usleep(150);
+		usleep(250);
 	}
 
 	id_patota++;
@@ -843,11 +843,9 @@ void enviarMensajeDeInicioDeTripulante(t_tripulante*tripulante){
 	iniciar_tripulante_msg* mensajeIniciarTripulante=malloc(sizeof(iniciar_tripulante_msg));
 	mensajeIniciarTripulante->idPatota=tripulante->idPatota;
 	mensajeIniciarTripulante->idTripulante=tripulante->idTripulante;
-	mensajeIniciarTripulante->coordenadas->posX=tripulante->coordenadas->posX;
-	mensajeIniciarTripulante->coordenadas->posY=tripulante->coordenadas->posY;
+	mensajeIniciarTripulante->coordenadas=tripulante->coordenadas;
 
-
-	enviar_paquete(mensajeIniciarTripulante,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
+	enviar_paquete(mensajeIniciarTripulante,INICIAR_TRIPULANTE,tripulante->socketTripulanteRam);
 	printf("se inicio al tripulante:%d\n",tripulante->idTripulante);
 
 	free(mensajeIniciarTripulante);
@@ -865,7 +863,8 @@ void ejecutarTripulante(t_tripulante* tripulante){
 		tripulante->socketTripulanteRam = socketDelTripulanteConRam;
 
 		enviarMensajeDeInicioDeTripulante(tripulante);
-		usleep(50);
+
+		usleep(150);
 		agregarTripulanteAListaReadyYAvisar(tripulante);
 
 
@@ -877,24 +876,24 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 
 		free(mensajeTarea);
-
-		t_tarea*tareaPrueba;
-		tareaPrueba->nombreTarea="generar_oxigeno";
-		tareaPrueba->coordenadas->posX=2;
-		tareaPrueba->coordenadas->posY=3;
-		tareaPrueba->duracion=5;
-
-		tripulante->tareaAsignada=tareaPrueba;
+//
+//		t_tarea*tareaPrueba;
+//		tareaPrueba->nombreTarea="generar_oxigeno";
+//		tareaPrueba->coordenadas->posX=2;
+//		tareaPrueba->coordenadas->posY=3;
+//		tareaPrueba->duracion=5;
+//
+//		tripulante->tareaAsignada=tareaPrueba;
 
 		sem_post(&sem_hiloTripulante);
 
-		while(tripulante->llegoALaTarea!=true){
-		moverAlTripulanteHastaLaTarea(tripulante);
-		puts("me movi");
-		}
-		if(tripulante->llegoALaTarea==true){
-			puts("llegue a la tarea");
-		}
+//		while(tripulante->llegoALaTarea!=true){
+//		moverAlTripulanteHastaLaTarea(tripulante);
+//		puts("me movi");
+//		}
+//		if(tripulante->llegoALaTarea==true){
+//			puts("llegue a la tarea");
+//		}
 
 }
 
