@@ -193,8 +193,10 @@ int32_t enviar_paquete(void* mensaje, op_code codigo, int32_t socketCliente){
 	int32_t status = send(socketCliente, stream, size, MSG_NOSIGNAL);
 
 	free(stream);
-	free(paquete->buffer->stream);
-	free(paquete->buffer);
+	if(leer_buffer(paquete->codigo)){
+		free(paquete->buffer->stream);
+		free(paquete->buffer);
+	}
 	free(paquete);
 
 	return status;
