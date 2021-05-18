@@ -541,7 +541,7 @@ op_code_tareas string_to_op_code_tareas (char* string){
 
 void leerConfig() {
 
-	config = config_create("mongo.config");
+	config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/mongo.config");
 	PUERTO = config_get_string_value(config, "PUERTO_ESCUCHA");
 	IP = config_get_string_value(config, "IP");
 	PUNTO_MONTAJE = config_get_string_value(config, "PUNTO_MONTAJE");
