@@ -53,15 +53,41 @@ int main(void) {
 
 */
 
-	/*
+
 	//Prueba Expulsar Tripulante
 
-	expulsar_tripulante_msg* mensaje = deserializar_paquete(paquete);
+	while(paquete->codigo != DESCONECTADO){
 
-	log_debug(logger, "%d", mensaje->idTripulante);
+		switch(paquete->codigo){
+		case EXPULSAR_TRIPULANTE_MSG:{
 
-	free(mensaje);
-	 */
+			expulsar_tripulante_msg* mensaje = deserializar_paquete(paquete);
+
+			log_debug(logger, "%d", mensaje->idTripulante);
+
+			free(mensaje);
+			break;
+		}
+		case COMPLETO_TAREAS:{
+
+			log_debug(logger, "COMPLETO TAREAS");
+			free(paquete);
+			break;
+		}
+		case DESCONECTADO:
+		default : break;
+		}
+
+		paquete = recibir_paquete(socketCliente);
+
+	}
+
+	if(paquete->codigo == DESCONECTADO){
+
+		log_debug(logger, "desconectado");
+		free(paquete);
+
+	}
 
 	return 0;
 }
@@ -75,6 +101,6 @@ t_config* leer_config(void)
 
 t_log* crear_log(char* dir){
 
-	return log_create(dir, "MONGO", TRUE, LOG_LEVEL_DEBUG);
+	return log_create(dir, "MONGO", true, LOG_LEVEL_DEBUG);
 
 }

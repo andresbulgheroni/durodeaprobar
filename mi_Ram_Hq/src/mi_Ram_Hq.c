@@ -48,17 +48,32 @@ int main(void) {
 */
 
 
-	/*
+
 	//Prueba Expulsar Tripulante
 
 	expulsar_tripulante_msg* mensaje = malloc(sizeof(expulsar_tripulante_msg));
 
 	mensaje->idTripulante = 5;
 
-	enviar_paquete(mensaje, EXPULSAR_TRIPULANTE, conexion);
+	enviar_paquete(mensaje, EXPULSAR_TRIPULANTE_MSG, conexion);
 
 	free(mensaje);
-	*/
+
+	sleep(5);
+
+	expulsar_tripulante_msg* mensaje1 = malloc(sizeof(expulsar_tripulante_msg));
+
+	mensaje1->idTripulante = 6;
+
+	enviar_paquete(mensaje1, EXPULSAR_TRIPULANTE_MSG, conexion);
+
+	free(mensaje1);
+
+	sleep(5);
+
+	enviar_paquete(NULL, COMPLETO_TAREAS, conexion);
+
+	sleep(5);
 
 	liberar_conexion(conexion);
 
@@ -73,5 +88,5 @@ t_config* leer_config(void)
 }
 
 t_log* crear_log(char* dir){
-	return log_create(dir, "RAM", TRUE, LOG_LEVEL_DEBUG);
+	return log_create(dir, "RAM", true, LOG_LEVEL_DEBUG);
 }
