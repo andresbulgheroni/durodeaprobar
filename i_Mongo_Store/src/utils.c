@@ -24,6 +24,12 @@ t_string* get_t_string(char* string){
 	return newString;
 }
 
+bool leer_buffer(int32_t codigo){
+
+	return codigo != DESCONECTADO && codigo != COMPLETO_TAREAS;
+
+}
+
 // SERIALIZADO BASE
 
 void serializar_variable(void* stream, void* variable, uint32_t size, uint32_t* offset) {
@@ -150,6 +156,8 @@ t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje){
 			break;
 
 		}
+		case DESCONECTADO:
+		case COMPLETO_TAREAS:
 		default: break;
 
 	}
@@ -157,15 +165,16 @@ t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje){
 	return paquete;
 }
 
-void* serializar_paquete(t_paquete* paquete){
+void* serializar_paquete(t_paquete* paquete, int32_t* size){
 
-	void* stream = malloc(sizeof(op_code) + sizeof(paquete->buffer->size) + paquete->buffer->size);
+	*size += sizeof(op_code) + (leer_buffer(paquete->codigo) ? sizeof(paquete->buffer->size) + paquete->buffer->size : 0);
+	void* stream = malloc(*size);
 
 	uint32_t offset = 0;
 
 	serializar_variable(stream, &(paquete->codigo), sizeof(op_code), &offset);
 
-	if(paquete->buffer->size > 0){
+	if(leer_buffer(paquete->codigo)){
 
 		serializar_variable(stream, &(paquete->buffer->size), sizeof(paquete->buffer->size), &offset);
 		serializar_variable(stream, paquete->buffer->stream, paquete->buffer->size, &offset);
@@ -177,14 +186,17 @@ void* serializar_paquete(t_paquete* paquete){
 
 int32_t enviar_paquete(void* mensaje, op_code codigo, int32_t socketCliente){
 
+	int32_t size = 0;
 	t_paquete* paquete = crear_paquete_a_serializar(codigo, mensaje);
-	void* stream  = serializar_paquete(paquete);
+	void* stream  = serializar_paquete(paquete, &size);
 	fflush(stdout);
-	int32_t status = send(socketCliente, stream, sizeof(op_code) + sizeof(paquete->buffer->size) + paquete->buffer->size, MSG_NOSIGNAL);
+	int32_t status = send(socketCliente, stream, size, MSG_NOSIGNAL);
 
 	free(stream);
-	free(paquete->buffer->stream);
-	free(paquete->buffer);
+	if(leer_buffer(paquete->codigo)){
+		free(paquete->buffer->stream);
+		free(paquete->buffer);
+	}
 	free(paquete);
 
 	return status;
@@ -218,13 +230,27 @@ t_paquete* recibir_paquete(int32_t socket){
 
 	t_paquete* paquete = malloc(sizeof(t_paquete));
 
-	recv(socket, &(paquete->codigo), sizeof(op_code), MSG_WAITALL);
+	int32_t status = 1;
 
-	paquete->buffer = malloc(sizeof(t_buffer));
+	status = recv(socket, &(paquete->codigo), sizeof(op_code), MSG_WAITALL);
 
-	recv(socket, &(paquete->buffer->size), sizeof(uint32_t), MSG_WAITALL);
-	paquete->buffer->stream = malloc(paquete->buffer->size);
-	recv(socket, paquete->buffer->stream, paquete->buffer->size, MSG_WAITALL);
+	if(leer_buffer(paquete->codigo)){
+
+		paquete->buffer = malloc(sizeof(t_buffer));
+
+		status = recv(socket, &(paquete->buffer->size), sizeof(uint32_t), MSG_WAITALL);
+		paquete->buffer->stream = malloc(paquete->buffer->size);
+		status = recv(socket, paquete->buffer->stream, paquete->buffer->size, MSG_WAITALL);
+
+		if(status == 0)
+			free(paquete->buffer);
+
+	}
+
+	if(status == 0){
+		paquete->codigo = DESCONECTADO;
+		paquete->buffer = NULL;
+	}
 
 	return paquete;
 
@@ -851,6 +877,7 @@ notificar_sabotaje_msg* desserializar_notificar_sabotaje_msg(void* stream){
 int32_t iniciar_servidor(char *ip, char *puerto){
 
 	int socket_servidor;
+	int yes = 1;
 
 	struct addrinfo hints, *servinfo, *p;
 
@@ -866,6 +893,9 @@ int32_t iniciar_servidor(char *ip, char *puerto){
 		if ((socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
 			continue;
 
+		if (setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int32_t)) == -1){
+			puts("Error conexion server");
+		}
 		if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1)
 		{
 			close(socket_servidor);
@@ -923,4 +953,3 @@ void liberar_conexion(uint32_t socketCliente){
 	close(socketCliente);
 
 }
-
