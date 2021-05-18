@@ -12,42 +12,72 @@
 #include <stdlib.h>
 #include "i_Mongo_Store.h"
 
+
 int main(void) {
 
 	leerConfig();
-	crear_log();
+	//crear_log();
 
-	inicializarFS();
+	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 
-	int32_t socket = iniciar_servidor(IP,PUERTO);
+	while(true){
 
-	int32_t socketDiscordiador = esperar_cliente(socket);
+		int32_t socket_cliente = esperar_cliente(socket_servidor);
+		pthread_t hilo_mensaje;
+		pthread_create(&hilo_mensaje,NULL,(void*)funcionPruebaDisc, (void*) (&socket_cliente));
+		pthread_detach(hilo_mensaje);
 
-	pthread_t hiloDiscordiador;
-	pthread_create(&hiloDiscordiador, NULL,(void *) funcionPruebaDisc,(void *) socketDiscordiador);
-	pthread_detach(hiloDiscordiador);
-
-	while(1){
-		int32_t socketTripulante = esperar_cliente(socket);
-		pthread_t hiloTripulante;
-		pthread_create(&hiloTripulante, NULL,(void *) funcionPruebaTrip,(void *) socketTripulante);
-		pthread_detach(hiloTripulante);
 	}
 
-	return 0;
+	puts("fin programa");
+
+	return EXIT_SUCCESS;
 
 }
+
+// Reemplazo el main por el que usó Andres para probar la conexion con su modulo, dejo la version vieja para referencia
+
+//int main(void) {
+//
+//	leerConfig();
+//	crear_log();
+//
+//	inicializarFS();
+//
+//	int32_t socket = iniciar_servidor(IP,PUERTO);
+//
+//	int32_t socketDiscordiador = esperar_cliente(socket);
+//
+//	pthread_t hiloDiscordiador;
+//	pthread_create(&hiloDiscordiador, NULL,(void *) funcionPruebaDisc,(void *) socketDiscordiador);
+//	pthread_detach(hiloDiscordiador);
+//
+//	while(1){
+//		int32_t socketTripulante = esperar_cliente(socket);
+//		pthread_t hiloTripulante;
+//		pthread_create(&hiloTripulante, NULL,(void *) funcionPruebaTrip,(void *) socketTripulante);
+//		pthread_detach(hiloTripulante);
+//	}
+//
+//	return 0;
+//
+//}
 
 
 void funcionPruebaDisc(int32_t* socketCliente){
 
-	t_paquete* paquete = recibir_paquete(*socketCliente);
-	switch(paquete->codigo){
-	case OBTENER_BITACORA_MSG:
-
-		break;
+	bool terminado = false;
+	while (!terminado){
+		t_paquete* paquete = recibir_paquete(*socketCliente);
+		switch(paquete->codigo){
+		case OBTENER_BITACORA_MSG:{
+			puts("funciono");
+			break;
+		}
+		default: terminado = true; break;
+		}
 	}
-
+	pthread_exit(NULL);
 }
 
 void funcionPruebaTrip(int32_t* socketCliente){
@@ -542,7 +572,7 @@ op_code_tareas string_to_op_code_tareas (char* string){
 void leerConfig() {
 
 	config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/mongo.config");
-	PUERTO = config_get_string_value(config, "PUERTO_ESCUCHA");
+	PUERTO = config_get_string_value(config, "PUERTO");
 	IP = config_get_string_value(config, "IP");
 	PUNTO_MONTAJE = config_get_string_value(config, "PUNTO_MONTAJE");
 	TIEMPO_SINCRONIZACION = config_get_int_value(config,"TIEMPO_SINCRONIZACION");
