@@ -68,7 +68,7 @@ void inicializarListasGlobales(){
 
 void inicializarConfig(t_config* config){
 
-	config= config_create("../discord.config"); //tp-2021-1c-DuroDeAprobar/discordiador
+	config= config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/discordiador/discord.config"); //tp-2021-1c-DuroDeAprobar/discordiador
 	if( config==NULL){
 		printf("no se pudo leer archivo config");
 		exit(2);
