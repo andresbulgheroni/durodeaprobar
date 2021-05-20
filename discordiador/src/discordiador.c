@@ -486,7 +486,7 @@ void log_movimiento_tripulante(uint32_t id, uint32_t coordX, uint32_t coordY)
 }
 void log_tripulante_cambio_de_cola_planificacion(uint32_t id, char* razon, char* cola)
 {
-	char* log_msg = "El repartidor con ID %d cambió a la cola %s porque %s";
+	char* log_msg = "El tripulante con ID %d cambió a la cola %s porque %s";
 	log_info(logger,log_msg, id, cola, razon);
 }
 
@@ -960,11 +960,35 @@ void ejecutarTripulante(t_tripulante* tripulante){
 							puts("llegue a la tarea");
 
 							//aca vendria la ejecucion de la tarea
-
+							if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)==TAREA_CPU){
 							for(int i=0;i<=tripulante->tareaAsignada->duracion;i++){
 								sleep(RETARDO_CICLO_CPU);
 
 							}
+						}else if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU){
+							pthread_mutex_lock(&mutex_listaBloqueados);
+										list_add(listaBloqueados, tripulante);
+										pthread_mutex_unlock(&mutex_listaBloqueados);
+							tripulante->estado = BLOCKED;
+				log_tripulante_cambio_de_cola_planificacion(tripulante->idTripulante, "FRECUENCIA DE DESCANSO", "BLOCKED"); //PONER EN LISTA DE BLOQUEADOS
+
+						int r=0;								//ACA CODEO LA DURACION BLOQUEADA EN LA TAREA
+						while(tripulante->tareaAsignada->duracion>=r){
+						sleep(RETARDO_CICLO_CPU);
+						r++;
+
+							}
+							}
+
+							list_remove(listaBloqueados, getIndexTripulanteEnLista(listaBloqueados,tripulante));		//	aca lo saco de la lista de bloqueo
+
+
+						//ACA MANDARIA EL MENSAJE DE LA TAREA A IMONGO
+
+						pthread_mutex_lock(&mutex_listaReady);
+						list_add(listaReady, tripulante);				//aca lo pongo en listaReady
+						pthread_mutex_unlock(&mutex_listaReady);
+
 
 						tripulante->tareaAsignada=NULL;
 
