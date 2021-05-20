@@ -44,8 +44,8 @@ void recibir_mensaje(int32_t* conexion){
 
 				iniciar_patota_msg* mensaje = deserializar_paquete(paquete);
 
-				log_debug(logger, "%d", mensaje->idPatota);
-				log_debug(logger, mensaje->tareas->string);
+				log_debug(logger, "Id patota: %d", mensaje->idPatota);
+				log_debug(logger, "Tareas: %s", mensaje->tareas->string);
 
 				free(mensaje->tareas);
 				free(mensaje);
@@ -57,10 +57,10 @@ void recibir_mensaje(int32_t* conexion){
 
 				iniciar_tripulante_msg* mensaje = deserializar_paquete(paquete);
 
-				log_debug(logger, "%d", mensaje->idPatota);
-				log_debug(logger, "%d", mensaje->idTripulante);
-				log_debug(logger, "%d", mensaje->coordenadas->posX);
-				log_debug(logger, "%d", mensaje->coordenadas->posY);
+				log_debug(logger, "Id patota: %d", mensaje->idPatota);
+				log_debug(logger, "Id tripulante: %d", mensaje->idTripulante);
+				log_debug(logger, "PosX: %d", mensaje->coordenadas->posX);
+				log_debug(logger, "PosY: %d", mensaje->coordenadas->posY);
 
 				free(mensaje->coordenadas);
 				free(mensaje);
@@ -72,9 +72,9 @@ void recibir_mensaje(int32_t* conexion){
 
 				informar_movimiento_ram_msg* mensaje = deserializar_paquete(paquete);
 
-				log_debug(logger, "%d", mensaje->idTripulante);
-				log_debug(logger, "%d", mensaje->coordenadasDestino->posX);
-				log_debug(logger, "%d", mensaje->coordenadasDestino->posY);
+				log_debug(logger, "Id tripulante: %d", mensaje->idTripulante);
+				log_debug(logger, "PosX: %d", mensaje->coordenadasDestino->posX);
+				log_debug(logger, "PosY: %d", mensaje->coordenadasDestino->posY);
 
 				free(mensaje->coordenadasDestino);
 				free(mensaje);
@@ -86,8 +86,8 @@ void recibir_mensaje(int32_t* conexion){
 
 				cambio_estado_msg* mensaje = deserializar_paquete(paquete);
 
-				log_debug(logger, "%d", mensaje->estado);
-				log_debug(logger, "%d", mensaje->idTripulante);
+				log_debug(logger, "Estado: %d", mensaje->estado);
+				log_debug(logger, "Id tripulante: %d", mensaje->idTripulante);
 
 				free(mensaje);
 
@@ -98,14 +98,14 @@ void recibir_mensaje(int32_t* conexion){
 
 				solicitar_siguiente_tarea_msg* mensaje = deserializar_paquete(paquete);
 
-				log_debug(logger, "%d", mensaje->idTripulante);
+				log_debug(logger, "Id tripulante: %d", mensaje->idTripulante);
 
 				break;
 			}
 			case EXPULSAR_TRIPULANTE_MSG:{
 				expulsar_tripulante_msg* mensaje = deserializar_paquete(paquete);
 
-				log_debug(logger, "%d", mensaje->idTripulante);
+				log_debug(logger, "Id tripulante %d", mensaje->idTripulante);
 
 				free(mensaje);
 
