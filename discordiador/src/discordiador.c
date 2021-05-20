@@ -941,86 +941,115 @@ void ejecutarTripulante(t_tripulante* tripulante){
 		while(tripulante->estado == FINISHED || tripulante->fueExpulsado == 1){		//TODO
 
 			sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
-					sem_wait(semaforoDelTripulante);
+			sem_wait(semaforoDelTripulante);
 
-				if(stringACodigoAlgoritmo(ALGORITMO)==FIFO){
-					if(!llegoATarea(tripulante)){
-						int distancia;
-						distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
+			if(stringACodigoAlgoritmo(ALGORITMO)==FIFO){
+				if(!llegoATarea(tripulante)){
+					int distancia;
+					distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
 
-						while (distancia != 0 && distancia != -1) {
+					while (distancia != 0 && distancia != -1) {
 						moverAlTripulanteHastaLaTarea(tripulante);
 						distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : NULL);
-								}
+					}
 
-						}
-
-
-						if(llegoATarea(tripulante)){
-							puts("llegue a la tarea");
-
-							//aca vendria la ejecucion de la tarea
-							if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)==TAREA_CPU){
-							for(int i=0;i<=tripulante->tareaAsignada->duracion;i++){
-								sleep(RETARDO_CICLO_CPU);
-
-							}
-						}else if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU){
-							pthread_mutex_lock(&mutex_listaBloqueados);
-										list_add(listaBloqueados, tripulante);
-										pthread_mutex_unlock(&mutex_listaBloqueados);
-							tripulante->estado = BLOCKED;
-				log_tripulante_cambio_de_cola_planificacion(tripulante->idTripulante, "FRECUENCIA DE DESCANSO", "BLOCKED"); //PONER EN LISTA DE BLOQUEADOS
-
-						int r=0;								//ACA CODEO LA DURACION BLOQUEADA EN LA TAREA
-						while(tripulante->tareaAsignada->duracion>=r){
-						sleep(RETARDO_CICLO_CPU);
-						r++;
-
-							}
-							}
-
-							list_remove(listaBloqueados, getIndexTripulanteEnLista(listaBloqueados,tripulante));		//	aca lo saco de la lista de bloqueo
-
-
-						//ACA MANDARIA EL MENSAJE DE LA TAREA A IMONGO
-
-						pthread_mutex_lock(&mutex_listaReady);
-						list_add(listaReady, tripulante);				//aca lo pongo en listaReady
-						pthread_mutex_unlock(&mutex_listaReady);
-
-
-						tripulante->tareaAsignada=NULL;
-
-						}
-
-						if(tripulante->tareaAsignada==NULL){
-							/*solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
-								mensajeTarea->idTripulante=tripulante->idTripulante;
-								enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
-								printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
-
-								t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
-								solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
-								tripulante->tareaAsignada=mensajeTareaRta;
-								free(mensajeTarea);
-								 */
-
-						}
-
-
-			sem_post(&sem_planificarMultitarea);
 				}
-				else if(stringACodigoAlgoritmo(ALGORITMO)==RR){
-					puts("hola soy RR");
+
+
+				if(llegoATarea(tripulante)){
+					puts("llegue a la tarea");
+
+					ejecucionDeTareaTripulanteFIFO(tripulante);
+
+
 				}
+
+				if(tripulante->tareaAsignada==NULL){
+					/*solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
+					mensajeTarea->idTripulante=tripulante->idTripulante;
+					enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
+					printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
+
+					t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
+					solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
+					tripulante->tareaAsignada=mensajeTareaRta;
+					free(mensajeTarea);
+					 */
+
+				}
+
+
+				sem_post(&sem_planificarMultitarea);
+			}
+			else if(stringACodigoAlgoritmo(ALGORITMO)==RR){
+				puts("hola soy RR");
+			}
+		}
+}
+
+
+
+
+void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
+
+	if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)==TAREA_CPU){
+		for(int i=0;i<=tripulante->tareaAsignada->duracion;i++){
+			sleep(RETARDO_CICLO_CPU);
+
+		}
+
+
+		sem_post(&sem_planificarMultitarea);
+
+	}
+	else if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU){
+
+
+		agregarTripulanteAListaBloqueadosYAvisar(tripulante);
+		log_tripulante_cambio_de_cola_planificacion(tripulante->idTripulante, "ES UNA TAREA DE ENTRADA Y SALIDA", "BLOCKED"); //PONER EN LISTA DE BLOQUEADOS
+
+
+		sem_post(&sem_planificarMultitarea);		//ES UNA IO PUEDO EJECUTAR OTRO TRIPULANTE
+
+
+		int r=0;	// DURACION DE LA TAREA BLOQUEADA
+		while(tripulante->tareaAsignada->duracion>=r){
+			sleep(RETARDO_CICLO_CPU);
+			r++;
+
 		}
 	}
 
+	list_remove(listaBloqueados, getIndexTripulanteEnLista(listaBloqueados,tripulante));		//	aca lo saco de la lista de bloqueo
+
+
+	//ACA MANDARIA EL MENSAJE DE LA TAREA A IMONGO
+
+
+	agregarTripulanteAListaReadyYAvisar(tripulante);
+
+	tripulante->tareaAsignada=NULL;
+
+}
 
 
 
 
+void iniciarHiloRETARDO_CICLO_CPU(){		//TODO
+	pthread_t hiloRetardoCiclo;
+	pthread_create(&hiloRetardoCiclo, NULL, (void*) sincronizarRETARDO_CICLO_CPU,NULL);
+	pthread_detach(hiloRetardoCiclo);
+}
+
+void sincronizarRETARDO_CICLO_CPU(){
+	while(true){
+
+		sem_wait(&semaforoInicioCicloCPU);
+		sleep(RETARDO_CICLO_CPU);
+		sem_post(&semaforoFinCicloCPU);
+
+	}
+}
 
 
 

@@ -189,6 +189,7 @@ algoritmo_code stringACodigoAlgoritmo(const char* );
 void planificarSegun();
 void planificarSegunFIFO();
 void planificarSegunRR();
+void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante);
 
 
 void moverAlTripulanteHastaElSabotaje(t_tripulante*);
@@ -201,5 +202,11 @@ void sacarTripulanteDeLista(t_tripulante* , t_list* );
 void moverAlTripulanteHastaLaTarea(t_tripulante*);
 int llegoATarea(t_tripulante*);
 t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje*);
+
+
+
+//COSAS QUE NOSE SI VAN
+void iniciarHiloRETARDO_CICLO_CPU();
+void sincronizarRETARDO_CICLO_CPU();
 
 #endif /* DISCORDIADOR_H_ */
