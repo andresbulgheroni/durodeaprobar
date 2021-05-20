@@ -121,27 +121,85 @@ void recibir_mensaje(int32_t* conexion){
 
 void init (){
 
-	config = config_create("ram.config");
-	logger = log_create("ram.log", "MI-RAM-HQ", true, LOG_LEVEL_DEBUG);
+	config = config_create("Debug/ram.config");
+	logger = log_create("Debug/ram.log", "MI-RAM-HQ", true, LOG_LEVEL_DEBUG);
 
 	TAMANIO_MEMORIA = config_get_int_value(config, "TAMANIO_MEMORIA");
 	ESQUEMA_MEMORIA = get_esquema_memoria(config_get_string_value(config, "ESQUEMA_MEMORIA"));
 	TAMANIO_PAGINA = config_get_int_value(config, "TAMANIO_PAGINA");
 	TAMANIO_SWAP = config_get_int_value(config, "TAMANIO_SWAP");
 	PATH_SWAP = config_get_string_value(config, "PATH_SWAP");
-	ALGORITMO_REEMPLAZO = config_get_string_value(config, "ALGORITMO_REEMPLAZO");;
+	ALGORITMO_REEMPLAZO = get_algoritmo(config_get_string_value(config, "ALGORITMO_REEMPLAZO"));;
 	IP = config_get_string_value(config, "IP");
 	PUERTO = config_get_string_value(config, "PUERTO");
 
 	memoria_principal = malloc(TAMANIO_MEMORIA);
 
-	iniciarMapa();
+	switch(ESQUEMA_MEMORIA){
+		case SEGMENTACION_PURA:break;
+		case PAGINACION_VIRTUAL:{
+			if(TAMANIO_MEMORIA%TAMANIO_PAGINA != 0 || TAMANIO_SWAP%TAMANIO_PAGINA != 0){
+				log_error(logger, "Mal configurados tamanios de memoria y pagina");
+			}
+
+			int32_t fileDes = open(PATH_SWAP, O_RDWR | O_APPEND | O_CREAT, 0777);
+
+			if(fileDes == -1){
+				log_error(logger, "No se pudo abrir el archivo");
+				close(fileDes);
+			}
+
+			if(fileDes >= 0){
+
+				lseek(fileDes, TAMANIO_SWAP - 1, SEEK_SET);
+
+				write(fileDes, "", 1);
+
+				memoria_virtual =  mmap(0, TAMANIO_SWAP, PROT_WRITE | PROT_READ, MAP_SHARED, fileDes, 0);
+
+				if(memoria_virtual == MAP_FAILED){
+					log_error(logger, "Fallo en el mapeo de archivo SWAP");
+					close(fileDes);
+				}
+
+				frames_swap = list_create();
+				frames_libres_principal = list_create();
+				lista_para_reemplazo = list_create();
+
+				for(uint32_t i = 0; i < (TAMANIO_SWAP / TAMANIO_PAGINA);i++){
+					t_frame* frame = malloc(sizeof(t_frame));
+					frame->pagina = NULL;
+					frame->pos = i;
+					list_add(frames_swap, frame);
+				}
+
+				for(uint32_t i = 0; i < (TAMANIO_MEMORIA / TAMANIO_PAGINA); i++){
+					t_frame_libre* nro_frame = malloc(sizeof(t_frame_libre));
+					nro_frame->pos = i;
+					list_add(frames_libres_principal, nro_frame);
+				}
+
+				if(ALGORITMO_REEMPLAZO == CLOCK){
+					buffer_clock_pos = 0;
+					for(uint32_t i = 0; i < (TAMANIO_MEMORIA / TAMANIO_PAGINA); i++){
+						t_buffer_clock* frame = malloc(sizeof(t_frame));
+						frame->pagina = NULL;
+						list_add(lista_para_reemplazo, frame);
+					}
+				}
+
+			}
+
+			break;
+		}
+	}
+	//iniciarMapa();
 
 }
 
 void iniciarMapa(){
 
-	int columnas, filas;
+	//int columnas, filas;
 
 	//nivel_gui_inicializar();
 
@@ -174,3 +232,19 @@ int32_t get_esquema_memoria(char* esquema_config) {
 
 	return -1;
 }
+
+int32_t get_algoritmo(char* algoritmo_config) {
+
+	if(strcmp("LRU", algoritmo_config) == 0){
+
+		return LRU;
+
+	} else if(strcmp("CLOCK", algoritmo_config) == 0){
+
+		return CLOCK;
+
+	}
+
+	return -1;
+}
+
