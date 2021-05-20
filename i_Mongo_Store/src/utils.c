@@ -578,7 +578,7 @@ t_buffer* serializar_inicio_tarea_msg(inicio_tarea_msg* mensaje){
 
 	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 	serializar_string(buffer->stream, mensaje->nombreTarea, &offset);
-	serializar_variable(buffer->stream, mensaje->parametros, sizeof(mensaje->parametros), &offset);
+	serializar_variable(buffer->stream, &(mensaje->parametros), sizeof(mensaje->parametros), &offset);
 
 	return buffer;
 
