@@ -31,6 +31,7 @@ int main(void){
 	iniciarLog();
 	inicializarListasGlobales();
 	//iniciarHiloSabotaje();
+	//crearHiloPlanificador();
 
 
 	puts("hola viajero, soy el discordiador, ¿En que puedo ayudarte?");
@@ -43,6 +44,12 @@ int main(void){
 
 	return EXIT_SUCCESS;
 
+}
+
+void crearHiloPlanificador(){
+	pthread_t hiloPlanificador;
+	pthread_create(&hiloPlanificador, NULL, (void*) planificarSegun,NULL);
+	pthread_detach(hiloPlanificador);
 }
 
 void inicializarListasGlobales(){
@@ -102,9 +109,13 @@ void iniciarLog(){
 
 }
 
-void inicializarSemaforoPlanificador(){			//Maneja el multiprocesamiento
+void inicializarSemaforoPlanificador(){			//Maneja el multiprocesamiento		//TODO
 
-	sem_init(&sem_planificar, 0, GRADO_MULTITAREA);
+	sem_init(&sem_planificarMultitarea, 0, GRADO_MULTITAREA);
+
+	sem_init(&sem_pausarPlanificacion,0,0);
+
+	sem_init(&sem_sabotaje,0,1);
 
 }
 
@@ -153,7 +164,7 @@ op_code_tareas string_to_op_code_tareas (char* string){
 		}
 }
 /*
-void iniciarHiloSabotaje(){
+void iniciarHiloSabotaje(){		//TODO
 	pthread_t hiloSabotaje;
 	pthread_create(&hiloSabotaje, NULL, (void*) planificarSabotaje,NULL);
 	pthread_detach(hiloSabotaje);
@@ -162,11 +173,13 @@ void planificarSabotaje(){
 	while(true){
 	uint32_t socketSabotaje = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
 	t_paquete*mensaje=recibir_paquete(socketSabotaje);
+	sem_wait(&sem_sabotaje);
 	haySabotaje=1;
 	pasarATodosLosTripulantesAListaBloqueado();
 	PasarAEjecutarAlTripulanteMasCercano();
 	ponerATodosLosTripulantesAReady();
 	haySabotaje=0;
+	sem_post(&sem_sabotaje)
 	liberar_conexion(socketSabotaje);
 	}
 }
@@ -398,25 +411,27 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 		}
 		case INICIAR_PLANIFICACION: { //Con este comando se dará inicio a la planificación (es un semaforo sem init)
 
-			//armar un hilo y utilizar flags. armar antes.
 
+			sem_post(&sem_pausarPlanificacion);
 
-			if(estaPlanificando ==1){
-				pthread_t hiloPlanificador;
-				pthread_create(&hiloPlanificador, NULL, (void*) planificarSegun,NULL);
-				pthread_detach(hiloPlanificador);
-
-			}
-			if(estaPlanificando ==0){
-				estaPlanificando= 1;
-				//sem post a algo
-			}
+//			if(estaPlanificando ==1){
+//				pthread_t hiloPlanificador;
+//				pthread_create(&hiloPlanificador, NULL, (void*) planificarSegun,NULL);
+//				pthread_detach(hiloPlanificador);
+//
+//			}
+//			if(estaPlanificando ==0){
+//				estaPlanificando= 1;
+//				//sem post a algo
+//			}
 
 			break;
 		}
 		case PAUSAR_PLANIFICACION: { //Este comando lo que busca es detener la planificación en cualquier momento(semaforo)
 
-			estaPlanificando=0;
+			sem_wait(&sem_pausarPlanificacion);
+		//	estaPlanificando=0;
+
 			//ACA QUITARIA A LOS TRIPULANTES DE LAS RESPECTIVAS LISTAS EN ORDEN. LIST FILTER Y LIST SORT
 
 			break;
@@ -463,6 +478,17 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 }
 
 ///////////////////////////////////////FUNCIONES GENERALES///////////////
+
+void log_movimiento_tripulante(uint32_t id, uint32_t coordX, uint32_t coordY)
+{
+	char* log_msg = "El tripulante con ID %d se movió a la posición [%d,%d]";
+	log_info(logger,log_msg, id, coordX, coordY);
+}
+void log_tripulante_cambio_de_cola_planificacion(uint32_t id, char* razon, char* cola)
+{
+	char* log_msg = "El repartidor con ID %d cambió a la cola %s porque %s";
+	log_info(logger,log_msg, id, cola, razon);
+}
 
 int cantidadElementosArray(char** array)
 {
@@ -520,7 +546,7 @@ void agregarTripulanteAListaExecYAvisar(t_tripulante* tripulante){
 	tripulante->estado=EXEC;
 
 	//pthread_mutex_lock(&mutex_listaEjecutando);
-	//list_add(listaExec,tripulante);				TODO
+	//list_add(listaExec,tripulante);
 	//pthread_mutex_lock(&mutex_listaEjecutando);
 
 	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
@@ -677,9 +703,11 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 		}
 
 	}
+	log_movimiento_tripulante(tripulante->idTripulante,tripulante->coordenadas->posX,tripulante->coordenadas->posY);
+
 	mensajeMovimientoTarea->coordenadasDestino=tripulante->coordenadas;
 
-	tripulante->misCiclosDeCPU++;
+
 	enviar_paquete(mensajeMovimientoTarea,INFORMAR_MOVIMIENTO_RAM,tripulante->socketTripulanteRam);
 	tripulante->misCiclosDeCPU++;
 
@@ -770,47 +798,59 @@ void planificarSegun() {
 
 
 
-void planificarSegunFIFO(){
-	puts("hola soy FIFO");
+void planificarSegunFIFO(){			//TODO
+		while(true){
+		sem_wait(&sem_sabotaje);
+		sem_wait(&sem_pausarPlanificacion);
+		sem_wait(&sem_planificarMultitarea);
 
-	int distancia;
-
-		sem_wait(&sem_planificar);
-
+		//int distancia;
 		t_tripulante* tripulante = (t_tripulante*) list_remove(listaReady, 0);
-
-
-
 		tripulante->estado = EXEC;
+		log_tripulante_cambio_de_cola_planificacion(tripulante->idTripulante, "fue seleccionado para ejecutar", "EXEC");
 
+		//sem_init(&sem_tripulanteMoviendose, 0, 0);
+		sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
+		sem_post(semaforoDelTripulante);
 
-			sem_init(&sem_tripulanteMoviendose, 0, 0);
-			sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
+		/*sem_wait(&sem_tripulanteMoviendose);
+
+		distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
+
+		while (distancia != 0 && distancia != -1) {
 			sem_post(semaforoDelTripulante);
 			sem_wait(&sem_tripulanteMoviendose);
-			distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
-
-			while (distancia != 0 && distancia != -1) {
-				sem_post(semaforoDelTripulante);
-				sem_wait(&sem_tripulanteMoviendose);
-				distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : NULL);
-			}
-			sem_destroy(&sem_tripulanteMoviendose);
+			distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : NULL);
+		}
+		sem_destroy(&sem_tripulanteMoviendose);
+*/
+		sem_post(&sem_pausarPlanificacion);
+		sem_post(&sem_sabotaje);
+		}
 
 }
+
+
+
+
+
+
 void planificarSegunRR(){
+	while(true){
 	puts("hola soy RR");
 
-	int distancia;
+	sem_wait(&sem_sabotaje);
+	sem_wait(&sem_pausarPlanificacion);
+	sem_wait(&sem_planificarMultitarea);
 
-		sem_wait(&sem_planificar);
 
+	//int distancia;
 
 		t_tripulante* tripulante = (t_tripulante*) list_remove(listaReady, 0);
 
 		tripulante->estado = EXEC;
 
-		sem_init(&sem_tripulanteMoviendose, 0, 0);
+	/*	sem_init(&sem_tripulanteMoviendose, 0, 0);
 				sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
 				sem_post(semaforoDelTripulante);
 
@@ -834,8 +874,11 @@ void planificarSegunRR(){
 				//	log_tripulante_cambio_de_cola_planificacion(tripulante->idTripulante, "se le terminó el quantum", "READY");
 
 					tripulante->quantumDisponible = QUANTUM;
+*/
 
-					sem_post(&sem_planificar);
+					sem_post(&sem_pausarPlanificacion);
+					sem_post(&sem_sabotaje);
+
 }
 }
 
@@ -858,6 +901,8 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 		printf("hola soy:%d\n",tripulante->idTripulante);
 
+		//	//int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
+		//	//tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
 
 		int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 		tripulante->socketTripulanteRam = socketDelTripulanteConRam;
@@ -873,29 +918,81 @@ void ejecutarTripulante(t_tripulante* tripulante){
 		enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
 		printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
 
+		/*
+		 	//recibirMensaje()
+			t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
+			solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
+		 */
 
 
 		free(mensajeTarea);
-//
-//		t_tarea*tareaPrueba;
-//		tareaPrueba->nombreTarea="generar_oxigeno";
-//		tareaPrueba->coordenadas->posX=2;
-//		tareaPrueba->coordenadas->posY=3;
-//		tareaPrueba->duracion=5;
-//
-//		tripulante->tareaAsignada=tareaPrueba;
+
+		t_tarea*tareaPrueba;
+		tareaPrueba->nombreTarea="GENERAR_OXIGENO";
+		tareaPrueba->coordenadas->posX=2;
+		tareaPrueba->coordenadas->posY=3;
+		tareaPrueba->duracion=5;
+
+		tripulante->tareaAsignada=tareaPrueba;
 
 		sem_post(&sem_hiloTripulante);
 
-//		while(tripulante->llegoALaTarea!=true){
-//		moverAlTripulanteHastaLaTarea(tripulante);
-//		puts("me movi");
-//		}
-//		if(tripulante->llegoALaTarea==true){
-//			puts("llegue a la tarea");
-//		}
 
-}
+		while(tripulante->estado == FINISHED || tripulante->fueExpulsado == 1){		//TODO
+
+			sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
+					sem_wait(semaforoDelTripulante);
+
+				if(stringACodigoAlgoritmo(ALGORITMO)==FIFO){
+					if(!llegoATarea(tripulante)){
+						int distancia;
+						distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
+
+						while (distancia != 0 && distancia != -1) {
+						moverAlTripulanteHastaLaTarea(tripulante);
+						distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : NULL);
+								}
+
+						}
+
+
+						if(llegoATarea(tripulante)){
+							puts("llegue a la tarea");
+
+							//aca vendria la ejecucion de la tarea
+
+							for(int i=0;i<=tripulante->tareaAsignada->duracion;i++){
+								sleep(RETARDO_CICLO_CPU);
+
+							}
+
+						tripulante->tareaAsignada=NULL;
+
+						}
+
+						if(tripulante->tareaAsignada==NULL){
+							/*solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
+								mensajeTarea->idTripulante=tripulante->idTripulante;
+								enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
+								printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
+
+								t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
+								solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
+								tripulante->tareaAsignada=mensajeTareaRta;
+								free(mensajeTarea);
+								 */
+
+						}
+
+
+			sem_post(&sem_planificarMultitarea);
+				}
+				else if(stringACodigoAlgoritmo(ALGORITMO)==RR){
+					puts("hola soy RR");
+				}
+		}
+	}
+
 
 
 

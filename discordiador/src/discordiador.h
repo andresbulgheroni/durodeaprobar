@@ -61,7 +61,9 @@ int QUANTUM;
 int DURACION_SABOTAJE;
 int RETARDO_CICLO_CPU;
 
-sem_t sem_planificar;
+sem_t sem_planificarMultitarea;
+sem_t sem_pausarPlanificacion;
+sem_t sem_sabotaje;
 
 sem_t sem_hiloTripulante;
 
@@ -84,7 +86,7 @@ t_list* sem_tripulantes_ejecutar;
 
 
 sem_t sem_buscartripulanteMasCercano;
-sem_t sem_tripulanteMoviendose;
+//sem_t sem_tripulanteMoviendose;
 
 sem_t semaforoInicioCicloCPU; //= malloc(sizeof(sem_t));
 sem_t semaforoFinCicloCPU;
@@ -155,20 +157,22 @@ typedef struct
 	//uint32_t cantidadDeTareasAsignadas;
 	//uint32_t flagDeSabotaje; 1 o 0
 	uint32_t fueExpulsado; //1 o 0
-	bool llegoALaTarea;
+	//bool llegoALaTarea;
 
 } t_tripulante;
 
 
 op_code_consola string_to_op_code_consola (char* );
 op_code_tareas string_to_op_code_tareas (char*);
-
+void crearHiloPlanificador();
 int getIndexTripulanteEnLista(t_list* , t_tripulante* );
 void iniciarLog();
 void inicializarListasGlobales();
 void inicializarConfig(t_config*);
 void inicializarSemaforoPlanificador();
 void leer_consola();
+void log_movimiento_tripulante(uint32_t, uint32_t, uint32_t);
+void log_tripulante_cambio_de_cola_planificacion(uint32_t, char*, char*);
 
 //TRIPULANTES
 void inicializarAtributosATripulante(t_list*);
