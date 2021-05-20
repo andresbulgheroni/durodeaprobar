@@ -11,12 +11,9 @@
 #include <netdb.h>
 #include <string.h>
 
-typedef enum{
-
-	TRUE = 1,
-	FALSE = 0
-
-} boolean;
+#include<commons/log.h>
+#include<commons/string.h>
+#include<commons/config.h>
 
 typedef enum{
 
@@ -31,6 +28,7 @@ typedef enum{
 	INICIAR_TRIPULANTE= 10, // MANDA DATA
 	SOLICITAR_SIGUIENTE_TAREA= 14, // MANDA DATA
 	SOLICITAR_SIGUIENTE_TAREA_RTA= 15, // MANDA DATA
+	COMPLETO_TAREAS=25,
 	CAMBIO_ESTADO= 12,
 	//TRIPULANTE CON MONGO Y RAM
 	INFORMAR_MOVIMIENTO_RAM= 16, // MANDA DATA
@@ -41,7 +39,8 @@ typedef enum{
 	ATENDER_SABOTAJE= 19, // MANDA DATA
 	RESOLUCION_SABOTAJE= 20, // MANDA DATA
 	//MONGO A DISCORD
-	NOTIFICAR_SABOTAJE= 21 // MANDA DATA
+	NOTIFICAR_SABOTAJE= 21, // MANDA DATA
+	DESCONECTADO = -1 //CUANDO recv devuelve -1
 
 } op_code;
 
@@ -207,7 +206,7 @@ t_paquete* recibir_paquete(int32_t socket);
 
 op_code string_to_op_code (char* string);
 t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje);
-void* serializar_paquete(t_paquete* paquete);
+void* serializar_paquete(t_paquete* paquete, int32_t* size);
 void serializar_variable(void* stream, void* variable, uint32_t size, uint32_t* offset);
 void serializar_string(void* stream, t_string* string, uint32_t* offset);
 
@@ -257,5 +256,6 @@ notificar_sabotaje_msg* desserializar_notificar_sabotaje_msg(void* stream);
 
 t_coordenadas* get_coordenadas(char* posicion);
 t_string* get_t_string(char* string);
+bool leer_buffer(int32_t codigo);
 
 #endif
