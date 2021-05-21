@@ -21,6 +21,10 @@
 #include <commons/txt.h>
 #include "utils.h"
 #include<pthread.h>
+#include <commons/bitarray.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <sys/types.h>
 
 #define MAX_BUFFER 512
 
@@ -63,6 +67,7 @@ char* generar_comida(int32_t);
 char* consumir_comida(int32_t);
 char* generar_basura(int32_t);
 char* descartar_basura();
+t_bitarray* crearBitmap(char*);
 
 
 #endif /* I_MONGO_STORE_H_ */

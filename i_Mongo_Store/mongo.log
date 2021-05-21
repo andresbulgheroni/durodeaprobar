@@ -1,3 +1,84 @@
 [INFO] 23:25:38:670 MONGO/(7347:7347): no existe el archivo
 [INFO] 23:25:38:670 MONGO/(7347:7347): Se quieren borrar mas caracteres de los que hay
 [INFO] 23:25:38:670 MONGO/(7347:7347): Se quieren borrar mas caracteres de los que hay
+[INFO] 23:45:37:344 MONGO/(5820:5820): Blocks creados
+[INFO] 23:47:01:60 MONGO/(5915:5915): Blocks creados
+[INFO] 23:52:27:843 MONGO/(6113:6113): Blocks creados
+[ERROR] 23:52:54:353 MONGO/(6157:6157): Error al crear archivo /home/utnso/polus/SuperBloque.ims
+
+[INFO] 23:58:21:20 MONGO/(6305:6305): Blocks creados
+[INFO] 00:19:10:53 MONGO/(7050:7050): Blocks creados
+[INFO] 01:12:32:225 MONGO/(8593:8593): Posicion 1 libre en el bitmap
+[INFO] 01:12:32:290 MONGO/(8593:8593): Blocks creados
+[INFO] 01:19:16:414 MONGO/(8893:8893): Posicion 1 libre en el bitmap
+[INFO] 01:19:16:590 MONGO/(8893:8893): Blocks creados
+[INFO] 01:22:41:368 MONGO/(9054:9054): Blocks creados
+[INFO] 01:23:30:669 MONGO/(9129:9129): Blocks creados
+[INFO] 01:25:13:598 MONGO/(9176:9176): Blocks creados
+[INFO] 01:26:10:715 MONGO/(9244:9244): Blocks creados
+[INFO] 01:27:40:98 MONGO/(9329:9329): Blocks creados
+[INFO] 01:29:00:342 MONGO/(9396:9396): Blocks creados
+[INFO] 01:34:54:112 MONGO/(9646:9646): Blocks creados
+[INFO] 01:36:15:910 MONGO/(9709:9709): Blocks creados
+[INFO] 01:40:24:228 MONGO/(9847:9847): Blocks creados
+[INFO] 01:41:48:400 MONGO/(9911:9911): Blocks creados
+[INFO] 01:44:02:257 MONGO/(10001:10001): Blocks creados
+[INFO] 01:50:59:383 MONGO/(10079:10079): Blocks creados
+[INFO] 01:57:56:484 MONGO/(10623:10623): Blocks creados
+[INFO] 02:08:31:926 MONGO/(11089:11089): Blocks creados
+[INFO] 02:09:07:940 MONGO/(11209:11209): Blocks creados
+[INFO] 02:11:28:192 MONGO/(11323:11323): Blocks creados
+[INFO] 02:14:37:350 MONGO/(11435:11435): Blocks creados
+[INFO] 23:59:09:898 MONGO/(4799:4799): Blocks creados
+[INFO] 00:15:42:461 MONGO/(5154:5154): Blocks creados
+[INFO] 00:26:23:77 MONGO/(5373:5373): Blocks creados
+[INFO] 00:31:30:213 MONGO/(5516:5516): Blocks creados
+[INFO] 00:32:25:996 MONGO/(5567:5567): Blocks creados
+[INFO] 00:47:42:331 MONGO/(5828:5828): Blocks creados
+[INFO] 00:55:11:279 MONGO/(6016:6016): El tamano del bitmap creado es de 96 bits
+[INFO] 00:55:11:298 MONGO/(6016:6016): Blocks creados
+[INFO] 00:55:58:216 MONGO/(6070:6070): El tamano del bitmap creado es de 96 bits
+[INFO] 00:55:58:261 MONGO/(6070:6070): Blocks creados
+[INFO] 00:56:46:41 MONGO/(6111:6111): El tamano del bitmap creado es de 96 bits
+[INFO] 00:56:46:55 MONGO/(6111:6111): Blocks creados
+[INFO] 00:58:31:908 MONGO/(6165:6165): El tamano del bitmap creado es de 96 bits
+[INFO] 00:58:32:23 MONGO/(6165:6165): Blocks creados
+[INFO] 01:05:30:786 MONGO/(6308:6308): El tamano del bitmap creado es de 96 bits
+[INFO] 01:05:30:903 MONGO/(6308:6308): Blocks creados
+[INFO] 01:06:25:451 MONGO/(6359:6359): El tamano del bitmap creado es de 96 bits
+[INFO] 01:06:25:641 MONGO/(6359:6359): Blocks creados
+[INFO] 01:07:21:440 MONGO/(6413:6413): El tamano del bitmap creado es de 96 bits
+[INFO] 01:07:21:452 MONGO/(6413:6413): Blocks creados
+[INFO] 01:08:21:740 MONGO/(6495:6495): El tamano del bitmap creado es de 96 bits
+[INFO] 01:08:21:846 MONGO/(6495:6495): Blocks creados
+[INFO] 01:09:04:144 MONGO/(6568:6568): El tamano del bitmap creado es de 96 bits
+[INFO] 01:09:04:168 MONGO/(6568:6568): Blocks creados
+[INFO] 01:09:46:446 MONGO/(6633:6633): El tamano del bitmap creado es de 96 bits
+[INFO] 01:09:46:492 MONGO/(6633:6633): Blocks creados
+[INFO] 01:10:34:364 MONGO/(6714:6714): El tamano del bitmap creado es de 96 bits
+[INFO] 01:10:34:389 MONGO/(6714:6714): Blocks creados
+[INFO] 01:15:12:428 MONGO/(6903:6903): El tamano del bitmap creado es de 96 bits
+[INFO] 01:15:12:491 MONGO/(6903:6903): Blocks creados
+[INFO] 01:21:19:139 MONGO/(7016:7016): El tamano del bitmap creado es de 96 bits
+[INFO] 01:21:19:186 MONGO/(7016:7016): Blocks creados
+[INFO] 01:28:23:244 MONGO/(7199:7199): El tamano del bitmap creado es de 96 bits
+[INFO] 01:28:23:619 MONGO/(7199:7199): Blocks creados
+[INFO] 01:37:50:957 MONGO/(7347:7347): El tamano del bitmap creado es de 96 bits
+[INFO] 01:42:12:881 MONGO/(7347:7347): Blocks creados
+[INFO] 01:43:20:65 MONGO/(7920:7920): El tamano del bitmap creado es de 96 bits
+[INFO] 01:43:21:203 MONGO/(7920:7920): Blocks creados
+[INFO] 01:46:35:987 MONGO/(8031:8031): El tamano del bitmap creado es de 96 bits
+[INFO] 01:46:40:733 MONGO/(8031:8031): Blocks creados
+[INFO] 01:49:15:612 MONGO/(8234:8234): El tamano del bitmap creado es de 96 bits
+[INFO] 01:53:19:970 MONGO/(8327:8327): El tamano del bitmap creado es de 96 bits
+[INFO] 01:54:30:1 MONGO/(8327:8327): Blocks creados
+[INFO] 01:55:26:845 MONGO/(8433:8433): El tamano del bitmap creado es de 96 bits
+[INFO] 01:55:27:37 MONGO/(8433:8433): Blocks creados
+[INFO] 02:00:28:0 MONGO/(8586:8586): El tamano del bitmap creado es de 96 bits
+[INFO] 02:03:45:843 MONGO/(8681:8681): El tamano del bitmap creado es de 96 bits
+[INFO] 02:05:48:391 MONGO/(8808:8808): El tamano del bitmap creado es de 96 bits
+[INFO] 02:06:07:257 MONGO/(8808:8808): Blocks creados
+[INFO] 02:08:05:253 MONGO/(8896:8896): El tamano del bitmap creado es de 96 bits
+[INFO] 02:08:05:324 MONGO/(8896:8896): Blocks creados
+[INFO] 02:27:43:886 MONGO/(9203:9203): El tamano del bitmap creado es de 96 bits
+[INFO] 02:27:44:6 MONGO/(9203:9203): Blocks creados

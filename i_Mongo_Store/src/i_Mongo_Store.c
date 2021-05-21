@@ -6,20 +6,32 @@
 int main(void) {
 
 	leerConfig();
-	//crear_log();
+	crear_log();
 
-	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
+	inicializarFS();
 
-	while(true){
+	uint32_t a;
+	uint32_t b;
 
-		int32_t socket_cliente = esperar_cliente(socket_servidor);
-		pthread_t hilo_mensaje;
-		pthread_create(&hilo_mensaje,NULL,(void*)funcionPruebaDisc, (void*) (&socket_cliente));
-		pthread_detach(hilo_mensaje);
+	FILE* fp = fopen("/home/utnso/polus/SuperBloque.ims","r+");
+	fread(&a,sizeof(uint32_t),1,fp);
+	printf("block_size: %d",a);
+	fread(&b,sizeof(uint32_t),1,fp);
+	printf("blocks: %d",b);
+	fclose(fp);
 
-	}
-
-	puts("fin programa");
+	//	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
+	//
+	//	while(true){
+	//
+	//		int32_t socket_cliente = esperar_cliente(socket_servidor);
+	//		pthread_t hilo_mensaje;
+	//		pthread_create(&hilo_mensaje,NULL,(void*)funcionPruebaDisc, (void*) (&socket_cliente));
+	//		pthread_detach(hilo_mensaje);
+	//
+	//	}
+	//
+	//	puts("fin programa");
 
 	return EXIT_SUCCESS;
 
@@ -442,44 +454,60 @@ void escribir_archivo(char* rutaArchivo, char* stringAEscribir) {
 
 void crearTodosLosBloquesEnFS() {
 
+	int tamanioBlocks = BLOCKS*BLOCK_SIZE;
 	char* rutaArchivoBlock = string_new();
 	string_append(&rutaArchivoBlock, PUNTO_MONTAJE);
-	string_append(&rutaArchivoBlock, "Blocks.ims");
-	escribir_archivo(rutaArchivoBlock, "");
+	string_append(&rutaArchivoBlock, "/Blocks.ims");
+	for(int i=0; i< tamanioBlocks;i++){
+		escribir_archivo(rutaArchivoBlock, " ");
+	}
 	log_info(logger, "Blocks creados", rutaArchivoBlock);
 
 }
 
 void crearSuperBloque(){
 
-	char* buffer = string_new();
-
-	char* ruta_carpeta = string_new();
-	string_append(&ruta_carpeta, PUNTO_MONTAJE);
-	string_append(&ruta_carpeta, "/Metadata/");
-	puts(ruta_carpeta);
-	crearDirectorio(ruta_carpeta);
-
 	char* ruta_archivo = string_new();
-	string_append(&ruta_archivo, ruta_carpeta);
-	string_append(&ruta_archivo, "Files");
+	string_append(&ruta_archivo, PUNTO_MONTAJE);
+	string_append(&ruta_archivo, "/SuperBloque.ims");
 
-	FILE *fp;
-	fp = fopen(ruta_archivo, "wb+");
+	int fd = open(ruta_archivo, O_CREAT | O_RDWR, 0777);
 
-	puts("Ingresar BLOCK_SIZE:");
-	fgets(buffer, MAX_BUFFER, stdin);
-	strtok(buffer, "\n");
-	fputs("BLOCK_SIZE=",fp);
-	fputs(buffer,fp);
+	if (fd == -1) {
+		log_error(logger, "No se pudo abrir el bitmap");
+		perror("open file");
+		exit(1);
+	}
 
-	puts("Ingresar BLOCKS:");
-	fgets(buffer, MAX_BUFFER, stdin);
-	strtok(buffer, "\n");
-	fputs("\nBLOCKS=",fp);
-	fputs(buffer,fp);
+	int offset = 2*sizeof(uint32_t);
+	int cantidadBloques = BLOCKS / 8;
+	ftruncate(fd, cantidadBloques + offset);
 
-	puts("Metadata creado");
+	char* bmap = mmap(NULL, cantidadBloques + offset, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	if (bmap == MAP_FAILED) {
+		perror("mmap");
+		close(fd);
+		exit(1);
+	}
+
+	memcpy(bmap,&BLOCK_SIZE,sizeof(uint32_t));
+	memcpy(bmap+sizeof(uint32_t),&BLOCKS,sizeof(uint32_t));
+
+	t_bitarray* bitmap = bitarray_create_with_mode(bmap + offset, cantidadBloques, LSB_FIRST);
+
+	log_info(logger, "El tamano del bitmap creado es de %d bits",
+			bitarray_get_max_bit(bitmap));
+	size_t tope = bitarray_get_max_bit(bitmap);
+	for (int i = 0; i < tope; i++) {
+		bitarray_clean_bit(bitmap, i);
+	}
+
+	memcpy(bmap+offset,&bitmap,cantidadBloques);
+	msync(bmap, offset + cantidadBloques, MS_SYNC);
+	//munmap(bmap, offset + cantidadBloques); si llega a esta linea despues en el debug tira <error: Cannot access memory at address 0xb7fd5000>
+	close(fd);
+
+	log_debug(logger, "ARCHIVO %s ACTUALIZADO\n", ruta_archivo);
 
 }
 
@@ -509,26 +537,16 @@ bool existeArchivo(char* path) {
 
 void inicializarFS(){
 
-	puts("Buscando metadata...");
+	if(existeArchivo(PUNTO_MONTAJE)){
 
-	if(existeArchivo(string_from_format("%s/SuperBloque.ims", PUNTO_MONTAJE))){
-
-		puts("Metadata existente encontrado");
+		puts("FS ya levantado");
 
 
 	} else {
-
-		puts("Metadata no encontrado, crear uno");
+		puts("Levantando FS");
+		crearDirectorio(PUNTO_MONTAJE);
 		crearSuperBloque();
-		inicializarFS(); // Hace falta ??
 		crearTodosLosBloquesEnFS();
-
-		// Creo carpeta recetas
-		char* ruta_carpeta = string_new();
-		string_append(&ruta_carpeta, PUNTO_MONTAJE);
-		string_append(&ruta_carpeta, "/Files/Recetas/");
-		crearDirectorio(ruta_carpeta);
-		//	free(ruta_carpeta);
 
 	}
 
@@ -567,8 +585,8 @@ void leerConfig() {
 	PUNTO_MONTAJE = config_get_string_value(config, "PUNTO_MONTAJE");
 	TIEMPO_SINCRONIZACION = config_get_int_value(config,"TIEMPO_SINCRONIZACION");
 	POSICIONES_SABOTAJE = config_get_string_value(config, "POSICIONES_SABOTAJE"); // ver esto, es una lista en realidad
-	BLOCKS= config_get_int_value(config,"BLOCKS");
-	BLOCK_SIZE= config_get_int_value(config,"BLOCK_SIZE");
+	BLOCKS= (uint32_t) config_get_int_value(config,"BLOCKS");
+	BLOCK_SIZE= (uint32_t) config_get_int_value(config,"BLOCK_SIZE");
 }
 
 void crear_log(){
