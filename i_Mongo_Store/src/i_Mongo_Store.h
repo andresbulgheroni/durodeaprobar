@@ -35,6 +35,8 @@ uint32_t TIEMPO_SINCRONIZACION;
 char* POSICIONES_SABOTAJE;
 uint32_t BLOCK_SIZE;
 uint32_t BLOCKS;
+char* superBloqueMap;
+char* blocksMap;
 t_log* logger;
 t_config* config;
 

@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "i_Mongo_Store.h"
 
 
@@ -80,6 +78,7 @@ void funcionPruebaDisc(int32_t* socketCliente){
 		}
 	}
 	pthread_exit(NULL);
+
 }
 
 void funcionPruebaTrip(int32_t* socketCliente){
@@ -458,10 +457,31 @@ void crearTodosLosBloquesEnFS() {
 	char* rutaArchivoBlock = string_new();
 	string_append(&rutaArchivoBlock, PUNTO_MONTAJE);
 	string_append(&rutaArchivoBlock, "/Blocks.ims");
-	for(int i=0; i< tamanioBlocks;i++){
-		escribir_archivo(rutaArchivoBlock, " ");
+
+	int fd = open(rutaArchivoBlock, O_CREAT | O_RDWR, 0777);
+
+	if (fd == -1) {
+		log_error(logger, "No se pudo abrir el bitmap");
+		perror("open file");
+		exit(1);
 	}
-	log_info(logger, "Blocks creados", rutaArchivoBlock);
+
+	ftruncate(fd, tamanioBlocks);
+
+	blocksMap = mmap(NULL, tamanioBlocks, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	if (blocksMap == MAP_FAILED) {
+		perror("mmap");
+		close(fd);
+		exit(1);
+	}
+
+
+	msync(blocksMap, tamanioBlocks, MS_SYNC);
+
+//	munmap(blocksMap, tamanioBlocks);
+	close(fd);
+
+	log_debug(logger, "ARCHIVO %s ACTUALIZADO\n", rutaArchivoBlock);
 
 }
 
@@ -483,17 +503,17 @@ void crearSuperBloque(){
 	int cantidadBloques = BLOCKS / 8;
 	ftruncate(fd, cantidadBloques + offset);
 
-	char* bmap = mmap(NULL, cantidadBloques + offset, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if (bmap == MAP_FAILED) {
+	superBloqueMap = mmap(NULL, cantidadBloques + offset, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	if (superBloqueMap == MAP_FAILED) {
 		perror("mmap");
 		close(fd);
 		exit(1);
 	}
 
-	memcpy(bmap,&BLOCK_SIZE,sizeof(uint32_t));
-	memcpy(bmap+sizeof(uint32_t),&BLOCKS,sizeof(uint32_t));
+	memcpy(superBloqueMap,&BLOCK_SIZE,sizeof(uint32_t));
+	memcpy(superBloqueMap+sizeof(uint32_t),&BLOCKS,sizeof(uint32_t));
 
-	t_bitarray* bitmap = bitarray_create_with_mode(bmap + offset, cantidadBloques, LSB_FIRST);
+	t_bitarray* bitmap = bitarray_create_with_mode(superBloqueMap + offset, cantidadBloques, LSB_FIRST);
 
 	log_info(logger, "El tamano del bitmap creado es de %d bits",
 			bitarray_get_max_bit(bitmap));
@@ -502,9 +522,9 @@ void crearSuperBloque(){
 		bitarray_clean_bit(bitmap, i);
 	}
 
-	memcpy(bmap+offset,&bitmap,cantidadBloques);
-	msync(bmap, offset + cantidadBloques, MS_SYNC);
-	//munmap(bmap, offset + cantidadBloques); si llega a esta linea despues en el debug tira <error: Cannot access memory at address 0xb7fd5000>
+	memcpy(superBloqueMap+offset,&bitmap,cantidadBloques);
+	msync(superBloqueMap, offset + cantidadBloques, MS_SYNC);
+//	munmap(superBloqueMap, offset + cantidadBloques); //si llega a esta linea despues en el debug tira <error: Cannot access memory at address 0xb7fd5000>
 	close(fd);
 
 	log_debug(logger, "ARCHIVO %s ACTUALIZADO\n", ruta_archivo);
