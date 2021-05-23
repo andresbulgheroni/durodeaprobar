@@ -8,20 +8,12 @@ int main(void) {
 
 	inicializarFS();
 
-	uint32_t a;
-	uint32_t b;
-
-	FILE* fp = fopen("/home/utnso/polus/SuperBloque.ims","r+");
-	fread(&a,sizeof(uint32_t),1,fp);
-	printf("block_size: %d",a);
-	fread(&b,sizeof(uint32_t),1,fp);
-	printf("blocks: %d",b);
-	fclose(fp);
+	printf("BLOCK SIZE: %d\n",superBloqueMap[0]);
+	printf("BLOCKS: %d\n",superBloqueMap[4]);
 
 	while(1){
 
 	}
-
 
 	//	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 	//
@@ -475,7 +467,7 @@ void escribir_archivo(char* rutaArchivo, char* stringAEscribir) {
 
 }
 
-void crearTodosLosBloquesEnFS() {
+void inicializarBlocks() {
 
 	tamanioBlocks = BLOCKS*BLOCK_SIZE;
 	char* rutaArchivoBlock = string_new();
@@ -504,11 +496,48 @@ void crearTodosLosBloquesEnFS() {
 	// Corre: msync(blocksMap, tamanioBlocks, MS_SYNC);
 	pthread_t hilo_sincro_blocksmap;
 	pthread_create(&hilo_sincro_blocksmap, NULL,(void*) timerSincronizacion_blocksMap, NULL);
-//	munmap(blocksMap, tamanioBlocks);
+	//	munmap(blocksMap, tamanioBlocks);
 
 	close(fd);
 
-	log_debug(logger, "ARCHIVO %s ACTUALIZADO\n", rutaArchivoBlock);
+	log_debug(logger, "ARCHIVO %s LEIDO\n", rutaArchivoBlock);
+
+}
+
+void inicializarSuperBloque(){
+
+	char* ruta_archivo = string_new();
+	string_append(&ruta_archivo, PUNTO_MONTAJE);
+	string_append(&ruta_archivo, "/SuperBloque.ims");
+
+	int fd = open(ruta_archivo, O_RDWR, 0777);
+
+	if (fd == -1) {
+		log_error(logger, "No se pudo abrir el bitmap");
+		perror("open file");
+		exit(1);
+	}
+
+	int offset = 2*sizeof(uint32_t);
+	int cantidadBloques = BLOCKS / 8;
+	ftruncate(fd, cantidadBloques + offset);
+
+	superBloqueMap = mmap(NULL, cantidadBloques + offset, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	if (superBloqueMap == MAP_FAILED) {
+		perror("mmap");
+		close(fd);
+		exit(1);
+	}
+
+	// Thread con timer para sincronizar mmap a disco, iniciarlo despues del mmap!
+	// Corre: msync(superBloqueMap, offset + cantidadBloques, MS_SYNC);
+	pthread_t hilo_sincro_superBloque;
+	pthread_create(&hilo_sincro_superBloque, NULL,(void*) timerSincronizacion_superBloqueMap, NULL);
+	//	munmap(superBloqueMap, offset + cantidadBloques); //si llega a esta linea despues en el debug tira <error: Cannot access memory at address 0xb7fd5000>
+
+	close(fd);
+
+	log_debug(logger, "ARCHIVO %s LEIDO\n", ruta_archivo);
 
 }
 
@@ -557,11 +586,11 @@ void crearSuperBloque(){
 	// Corre: msync(superBloqueMap, offset + cantidadBloques, MS_SYNC);
 	pthread_t hilo_sincro_superBloque;
 	pthread_create(&hilo_sincro_superBloque, NULL,(void*) timerSincronizacion_superBloqueMap, NULL);
-//	munmap(superBloqueMap, offset + cantidadBloques); //si llega a esta linea despues en el debug tira <error: Cannot access memory at address 0xb7fd5000>
+	//	munmap(superBloqueMap, offset + cantidadBloques); //si llega a esta linea despues en el debug tira <error: Cannot access memory at address 0xb7fd5000>
 
 	close(fd);
 
-	log_debug(logger, "ARCHIVO %s ACTUALIZADO\n", ruta_archivo);
+	log_debug(logger, "ARCHIVO %s CREADO\n", ruta_archivo);
 
 }
 
@@ -592,17 +621,14 @@ bool existeArchivo(char* path) {
 void inicializarFS(){
 
 	if(existeArchivo(PUNTO_MONTAJE)){
-
 		puts("FS ya levantado");
-
-
+		inicializarSuperBloque();
 	} else {
 		puts("Levantando FS");
 		crearDirectorio(PUNTO_MONTAJE);
 		crearSuperBloque();
-		crearTodosLosBloquesEnFS();
-
 	}
+	inicializarBlocks();
 
 }
 
