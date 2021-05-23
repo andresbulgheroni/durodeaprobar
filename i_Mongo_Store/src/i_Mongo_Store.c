@@ -18,6 +18,8 @@ int main(void) {
 	printf("blocks: %d",b);
 	fclose(fp);
 
+
+
 	//	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 	//
 	//	while(true){
@@ -63,6 +65,21 @@ int main(void) {
 //
 //}
 
+void* timerSincronizacion_superBloqueMap(void* args){
+	while(1){
+		msync(superBloqueMap, tamanioSuperBloque, MS_SYNC);
+		sleep(TIEMPO_SINCRONIZACION / 1000);
+	}
+	pthread_exit(NULL);
+}
+
+void* timerSincronizacion_blocksMap(void* args){
+	while(1){
+		msync(blocksMap, tamanioBlocks, MS_SYNC);
+		sleep(TIEMPO_SINCRONIZACION / 1000);
+	}
+	pthread_exit(NULL);
+}
 
 void funcionPruebaDisc(int32_t* socketCliente){
 
@@ -453,7 +470,7 @@ void escribir_archivo(char* rutaArchivo, char* stringAEscribir) {
 
 void crearTodosLosBloquesEnFS() {
 
-	int tamanioBlocks = BLOCKS*BLOCK_SIZE;
+	tamanioBlocks = BLOCKS*BLOCK_SIZE;
 	char* rutaArchivoBlock = string_new();
 	string_append(&rutaArchivoBlock, PUNTO_MONTAJE);
 	string_append(&rutaArchivoBlock, "/Blocks.ims");
@@ -476,9 +493,13 @@ void crearTodosLosBloquesEnFS() {
 	}
 
 
-	msync(blocksMap, tamanioBlocks, MS_SYNC);
-
+	// Thread con timer para sincronizar mmap a disco, iniciarlo despues del mmap!
+	// Corre: msync(blocksMap, tamanioBlocks, MS_SYNC);
+	pthread_t hilo_sincro_blocksmap;
+	pthread_create(hilo_sincro_blocksmap, NULL, timerSincronizacion_blocksMap, &tamanioBlocks);
+	pthread_join(hilo_sincro_blocksmap, NULL);
 //	munmap(blocksMap, tamanioBlocks);
+
 	close(fd);
 
 	log_debug(logger, "ARCHIVO %s ACTUALIZADO\n", rutaArchivoBlock);
@@ -523,8 +544,16 @@ void crearSuperBloque(){
 	}
 
 	memcpy(superBloqueMap+offset,&bitmap,cantidadBloques);
-	msync(superBloqueMap, offset + cantidadBloques, MS_SYNC);
+
+	tamanioSuperBloque = offset + cantidadBloques;
+
+	// Thread con timer para sincronizar mmap a disco, iniciarlo despues del mmap!
+	// Corre: msync(superBloqueMap, offset + cantidadBloques, MS_SYNC);
+	pthread_t hilo_sincro_superBloque;
+	pthread_create(hilo_sincro_superBloque, NULL, timerSincronizacion_superBloqueMap, NULL);
+	pthread_join(hilo_sincro_superBloque, NULL);
 //	munmap(superBloqueMap, offset + cantidadBloques); //si llega a esta linea despues en el debug tira <error: Cannot access memory at address 0xb7fd5000>
+
 	close(fd);
 
 	log_debug(logger, "ARCHIVO %s ACTUALIZADO\n", ruta_archivo);

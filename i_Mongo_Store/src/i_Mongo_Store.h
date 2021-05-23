@@ -39,6 +39,9 @@ char* superBloqueMap;
 char* blocksMap;
 t_log* logger;
 t_config* config;
+int tamanioBlocks;
+int tamanioSuperBloque;
+
 
 typedef enum{
 	GENERAR_OXIGENO = 0,
@@ -70,6 +73,8 @@ char* consumir_comida(int32_t);
 char* generar_basura(int32_t);
 char* descartar_basura();
 t_bitarray* crearBitmap(char*);
+void* timerSincronizacion_superBloqueMap(void*);
+void* timerSincronizacion_blocksMap(void*);
 
 
 #endif /* I_MONGO_STORE_H_ */
