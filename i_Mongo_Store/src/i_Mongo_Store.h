@@ -73,8 +73,8 @@ char* consumir_comida(int32_t);
 char* generar_basura(int32_t);
 char* descartar_basura();
 t_bitarray* crearBitmap(char*);
-void* timerSincronizacion_superBloqueMap(void*);
-void* timerSincronizacion_blocksMap(void*);
+void timerSincronizacion_superBloqueMap();
+void timerSincronizacion_blocksMap();
 
 
 #endif /* I_MONGO_STORE_H_ */

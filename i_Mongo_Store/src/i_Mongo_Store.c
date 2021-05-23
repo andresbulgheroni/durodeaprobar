@@ -18,6 +18,9 @@ int main(void) {
 	printf("blocks: %d",b);
 	fclose(fp);
 
+	while(1){
+
+	}
 
 
 	//	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
@@ -65,20 +68,24 @@ int main(void) {
 //
 //}
 
-void* timerSincronizacion_superBloqueMap(void* args){
+void timerSincronizacion_superBloqueMap(){
+
 	while(1){
-		msync(superBloqueMap, tamanioSuperBloque, MS_SYNC);
+		puts("funciona superBloque");
 		sleep(TIEMPO_SINCRONIZACION / 1000);
+		pthread_detach(pthread_self());
 	}
-	pthread_exit(NULL);
+
 }
 
-void* timerSincronizacion_blocksMap(void* args){
+void timerSincronizacion_blocksMap(){
+
 	while(1){
 		msync(blocksMap, tamanioBlocks, MS_SYNC);
+		puts("funciona blocks");
 		sleep(TIEMPO_SINCRONIZACION / 1000);
 	}
-	pthread_exit(NULL);
+
 }
 
 void funcionPruebaDisc(int32_t* socketCliente){
@@ -496,8 +503,7 @@ void crearTodosLosBloquesEnFS() {
 	// Thread con timer para sincronizar mmap a disco, iniciarlo despues del mmap!
 	// Corre: msync(blocksMap, tamanioBlocks, MS_SYNC);
 	pthread_t hilo_sincro_blocksmap;
-	pthread_create(hilo_sincro_blocksmap, NULL, timerSincronizacion_blocksMap, &tamanioBlocks);
-	pthread_join(hilo_sincro_blocksmap, NULL);
+	pthread_create(&hilo_sincro_blocksmap, NULL,(void*) timerSincronizacion_blocksMap, NULL);
 //	munmap(blocksMap, tamanioBlocks);
 
 	close(fd);
@@ -550,8 +556,7 @@ void crearSuperBloque(){
 	// Thread con timer para sincronizar mmap a disco, iniciarlo despues del mmap!
 	// Corre: msync(superBloqueMap, offset + cantidadBloques, MS_SYNC);
 	pthread_t hilo_sincro_superBloque;
-	pthread_create(hilo_sincro_superBloque, NULL, timerSincronizacion_superBloqueMap, NULL);
-	pthread_join(hilo_sincro_superBloque, NULL);
+	pthread_create(&hilo_sincro_superBloque, NULL,(void*) timerSincronizacion_superBloqueMap, NULL);
 //	munmap(superBloqueMap, offset + cantidadBloques); //si llega a esta linea despues en el debug tira <error: Cannot access memory at address 0xb7fd5000>
 
 	close(fd);
