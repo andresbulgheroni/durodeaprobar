@@ -829,7 +829,7 @@ void planificarSegunFIFO(){			//TODO
 		sem_post(&sem_pausarPlanificacion);
 		sem_post(&sem_sabotaje);
 
-		puts("el tripulante ya puede planificar");
+		puts("FIFO:el tripulante ya puede planificar");
 		}
 
 }
@@ -931,7 +931,7 @@ void enviarMensajeDeInicioDeTripulante(t_tripulante*tripulante){
 }
 
 void ejecutarTripulante(t_tripulante* tripulante){
-	//INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
+	//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
 
 
 
@@ -993,6 +993,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 				if(!llegoATarea(tripulante)){
 					int distancia;
 					distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
+					log_info(logger,"se esta moviendo a la tarea la tarea el tripulante %d",tripulante->idTripulante);
 
 					while (distancia != 0 && distancia != -1) {
 						moverAlTripulanteHastaLaTarea(tripulante);
@@ -1004,6 +1005,8 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 				if(llegoATarea(tripulante)){
 					log_info(logger,"llego a la tarea el tripulante %d",tripulante->idTripulante);
+
+					usleep(100);
 
 					ejecucionDeTareaTripulanteFIFO(tripulante);
 
@@ -1022,14 +1025,25 @@ void ejecutarTripulante(t_tripulante* tripulante){
 					solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
 					tripulante->tareaAsignada=mensajeTareaRta;
 					free(mensajeTarea);
-					*/
+					 */
+					t_tarea*tareaPrueba=malloc(sizeof(t_tarea));
+					t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
+					coordenadas->posX=3;
+					coordenadas->posY=4;
+					tareaPrueba->nombreTarea="GENERAR_OXIGENO_AHRE";
+					tareaPrueba->coordenadas=coordenadas;
+					tareaPrueba->duracion=2;
+					tripulante->tareaAsignada=tareaPrueba;
+
 					log_info(logger,"se le asigno otra tarea al tripulante%d",tripulante->idTripulante);
-					agregarTripulanteAListaReadyYAvisar(tripulante);
+					//	agregarTripulanteAListaReadyYAvisar(tripulante);
+
+					//	sem_post(&sem_planificarMultitarea);		DEBERIA IR ACA DENTRO DEL FIN DE TAREA
 
 				}
 
 
-				//sem_post(&sem_planificarMultitarea);  	no deberia ya que cuando termino la tarea
+
 			}
 			else if(stringACodigoAlgoritmo(ALGORITMO)==RR){
 				puts("hola soy RR");
@@ -1051,12 +1065,10 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 		log_info(logger, "el tripulante %d esta realizando una tarea de CPU ",tripulante->idTripulante);
 		for(int i=1;i<=tripulante->tareaAsignada->duracion;i++){
 			sleep(RETARDO_CICLO_CPU);
-			log_info(logger,"se hizo %d de CPU de un total de %d ",i,tripulante->tareaAsignada->duracion);
 
+			log_info(logger,"El tripulante con ID %d hizo %d de CPU de un total de %d",tripulante->idTripulante,i,tripulante->tareaAsignada->duracion);
 		}
 
-
-		sem_post(&sem_planificarMultitarea);
 
 	}
 	else if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU){
@@ -1071,14 +1083,20 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 
 		int r=1;	// DURACION DE LA TAREA BLOQUEADA
 		while(tripulante->tareaAsignada->duracion>=r){
-			r++;
-			log_info(logger,"se hizo %d de IO de un total de %d ",r,tripulante->tareaAsignada->duracion);
 			sleep(RETARDO_CICLO_CPU);
+			r++;
+
+
+			log_info(logger,"El tripulante con ID %d hizo %d de IO de un total de %d",tripulante->idTripulante,r,tripulante->tareaAsignada->duracion);
+
+
 
 		}
+		list_remove(listaBloqueados, getIndexTripulanteEnLista(listaBloqueados,tripulante));		//	aca lo saco de la lista de bloqueo
+		agregarTripulanteAListaReadyYAvisar(tripulante);
 	}
 
-	list_remove(listaBloqueados, getIndexTripulanteEnLista(listaBloqueados,tripulante));		//	aca lo saco de la lista de bloqueo
+
 
 
 	//ACA MANDARIA EL MENSAJE DE LA TAREA A IMONGO

@@ -228,3 +228,188 @@
 [INFO] 23:27:09:852 discordiador/(5772:5772): 0|0
 [INFO] 23:27:09:852 discordiador/(5772:5772): 0|0
 [INFO] 23:27:23:539 discordiador/(5772:5772): LISTAR_TRIPULANTES
+[INFO] 17:29:23:163 discordiador/(14102:14102): INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
+[INFO] 17:29:23:165 discordiador/(14102:14102): 1|1
+[INFO] 17:29:23:165 discordiador/(14102:14102): 0|0
+[INFO] 17:29:23:165 discordiador/(14102:14116): cambio De Estado A Ready:1
+
+[INFO] 17:29:23:165 discordiador/(14102:14116): el tripulante se queda esperando a ser asignado 1
+[INFO] 17:29:23:171 discordiador/(14102:14118): cambio De Estado A Ready:2
+
+[INFO] 17:29:23:172 discordiador/(14102:14118): el tripulante se queda esperando a ser asignado 2
+[INFO] 17:29:30:350 discordiador/(14102:14102): INICIAR_PLANIFICACION
+[INFO] 17:29:30:351 discordiador/(14102:14107): cambio De Estado A Exec:1
+
+[INFO] 17:29:30:351 discordiador/(14102:14107): El tripulante con ID 1 cambió a la cola EXEC porque fue seleccionado para ejecutar
+[INFO] 17:29:30:351 discordiador/(14102:14107): cambio De Estado A Exec:2
+
+[INFO] 17:29:30:351 discordiador/(14102:14107): El tripulante con ID 2 cambió a la cola EXEC porque fue seleccionado para ejecutar
+[INFO] 17:29:30:351 discordiador/(14102:14116): fue seleccionado para ejecutar el tripulante 1
+[INFO] 17:29:30:351 discordiador/(14102:14116): se esta moviendo a la tarea la tarea el tripulante 1
+[INFO] 17:29:30:351 discordiador/(14102:14118): fue seleccionado para ejecutar el tripulante 2
+[INFO] 17:29:30:351 discordiador/(14102:14118): se esta moviendo a la tarea la tarea el tripulante 2
+[INFO] 17:29:31:351 discordiador/(14102:14118): El tripulante con ID 2 se movió a la posición [1,0]
+[INFO] 17:29:31:352 discordiador/(14102:14116): El tripulante con ID 1 se movió a la posición [2,1]
+[INFO] 17:29:32:352 discordiador/(14102:14118): El tripulante con ID 2 se movió a la posición [2,0]
+[INFO] 17:29:32:352 discordiador/(14102:14116): El tripulante con ID 1 se movió a la posición [2,2]
+[INFO] 17:29:32:352 discordiador/(14102:14116): llego a la tarea el tripulante 1
+[INFO] 17:29:32:352 discordiador/(14102:14116): el tripulante 1 esta realizando una tarea de CPU 
+[INFO] 17:29:33:352 discordiador/(14102:14116): se hizo 1 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:29:33:352 discordiador/(14102:14118): El tripulante con ID 2 se movió a la posición [2,1]
+[INFO] 17:29:34:353 discordiador/(14102:14116): se hizo 2 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:29:34:353 discordiador/(14102:14118): El tripulante con ID 2 se movió a la posición [2,2]
+[INFO] 17:29:34:353 discordiador/(14102:14118): llego a la tarea el tripulante 2
+[INFO] 17:29:34:353 discordiador/(14102:14118): el tripulante 2 esta realizando una tarea de CPU 
+[INFO] 17:29:35:354 discordiador/(14102:14118): se hizo 1 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:29:35:357 discordiador/(14102:14116): se hizo 3 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:29:36:354 discordiador/(14102:14118): se hizo 2 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:29:36:357 discordiador/(14102:14116): se hizo 4 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:29:37:355 discordiador/(14102:14118): se hizo 3 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:29:37:357 discordiador/(14102:14116): se hizo 5 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:29:37:357 discordiador/(14102:14116): finalizo la ejecucion de la tarea el tripulante 1
+[INFO] 17:29:37:357 discordiador/(14102:14116): acaba de solicitar otra tarea el tripulante 1
+[INFO] 17:29:37:357 discordiador/(14102:14116): se le asigno otra tarea al tripulante1
+[INFO] 17:29:38:355 discordiador/(14102:14118): se hizo 4 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:29:39:356 discordiador/(14102:14118): se hizo 5 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:29:39:356 discordiador/(14102:14118): finalizo la ejecucion de la tarea el tripulante 2
+[INFO] 17:29:39:356 discordiador/(14102:14118): acaba de solicitar otra tarea el tripulante 2
+[INFO] 17:29:39:356 discordiador/(14102:14118): se le asigno otra tarea al tripulante2
+[INFO] 17:33:36:111 discordiador/(14232:14232): INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
+[INFO] 17:33:36:111 discordiador/(14232:14232): 1|1
+[INFO] 17:33:36:111 discordiador/(14232:14232): 0|0
+[INFO] 17:33:36:112 discordiador/(14232:14239): cambio De Estado A Ready:1
+
+[INFO] 17:33:36:112 discordiador/(14232:14239): el tripulante se queda esperando a ser asignado 1
+[INFO] 17:33:36:114 discordiador/(14232:14241): cambio De Estado A Ready:2
+
+[INFO] 17:33:36:114 discordiador/(14232:14241): el tripulante se queda esperando a ser asignado 2
+[INFO] 17:34:15:179 discordiador/(14232:14232): INICIAR_PLANIFICACION
+[INFO] 17:34:15:180 discordiador/(14232:14237): cambio De Estado A Exec:1
+
+[INFO] 17:34:15:180 discordiador/(14232:14237): El tripulante con ID 1 cambió a la cola EXEC porque fue seleccionado para ejecutar
+[INFO] 17:34:15:180 discordiador/(14232:14239): fue seleccionado para ejecutar el tripulante 1
+[INFO] 17:34:15:180 discordiador/(14232:14239): se esta moviendo a la tarea la tarea el tripulante 1
+[INFO] 17:34:15:180 discordiador/(14232:14237): cambio De Estado A Exec:2
+
+[INFO] 17:34:15:180 discordiador/(14232:14237): El tripulante con ID 2 cambió a la cola EXEC porque fue seleccionado para ejecutar
+[INFO] 17:34:15:180 discordiador/(14232:14241): fue seleccionado para ejecutar el tripulante 2
+[INFO] 17:34:15:180 discordiador/(14232:14241): se esta moviendo a la tarea la tarea el tripulante 2
+[INFO] 17:34:16:180 discordiador/(14232:14239): El tripulante con ID 1 se movió a la posición [2,1]
+[INFO] 17:34:16:180 discordiador/(14232:14241): El tripulante con ID 2 se movió a la posición [1,0]
+[INFO] 17:34:17:180 discordiador/(14232:14239): El tripulante con ID 1 se movió a la posición [2,2]
+[INFO] 17:34:17:181 discordiador/(14232:14239): llego a la tarea el tripulante 1
+[INFO] 17:34:17:181 discordiador/(14232:14241): El tripulante con ID 2 se movió a la posición [2,0]
+[INFO] 17:34:17:181 discordiador/(14232:14239): el tripulante 1 esta realizando una tarea de CPU 
+[INFO] 17:34:18:182 discordiador/(14232:14239): se hizo 1 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:34:18:182 discordiador/(14232:14241): El tripulante con ID 2 se movió a la posición [2,1]
+[INFO] 17:34:19:183 discordiador/(14232:14241): El tripulante con ID 2 se movió a la posición [2,2]
+[INFO] 17:34:19:183 discordiador/(14232:14239): se hizo 2 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:34:19:183 discordiador/(14232:14241): llego a la tarea el tripulante 2
+[INFO] 17:34:19:184 discordiador/(14232:14241): el tripulante 2 esta realizando una tarea de CPU 
+[INFO] 17:34:20:183 discordiador/(14232:14239): se hizo 3 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:34:20:185 discordiador/(14232:14241): se hizo 1 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:34:21:184 discordiador/(14232:14239): se hizo 4 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:34:21:186 discordiador/(14232:14241): se hizo 2 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:34:22:187 discordiador/(14232:14239): se hizo 5 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:34:22:188 discordiador/(14232:14239): finalizo la ejecucion de la tarea el tripulante 1
+[INFO] 17:34:22:188 discordiador/(14232:14239): acaba de solicitar otra tarea el tripulante 1
+[INFO] 17:34:22:188 discordiador/(14232:14239): se le asigno otra tarea al tripulante1
+[INFO] 17:34:22:189 discordiador/(14232:14241): se hizo 3 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:34:23:195 discordiador/(14232:14241): se hizo 4 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:34:24:200 discordiador/(14232:14241): se hizo 5 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:34:24:200 discordiador/(14232:14241): finalizo la ejecucion de la tarea el tripulante 2
+[INFO] 17:34:24:200 discordiador/(14232:14241): acaba de solicitar otra tarea el tripulante 2
+[INFO] 17:34:24:200 discordiador/(14232:14241): se le asigno otra tarea al tripulante2
+[INFO] 17:37:05:334 discordiador/(14333:14333): INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
+[INFO] 17:37:05:334 discordiador/(14333:14333): 1|1
+[INFO] 17:37:05:334 discordiador/(14333:14333): 0|0
+[INFO] 17:37:05:335 discordiador/(14333:14340): cambio De Estado A Ready:1
+
+[INFO] 17:37:05:335 discordiador/(14333:14340): el tripulante se queda esperando a ser asignado 1
+[INFO] 17:37:05:336 discordiador/(14333:14343): cambio De Estado A Ready:2
+
+[INFO] 17:37:05:336 discordiador/(14333:14343): el tripulante se queda esperando a ser asignado 2
+[INFO] 17:37:10:980 discordiador/(14333:14333): INICIAR_PLANIFICACION
+[INFO] 17:37:10:981 discordiador/(14333:14338): cambio De Estado A Exec:1
+
+[INFO] 17:37:10:981 discordiador/(14333:14338): El tripulante con ID 1 cambió a la cola EXEC porque fue seleccionado para ejecutar
+[INFO] 17:37:10:981 discordiador/(14333:14338): cambio De Estado A Exec:2
+
+[INFO] 17:37:10:981 discordiador/(14333:14338): El tripulante con ID 2 cambió a la cola EXEC porque fue seleccionado para ejecutar
+[INFO] 17:37:10:981 discordiador/(14333:14340): fue seleccionado para ejecutar el tripulante 1
+[INFO] 17:37:10:981 discordiador/(14333:14340): se esta moviendo a la tarea la tarea el tripulante 1
+[INFO] 17:37:10:981 discordiador/(14333:14343): fue seleccionado para ejecutar el tripulante 2
+[INFO] 17:37:10:981 discordiador/(14333:14343): se esta moviendo a la tarea la tarea el tripulante 2
+[INFO] 17:37:11:981 discordiador/(14333:14343): El tripulante con ID 2 se movió a la posición [1,0]
+[INFO] 17:37:11:981 discordiador/(14333:14340): El tripulante con ID 1 se movió a la posición [2,1]
+[INFO] 17:37:12:982 discordiador/(14333:14340): El tripulante con ID 1 se movió a la posición [2,2]
+[INFO] 17:37:12:982 discordiador/(14333:14343): El tripulante con ID 2 se movió a la posición [2,0]
+[INFO] 17:37:12:982 discordiador/(14333:14340): llego a la tarea el tripulante 1
+[INFO] 17:37:12:983 discordiador/(14333:14340): el tripulante 1 esta realizando una tarea de CPU 
+[INFO] 17:37:13:983 discordiador/(14333:14340): se hizo 1 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:37:13:983 discordiador/(14333:14343): El tripulante con ID 2 se movió a la posición [2,1]
+[INFO] 17:37:14:984 discordiador/(14333:14340): se hizo 2 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:37:14:985 discordiador/(14333:14343): El tripulante con ID 2 se movió a la posición [2,2]
+[INFO] 17:37:14:985 discordiador/(14333:14343): llego a la tarea el tripulante 2
+[INFO] 17:37:14:985 discordiador/(14333:14343): el tripulante 2 esta realizando una tarea de CPU 
+[INFO] 17:37:15:984 discordiador/(14333:14340): se hizo 3 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:37:15:985 discordiador/(14333:14343): se hizo 1 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:37:16:985 discordiador/(14333:14340): se hizo 4 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:37:16:985 discordiador/(14333:14343): se hizo 2 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:37:17:985 discordiador/(14333:14340): se hizo 5 de CPU de un total de 5 del tripulante ID:1 
+[INFO] 17:37:17:985 discordiador/(14333:14340): finalizo la ejecucion de la tarea el tripulante 1
+[INFO] 17:37:17:985 discordiador/(14333:14340): acaba de solicitar otra tarea el tripulante 1
+[INFO] 17:37:17:985 discordiador/(14333:14340): se le asigno otra tarea al tripulante1
+[INFO] 17:37:17:987 discordiador/(14333:14343): se hizo 3 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:37:18:991 discordiador/(14333:14343): se hizo 4 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:37:19:992 discordiador/(14333:14343): se hizo 5 de CPU de un total de 5 del tripulante ID:2 
+[INFO] 17:37:19:992 discordiador/(14333:14343): finalizo la ejecucion de la tarea el tripulante 2
+[INFO] 17:37:19:992 discordiador/(14333:14343): acaba de solicitar otra tarea el tripulante 2
+[INFO] 17:37:19:992 discordiador/(14333:14343): se le asigno otra tarea al tripulante2
+[INFO] 17:43:55:671 discordiador/(14529:14529): log_info(logger,"El tripulante con ID 134514092 hizo -1075982136 de IO de un total de -1217054092",tripulante->idTripulante,r,tripulante->tareaAsignada->duracion);
+[INFO] 17:44:07:279 discordiador/(14529:14529): INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
+[INFO] 17:44:07:279 discordiador/(14529:14529): 1|1
+[INFO] 17:44:07:279 discordiador/(14529:14529): 0|0
+[INFO] 17:44:07:280 discordiador/(14529:14538): cambio De Estado A Ready:1
+
+[INFO] 17:44:07:281 discordiador/(14529:14540): cambio De Estado A Ready:2
+
+[INFO] 17:44:07:281 discordiador/(14529:14540): el tripulante se queda esperando a ser asignado 2
+[INFO] 17:44:07:282 discordiador/(14529:14538): el tripulante se queda esperando a ser asignado 1
+[INFO] 17:44:11:974 discordiador/(14529:14529): INICIAR_PLANIFICACION
+[INFO] 17:44:11:975 discordiador/(14529:14534): cambio De Estado A Exec:1
+
+[INFO] 17:44:11:975 discordiador/(14529:14534): El tripulante con ID 1 cambió a la cola EXEC porque fue seleccionado para ejecutar
+[INFO] 17:44:11:975 discordiador/(14529:14534): cambio De Estado A Exec:2
+
+[INFO] 17:44:11:975 discordiador/(14529:14534): El tripulante con ID 2 cambió a la cola EXEC porque fue seleccionado para ejecutar
+[INFO] 17:44:11:975 discordiador/(14529:14538): fue seleccionado para ejecutar el tripulante 1
+[INFO] 17:44:11:975 discordiador/(14529:14538): se esta moviendo a la tarea la tarea el tripulante 1
+[INFO] 17:44:11:975 discordiador/(14529:14540): fue seleccionado para ejecutar el tripulante 2
+[INFO] 17:44:11:975 discordiador/(14529:14540): se esta moviendo a la tarea la tarea el tripulante 2
+[INFO] 17:44:12:984 discordiador/(14529:14538): El tripulante con ID 1 se movió a la posición [2,1]
+[INFO] 17:44:12:984 discordiador/(14529:14540): El tripulante con ID 2 se movió a la posición [1,0]
+[INFO] 17:44:13:985 discordiador/(14529:14540): El tripulante con ID 2 se movió a la posición [2,0]
+[INFO] 17:44:13:985 discordiador/(14529:14538): El tripulante con ID 1 se movió a la posición [2,2]
+[INFO] 17:44:13:985 discordiador/(14529:14538): llego a la tarea el tripulante 1
+[INFO] 17:44:13:985 discordiador/(14529:14538): el tripulante 1 esta realizando una tarea de CPU 
+[INFO] 17:44:14:986 discordiador/(14529:14538): El tripulante con ID 1 hizo 1 de CPU de un total de 5
+[INFO] 17:44:14:987 discordiador/(14529:14540): El tripulante con ID 2 se movió a la posición [2,1]
+[INFO] 17:44:15:988 discordiador/(14529:14540): El tripulante con ID 2 se movió a la posición [2,2]
+[INFO] 17:44:15:988 discordiador/(14529:14538): El tripulante con ID 1 hizo 2 de CPU de un total de 5
+[INFO] 17:44:15:989 discordiador/(14529:14540): llego a la tarea el tripulante 2
+[INFO] 17:44:15:989 discordiador/(14529:14540): el tripulante 2 esta realizando una tarea de CPU 
+[INFO] 17:44:16:991 discordiador/(14529:14538): El tripulante con ID 1 hizo 3 de CPU de un total de 5
+[INFO] 17:44:16:992 discordiador/(14529:14540): El tripulante con ID 2 hizo 1 de CPU de un total de 5
+[INFO] 17:44:17:996 discordiador/(14529:14540): El tripulante con ID 2 hizo 2 de CPU de un total de 5
+[INFO] 17:44:17:997 discordiador/(14529:14538): El tripulante con ID 1 hizo 4 de CPU de un total de 5
+[INFO] 17:44:18:997 discordiador/(14529:14540): El tripulante con ID 2 hizo 3 de CPU de un total de 5
+[INFO] 17:44:18:998 discordiador/(14529:14538): El tripulante con ID 1 hizo 5 de CPU de un total de 5
+[INFO] 17:44:18:998 discordiador/(14529:14538): finalizo la ejecucion de la tarea el tripulante 1
+[INFO] 17:44:18:998 discordiador/(14529:14538): acaba de solicitar otra tarea el tripulante 1
+[INFO] 17:44:18:998 discordiador/(14529:14538): se le asigno otra tarea al tripulante1
+[INFO] 17:44:19:998 discordiador/(14529:14540): El tripulante con ID 2 hizo 4 de CPU de un total de 5
+[INFO] 17:44:20:999 discordiador/(14529:14540): El tripulante con ID 2 hizo 5 de CPU de un total de 5
+[INFO] 17:44:20:999 discordiador/(14529:14540): finalizo la ejecucion de la tarea el tripulante 2
+[INFO] 17:44:20:999 discordiador/(14529:14540): acaba de solicitar otra tarea el tripulante 2
+[INFO] 17:44:20:999 discordiador/(14529:14540): se le asigno otra tarea al tripulante2
