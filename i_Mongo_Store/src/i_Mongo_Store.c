@@ -259,10 +259,19 @@ char* generar_oxigeno(int32_t parametros){
 	string_append(&rutaTarea, "/Files");
 	crearDirectorio(rutaTarea);
 	string_append(&rutaTarea, "/Oxigeno.ims");
+	FILE* fp;
 
 	if(access(rutaTarea, F_OK) != -1){ //Si existe
 
-		FILE* fp = fopen(rutaTarea, "w+b");
+		fp = fopen(rutaTarea, "r+b");
+		//sacar todos los datos del fp como un char* y se lo pasas a la funcion de armar diccionario
+		//saca todos valores, y opera como lo de abajo
+
+
+
+	}else{
+
+		fp = fopen(rutaTarea, "w+b");
 		t_dictionary* dic = armar_diccionario(metadataFiles);
 		config_set_value_propio(dic,"SIZE",string_itoa(parametros));
 		uint32_t block_count = (parametros / BLOCK_SIZE) + 1;
@@ -276,13 +285,8 @@ char* generar_oxigeno(int32_t parametros){
 		dictionary_destroy(dic);
 		txt_close_file(fp);
 
-	}else{
-
-		FILE* fp = fopen(rutaTarea, "w+b");
-		txt_write_in_file(fp, metadataFiles);
-		txt_close_file(fp);
-
 	}
+
 	return "Funciono";
 
 }
