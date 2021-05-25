@@ -11,6 +11,9 @@ int main(void) {
 	printf("BLOCK SIZE: %d\n",superBloqueMap[0]);
 	printf("BLOCKS: %d\n",superBloqueMap[4]);
 
+	int32_t dato = 33;
+	generar_oxigeno(dato);
+
 	while(1){
 
 	}
@@ -63,9 +66,9 @@ int main(void) {
 void timerSincronizacion_superBloqueMap(){
 
 	while(1){
-		puts("funciona superBloque");
+		msync(superBloqueMap, tamanioSuperBloque, MS_SYNC);
+		puts("funciona SuperBloque");
 		sleep(TIEMPO_SINCRONIZACION / 1000);
-		pthread_detach(pthread_self());
 	}
 
 }
@@ -215,10 +218,42 @@ int contar_caracteres(char* path){
 
 }
 
+char* diccionarioFiles_to_char(t_dictionary* dic){
+
+	char* cadena = string_new();
+	char* keyAndValue;
+	char* valor;
+
+	valor = config_get_string_value_propio(dic, "SIZE");
+	keyAndValue = string_from_format("%s=%s\n","SIZE",valor);
+	string_append(&cadena, keyAndValue);
+	valor = config_get_string_value_propio(dic, "BLOCK_COUNT");
+	keyAndValue = string_from_format("%s=%s\n","BLOCK_COUNT",valor);
+	string_append(&cadena, keyAndValue);
+	valor = config_get_string_value_propio(dic, "BLOCKS");
+	keyAndValue = string_from_format("%s=%s\n","BLOCKS",valor);
+	string_append(&cadena, keyAndValue);
+	valor = config_get_string_value_propio(dic, "CARACTER_LLENADO");
+	keyAndValue = string_from_format("%s=%s\n","CARACTER_LLENADO",valor);
+	string_append(&cadena, keyAndValue);
+	valor = config_get_string_value_propio(dic, "MD5_ARCHIVO");
+	keyAndValue = string_from_format("%s=%s","MD5_ARCHIVO",valor);
+	string_append(&cadena, keyAndValue);
+
+	return cadena;
+
+}
 
 char* generar_oxigeno(int32_t parametros){
 
-	char oxigeno = 'O' ;
+	char* oxigeno = "O";
+	char* metadataFiles = string_new();
+	string_append(&metadataFiles,"SIZE=");
+	string_append(&metadataFiles,"\nBLOCK_COUNT=");
+	string_append(&metadataFiles,"\nBLOCKS=");
+	string_append(&metadataFiles,"\nCARACTER_LLENADO=");
+	string_append(&metadataFiles,oxigeno);
+	string_append(&metadataFiles,"\nMD5_ARCHIVO=");
 	char* rutaTarea= string_new();
 	string_append(&rutaTarea, PUNTO_MONTAJE);
 	string_append(&rutaTarea, "/Files");
@@ -227,20 +262,26 @@ char* generar_oxigeno(int32_t parametros){
 
 	if(access(rutaTarea, F_OK) != -1){ //Si existe
 
-		FILE* fp =  txt_open_for_append(rutaTarea);
-
-		for(int i=0; i < parametros ; i++){
-			fwrite(&oxigeno, sizeof(char),1, fp);
-		}
-		fclose(fp);
+		FILE* fp = fopen(rutaTarea, "w+b");
+		t_dictionary* dic = armar_diccionario(metadataFiles);
+		config_set_value_propio(dic,"SIZE",string_itoa(parametros));
+		uint32_t block_count = (parametros / BLOCK_SIZE) + 1;
+		config_set_value_propio(dic,"BLOCK_COUNT",string_itoa(block_count));
+		//hay que verificar en el bitmap los bloques libres
+		//una vez obtenidos los guardamos como el block_count usando string_from_format en el diccionario
+		//luego en los bloques que nos dijo el bitmap escribimos el caracter de llenado las veces que dice parametros
+		//luego actualizamos el bitmap en 1 en los bloques que escribimos
+		char* cadena = diccionarioFiles_to_char(dic);
+		txt_write_in_file(fp, cadena);
+		dictionary_destroy(dic);
+		txt_close_file(fp);
 
 	}else{
-		FILE* fp = fopen(rutaTarea,"w+b");
 
-		for(int i=0; i < parametros; i++){
-			fwrite(&oxigeno, sizeof(char),1, fp);
-		}
-		fclose(fp);
+		FILE* fp = fopen(rutaTarea, "w+b");
+		txt_write_in_file(fp, metadataFiles);
+		txt_close_file(fp);
+
 	}
 	return "Funciono";
 
@@ -287,7 +328,14 @@ char* consumir_oxigeno(int32_t parametros){
 
 char* generar_comida(int32_t parametros){
 
-	char comida = 'C' ;
+	char* comida = "C";
+	char* metadataFiles = string_new();
+	string_append(&metadataFiles,"SIZE=");
+	string_append(&metadataFiles,"\nBLOCK_COUNT=");
+	string_append(&metadataFiles,"\nBLOCKS=");
+	string_append(&metadataFiles,"\nCARACTER_LLENADO=");
+	string_append(&metadataFiles,comida);
+	string_append(&metadataFiles,"\nMD5_ARCHIVO=");
 	char* rutaTarea= string_new();
 	string_append(&rutaTarea, PUNTO_MONTAJE);
 	string_append(&rutaTarea, "/Files");
@@ -296,20 +344,26 @@ char* generar_comida(int32_t parametros){
 
 	if(access(rutaTarea, F_OK) != -1){ //Si existe
 
-		FILE* fp =  txt_open_for_append(rutaTarea);
-
-		for(int i=0; i < parametros; i++){
-			fwrite(&comida, sizeof(char),1, fp);
-		}
-		fclose(fp);
+		FILE* fp = fopen(rutaTarea, "w+b");
+		t_dictionary* dic = armar_diccionario(metadataFiles);
+		config_set_value_propio(dic,"SIZE",string_itoa(parametros));
+		uint32_t block_count = (parametros / BLOCK_SIZE) + 1;
+		config_set_value_propio(dic,"BLOCK_COUNT",string_itoa(block_count));
+		//hay que verificar en el bitmap los bloques libres
+		//una vez obtenidos los guardamos como el block_count usando string_from_format en el diccionario
+		//luego en los bloques que nos dijo el bitmap escribimos el caracter de llenado las veces que dice parametros
+		//luego actualizamos el bitmap en 1 en los bloques que escribimos
+		char* cadena = diccionarioFiles_to_char(dic);
+		txt_write_in_file(fp, cadena);
+		dictionary_destroy(dic);
+		txt_close_file(fp);
 
 	}else{
-		FILE* fp = fopen(rutaTarea,"w+b");
 
-		for(int i=0; i < parametros; i++){
-			fwrite(&comida, sizeof(char),1, fp);
-		}
-		fclose(fp);
+		FILE* fp = txt_open_for_append(rutaTarea);
+		txt_write_in_file(fp, metadataFiles);
+		txt_close_file(fp);
+
 	}
 	return "Funciono";
 
@@ -354,7 +408,14 @@ char* consumir_comida(int32_t parametros){
 
 char* generar_basura(int32_t parametros){
 
-	char basura = 'B' ;
+	char* basura = "B";
+	char* metadataFiles = string_new();
+	string_append(&metadataFiles,"SIZE=");
+	string_append(&metadataFiles,"\nBLOCK_COUNT=");
+	string_append(&metadataFiles,"\nBLOCKS=");
+	string_append(&metadataFiles,"\nCARACTER_LLENADO=");
+	string_append(&metadataFiles,basura);
+	string_append(&metadataFiles,"\nMD5_ARCHIVO=");
 	char* rutaTarea= string_new();
 	string_append(&rutaTarea, PUNTO_MONTAJE);
 	string_append(&rutaTarea, "/Files");
@@ -363,20 +424,26 @@ char* generar_basura(int32_t parametros){
 
 	if(access(rutaTarea, F_OK) != -1){ //Si existe
 
-		FILE* fp =  txt_open_for_append(rutaTarea);
-
-		for(int i=0; i < parametros; i++){
-			fwrite(&basura, sizeof(char),1, fp);
-		}
-		fclose(fp);
+		FILE* fp = fopen(rutaTarea, "w+b");
+		t_dictionary* dic = armar_diccionario(metadataFiles);
+		config_set_value_propio(dic,"SIZE",string_itoa(parametros));
+		uint32_t block_count = (parametros / BLOCK_SIZE) + 1;
+		config_set_value_propio(dic,"BLOCK_COUNT",string_itoa(block_count));
+		//hay que verificar en el bitmap los bloques libres
+		//una vez obtenidos los guardamos como el block_count usando string_from_format en el diccionario
+		//luego en los bloques que nos dijo el bitmap escribimos el caracter de llenado las veces que dice parametros
+		//luego actualizamos el bitmap en 1 en los bloques que escribimos
+		char* cadena = diccionarioFiles_to_char(dic);
+		txt_write_in_file(fp, cadena);
+		dictionary_destroy(dic);
+		txt_close_file(fp);
 
 	}else{
-		FILE* fp = fopen(rutaTarea,"w+b");
 
-		for(int i=0; i < parametros; i++){
-			fwrite(&basura, sizeof(char),1, fp);
-		}
-		fclose(fp);
+		FILE* fp = txt_open_for_append(rutaTarea);
+		txt_write_in_file(fp, metadataFiles);
+		txt_close_file(fp);
+
 	}
 	return "Funciono";
 
@@ -615,8 +682,6 @@ bool existeArchivo(char* path) {
 	}
 
 }
-
-
 
 void inicializarFS(){
 

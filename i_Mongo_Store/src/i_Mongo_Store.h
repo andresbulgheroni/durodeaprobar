@@ -53,6 +53,30 @@ typedef enum{
 	ERROR=6
 }op_code_tareas;
 
+typedef struct {
+	uint32_t SIZE;
+	uint32_t BLOCK_COUNT;
+	t_list* BLOCKS;
+	char* CARACTER_LLENADO;
+	char* MD5_ARCHIVO;
+}t_recurso;
+
+//typedef struct {
+//	uint32_t SIZE;
+//	uint32_t BLOCK_COUNT;
+//	t_list* BLOCKS;
+//	char* CARACTER_LLENADO;
+//	char* MD5_ARCHIVO;
+//}t_comida;
+//
+//typedef struct {
+//	uint32_t SIZE;
+//	uint32_t BLOCK_COUNT;
+//	t_list* BLOCKS;
+//	char* CARACTER_LLENADO;
+//	char* MD5_ARCHIVO;
+//}t_basura;
+
 void crear_log();
 void leerConfig();
 void crearDirectorio(char*);
@@ -76,6 +100,7 @@ char* descartar_basura();
 t_bitarray* crearBitmap(char*);
 void timerSincronizacion_superBloqueMap();
 void timerSincronizacion_blocksMap();
+char* diccionarioFiles_to_char(t_dictionary*);
 
 
 #endif /* I_MONGO_STORE_H_ */
