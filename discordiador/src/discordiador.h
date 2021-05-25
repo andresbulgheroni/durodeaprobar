@@ -65,23 +65,22 @@ sem_t sem_planificarMultitarea;
 sem_t sem_pausarPlanificacion;
 sem_t sem_sabotaje;
 
+
+
+
+
+
 sem_t sem_hiloTripulante;
-
-t_list* tareas;
-
-
-
 t_list* tripulantes;
 uint32_t numeroHiloTripulante;
 t_list* hilosTripulantes;
+t_list*sem_tripulante_ciclo;
 
 t_list* listaNuevos;
 t_list* listaReady;
 t_list* listaBloqueados;
 t_list*listaBloqueadosPorSabotaje;
-
 t_list* listaFinalizados;
-
 t_list* sem_tripulantes_ejecutar;
 
 

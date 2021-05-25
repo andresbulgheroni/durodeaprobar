@@ -70,6 +70,7 @@ void inicializarListasGlobales(){
 
 	hilosTripulantes = list_create();
 	sem_tripulantes_ejecutar = list_create();
+	sem_tripulante_ciclo= list_create();
 
 	sem_init(&sem_hiloTripulante,0,1);
 }
@@ -255,7 +256,12 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 		sem_wait(&sem_hiloTripulante);
 		sem_t* semaforoDelTripulante = malloc(sizeof(sem_t));
 		sem_init(semaforoDelTripulante, 1, 0);
+
+		sem_t* semaforoDelCicloDelTripulante=malloc(sizeof(sem_t));
+		sem_init(semaforoDelTripulante, 1, 0);
+
 		list_add(sem_tripulantes_ejecutar, (void*) semaforoDelTripulante);
+		list_add(sem_tripulante_ciclo,(void*)semaforoDelCicloDelTripulante);
 		pthread_create(&pthread_id[numeroHiloTripulante], NULL, (void*) ejecutarTripulante, tripulante);
 		pthread_detach(pthread_id[numeroHiloTripulante]);
 
@@ -417,25 +423,24 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			sem_post(&sem_pausarPlanificacion);
 
-//			if(estaPlanificando ==1){
-//				pthread_t hiloPlanificador;
-//				pthread_create(&hiloPlanificador, NULL, (void*) planificarSegun,NULL);
-//				pthread_detach(hiloPlanificador);
-//
-//			}
-//			if(estaPlanificando ==0){
-//				estaPlanificando= 1;
-//				//sem post a algo
-//			}
+			//list_iterate(sem_tripulante_ciclo,);
+
+			for(int i=0; i<list_size(sem_tripulante_ciclo); i++){
+				sem_t* semaforoDelTripulanteCiclo = (sem_t*) list_get(sem_tripulante_ciclo,i);
+				sem_post(semaforoDelTripulanteCiclo);
+			}
 
 			break;
 		}
 		case PAUSAR_PLANIFICACION: { //Este comando lo que busca es detener la planificación en cualquier momento(semaforo)
 
 			sem_wait(&sem_pausarPlanificacion);
-		//	estaPlanificando=0;
 
-			//ACA QUITARIA A LOS TRIPULANTES DE LAS RESPECTIVAS LISTAS EN ORDEN. LIST FILTER Y LIST SORT
+			for(int i=0; i<list_size(sem_tripulante_ciclo); i++){
+				sem_t* semaforoDelTripulanteCiclo = (sem_t*) list_get(sem_tripulante_ciclo,i);
+				sem_wait(semaforoDelTripulanteCiclo);
+			}
+
 
 			break;
 		}
@@ -1006,7 +1011,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 				if(llegoATarea(tripulante)){
 					log_info(logger,"llego a la tarea el tripulante %d",tripulante->idTripulante);
 
-					usleep(100);
+					//usleep(100);
 
 					ejecucionDeTareaTripulanteFIFO(tripulante);
 
