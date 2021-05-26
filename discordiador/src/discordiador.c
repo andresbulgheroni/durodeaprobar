@@ -543,7 +543,7 @@ void agregarTripulanteAListaReadyYAvisar(t_tripulante* tripulante){
 
 enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
 
-printf("cambioDeEstadoAReady el tripulante %d\n",tripulante->idTripulante);
+
 log_info(logger,"cambio De Estado A Ready:%d\n",tripulante->idTripulante);
 free(mensaje);
 
@@ -812,7 +812,7 @@ void planificarSegunFIFO(){			//TODO
 		sem_wait(&sem_pausarPlanificacion);
 		sem_wait(&sem_planificarMultitarea);
 
-		puts("hola soy FIFO que esta pasando?");
+
 		t_tripulante* tripulante = (t_tripulante*) list_remove(listaReady, 0);
 
 		if(tripulante!=NULL){
@@ -827,14 +827,15 @@ void planificarSegunFIFO(){			//TODO
 
 
 		}else{
-			printf("FIFO:no hay nadie a quien ejecutar");
+			printf("FIFO:no hay nadie a quien ejecutar\n");
 			sleep(RETARDO_CICLO_CPU);
+			sem_post(&sem_planificarMultitarea);
 		}
 
 		sem_post(&sem_pausarPlanificacion);
 		sem_post(&sem_sabotaje);
 
-		puts("FIFO:el tripulante ya puede planificar");
+		//puts("FIFO:el tripulante ya puede planificar\n");
 		}
 
 }
@@ -936,7 +937,7 @@ void enviarMensajeDeInicioDeTripulante(t_tripulante*tripulante){
 }
 
 void ejecutarTripulante(t_tripulante* tripulante){
-	//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
+	//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
 
 
 
@@ -972,7 +973,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 		t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
 		coordenadas->posX=2;
 		coordenadas->posY=2;
-			tareaPrueba->nombreTarea="cualquier_tarea";
+			tareaPrueba->nombreTarea="GENERAR_OXIGENO";
 			tareaPrueba->coordenadas=coordenadas;
 			tareaPrueba->duracion=5;
 			tripulante->tareaAsignada=tareaPrueba;
@@ -1002,14 +1003,29 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 					while (distancia != 0 && distancia != -1) {
 						moverAlTripulanteHastaLaTarea(tripulante);
-						distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : NULL);
+						distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
+						if(llegoATarea(tripulante)){
+
+						log_info(logger,"llego a la tarea el tripulante %d",tripulante->idTripulante);
+							if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)==TAREA_CPU){
+								log_info(logger,"la tarea es de CPU del tripulante %d",tripulante->idTripulante);
+							}
+							if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU){
+								log_info(logger,"se realiza un ciclo de CPU para enviar tarea del tripulante %d",tripulante->idTripulante);
+								sleep(RETARDO_CICLO_CPU);
+								tripulante->misCiclosDeCPU++;
+								//ENVIAR MENSAJE A IMONGO	enviar_paquete(mensaje, codigo, socketCliente)
+								log_info(logger,"el mensaje a imongo ha sido enviado exitosamentedel tripulante %d",tripulante->idTripulante);
+							}
+
+						}
 					}
 
 				}
 
 
 				if(llegoATarea(tripulante)){
-					log_info(logger,"llego a la tarea el tripulante %d",tripulante->idTripulante);
+					log_info(logger,"va a ejecutar la tarea el tripulante %d",tripulante->idTripulante);
 
 					//usleep(100);
 
@@ -1035,7 +1051,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 					t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
 					coordenadas->posX=3;
 					coordenadas->posY=4;
-					tareaPrueba->nombreTarea="GENERAR_OXIGENO_AHRE";
+					tareaPrueba->nombreTarea="GENERAR_OXIGENO";
 					tareaPrueba->coordenadas=coordenadas;
 					tareaPrueba->duracion=2;
 					tripulante->tareaAsignada=tareaPrueba;
@@ -1072,6 +1088,7 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 			sleep(RETARDO_CICLO_CPU);
 
 			log_info(logger,"El tripulante con ID %d hizo %d de CPU de un total de %d",tripulante->idTripulante,i,tripulante->tareaAsignada->duracion);
+			tripulante->misCiclosDeCPU++;
 		}
 
 
@@ -1080,32 +1097,29 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 
 
 		agregarTripulanteAListaBloqueadosYAvisar(tripulante);
-		log_tripulante_cambio_de_cola_planificacion(tripulante->idTripulante, "ES UNA TAREA DE ENTRADA Y SALIDA", "BLOCKED"); //PONER EN LISTA DE BLOQUEADOS
+		log_tripulante_cambio_de_cola_planificacion(tripulante->idTripulante, "ES UNA TAREA DE IO", "BLOCKED"); //PONER EN LISTA DE BLOQUEADOS
 
 
 		sem_post(&sem_planificarMultitarea);		//ES UNA IO PUEDO EJECUTAR OTRO TRIPULANTE
 
+		pthread_mutex_lock(&mutex_listaBloqueados);
 
-		int r=1;	// DURACION DE LA TAREA BLOQUEADA
-		while(tripulante->tareaAsignada->duracion>=r){
+		int r=1;
+
+		while(tripulante->tareaAsignada->duracion>=r){		// DURACION DE LA TAREA BLOQUEADA
 			sleep(RETARDO_CICLO_CPU);
-			r++;
-
 
 			log_info(logger,"El tripulante con ID %d hizo %d de IO de un total de %d",tripulante->idTripulante,r,tripulante->tareaAsignada->duracion);
 
-
+			r++;
 
 		}
+
+		pthread_mutex_unlock(&mutex_listaBloqueados);
+
 		list_remove(listaBloqueados, getIndexTripulanteEnLista(listaBloqueados,tripulante));		//	aca lo saco de la lista de bloqueo
 		agregarTripulanteAListaReadyYAvisar(tripulante);
 	}
-
-
-
-
-	//ACA MANDARIA EL MENSAJE DE LA TAREA A IMONGO
-
 
 
 	tripulante->tareaAsignada=NULL;
