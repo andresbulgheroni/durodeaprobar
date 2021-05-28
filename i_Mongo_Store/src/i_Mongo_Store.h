@@ -1,10 +1,3 @@
-/*
- * I_Mongo_Store.h
- *
- *  Created on: 21 abr. 2021
- *      Author: utnso
- */
-
 #ifndef I_MONGO_STORE_H_
 #define I_MONGO_STORE_H_
 
@@ -26,8 +19,6 @@
 #include <fcntl.h>
 #include <sys/types.h>
 
-#define MAX_BUFFER 512
-
 char* PUNTO_MONTAJE;
 char* PUERTO;
 char* IP;
@@ -41,7 +32,7 @@ t_log* logger;
 t_config* config;
 int tamanioBlocks;
 int tamanioSuperBloque;
-
+t_bitarray* bitmap;
 
 typedef enum{
 	GENERAR_OXIGENO = 0,
@@ -101,6 +92,42 @@ t_bitarray* crearBitmap(char*);
 void timerSincronizacion_superBloqueMap();
 void timerSincronizacion_blocksMap();
 char* diccionarioFiles_to_char(t_dictionary*);
+void setBitmap(int, int);
 
+// FUNCIONES PARA TESTING:
+
+void estadoSuperBloque(){
+	puts("");
+	printf("BLOCK SIZE: %d\n",superBloqueMap[0]);
+	printf("BLOCKS: %d\n",superBloqueMap[4]);
+
+	puts("------------------------------------");
+	for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
+		if(bitarray_test_bit(bitmap, i))printf("\n%d.\tOCUPADO", i+1);
+		else printf("\n%d.\tLIBRE", i+1);
+	}
+	puts("\n------------------------------------");
+}
+
+
+void estadoBitmap(){
+
+		int posicion;
+
+		for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
+			if(bitarray_test_bit(bitmap, i))printf("\n%d.\tOCUPADO", i+1);
+					else printf("\n%d.\tLIBRE", i+1);
+		}
+		printf("\n");
+
+		for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
+			if(!bitarray_test_bit(bitmap, i)){
+				posicion = i+1;
+						break;
+			}
+		}
+		printf("\nPrimer bloque libre en bitmap: %d \n", posicion);
+
+}
 
 #endif /* I_MONGO_STORE_H_ */
