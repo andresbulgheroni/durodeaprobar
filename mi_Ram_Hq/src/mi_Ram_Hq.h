@@ -26,6 +26,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <math.h>
 
 typedef enum{
 	SEGMENTACION_PURA = 1,
@@ -72,7 +73,6 @@ void* memoria_principal;
 
 //Paginacion
 
-
 void* memoria_virtual;
 t_dictionary* tabla_paginas_patota;
 t_list* frames_libres_principal;
@@ -101,11 +101,35 @@ typedef struct {
 
 } t_tcb;
 
+//Paginacion
+
+typedef struct {
+
+	t_pcb* patota_control_block;
+	t_string* tareas;
+	t_tcb* tripulante_control_block;
+
+} t_datos;
+
 void init ();
 void iniciarMapa();
 void terminar ();
 int32_t get_esquema_memoria(char* esquema_config);
 int32_t get_algoritmo(char* algoritmo_config);
 void recibir_mensaje(int32_t* conexion);
+void configurar_paginacion();
+void crear_patota(uint32_t id_patota, t_string* tareas);
+t_list* get_frames_libres();
+t_list* get_frames_a_ubicar(uint32_t cantidad);
+void ubicar_frames(t_list* frames, t_datos* datos);
+void iniciar_tripulante(iniciar_tripulante_msg tripulante);
+void traer_pagina_a_memoria(t_pagina_patota* pagina);
+bool memoria_llena();
+bool swap_lleno();
+int32_t get_frame();
+t_list* swap_libres();
+int32_t pos_swap(t_pagina_patota* pagina);
+int32_t reemplazo_Clock();
+int32_t reemplazo_LRU();
 
 #endif /* MI_RAM_HQ_H_ */

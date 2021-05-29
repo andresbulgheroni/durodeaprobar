@@ -44,8 +44,7 @@ void recibir_mensaje(int32_t* conexion){
 
 				iniciar_patota_msg* mensaje = deserializar_paquete(paquete);
 
-				log_debug(logger, "Id patota: %d", mensaje->idPatota);
-				log_debug(logger, "Tareas: %s", mensaje->tareas->string);
+				crear_patota(mensaje->idPatota, mensaje->tareas);
 
 				free(mensaje->tareas);
 				free(mensaje);
@@ -57,10 +56,7 @@ void recibir_mensaje(int32_t* conexion){
 
 				iniciar_tripulante_msg* mensaje = deserializar_paquete(paquete);
 
-				log_debug(logger, "Id patota: %d", mensaje->idPatota);
-				log_debug(logger, "Id tripulante: %d", mensaje->idTripulante);
-				log_debug(logger, "PosX: %d", mensaje->coordenadas->posX);
-				log_debug(logger, "PosY: %d", mensaje->coordenadas->posY);
+				iniciar_tripulante(mensaje);
 
 				free(mensaje->coordenadas);
 				free(mensaje);
@@ -138,62 +134,69 @@ void init (){
 	switch(ESQUEMA_MEMORIA){
 		case SEGMENTACION_PURA:break;
 		case PAGINACION_VIRTUAL:{
-			if(TAMANIO_MEMORIA%TAMANIO_PAGINA != 0 || TAMANIO_SWAP%TAMANIO_PAGINA != 0){
-				log_error(logger, "Mal configurados tamanios de memoria y pagina");
-			}
 
-			int32_t fileDes = open(PATH_SWAP, O_RDWR | O_APPEND | O_CREAT, 0777);
-
-			if(fileDes == -1){
-				log_error(logger, "No se pudo abrir el archivo");
-				close(fileDes);
-			}
-
-			if(fileDes >= 0){
-
-				lseek(fileDes, TAMANIO_SWAP - 1, SEEK_SET);
-
-				write(fileDes, "", 1);
-
-				memoria_virtual =  mmap(0, TAMANIO_SWAP, PROT_WRITE | PROT_READ, MAP_SHARED, fileDes, 0);
-
-				if(memoria_virtual == MAP_FAILED){
-					log_error(logger, "Fallo en el mapeo de archivo SWAP");
-					close(fileDes);
-				}
-
-				frames_swap = list_create();
-				frames_libres_principal = list_create();
-				lista_para_reemplazo = list_create();
-
-				for(uint32_t i = 0; i < (TAMANIO_SWAP / TAMANIO_PAGINA);i++){
-					t_frame* frame = malloc(sizeof(t_frame));
-					frame->pagina = NULL;
-					frame->pos = i;
-					list_add(frames_swap, frame);
-				}
-
-				for(uint32_t i = 0; i < (TAMANIO_MEMORIA / TAMANIO_PAGINA); i++){
-					t_frame_libre* nro_frame = malloc(sizeof(t_frame_libre));
-					nro_frame->pos = i;
-					list_add(frames_libres_principal, nro_frame);
-				}
-
-				if(ALGORITMO_REEMPLAZO == CLOCK){
-					buffer_clock_pos = 0;
-					for(uint32_t i = 0; i < (TAMANIO_MEMORIA / TAMANIO_PAGINA); i++){
-						t_buffer_clock* frame = malloc(sizeof(t_frame));
-						frame->pagina = NULL;
-						list_add(lista_para_reemplazo, frame);
-					}
-				}
-
-			}
+			configurar_paginacion();
 
 			break;
 		}
 	}
 	//iniciarMapa();
+
+}
+
+void configurar_paginacion(){
+
+	if(TAMANIO_MEMORIA%TAMANIO_PAGINA != 0 || TAMANIO_SWAP%TAMANIO_PAGINA != 0){
+		log_error(logger, "Mal configurados tamanios de memoria y pagina");
+	}
+
+	int32_t fileDes = open(PATH_SWAP, O_RDWR | O_APPEND | O_CREAT, 0777);
+
+	if(fileDes == -1){
+		log_error(logger, "No se pudo abrir el archivo");
+		close(fileDes);
+	}
+
+	if(fileDes >= 0){
+
+		lseek(fileDes, TAMANIO_SWAP - 1, SEEK_SET);
+
+		write(fileDes, "", 1);
+
+		memoria_virtual =  mmap(0, TAMANIO_SWAP, PROT_WRITE | PROT_READ, MAP_SHARED, fileDes, 0);
+
+		if(memoria_virtual == MAP_FAILED){
+			log_error(logger, "Fallo en el mapeo de archivo SWAP");
+			close(fileDes);
+		}
+
+		frames_swap = list_create();
+		frames_libres_principal = list_create();
+		lista_para_reemplazo = list_create();
+
+		for(uint32_t i = 0; i < (TAMANIO_SWAP / TAMANIO_PAGINA);i++){
+			t_frame* frame = malloc(sizeof(t_frame));
+			frame->pagina = NULL;
+			frame->pos = i;
+			list_add(frames_swap, frame);
+		}
+
+		for(uint32_t i = 0; i < (TAMANIO_MEMORIA / TAMANIO_PAGINA); i++){
+			t_frame_libre* nro_frame = malloc(sizeof(t_frame_libre));
+			nro_frame->pos = i;
+			list_add(frames_libres_principal, nro_frame);
+		}
+
+		if(ALGORITMO_REEMPLAZO == CLOCK){
+			buffer_clock_pos = 0;
+			for(uint32_t i = 0; i < (TAMANIO_MEMORIA / TAMANIO_PAGINA); i++){
+				t_buffer_clock* frame = malloc(sizeof(t_frame));
+				frame->pagina = NULL;
+				list_add(lista_para_reemplazo, frame);
+			}
+		}
+
+	}
 
 }
 
@@ -218,6 +221,264 @@ void terminar(){
 
 }
 
+void crear_patota(uint32_t id_patota, t_string* tareas){
+
+
+	if(!dictionary_has_key(tabla_paginas_patota, string_itoa(id_patota))){
+
+		int32_t cantidad_frames = ceil((sizeof(id_patota) + sizeof(int32_t) + tareas->length) / TAMANIO_PAGINA);
+
+		t_list* paginas = list_create();
+
+		void* datos = malloc(TAMANIO_PAGINA * cantidad_frames);
+
+		int32_t offset = 0;
+
+		int32_t inicio_tareas = sizeof(id_patota) + sizeof(int32_t);
+		memcpy(datos + offset, &id_patota, sizeof(id_patota));
+		offset+=sizeof(id_patota);
+		memcpy(datos + offset, &inicio_tareas, sizeof(id_patota));
+		offset+=sizeof(int32_t);
+		memcpy(datos + offset, tareas->string, tareas->length);
+
+		offset = 0;
+		for(int32_t i = 0; i < cantidad_frames; i++){
+
+			t_pagina_patota* pagina = malloc(sizeof(t_pagina_patota));
+			int32_t frame = get_frame();
+			pagina->nro_frame = frame;
+			pagina->presente = true;
+			pagina->uso = true;
+			pagina->modificado = false;
+
+			list_add(pagina);
+
+			memcpy(memoria_principal + (frame * TAMANIO_PAGINA), datos + offset, TAMANIO_PAGINA);
+			offset += TAMANIO_PAGINA;
+
+		}
+
+		dictionary_put(tabla_paginas_patota, string_itoa(id_patota), paginas);
+
+	}
+
+}
+
+void iniciar_tripulante(iniciar_tripulante_msg* tripulante){
+
+	if(dictionary_has_key(tabla_paginas_patota, string_itoa(tripulante->idPatota))){
+
+		t_list* paginas = dictionary_get(tabla_paginas_patota, string_itoa(tripulante->idPatota));
+		uint32_t cantidad_paginas_inicial = list_size(paginas);
+		int32_t size_inicial = cantidad_paginas_inicial * TAMANIO_PAGINA;
+		void* datos_cargados = malloc(size_inicial);
+		uint32_t indice = 0;
+		void obtener_paginas_de_memoria(t_pagina_patota* pagina){
+
+			if(!pagina->presente)
+				traer_pagina_a_memoria(pagina);
+
+			memcpy(datos_cargados + indice++ * TAMANIO_PAGINA ,memoria_principal + pagina->nro_frame * TAMANIO_PAGINA, TAMANIO_PAGINA);
+			pagina->uso = true;
+
+		}
+
+		list_iterate(paginas, obtener_paginas_de_memoria);
+
+
+		//REVISAR ESTA PARTE SEGUN LO QUE DIGAN LOS AYUDANTES
+		t_tcb* tripulante_nuevo = malloc(sizeof(t_tcb));
+
+		tripulante_nuevo->tid = tripulante->idTripulante;
+		tripulante_nuevo->estado = 'N';
+		tripulante_nuevo->posX = tripulante->coordenadas->posX;
+		tripulante_nuevo->posY = tripulante->coordenadas->posY;
+		tripulante_nuevo->proxima_instruccion = 0;
+		tripulante_nuevo->direccion_patota = 0;
+
+		uint32_t direccion_tareas;
+		memcpy(&direccion_tareas, datos_cargados + sizeof(uint32_t), sizeof(uint32_t));
+
+		uint32_t cantidad_frames = ceil((size_inicial + sizeof(t_tcb)) / TAMANIO_PAGINA);
+
+		uint32_t size_nuevo = cantidad_frames * TAMANIO_PAGINA;
+
+		void* datos_nuevos = malloc(size_nuevo);
+
+		if(cantidad_frames > cantidad_paginas_inicial){
+
+			t_list* nuevos_frames = get_frames_a_ubicar(cantidad_frames - cantidad_paginas_inicial);
+
+			void agregar_paginas_nuevas(uint32_t* frame){
+
+				t_pagina_patota* pagina_nueva = malloc(sizeof(t_pagina_patota));
+
+				pagina_nueva->nro_frame = *frame;
+				pagina_nueva->uso = true;
+				pagina_nueva->presente = true;
+				pagina_nueva->modificado = false;
+
+				list_add(paginas, pagina_nueva);
+
+			}
+
+			list_iterate(nuevos_frames, agregar_paginas_nuevas);
+
+		}
+
+
+
+	}
+
+}
+
+void traer_pagina_a_memoria(t_pagina_patota* pagina){
+
+
+
+}
+
+bool memoria_llena(){
+	return list_size(frames_libres_principal) == 0;
+}
+
+bool swap_lleno(){
+	return list_size(swap_libres()) == 0;
+}
+
+t_list* swap_libres(){
+	bool libre(t_frame* frame){
+		return frame->pagina == NULL;
+	}
+
+	return list_filter(frames_swap, libre);
+}
+
+int32_t get_frame(){
+	int32_t nro_frame = -1;
+
+	if(!memoria_llena()){
+		t_frame* first_fit = list_remove(frames_libres_principal, 0);
+		nro_frame = first_fit->pos;
+		if(ALGORITMO_REEMPLAZO == LRU){
+			buffer_clock_pos = nro_frame + 1;
+			if(buffer_clock_pos == (TAMANIO_MEMORIA / 32)){
+				buffer_clock_pos = 0;
+			}
+		}
+		free(first_fit);
+	}else{
+
+		switch(ALGORITMO_REEMPLAZO){
+			case LRU: nro_frame = reemplazo_LRU(); break;
+			case CLOCK: nro_frame = reemplazo_Clock(); break;
+		}
+		if(nro_frame >= 0){
+			log_debug(logger, "Reemplazo en frame %d", nro_frame);
+		}else{
+			log_error(logger, "Fallo reemplazo en memoria principal");
+		}
+
+	}
+
+	return nro_frame;
+}
+
+int32_t pos_swap(t_pagina_patota* pagina){
+	int32_t pos = -1;
+	t_frame* frame_swap;
+
+	bool en_swap(t_frame* frame){
+		return frame->pagina == pagina;
+	}
+
+	t_list* contiene = list_filter(frames_swap, en_swap);
+
+	if(list_size(contiene) == 0){
+		t_list* libres = swap_libres();
+
+		if(list_size(libres) > 0){
+			frame_swap = (t_frame*)(list_get(libres, 0));
+			pos = frame_swap->pos;
+		}
+
+	}else{
+		frame_swap = (t_frame*)(list_get(contiene, 0));
+		pos = frame_swap->pos;
+	}
+
+	return pos;
+
+}
+
+int32_t reemplazo_LRU(){
+	int32_t frame = -1;
+
+	t_pagina_patota* pagina_removida = list_remove(lista_para_reemplazo, 0);
+	frame = pagina_removida->nro_frame;
+	if(pagina_removida->modificado){
+		uint32_t estado;
+		pagina_removida->presente =false;
+		guardar_en_memoria_swap(pagina_removida, traer_de_memoria_principal(pagina_removida), &estado);
+	}
+
+	return frame;
+}
+
+int32_t reemplazo_Clock(){
+	int32_t frame = -1;
+	t_pagina_patota* pagina_removida = NULL;
+	uint32_t paso = 0;
+	uint32_t buffer_recorrido = buffer_clock_pos;
+	uint32_t pos_max = (TAMANIO_MEMORIA / TAMANIO_PAGINA) - 1;
+	while(pagina_removida == NULL){
+		switch (paso) {
+			case 0:{
+				do{
+					t_buffer_clock* buff = list_get(lista_para_reemplazo, buffer_recorrido);
+
+					if(!(buff->pagina->uso) && !(buff->pagina->modificado)){
+						pagina_removida = buff->pagina;
+						buff->pagina = NULL;
+					}
+					buffer_recorrido++;
+					if(buffer_recorrido > pos_max){
+						buffer_recorrido = 0;
+					}
+				}while(pagina_removida == NULL && buffer_recorrido != buffer_clock_pos);
+				paso = 1;
+				break;
+			}
+			case 1:{
+				do{
+					t_buffer_clock* buff = list_get(lista_para_reemplazo, buffer_recorrido);
+					if(!(buff->pagina->uso) && (buff->pagina->modificado)){
+						pagina_removida = buff->pagina;
+						buff->pagina = NULL;
+					}
+					buff->pagina->uso = false;
+					buffer_recorrido++;
+					if(buffer_recorrido > pos_max){
+						buffer_recorrido = 0;
+					}
+				}while(pagina_removida == NULL && buffer_recorrido != buffer_clock_pos);
+				paso = 0;
+				break;
+			}
+		}
+	}
+
+	buffer_clock_pos = buffer_recorrido;
+	frame = pagina_removida->nro_frame;
+
+	if(pagina_removida->modificado){
+		uint32_t estado;
+		pagina_removida->presente =false;
+		guardar_en_memoria_swap(pagina_removida, traer_de_memoria_principal(pagina_removida), &estado);
+	}
+	return frame;
+}
+
 int32_t get_esquema_memoria(char* esquema_config) {
 
 	if(strcmp("PAGINACION", esquema_config) == 0){
@@ -231,6 +492,7 @@ int32_t get_esquema_memoria(char* esquema_config) {
 	}
 
 	return -1;
+
 }
 
 int32_t get_algoritmo(char* algoritmo_config) {
