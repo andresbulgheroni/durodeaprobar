@@ -65,6 +65,8 @@ sem_t sem_planificarMultitarea;
 sem_t sem_pausarPlanificacion;
 sem_t sem_sabotaje;
 
+sem_t semaforoInicioCicloBloqueado;
+
 
 
 
@@ -153,27 +155,37 @@ typedef struct
 	uint32_t quantumDisponible;
 	uint32_t socketTripulanteRam;
 	uint32_t socketTripulanteImongo;
-	//uint32_t cantidadDeTareasAsignadas;
-	//uint32_t flagDeSabotaje; 1 o 0
+
 	uint32_t fueExpulsado; //1 o 0
-	//bool llegoALaTarea;
+
+	sem_t*semaforoCiclo;
+	sem_t*semaforoBloqueadoTripulante;
 
 } t_tripulante;
 
 
-op_code_consola string_to_op_code_consola (char* );
-op_code_tareas string_to_op_code_tareas (char*);
-void crearHiloPlanificador();
-int getIndexTripulanteEnLista(t_list* , t_tripulante* );
+//Inicializacion
 void iniciarLog();
 void inicializarListasGlobales();
 void inicializarConfig(t_config*);
 void inicializarSemaforoPlanificador();
+void crearHiloPlanificador();
+
+//Consola
 void leer_consola();
-void log_movimiento_tripulante(uint32_t, uint32_t, uint32_t);
-void log_tripulante_cambio_de_cola_planificacion(uint32_t, char*, char*);
+void pausarPlanificacion();
+op_code_consola string_to_op_code_consola (char* );
+op_code_tareas string_to_op_code_tareas (char*);
+
+
+
 
 //TRIPULANTES
+void liberarArray(char**);
+int cantidadElementosArray(char**);
+
+void sacarTripulanteDeLista(t_tripulante* , t_list* );
+
 void inicializarAtributosATripulante(t_list*);
 void crearHilosTripulantes();
 void ejecutarTripulante(t_tripulante*);
@@ -182,6 +194,18 @@ void agregarTripulanteAListaReadyYAvisar(t_tripulante*);
 void agregarTripulanteAListaExecYAvisar(t_tripulante*);
 void agregarTripulanteAListaBloqueadosYAvisar(t_tripulante*);
 void agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(t_tripulante*);
+int getIndexTripulanteEnLista(t_list* , t_tripulante* );
+void log_movimiento_tripulante(uint32_t, uint32_t, uint32_t);
+void log_tripulante_cambio_de_cola_planificacion(uint32_t, char*, char*);
+
+void moverAlTripulanteHastaLaTarea(t_tripulante*);
+int llegoATarea(t_tripulante*);
+int distanciaA(t_coordenadas*, t_coordenadas*);
+
+//SABOTAJE
+t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje*);
+void moverAlTripulanteHastaElSabotaje(t_tripulante*);
+int llegoAlSabotaje(t_tripulante*);
 
 //PLANIFICACION
 algoritmo_code stringACodigoAlgoritmo(const char* );
@@ -191,16 +215,13 @@ void planificarSegunRR();
 void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante);
 
 
-void moverAlTripulanteHastaElSabotaje(t_tripulante*);
-int llegoAlSabotaje(t_tripulante*);
-int distanciaA(t_coordenadas*, t_coordenadas*);
-int getIndexTripulanteEnLista(t_list* , t_tripulante* );
-void liberarArray(char**);
-int cantidadElementosArray(char**);
-void sacarTripulanteDeLista(t_tripulante* , t_list* );
-void moverAlTripulanteHastaLaTarea(t_tripulante*);
-int llegoATarea(t_tripulante*);
-t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje*);
+
+
+
+
+
+
+
 
 
 
