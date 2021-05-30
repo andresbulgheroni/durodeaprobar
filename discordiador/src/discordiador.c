@@ -32,7 +32,7 @@ int main(void){
 	inicializarListasGlobales();
 	//iniciarHiloSabotaje();
 	crearHiloPlanificador();
-
+	inicioHiloPlanificarBloqueo();
 	inicializarSemaforoPlanificador();
 
 	puts("hola viajero, soy el discordiador, ¿En que puedo ayudarte?");
@@ -55,7 +55,7 @@ void crearHiloPlanificador(){
 
 void inicializarListasGlobales(){
 
-	estaPlanificando=1;
+	//estaPlanificando=1;
 	haySabotaje=0;
 	numeroHiloTripulante=0;
 
@@ -64,6 +64,7 @@ void inicializarListasGlobales(){
 	listaBloqueados= list_create();
 	listaBloqueadosPorSabotaje= list_create();
 
+	listaEjecutando = list_create();
 	listaFinalizados = list_create();
 
 	tripulantes = list_create();
@@ -288,28 +289,7 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 	id_patota++;
 }
 
-void pausarPlanificacion(){
 
-//				for(int i=0; i<list_size(sem_tripulante_ciclo); i++){
-//					sem_t* semaforoParaCortarCicloTripulante = (sem_t*) list_get(sem_tripulante_ciclo,i);
-//					sem_wait(semaforoParaCortarCicloTripulante);
-//				}
-
-				sem_wait(&sem_pausarPlanificacion);
-
-				void iterador(sem_t*semaforoParaCortarCicloTripulante){
-					sem_wait(semaforoParaCortarCicloTripulante);
-				}
-				list_iterate(sem_tripulante_ciclo,(void*) iterador);
-
-
-
-
-
-				puts("se pauso");
-
-
-}
 
 void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
@@ -325,8 +305,8 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 		switch(codigo_mensaje){
 
-		case INICIAR_PATOTA: {	//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
-								//INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt
+		case INICIAR_PATOTA: {	//INICIAR_PATOTA 3 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+								//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt
 
 			uint32_t socketPatota = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 
@@ -402,11 +382,16 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			char output[128];
 			strftime(output,128,"%d/%m/%y %H:%M:%S",tlocal);
 			printf("\nEstado de la Nave: %s",output);
+			log_info(logger,"Estado de la Nave: %s",output);
 			int i = 0;
 
 			for(i=0; i<list_size(tripulantes);i++){
 				t_tripulante* tripulante = list_get(tripulantes, i);
-				printf("\nTripulante: %s Patota: %s Status: %s",
+				printf("Tripulante: %s Patota: %s Status: %s",
+						string_itoa(tripulante->idTripulante),
+						string_itoa(tripulante->idPatota),
+						convertirEnumAString(tripulante->estado));
+				log_info(logger,"\nTripulante: %s Patota: %s Status: %s",
 						string_itoa(tripulante->idTripulante),
 						string_itoa(tripulante->idPatota),
 						convertirEnumAString(tripulante->estado));
@@ -458,13 +443,21 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			sem_post(&sem_pausarPlanificacion);
 
+			estaPlanificando=1;
 
+//			for(int i=0; i<list_size(sem_tripulante_ciclo); i++){
+//				sem_t* semaforoDelTripulanteCiclo = (sem_t*) list_get(sem_tripulante_ciclo,i);
+//				sem_post(semaforoDelTripulanteCiclo);
+//			}
 
-			for(int i=0; i<list_size(sem_tripulante_ciclo); i++){
-				sem_t* semaforoDelTripulanteCiclo = (sem_t*) list_get(sem_tripulante_ciclo,i);
-				sem_post(semaforoDelTripulanteCiclo);
+			if(!list_is_empty(listaEjecutando)){
+
+			void iterador(t_tripulante*tripulante){
+						sem_post(tripulante->semaforoCiclo);
+						}
+			list_iterate(listaEjecutando,(void*) iterador);
+
 			}
-
 
 			break;
 		}
@@ -472,12 +465,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
 
-			//estaPlanificando=0;
-
-			pthread_t hiloPausarPlanificacion;
-				pthread_create(&hiloPausarPlanificacion, NULL, (void*) pausarPlanificacion,NULL);
-				pthread_detach(hiloPausarPlanificacion);
-
+			estaPlanificando=0;
 
 
 			break;
@@ -592,9 +580,9 @@ void agregarTripulanteAListaExecYAvisar(t_tripulante* tripulante){
 
 	tripulante->estado=EXEC;
 
-	//pthread_mutex_lock(&mutex_listaEjecutando);
-	//list_add(listaExec,tripulante);
-	//pthread_mutex_lock(&mutex_listaEjecutando);
+	pthread_mutex_lock(&mutex_listaEjecutando);
+	list_add(listaEjecutando,tripulante);
+	pthread_mutex_unlock(&mutex_listaEjecutando);
 
 	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
 	mensaje->idTripulante=tripulante->idTripulante;
@@ -844,40 +832,40 @@ void planificarSegun() {
 
 
 
-void planificarSegunFIFO(){			//TODO
-		while(true){
-		sem_wait(&sem_sabotaje);
-		sem_wait(&sem_pausarPlanificacion);
-		sem_wait(&sem_planificarMultitarea);
-
-
-		t_tripulante* tripulante = (t_tripulante*) list_remove(listaReady, 0);
-
-		if(tripulante!=NULL){
-		printf("FIFO:voy a asignar al tripulante %d\n",tripulante->idTripulante);
-
-		agregarTripulanteAListaExecYAvisar(tripulante);
-		log_tripulante_cambio_de_cola_planificacion(tripulante->idTripulante, "fue seleccionado para ejecutar", "EXEC");
-
-		printf("FIFO:voy a planificar a el tripulante %d\n",tripulante->idTripulante);
-
-		sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante-1);
-		sem_post(semaforoDelTripulante);
-
-
-		}else{
-			printf("FIFO:no hay nadie a quien ejecutar\n");
-			sleep(RETARDO_CICLO_CPU);
-			sem_post(&sem_planificarMultitarea);
-		}
-
-		sem_post(&sem_pausarPlanificacion);
-		sem_post(&sem_sabotaje);
-
-		//puts("FIFO:el tripulante ya puede planificar\n");
-		}
-
-}
+//void planificarSegunFIFO(){			//TODO
+//		while(true){
+//		sem_wait(&sem_sabotaje);
+//		sem_wait(&sem_pausarPlanificacion);
+//		sem_wait(&sem_planificarMultitarea);
+//
+//
+//		t_tripulante* tripulante = (t_tripulante*) list_remove(listaReady, 0);
+//
+//		if(tripulante!=NULL){
+//		printf("FIFO:voy a asignar al tripulante %d\n",tripulante->idTripulante);
+//
+//		agregarTripulanteAListaExecYAvisar(tripulante);
+//		log_tripulante_cambio_de_cola_planificacion(tripulante->idTripulante, "fue seleccionado para ejecutar", "EXEC");
+//
+//		printf("FIFO:voy a planificar a el tripulante %d\n",tripulante->idTripulante);
+//
+//		sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante-1);
+//		sem_post(semaforoDelTripulante);
+//
+//
+//		}else{
+//			printf("FIFO:no hay nadie a quien ejecutar\n");
+//			sleep(RETARDO_CICLO_CPU);
+//			sem_post(&sem_planificarMultitarea);
+//		}
+//
+//		sem_post(&sem_pausarPlanificacion);
+//		sem_post(&sem_sabotaje);
+//
+//		//puts("FIFO:el tripulante ya puede planificar\n");
+//		}
+//
+//}
 
 
 
@@ -944,7 +932,7 @@ void enviarMensajeDeInicioDeTripulante(t_tripulante*tripulante){
 }
 
 void ejecutarTripulante(t_tripulante* tripulante){
-	//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+	//INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
 
 
 
@@ -980,7 +968,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 		t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
 		coordenadas->posX=2;
 		coordenadas->posY=2;
-			tareaPrueba->nombreTarea="GENERAR_OXIGENO_AHRE";
+			tareaPrueba->nombreTarea="GENERAR_OXIGENO";
 			tareaPrueba->coordenadas=coordenadas;
 			tareaPrueba->duracion=5;
 			tripulante->tareaAsignada=tareaPrueba;
@@ -1010,9 +998,12 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 					while (distancia != 0 && distancia != -1) {
 
-						sem_wait(tripulante->semaforoCiclo);
+						if(estaPlanificando==0){
+							sem_wait(tripulante->semaforoCiclo);
+						}
+
 						moverAlTripulanteHastaLaTarea(tripulante);
-						sem_post(tripulante->semaforoCiclo);
+
 
 						distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
 
@@ -1027,13 +1018,16 @@ void ejecutarTripulante(t_tripulante* tripulante){
 							}
 							if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU){
 
-								sem_wait(tripulante->semaforoCiclo);
+								if(estaPlanificando==0){
+									sem_wait(tripulante->semaforoCiclo);
+								}
+
 								log_info(logger,"se realiza un ciclo de CPU para enviar tarea del tripulante %d",tripulante->idTripulante);
 								sleep(RETARDO_CICLO_CPU);
 								tripulante->misCiclosDeCPU++;
 								//ENVIAR MENSAJE A IMONGO	enviar_paquete(mensaje, codigo, socketCliente)
 								log_info(logger,"el mensaje a imongo ha sido enviado exitosamentedel tripulante %d",tripulante->idTripulante);
-								sem_post(tripulante->semaforoCiclo);
+
 
 							}
 
@@ -1078,8 +1072,10 @@ void ejecutarTripulante(t_tripulante* tripulante){
 					log_info(logger,"se le asigno otra tarea al tripulante%d",tripulante->idTripulante);
 					//	agregarTripulanteAListaReadyYAvisar(tripulante);
 
+						list_remove(listaEjecutando, getIndexTripulanteEnLista(listaEjecutando,tripulante));
 						sem_post(&sem_planificarMultitarea);		//DEBERIA IR ACA DENTRO DEL FIN DE TAREA
 
+						log_info(logger,"se saco de la lista EXEC al tripulante %d",tripulante->idTripulante);
 				}
 
 
@@ -1088,7 +1084,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 			else if(stringACodigoAlgoritmo(ALGORITMO)==RR){
 				puts("hola soy RR");
 			}
-			puts("llegue al final");
+			printf("llego al finalel tripulante con ID %d\n",tripulante->idTripulante);
 			tripulante->estado=FINISHED;
 
 
@@ -1107,37 +1103,46 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 		log_info(logger, "el tripulante %d esta realizando una tarea de CPU ",tripulante->idTripulante);
 		for(int i=1;i<=tripulante->tareaAsignada->duracion;i++){
 
+			if(estaPlanificando==0){
 			sem_wait(tripulante->semaforoCiclo);
+			}
 			sleep(RETARDO_CICLO_CPU);
 
 			log_info(logger,"El tripulante con ID %d hizo %d de CPU de un total de %d",tripulante->idTripulante,i,tripulante->tareaAsignada->duracion);
 			tripulante->misCiclosDeCPU++;
 
-			sem_post(tripulante->semaforoCiclo);
+
 		}
 
 
 	}
 	else if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU){
 
-		//tiraSemaforoPostALHilo
+
+
+		list_remove(listaEjecutando, getIndexTripulanteEnLista(listaEjecutando,tripulante));
 		agregarTripulanteAListaBloqueadosYAvisar(tripulante);
 		log_tripulante_cambio_de_cola_planificacion(tripulante->idTripulante, "ES UNA TAREA DE IO", "BLOCKED"); //PONER EN LISTA DE BLOQUEADOS
 
 
 		sem_post(&sem_planificarMultitarea);		//ES UNA IO PUEDO EJECUTAR OTRO TRIPULANTE
-//llega 2 entra en el mutex, llega el 1 espera, llega el 3 espera
 
 
-		sem_post(&semaforoInicioCicloBloqueado);
 
-		sem_wait(tripulante->semaforoBloqueadoTripulante);
+		sem_post(&semaforoInicioCicloBloqueado);		//tiraSemaforoPostALHiloBLoqueado
+
+		sem_wait(tripulante->semaforoBloqueadoTripulante);		//el hilo me da el post para que pueda seguir, es por tripulante para que sea en orden.
+
+		printf("TIRO EL WAIT DEL SEMAFORO el tripulante %d \n",tripulante->idTripulante);
 
 
 	}
 
 
+
 	tripulante->tareaAsignada=NULL;
+
+	printf("se paso la tarea a nulo del tripulante con ID: %d\n",tripulante->idTripulante);
 
 }
 
@@ -1168,54 +1173,59 @@ void planificarBloqueo(){
 
 		sem_wait(&semaforoInicioCicloBloqueado);
 
+		puts("paso el semaforo de bloqueo");
+
+		pthread_mutex_lock(&mutex_listaBloqueados);
 		t_tripulante*tripulante=list_get(listaBloqueados,0);
+		pthread_mutex_unlock(&mutex_listaBloqueados);
+
+		printf("asigno al tripulante con ID: %d a planificar bloqueo\n",tripulante->idTripulante);
 
 			int r=1;
 
 			while(tripulante->tareaAsignada->duracion>=r){		// DURACION DE LA TAREA BLOQUEADA
-				sem_wait(tripulante->semaforoCiclo);
+
+				if(estaPlanificando==0){
+					sem_wait(tripulante->semaforoCiclo);
+				}
 
 				sleep(RETARDO_CICLO_CPU);
 
 				log_info(logger,"El tripulante con ID %d hizo %d de IO de un total de %d",tripulante->idTripulante,r,tripulante->tareaAsignada->duracion);
 
 				r++;
-
-				sem_post(tripulante->semaforoCiclo);
-
 			}
-
-
-
+			pthread_mutex_lock(&mutex_listaBloqueados);
 			list_remove(listaBloqueados, getIndexTripulanteEnLista(listaBloqueados,tripulante));		//	aca lo saco de la lista de bloqueo
+			pthread_mutex_unlock(&mutex_listaBloqueados);
 			agregarTripulanteAListaReadyYAvisar(tripulante);
 
 			sem_post(tripulante->semaforoBloqueadoTripulante);
-		}
+
+			printf("TIRO EL POST DEL SEMAFORO el tripulante %d\n",tripulante->idTripulante);
 
 
 	}
+	}
 
 
-void inicioHiloPlanificar(){
+void inicioHiloPlanificarBloqueo(){
 	pthread_t hiloPlaificadorBloqueo;
 	pthread_create(&hiloPlaificadorBloqueo, NULL, (void*) planificarBloqueo,NULL);
 	pthread_detach(hiloPlaificadorBloqueo);
 }
 
 
-void planificarSegunVersion2(){			//TODO
+void planificarSegunFIFO(){			//TODO
 	while(true){
 
 		sem_wait(&sem_pausarPlanificacion);
 
-		while(estaPlanificando==1){	//Y NO HAY SABOTAJE FALTARIA
-			//sem_wait(&sem_sabotaje);
-
+		while(estaPlanificando==1){	  //FALTARIA SABOTAJE FLAG
+											//sem_wait(&sem_sabotaje);
 			sem_wait(&sem_planificarMultitarea);
 
 			t_tripulante* tripulante = (t_tripulante*) list_remove(listaReady, 0);
-
 			if(tripulante!=NULL){
 
 				printf("FIFO:voy a asignar al tripulante %d\n",tripulante->idTripulante);
@@ -1230,17 +1240,12 @@ void planificarSegunVersion2(){			//TODO
 
 
 			}else{
-				printf("FIFO:no hay nadie a quien ejecutar\n");
+				//printf("FIFO:no hay nadie a quien ejecutar\n");
 				sleep(RETARDO_CICLO_CPU);
 				sem_post(&sem_planificarMultitarea);
 			}
-
-
-			//sem_post(&sem_sabotaje);
-
-
+											//sem_post(&sem_sabotaje);
 		}
-
 	}
 }
 

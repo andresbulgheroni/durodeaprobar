@@ -84,6 +84,7 @@ t_list* listaBloqueados;
 t_list*listaBloqueadosPorSabotaje;
 t_list* listaFinalizados;
 t_list* sem_tripulantes_ejecutar;
+t_list*listaEjecutando;
 
 
 sem_t sem_buscartripulanteMasCercano;
@@ -173,7 +174,7 @@ void crearHiloPlanificador();
 
 //Consola
 void leer_consola();
-void pausarPlanificacion();
+//void pausarPlanificacion();
 op_code_consola string_to_op_code_consola (char* );
 op_code_tareas string_to_op_code_tareas (char*);
 
@@ -197,6 +198,8 @@ void agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(t_tripulante*);
 int getIndexTripulanteEnLista(t_list* , t_tripulante* );
 void log_movimiento_tripulante(uint32_t, uint32_t, uint32_t);
 void log_tripulante_cambio_de_cola_planificacion(uint32_t, char*, char*);
+void planificarBloqueo();
+void inicioHiloPlanificarBloqueo();
 
 void moverAlTripulanteHastaLaTarea(t_tripulante*);
 int llegoATarea(t_tripulante*);
