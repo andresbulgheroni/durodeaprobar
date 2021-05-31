@@ -118,11 +118,10 @@ int32_t get_esquema_memoria(char* esquema_config);
 int32_t get_algoritmo(char* algoritmo_config);
 void recibir_mensaje(int32_t* conexion);
 void configurar_paginacion();
-void crear_patota(uint32_t id_patota, t_string* tareas);
+void crear_patota(iniciar_patota_msg* mensaje);
 t_list* get_frames_libres();
 t_list* get_frames_a_ubicar(uint32_t cantidad);
 void ubicar_frames(t_list* frames, t_datos* datos);
-void iniciar_tripulante(iniciar_tripulante_msg tripulante);
 void traer_pagina_a_memoria(t_pagina_patota* pagina);
 bool memoria_llena();
 bool swap_lleno();
@@ -131,5 +130,7 @@ t_list* swap_libres();
 int32_t pos_swap(t_pagina_patota* pagina);
 int32_t reemplazo_Clock();
 int32_t reemplazo_LRU();
+void guardar_en_memoria_principal(t_pagina_patota* pagina, void* datos);
+void guardar_en_memoria_swap(t_pagina_patota* pagina, void* datos);
 
 #endif /* MI_RAM_HQ_H_ */

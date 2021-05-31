@@ -44,21 +44,9 @@ void recibir_mensaje(int32_t* conexion){
 
 				iniciar_patota_msg* mensaje = deserializar_paquete(paquete);
 
-				crear_patota(mensaje->idPatota, mensaje->tareas);
+				crear_patota(mensaje);
 
 				free(mensaje->tareas);
-				free(mensaje);
-
-				break;
-
-			}
-			case INICIAR_TRIPULANTE:{
-
-				iniciar_tripulante_msg* mensaje = deserializar_paquete(paquete);
-
-				iniciar_tripulante(mensaje);
-
-				free(mensaje->coordenadas);
 				free(mensaje);
 
 				break;
@@ -221,12 +209,13 @@ void terminar(){
 
 }
 
-void crear_patota(uint32_t id_patota, t_string* tareas){
+void crear_patota(iniciar_patota_msg* mensaje){
 
 
-	if(!dictionary_has_key(tabla_paginas_patota, string_itoa(id_patota))){
+	if(!dictionary_has_key(tabla_paginas_patota, string_itoa(mensaje->idPatota))){
 
-		int32_t cantidad_frames = ceil((sizeof(id_patota) + sizeof(int32_t) + tareas->length) / TAMANIO_PAGINA);
+		int32_t cantidad_frames = ceil((sizeof(mensaje->idPatota) + mensaje->cant_tripulantes * (sizeof(uint32_t) * 3)
+				+ sizeof(mensaje->tareas->length) + mensaje->tareas->length) / TAMANIO_PAGINA);
 
 		t_list* paginas = list_create();
 
@@ -234,12 +223,7 @@ void crear_patota(uint32_t id_patota, t_string* tareas){
 
 		int32_t offset = 0;
 
-		int32_t inicio_tareas = sizeof(id_patota) + sizeof(int32_t);
-		memcpy(datos + offset, &id_patota, sizeof(id_patota));
-		offset+=sizeof(id_patota);
-		memcpy(datos + offset, &inicio_tareas, sizeof(id_patota));
-		offset+=sizeof(int32_t);
-		memcpy(datos + offset, tareas->string, tareas->length);
+		//ver como mapear a memoria el mensaje
 
 		offset = 0;
 		for(int32_t i = 0; i < cantidad_frames; i++){
@@ -251,18 +235,35 @@ void crear_patota(uint32_t id_patota, t_string* tareas){
 			pagina->uso = true;
 			pagina->modificado = false;
 
-			list_add(pagina);
+			guardar_en_memoria_swap(pagina, datos + i * TAMANIO_PAGINA);
+			guardar_en_memoria_principal(pagina,  datos + i * TAMANIO_PAGINA);
 
-			memcpy(memoria_principal + (frame * TAMANIO_PAGINA), datos + offset, TAMANIO_PAGINA);
-			offset += TAMANIO_PAGINA;
+			list_add(pagina);
 
 		}
 
-		dictionary_put(tabla_paginas_patota, string_itoa(id_patota), paginas);
+		dictionary_put(tabla_paginas_patota, string_itoa(mensaje->idPatota), paginas);
 
 	}
 
 }
+
+void guardar_en_memoria_principal(t_pagina_patota* pagina, void* datos){
+
+	memcpy( memoria_principal + pagina->nro_frame * TAMANIO_PAGINA, datos, TAMANIO_PAGINA);
+
+}
+void guardar_en_memoria_swap(t_pagina_patota* pagina, void* datos){
+
+	int32_t pos = pos_swap(pagina);
+
+	t_frame* frame_swap = list_get(frames_swap, pos);
+	memcpy(memoria_virtual + pos * TAMANIO_PAGINA, datos, TAMANIO_PAGINA);
+	frame_swap->pagina = pagina;
+	pagina->nro_frame = pos;
+
+}
+/*
 
 void iniciar_tripulante(iniciar_tripulante_msg* tripulante){
 
@@ -331,6 +332,7 @@ void iniciar_tripulante(iniciar_tripulante_msg* tripulante){
 	}
 
 }
+*/
 
 void traer_pagina_a_memoria(t_pagina_patota* pagina){
 
