@@ -93,6 +93,10 @@ void timerSincronizacion_superBloqueMap();
 void timerSincronizacion_blocksMap();
 char* diccionarioFiles_to_char(t_dictionary*);
 void setBitmap(int, int);
+int existeFS();
+int primerBloqueLibre();
+char* stringToBlocks(char, int);
+char* writeBlock(char*);
 
 // FUNCIONES PARA TESTING:
 

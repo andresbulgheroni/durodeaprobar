@@ -7,14 +7,12 @@ int main(void) {
 
 	inicializarFS();
 
-	estadoSuperBloque();
-	setBitmap(1,1);
-	estadoSuperBloque();
-	setBitmap(0,1);
-	setBitmap(1,10);
-	estadoSuperBloque();
 
-
+///////// Pruebas BLOCKS
+	estadoSuperBloque();
+	printf("\nBloques grabados: %s", stringToBlocks('B',3));
+	estadoSuperBloque();
+///////// Pruebas BLOCKS
 
 
 //	int32_t dato = 33;
@@ -281,9 +279,7 @@ char* generar_oxigeno(int32_t parametros){
 		txt_close_file(fp);
 
 	}
-
 	return "Funciono";
-
 }
 
 char* consumir_oxigeno(int32_t parametros){
@@ -322,7 +318,6 @@ char* consumir_oxigeno(int32_t parametros){
 
 	}
 	return "BORRO";
-
 }
 
 char* generar_comida(int32_t parametros){
@@ -365,7 +360,6 @@ char* generar_comida(int32_t parametros){
 
 	}
 	return "Funciono";
-
 }
 
 char* consumir_comida(int32_t parametros){
@@ -402,7 +396,6 @@ char* consumir_comida(int32_t parametros){
 
 	}
 	return "BORRO";
-
 }
 
 char* generar_basura(int32_t parametros){
@@ -445,7 +438,6 @@ char* generar_basura(int32_t parametros){
 
 	}
 	return "Funciono";
-
 }
 
 char* descartar_basura(){
@@ -461,7 +453,6 @@ char* descartar_basura(){
 		log_info(logger,"no existe el archivo");
 	}
 	return "BORRO";
-
 }
 
 void buscarMensaje(inicio_tarea_msg* tarea) {
@@ -575,7 +566,6 @@ void inicializarSuperBloque(){
 	string_append(&ruta_SuperBloque, "/SuperBloque.ims");
 
 	int fd = open(ruta_SuperBloque, O_RDWR, 0777);
-
 	if (fd == -1) {
 		log_error(logger, "No se pudo abrir el SuperBloque");
 		perror("open file");
@@ -584,14 +574,15 @@ void inicializarSuperBloque(){
 
 	int offset = 2 * sizeof(uint32_t);
 	int cantidadBloques = BLOCKS / 8;
-	ftruncate(fd, cantidadBloques + offset);
 
 	superBloqueMap = mmap(NULL, cantidadBloques + offset, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (superBloqueMap == MAP_FAILED) {
-		perror("mmap");
+		perror("Error al inicializar SuperBloque");
 		close(fd);
 		exit(1);
 	}
+
+	bitmap = bitarray_create_with_mode(superBloqueMap + offset, cantidadBloques, LSB_FIRST);
 
 	close(fd);
 
@@ -666,7 +657,7 @@ bool existeArchivo(char* path) {
 
 void inicializarFS(){
 
-	if(existeArchivo(PUNTO_MONTAJE)){
+	if(existeFS()){
 		puts("File System existente detectado, recuperando...");
 		inicializarSuperBloque();
 	} else {
@@ -729,3 +720,63 @@ void setBitmap(int valor, int posicion){
 	bitarray_set_bit(bitmap, posicion - 1);
 	}
 }
+
+int existeFS(){
+	if(existeArchivo(string_from_format("%s/SuperBloque.ims", PUNTO_MONTAJE)) &&
+			existeArchivo(string_from_format("%s/Blocks.ims", PUNTO_MONTAJE))){
+		return 1;
+	}else return 0;
+}
+
+// Devuelve 0 si el Bitmap esta lleno
+int primerBloqueLibre(){
+	int posicion = 0;
+	for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
+		if(!bitarray_test_bit(bitmap, i)){
+			posicion = i+1;
+			break;
+		}
+	}
+	return posicion;
+}
+
+//Recibe un string a grabar en el archivo Blocks, y devuelve la lista de bloques grabados
+char* stringToBlocks(char caracter, int cantidad){
+	char* bloquesGrabados = string_new();
+	string_append(&bloquesGrabados, "[");
+
+	while(cantidad > BLOCK_SIZE){
+		string_append(&bloquesGrabados, writeBlock(string_repeat(caracter, (int)BLOCK_SIZE)));
+		string_append(&bloquesGrabados, ",");
+		cantidad = cantidad - BLOCK_SIZE;
+	}
+
+	string_append(&bloquesGrabados,	writeBlock(string_repeat(caracter, cantidad)));
+
+
+	if(string_ends_with(bloquesGrabados, ",")){
+		bloquesGrabados[strlen(bloquesGrabados)-1] = ']';
+	}else{
+		string_append(&bloquesGrabados, "]");
+	}
+
+	return bloquesGrabados;
+}
+
+// Controlar previamente que no se pase del BLOCK_SIZE
+char* writeBlock(char* string){
+	int bloqueGrabado = primerBloqueLibre();
+	if (bloqueGrabado == 0){
+		log_error(logger, "File System lleno");
+		perror("File System lleno");
+		exit(1);
+	}
+	setBitmap(1, bloqueGrabado);
+
+	memcpy(blocksMap + ((bloqueGrabado - 1) * BLOCK_SIZE),
+			string,
+			strlen(string) * sizeof(char));
+
+	return string_itoa(bloqueGrabado);
+}
+
