@@ -459,6 +459,14 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			}
 
+			if(!list_is_empty(listaBloqueados)){
+
+				void iterador(t_tripulante*tripulante){
+					sem_post(tripulante->semaforoCiclo);
+				}
+				list_iterate(listaBloqueados,(void*) iterador);
+
+			}
 			break;
 		}
 		case PAUSAR_PLANIFICACION: { //Este comando lo que busca es detener la planificación en cualquier momento(semaforo)
@@ -1073,7 +1081,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 					//	agregarTripulanteAListaReadyYAvisar(tripulante);
 
 						list_remove(listaEjecutando, getIndexTripulanteEnLista(listaEjecutando,tripulante));
-						sem_post(&sem_planificarMultitarea);		//DEBERIA IR ACA DENTRO DEL FIN DE TAREA
+						//sem_post(&sem_planificarMultitarea);		//DEBERIA IR ACA DENTRO DEL FIN DE TAREA
 
 						log_info(logger,"se saco de la lista EXEC al tripulante %d",tripulante->idTripulante);
 				}
