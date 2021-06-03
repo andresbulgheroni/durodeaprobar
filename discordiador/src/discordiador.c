@@ -1148,7 +1148,7 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 
 
 
-	tripulante->tareaAsignada=NULL;
+	//tripulante->tareaAsignada=NULL;
 
 	printf("se paso la tarea a nulo del tripulante con ID: %d\n",tripulante->idTripulante);
 
@@ -1206,7 +1206,7 @@ void planificarBloqueo(){
 			pthread_mutex_lock(&mutex_listaBloqueados);
 			list_remove(listaBloqueados, getIndexTripulanteEnLista(listaBloqueados,tripulante));		//	aca lo saco de la lista de bloqueo
 			pthread_mutex_unlock(&mutex_listaBloqueados);
-			agregarTripulanteAListaReadyYAvisar(tripulante);
+			//agregarTripulanteAListaReadyYAvisar(tripulante);
 
 			sem_post(tripulante->semaforoBloqueadoTripulante);
 
@@ -1233,7 +1233,10 @@ void planificarSegunFIFO(){			//TODO
 											//sem_wait(&sem_sabotaje);
 			sem_wait(&sem_planificarMultitarea);
 
+			pthread_mutex_lock(&mutex_listaReady);
 			t_tripulante* tripulante = (t_tripulante*) list_remove(listaReady, 0);
+			pthread_mutex_unlock(&mutex_listaReady);
+
 			if(tripulante!=NULL){
 
 				printf("FIFO:voy a asignar al tripulante %d\n",tripulante->idTripulante);
