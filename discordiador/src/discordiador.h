@@ -161,6 +161,7 @@ typedef struct
 
 	sem_t*semaforoCiclo;
 	sem_t*semaforoBloqueadoTripulante;
+	sem_t*semaforoDelTripulante;
 
 } t_tripulante;
 
@@ -217,7 +218,8 @@ void planificarSegunFIFO();
 void planificarSegunRR();
 void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante);
 
-
+void ejecucionRR(t_tripulante*);
+void ejecucionDeTareaTripulanteRR(t_tripulante*);
 
 
 
