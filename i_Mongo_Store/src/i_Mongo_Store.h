@@ -1,6 +1,7 @@
 #ifndef I_MONGO_STORE_H_
 #define I_MONGO_STORE_H_
 
+#include "md5.h"
 #include<stdio.h>
 #include<stdlib.h>
 #include<commons/log.h>
@@ -97,6 +98,8 @@ int existeFS();
 int primerBloqueLibre();
 char* stringToBlocks(char, int);
 char* writeBlock(char*);
+char* calcularMD5(char*);
+
 
 // FUNCIONES PARA TESTING:
 

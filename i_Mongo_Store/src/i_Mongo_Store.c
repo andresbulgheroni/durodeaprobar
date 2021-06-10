@@ -8,10 +8,16 @@ int main(void) {
 	inicializarFS();
 
 
+char* output = 	calcularMD5("aaaaa");
+
+printf("Hash piola: %s", output);
+free(output);
+
+
 ///////// Pruebas BLOCKS
-	estadoSuperBloque();
-	printf("\nBloques grabados: %s", stringToBlocks('B',3));
-	estadoSuperBloque();
+//	estadoSuperBloque();
+//	printf("\nBloques grabados: %s", stringToBlocks('B',9));
+//	estadoSuperBloque();
 ///////// Pruebas BLOCKS
 
 
@@ -780,3 +786,19 @@ char* writeBlock(char* string){
 	return string_itoa(bloqueGrabado);
 }
 
+// Hacer free despues de usar!
+char* calcularMD5(char *str) {
+	unsigned char digest[16];
+	char* buf = malloc(sizeof digest * 2 + 1);
+
+	MD5_CTX ctx;
+	MD5_Init(&ctx);
+	MD5_Update(&ctx, str, strlen(str));
+	MD5_Final(digest, &ctx);
+
+	for (int i = 0, j = 0; i < 16; i++, j+=2)
+		sprintf(buf+j, "%02x", digest[i]);
+	buf[sizeof digest * 2] = 0;
+
+	return buf;
+}
