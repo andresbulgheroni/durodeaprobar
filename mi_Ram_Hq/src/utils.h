@@ -101,6 +101,7 @@ typedef struct {
 
 typedef struct {
 
+	uint32_t idPatota;
 	uint32_t idTripulante;
 
 } expulsar_tripulante_msg;
@@ -127,6 +128,7 @@ typedef struct {
 
 typedef struct {
 
+	uint32_t idPatota;
 	uint32_t idTripulante;
 
 } solicitar_siguiente_tarea_msg;
@@ -139,6 +141,7 @@ typedef struct {
 
 typedef struct{
 
+	uint32_t idPatota;
 	uint32_t idTripulante;
 	uint32_t estado;
 
@@ -146,6 +149,7 @@ typedef struct{
 
 typedef struct {
 
+	uint32_t idPatota;
 	uint32_t idTripulante;
 	t_coordenadas* coordenadasDestino;
 
