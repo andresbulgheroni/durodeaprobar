@@ -40,6 +40,7 @@ typedef enum{
 
 typedef struct{
 	uint32_t nro_frame;
+	uint32_t nro_frame_mv;
 	bool presente;
 	bool uso;
 	bool modificado;
@@ -48,7 +49,6 @@ typedef struct{
 
 typedef struct{
 	uint32_t pos;
-	t_pagina_patota* pagina;
 } t_frame;
 
 typedef struct{
@@ -101,16 +101,6 @@ typedef struct {
 
 } t_tcb;
 
-//Paginacion
-
-typedef struct {
-
-	t_pcb* patota_control_block;
-	t_string* tareas;
-	t_tcb* tripulante_control_block;
-
-} t_datos;
-
 void init ();
 void iniciarMapa();
 void terminar ();
@@ -121,16 +111,19 @@ void configurar_paginacion();
 void crear_patota(iniciar_patota_msg* mensaje);
 t_list* get_frames_libres();
 t_list* get_frames_a_ubicar(uint32_t cantidad);
-void ubicar_frames(t_list* frames, t_datos* datos);
 void traer_pagina_a_memoria(t_pagina_patota* pagina);
 bool memoria_llena();
 bool swap_lleno();
 int32_t get_frame();
 t_list* swap_libres();
-int32_t pos_swap(t_pagina_patota* pagina);
+int32_t get_frame_memoria_virtual(t_pagina_patota* pagina);
 int32_t reemplazo_Clock();
 int32_t reemplazo_LRU();
 void guardar_en_memoria_principal(t_pagina_patota* pagina, void* datos);
 void guardar_en_memoria_swap(t_pagina_patota* pagina, void* datos);
+uint32_t generar_direccion_logica_paginacion(uint32_t pagina, uint32_t desplazamiento);
+void obtener_direccion_logica_paginacion(uint32_t* pagina, uint32_t* desplazamiento, uint32_t direccion);
+
+void* leer_datos_patota(uint32_t id_patota);
 
 #endif /* MI_RAM_HQ_H_ */

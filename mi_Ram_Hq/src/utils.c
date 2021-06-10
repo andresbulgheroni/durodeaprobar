@@ -403,12 +403,13 @@ t_buffer* serializar_expulsar_tripulante_msg(expulsar_tripulante_msg* mensaje){
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
-	buffer->size = sizeof(mensaje->idTripulante);
+	buffer->size =  sizeof(mensaje->idPatota) + sizeof(mensaje->idTripulante);
 
 	buffer->stream = malloc(buffer->size);
 
 	uint32_t offset = 0;
 
+	serializar_variable(buffer->stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 
 	return buffer;
@@ -451,12 +452,13 @@ t_buffer* serializar_solicitar_siguiente_tarea_msg(solicitar_siguiente_tarea_msg
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
-	buffer->size = sizeof(mensaje->idTripulante);
+	buffer->size =  sizeof(mensaje->idPatota) + sizeof(mensaje->idTripulante);
 
 	buffer->stream = malloc(buffer->size);
 
 	uint32_t offset = 0;
 
+	serializar_variable(buffer->stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 
 	return buffer;
@@ -489,12 +491,13 @@ t_buffer* serializar_cambio_estado_msg(cambio_estado_msg* mensaje){
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
-	buffer->size = sizeof(mensaje->idTripulante) + sizeof(mensaje->estado);
+	buffer->size = sizeof(mensaje->idPatota) + sizeof(mensaje->idTripulante) + sizeof(mensaje->estado);
 
 	buffer->stream = malloc(buffer->size);
 
 	uint32_t offset = 0;
 
+	serializar_variable(buffer->stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 	serializar_variable(buffer->stream, &(mensaje->estado), sizeof(mensaje->estado), &offset);
 
@@ -507,13 +510,14 @@ t_buffer* serializar_informar_movimiento_ram_msg(informar_movimiento_ram_msg* me
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
-	buffer->size = sizeof(mensaje->idTripulante) + sizeof(mensaje->coordenadasDestino->posX)
+	buffer->size = sizeof(mensaje->idPatota) + sizeof(mensaje->idTripulante) + sizeof(mensaje->coordenadasDestino->posX)
 			+ sizeof(mensaje->coordenadasDestino->posX);
 
 	buffer->stream = malloc(buffer->size);
 
 	uint32_t offset = 0;
 
+	serializar_variable(buffer->stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 	serializar_variable(buffer->stream, &(mensaje->coordenadasDestino->posX), sizeof(mensaje->coordenadasDestino->posX), &offset);
 	serializar_variable(buffer->stream, &(mensaje->coordenadasDestino->posY), sizeof(mensaje->coordenadasDestino->posY), &offset);

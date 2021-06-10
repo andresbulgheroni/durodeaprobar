@@ -54,6 +54,7 @@ void recibir_mensaje(int32_t* conexion){
 			}
 			case INFORMAR_MOVIMIENTO_RAM:{
 
+				//FALTA ID PATOTA EN EL MENSAJE
 				informar_movimiento_ram_msg* mensaje = deserializar_paquete(paquete);
 
 				log_debug(logger, "Id tripulante: %d", mensaje->idTripulante);
@@ -68,6 +69,7 @@ void recibir_mensaje(int32_t* conexion){
 			}
 			case CAMBIO_ESTADO:{
 
+				//FALTA ID PATOTA EN EL MENSAJE
 				cambio_estado_msg* mensaje = deserializar_paquete(paquete);
 
 				log_debug(logger, "Estado: %d", mensaje->estado);
@@ -80,6 +82,7 @@ void recibir_mensaje(int32_t* conexion){
 			}
 			case SOLICITAR_SIGUIENTE_TAREA:{
 
+				//FALTA ID PATOTA EN EL MENSAJE
 				solicitar_siguiente_tarea_msg* mensaje = deserializar_paquete(paquete);
 
 				log_debug(logger, "Id tripulante: %d", mensaje->idTripulante);
@@ -87,6 +90,8 @@ void recibir_mensaje(int32_t* conexion){
 				break;
 			}
 			case EXPULSAR_TRIPULANTE_MSG:{
+
+				//FALTA ID PATOTA EN EL MENSAJE
 				expulsar_tripulante_msg* mensaje = deserializar_paquete(paquete);
 
 				log_debug(logger, "Id tripulante %d", mensaje->idTripulante);
@@ -164,7 +169,6 @@ void configurar_paginacion(){
 
 		for(uint32_t i = 0; i < (TAMANIO_SWAP / TAMANIO_PAGINA);i++){
 			t_frame* frame = malloc(sizeof(t_frame));
-			frame->pagina = NULL;
 			frame->pos = i;
 			list_add(frames_swap, frame);
 		}
@@ -209,42 +213,134 @@ void terminar(){
 
 }
 
-void crear_patota(iniciar_patota_msg* mensaje){
+uint32_t generar_direccion_logica_paginacion(uint32_t pagina, uint32_t desplazamiento){
 
+	uint32_t direccion = 0;
+
+	uint32_t bits_derecha = floor(log(TAMANIO_PAGINA) / log(2)) + 1;
+
+	direccion = (pagina << bits_derecha) | desplazamiento;
+
+	return direccion;
+
+}
+void obtener_direccion_logica_paginacion(uint32_t* pagina, uint32_t* desplazamiento, uint32_t direccion){
+
+	uint32_t bits_derecha = floor(log(TAMANIO_PAGINA) / log(2)) + 1;
+	uint32_t bits_izquierda = 32  - bits_derecha;
+
+	*pagina = (direccion >> bits_derecha);
+	*desplazamiento = (direccion << bits_izquierda) >> bits_izquierda;
+
+}
+
+void crear_patota(iniciar_patota_msg* mensaje, bool* status){
 
 	if(!dictionary_has_key(tabla_paginas_patota, string_itoa(mensaje->idPatota))){
 
-		int32_t cantidad_frames = ceil((sizeof(mensaje->idPatota) + mensaje->cant_tripulantes * (sizeof(uint32_t) * 3)
-				+ sizeof(mensaje->tareas->length) + mensaje->tareas->length) / TAMANIO_PAGINA);
+		//Saco cantidad de frames/paginas que va a ocupar
+		uint32_t cantidad_frames = ceil((sizeof(t_pcb) + mensaje->cant_tripulantes * (sizeof(t_tcb))
+				+  mensaje->tareas->length) / TAMANIO_PAGINA);
+		uint32_t size_pcb = cantidad_frames * TAMANIO_PAGINA;
 
-		t_list* paginas = list_create();
+		status = entra_en_swap(cantidad_frames);
+		status = entra_en_memoria(size_pcb);
 
-		void* datos = malloc(TAMANIO_PAGINA * cantidad_frames);
+		if(status){
 
-		int32_t offset = 0;
+			t_list* paginas = list_create();
+			uint32_t direccion_tareas = sizeof(t_pcb);
 
-		//ver como mapear a memoria el mensaje
+			//Cargo datos de pcb y tcb para copiarlos a memoria
+			t_pcb* pcb = malloc(sizeof(t_pcb));
+			t_list* tcbs = list_create();
 
-		offset = 0;
-		for(int32_t i = 0; i < cantidad_frames; i++){
+			pcb->pid = mensaje->idPatota;
 
-			t_pagina_patota* pagina = malloc(sizeof(t_pagina_patota));
-			int32_t frame = get_frame();
-			pagina->nro_frame = frame;
-			pagina->presente = true;
-			pagina->uso = true;
-			pagina->modificado = false;
+			void cargar_tcb(tripulante_data_msg* tripulante){
 
-			guardar_en_memoria_swap(pagina, datos + i * TAMANIO_PAGINA);
-			guardar_en_memoria_principal(pagina,  datos + i * TAMANIO_PAGINA);
+				t_tcb* tcb = malloc(sizeof(t_tcb));
 
-			list_add(pagina);
+				tcb->tid = tripulante->idTripulante;
+				tcb->direccion_patota = 0;
+				tcb->estado = 'R';
+				tcb->proxima_instruccion = 0;
+				tcb->posX = tripulante->coordenadas->posX;
+				tcb->posY = tripulante->coordenadas->posY;
+
+				list_add(tcbs, tcb);
+				direccion_tareas += sizeof(t_tcb);
+
+			}
+
+			list_iterate(mensaje->tripulantes, cargar_tcb);
+
+			pcb->direccion_tareas = generar_direccion_logica_paginacion(direccion_tareas / TAMANIO_PAGINA, direccion_tareas % TAMANIO_PAGINA);
+
+			// Pongo los datos en un void* por conveniencia para el paso mem principal
+			void* datos = malloc(size_pcb);
+			int32_t offset = 0;
+
+			memcpy(datos + offset, pcb, sizeof(t_pcb));
+			offset += sizeof(t_pcb);
+
+			void cargarTcbDatos(t_tcb* tcb){
+
+				memcpy(datos + offset, tcb, sizeof(t_tcb));
+				offset += sizeof(t_tcb);
+
+			}
+			list_iterate(tcbs, cargarTcbDatos);
+
+			memcpy(datos + offset, mensaje->tareas->string, mensaje->tareas->length);
+
+			// Creo las paginas y paso los datos a memoria principal y swap
+			offset = 0;
+			for(int32_t i = 0; i < cantidad_frames; i++){
+
+				t_pagina_patota* pagina = malloc(sizeof(t_pagina_patota));
+				pagina->nro_frame = get_frame();
+				pagina->nro_frame_mv = get_frame_memoria_virtual();
+				pagina->presente = true;
+				pagina->uso = true;
+				pagina->modificado = false;
+
+				guardar_en_memoria_swap(pagina, datos + i * TAMANIO_PAGINA);
+				guardar_en_memoria_principal(pagina,  datos + i * TAMANIO_PAGINA);
+
+				list_add(pagina);
+
+			}
+
+			//Guardo tabla de paginas
+			dictionary_put(tabla_paginas_patota, string_itoa(mensaje->idPatota), paginas);
 
 		}
 
-		dictionary_put(tabla_paginas_patota, string_itoa(mensaje->idPatota), paginas);
+	}
+
+}
+
+void* leer_datos_patota(uint32_t id_patota){
+
+	t_list* paginas = dictionary_get(tabla_paginas_patota, string_itoa(id_patota));
+
+	void* datos = malloc(TAMANIO_PAGINA * list_size(paginas));
+
+	uint32_t offset = 0;
+	void leer_pagina_de_memoria(t_pagina_patota* pagina){
+
+		if(!pagina->presente)
+			pasar_de_swap_a_principal(pagina);
+
+		memcpy(datos + offset, memoria_principal + pagina->nro_frame  * TAMANIO_PAGINA, sizeof(TAMANIO_PAGINA));
+		offset += sizeof(TAMANIO_PAGINA);
 
 	}
+
+	list_iterate(paginas, leer_pagina_de_memoria);
+
+	return datos;
 
 }
 
@@ -255,89 +351,47 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* datos){
 }
 void guardar_en_memoria_swap(t_pagina_patota* pagina, void* datos){
 
-	int32_t pos = pos_swap(pagina);
-
-	t_frame* frame_swap = list_get(frames_swap, pos);
-	memcpy(memoria_virtual + pos * TAMANIO_PAGINA, datos, TAMANIO_PAGINA);
-	frame_swap->pagina = pagina;
-	pagina->nro_frame = pos;
-
+	memcpy(memoria_virtual + pagina->nro_frame_mv * TAMANIO_PAGINA, datos, TAMANIO_PAGINA);
 }
-/*
 
-void iniciar_tripulante(iniciar_tripulante_msg* tripulante){
 
-	if(dictionary_has_key(tabla_paginas_patota, string_itoa(tripulante->idPatota))){
+void* traer_de_swap(t_pagina_patota* pagina){
+	void* datos = malloc(sizeof(TAMANIO_PAGINA));
 
-		t_list* paginas = dictionary_get(tabla_paginas_patota, string_itoa(tripulante->idPatota));
-		uint32_t cantidad_paginas_inicial = list_size(paginas);
-		int32_t size_inicial = cantidad_paginas_inicial * TAMANIO_PAGINA;
-		void* datos_cargados = malloc(size_inicial);
-		uint32_t indice = 0;
-		void obtener_paginas_de_memoria(t_pagina_patota* pagina){
+	memcpy(datos, memoria_virtual + pagina->nro_frame * TAMANIO_PAGINA , sizeof(TAMANIO_PAGINA));
 
-			if(!pagina->presente)
-				traer_pagina_a_memoria(pagina);
+	return datos;
+}
 
-			memcpy(datos_cargados + indice++ * TAMANIO_PAGINA ,memoria_principal + pagina->nro_frame * TAMANIO_PAGINA, TAMANIO_PAGINA);
+void pasar_de_swap_a_principal(t_pagina_patota* pagina){
+	void* datos = traer_de_swap(pagina);
+
+	pagina->nro_frame = get_frame();
+	guardar_en_memoria_principal(pagina, datos);
+	pagina->modificado = false;
+	pagina->presente = true;
+	switch(ALGORITMO_REEMPLAZO){
+		case LRU:{
+			list_add(lista_para_reemplazo, pagina);
+			break;
+		}case CLOCK:{
+			t_buffer_clock* frame_p = list_get(lista_para_reemplazo, pagina->nro_frame);
+			frame_p->pagina = pagina;
 			pagina->uso = true;
-
+			break;
 		}
-
-		list_iterate(paginas, obtener_paginas_de_memoria);
-
-
-		//REVISAR ESTA PARTE SEGUN LO QUE DIGAN LOS AYUDANTES
-		t_tcb* tripulante_nuevo = malloc(sizeof(t_tcb));
-
-		tripulante_nuevo->tid = tripulante->idTripulante;
-		tripulante_nuevo->estado = 'N';
-		tripulante_nuevo->posX = tripulante->coordenadas->posX;
-		tripulante_nuevo->posY = tripulante->coordenadas->posY;
-		tripulante_nuevo->proxima_instruccion = 0;
-		tripulante_nuevo->direccion_patota = 0;
-
-		uint32_t direccion_tareas;
-		memcpy(&direccion_tareas, datos_cargados + sizeof(uint32_t), sizeof(uint32_t));
-
-		uint32_t cantidad_frames = ceil((size_inicial + sizeof(t_tcb)) / TAMANIO_PAGINA);
-
-		uint32_t size_nuevo = cantidad_frames * TAMANIO_PAGINA;
-
-		void* datos_nuevos = malloc(size_nuevo);
-
-		if(cantidad_frames > cantidad_paginas_inicial){
-
-			t_list* nuevos_frames = get_frames_a_ubicar(cantidad_frames - cantidad_paginas_inicial);
-
-			void agregar_paginas_nuevas(uint32_t* frame){
-
-				t_pagina_patota* pagina_nueva = malloc(sizeof(t_pagina_patota));
-
-				pagina_nueva->nro_frame = *frame;
-				pagina_nueva->uso = true;
-				pagina_nueva->presente = true;
-				pagina_nueva->modificado = false;
-
-				list_add(paginas, pagina_nueva);
-
-			}
-
-			list_iterate(nuevos_frames, agregar_paginas_nuevas);
-
-		}
-
-
-
 	}
 
+	free(datos);
+
 }
-*/
 
-void traer_pagina_a_memoria(t_pagina_patota* pagina){
+bool entra_en_swap(uint32_t cantidad){
+		return list_size(frames_swap) >= cantidad;
+}
 
-
-
+bool entra_en_memoria(uint32_t size_pcb){
+		return TAMANIO_MEMORIA >= size_pcb;
 }
 
 bool memoria_llena(){
@@ -345,15 +399,7 @@ bool memoria_llena(){
 }
 
 bool swap_lleno(){
-	return list_size(swap_libres()) == 0;
-}
-
-t_list* swap_libres(){
-	bool libre(t_frame* frame){
-		return frame->pagina == NULL;
-	}
-
-	return list_filter(frames_swap, libre);
+	return list_size(frames_swap) == 0;
 }
 
 int32_t get_frame(){
@@ -386,27 +432,13 @@ int32_t get_frame(){
 	return nro_frame;
 }
 
-int32_t pos_swap(t_pagina_patota* pagina){
+int32_t get_frame_memoria_virtual(){
 	int32_t pos = -1;
-	t_frame* frame_swap;
 
-	bool en_swap(t_frame* frame){
-		return frame->pagina == pagina;
-	}
+	if(list_size(frames_swap) > 0){
 
-	t_list* contiene = list_filter(frames_swap, en_swap);
+		pos = *(list_remove(frames_swap, 0));
 
-	if(list_size(contiene) == 0){
-		t_list* libres = swap_libres();
-
-		if(list_size(libres) > 0){
-			frame_swap = (t_frame*)(list_get(libres, 0));
-			pos = frame_swap->pos;
-		}
-
-	}else{
-		frame_swap = (t_frame*)(list_get(contiene, 0));
-		pos = frame_swap->pos;
 	}
 
 	return pos;
