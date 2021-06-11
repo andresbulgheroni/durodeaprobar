@@ -96,8 +96,8 @@ char* diccionarioFiles_to_char(t_dictionary*);
 void setBitmap(int, int);
 int existeFS();
 int primerBloqueLibre();
-char* stringToBlocks(char, int);
-char* writeBlock(char*);
+void stringToBlocks(char, int, char*, char*);
+char* writeBlock(char*, int);
 char* calcularMD5(char*);
 
 

@@ -8,22 +8,11 @@ int main(void) {
 	inicializarFS();
 
 
-char* output = 	calcularMD5("aaaaa");
+	estadoSuperBloque();
+	int32_t dato = 22;
+	generarOxigeno(dato);
+	estadoSuperBloque();
 
-printf("Hash piola: %s", output);
-free(output);
-
-
-///////// Pruebas BLOCKS
-//	estadoSuperBloque();
-//	printf("\nBloques grabados: %s", stringToBlocks('B',9));
-//	estadoSuperBloque();
-///////// Pruebas BLOCKS
-
-
-//	int32_t dato = 33;
-//	generar_oxigeno(dato);
-//
 
 //	while(1){}
 
@@ -77,7 +66,7 @@ void timerSincronizacion_blocksMap(){
 	while(1){
 		msync(blocksMap, tamanioBlocks, MS_SYNC);
 		puts("Sincronizado blocks");
-		sleep(TIEMPO_SINCRONIZACION / 1000);
+		sleep(TIEMPO_SINCRONIZACION);
 	}
 
 }
@@ -670,6 +659,7 @@ void inicializarFS(){
 		puts("File System NO encontrado, generando...");
 		crearDirectorio(PUNTO_MONTAJE);
 		crearSuperBloque();
+		crearDirectorio(string_from_format("%s/Files", PUNTO_MONTAJE));
 	}
 	inicializarBlocks();
 
@@ -746,47 +736,57 @@ int primerBloqueLibre(){
 	return posicion;
 }
 
-//Recibe un string a grabar en el archivo Blocks, y devuelve la lista de bloques grabados
-char* stringToBlocks(char caracter, int cantidad){
-	char* bloquesGrabados = string_new();
-	string_append(&bloquesGrabados, "[");
+//Recibe un string a grabar en el archivo Blocks
+void stringToBlocks(char caracter, int size, char* blockCount, char* blocks){
+	string_append(&blocks, "[");
 
-	while(cantidad > BLOCK_SIZE){
-		string_append(&bloquesGrabados, writeBlock(string_repeat(caracter, (int)BLOCK_SIZE)));
-		string_append(&bloquesGrabados, ",");
-		cantidad = cantidad - BLOCK_SIZE;
+	int contador = 0;
+
+	while(size > BLOCK_SIZE){
+		string_append(&blocks, writeBlock(string_repeat(caracter, (int)BLOCK_SIZE), -1));
+		string_append(&blocks, ",");
+		size = size - BLOCK_SIZE;
+		contador++;
 	}
 
-	string_append(&bloquesGrabados,	writeBlock(string_repeat(caracter, cantidad)));
+	string_append(&blocks,	writeBlock(string_repeat(caracter, size), -1));
+	contador++;
 
-
-	if(string_ends_with(bloquesGrabados, ",")){
-		bloquesGrabados[strlen(bloquesGrabados)-1] = ']';
+	if(string_ends_with(blocks, ",")){
+		blocks[strlen(blocks)-1] = ']';
 	}else{
-		string_append(&bloquesGrabados, "]");
+		string_append(&blocks, "]");
 	}
 
-	return bloquesGrabados;
+	string_append(&blockCount, string_itoa(contador));
+
 }
 
-// Controlar previamente que no se pase del BLOCK_SIZE
-char* writeBlock(char* string){
-	int bloqueGrabado = primerBloqueLibre();
-	if (bloqueGrabado == 0){
+// Controlar previamente que no se pase del BLOCK_SIZE, si bloque es -1 busca el primero libre
+char* writeBlock(char* string, int bloque){
+	if(bloque == -1){
+		bloque = primerBloqueLibre();
+	}
+	if (bloque == 0){
 		log_error(logger, "File System lleno");
 		perror("File System lleno");
 		exit(1);
 	}
-	setBitmap(1, bloqueGrabado);
+	setBitmap(1, bloque);
 
-	memcpy(blocksMap + ((bloqueGrabado - 1) * BLOCK_SIZE),
+	memcpy(blocksMap + ((bloque - 1) * BLOCK_SIZE),
 			string,
 			strlen(string) * sizeof(char));
 
-	return string_itoa(bloqueGrabado);
+	return string_itoa(bloque);
 }
 
-// Hacer free despues de usar!
+/*
+Hacer free despues de usar! Ejemplo:
+char* output = calcularMD5("aaaaa");
+printf("Hash piola: %s", output);
+free(output);
+*/
 char* calcularMD5(char *str) {
 	unsigned char digest[16];
 	char* buf = malloc(sizeof digest * 2 + 1);
@@ -801,4 +801,52 @@ char* calcularMD5(char *str) {
 	buf[sizeof digest * 2] = 0;
 
 	return buf;
+}
+
+// Version diego :D
+void generarOxigeno(int32_t cantidad){
+	char* rutaMetadata = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
+
+	if(access(rutaMetadata, F_OK) != -1){ //Existe archivo metadata, lo manejo como config
+
+		t_config* metadata = config_create(rutaMetadata);
+
+		printf("\nBlocks: %s", config_get_string_value(metadata, "BLOCKS"));
+		config_destroy(metadata);
+
+	}else{// No existe archivo metadata, lo creo
+
+		char* metadata = string_new();
+
+		char* blockCount = string_new();
+		char* blocks = string_new();
+
+
+		char* MD5 = calcularMD5(string_repeat('O', cantidad));
+
+
+		stringToBlocks('O', (int)cantidad, blockCount, blocks);
+
+		string_append(&metadata, "SIZE=");
+		string_append(&metadata, string_itoa(cantidad));
+
+		string_append(&metadata, "\nBLOCK_COUNT=");
+		string_append(&metadata, blockCount);
+
+		string_append(&metadata, "\nBLOCKS=");
+		string_append(&metadata, blocks);
+
+		string_append(&metadata, "\nCARACTER_LLENADO=");
+		string_append(&metadata,"O");
+
+		string_append(&metadata, "\nMD5_ARCHIVO=");
+		string_append(&metadata, MD5);
+
+		FILE* fp = txt_open_for_append(rutaMetadata);
+		txt_write_in_file(fp, metadata);
+		txt_close_file(fp);
+
+		free(MD5);
+
+	}
 }
