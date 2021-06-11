@@ -12,7 +12,6 @@ int main(void) {
 	generarOxigeno(dato);
 	estadoSuperBloque();
 
-
 //	while(1){}
 
 	//	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
@@ -734,8 +733,10 @@ int primerBloqueLibre(){
 	}
 	return posicion;
 }
-
-//Recibe un string a grabar en el archivo Blocks
+/*
+string: cadena a grabar en Blocks
+blockCount y blocks: parametros a devolver por referencia
+*/
 void stringToBlocks(char* string, char* blockCount, char* blocks){
 
 	int bloquesGrabados[BLOCKS];
@@ -812,11 +813,11 @@ void generarOxigeno(int32_t cantidad){
 
 	}else{// No existe archivo metadata, lo creo
 
-		char* archivo = malloc(cantidad + 1);
-		archivo = string_repeat('O', cantidad);
-
 		char blockCount[MAX_BUFFER] = "";
 		char blocks[MAX_BUFFER] = "";
+
+		char* archivo = malloc(cantidad + 1);
+		archivo = string_repeat('O', cantidad);
 
 		char* MD5 = calcularMD5(archivo);
 		stringToBlocks(archivo, blockCount, blocks);

@@ -101,7 +101,7 @@ int primerBloqueLibre();
 void stringToBlocks(char*, char*, char*);
 int writeBlock(char*, int);
 char* calcularMD5(char*);
-
+void generarOxigeno(int32_t);
 
 // FUNCIONES PARA TESTING:
 
