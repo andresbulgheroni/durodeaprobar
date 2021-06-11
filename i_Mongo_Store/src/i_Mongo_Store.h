@@ -20,6 +20,8 @@
 #include <fcntl.h>
 #include <sys/types.h>
 
+#define MAX_BUFFER 1024
+
 char* PUNTO_MONTAJE;
 char* PUERTO;
 char* IP;
@@ -96,8 +98,8 @@ char* diccionarioFiles_to_char(t_dictionary*);
 void setBitmap(int, int);
 int existeFS();
 int primerBloqueLibre();
-void stringToBlocks(char, int, char*, char*);
-char* writeBlock(char*, int);
+void stringToBlocks(char*, char*, char*);
+int writeBlock(char*, int);
 char* calcularMD5(char*);
 
 

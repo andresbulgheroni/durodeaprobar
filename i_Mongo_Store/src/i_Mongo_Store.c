@@ -7,9 +7,8 @@ int main(void) {
 
 	inicializarFS();
 
-
 	estadoSuperBloque();
-	int32_t dato = 22;
+	int32_t dato = 250;
 	generarOxigeno(dato);
 	estadoSuperBloque();
 
@@ -65,7 +64,7 @@ void timerSincronizacion_blocksMap(){
 
 	while(1){
 		msync(blocksMap, tamanioBlocks, MS_SYNC);
-		puts("Sincronizado blocks");
+		puts("\n-- Sincronizado blocks --\n");
 		sleep(TIEMPO_SINCRONIZACION);
 	}
 
@@ -737,33 +736,31 @@ int primerBloqueLibre(){
 }
 
 //Recibe un string a grabar en el archivo Blocks
-void stringToBlocks(char caracter, int size, char* blockCount, char* blocks){
-	string_append(&blocks, "[");
+void stringToBlocks(char* string, char* blockCount, char* blocks){
 
+	int bloquesGrabados[BLOCKS];
+	int longitud = string_length(string);
 	int contador = 0;
 
-	while(size > BLOCK_SIZE){
-		string_append(&blocks, writeBlock(string_repeat(caracter, (int)BLOCK_SIZE), -1));
-		string_append(&blocks, ",");
-		size = size - BLOCK_SIZE;
-		contador++;
-	}
-
-	string_append(&blocks,	writeBlock(string_repeat(caracter, size), -1));
+	while(longitud > 0){
+	bloquesGrabados[contador] = writeBlock(string_substring(string, contador * BLOCK_SIZE, BLOCK_SIZE), -1);
 	contador++;
-
-	if(string_ends_with(blocks, ",")){
-		blocks[strlen(blocks)-1] = ']';
-	}else{
-		string_append(&blocks, "]");
+	longitud -= BLOCK_SIZE;
 	}
 
-	string_append(&blockCount, string_itoa(contador));
+	strcpy(blockCount, string_itoa(contador));
 
+	strcpy(blocks, "[");
+	for(int i=0; i<contador; i++)
+	{
+		strcat(blocks, string_itoa(bloquesGrabados[i]));
+		strcat(blocks, ",");
+	}
+	blocks[strlen(blocks)-1] = ']';
 }
 
 // Controlar previamente que no se pase del BLOCK_SIZE, si bloque es -1 busca el primero libre
-char* writeBlock(char* string, int bloque){
+int writeBlock(char* string, int bloque){
 	if(bloque == -1){
 		bloque = primerBloqueLibre();
 	}
@@ -778,7 +775,7 @@ char* writeBlock(char* string, int bloque){
 			string,
 			strlen(string) * sizeof(char));
 
-	return string_itoa(bloque);
+	return bloque;
 }
 
 /*
@@ -809,24 +806,22 @@ void generarOxigeno(int32_t cantidad){
 
 	if(access(rutaMetadata, F_OK) != -1){ //Existe archivo metadata, lo manejo como config
 
-		t_config* metadata = config_create(rutaMetadata);
-
-		printf("\nBlocks: %s", config_get_string_value(metadata, "BLOCKS"));
-		config_destroy(metadata);
+//		t_config* metadata = config_create(rutaMetadata);
+//		printf("\nBlocks: %s", config_get_string_value(metadata, "BLOCKS"));
+//		config_destroy(metadata);
 
 	}else{// No existe archivo metadata, lo creo
 
+		char* archivo = malloc(cantidad + 1);
+		archivo = string_repeat('O', cantidad);
+
+		char blockCount[MAX_BUFFER] = "";
+		char blocks[MAX_BUFFER] = "";
+
+		char* MD5 = calcularMD5(archivo);
+		stringToBlocks(archivo, blockCount, blocks);
+
 		char* metadata = string_new();
-
-		char* blockCount = string_new();
-		char* blocks = string_new();
-
-
-		char* MD5 = calcularMD5(string_repeat('O', cantidad));
-
-
-		stringToBlocks('O', (int)cantidad, blockCount, blocks);
-
 		string_append(&metadata, "SIZE=");
 		string_append(&metadata, string_itoa(cantidad));
 
@@ -846,7 +841,7 @@ void generarOxigeno(int32_t cantidad){
 		txt_write_in_file(fp, metadata);
 		txt_close_file(fp);
 
+		free(archivo);
 		free(MD5);
-
 	}
 }
