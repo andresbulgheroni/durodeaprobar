@@ -7,8 +7,9 @@ int main(void) {
 
 	inicializarFS();
 
+
 	estadoSuperBloque();
-	int32_t dato = 250;
+	int32_t dato = 130;
 	generarOxigeno(dato);
 	estadoSuperBloque();
 
@@ -648,6 +649,13 @@ bool existeArchivo(char* path) {
 
 }
 
+int menorEntre(int a, int b){
+    if(a>b)
+        return b;
+    else
+        return a;
+}
+
 void inicializarFS(){
 
 	if(existeFS()){
@@ -744,7 +752,8 @@ void stringToBlocks(char* string, char* blockCount, char* blocks){
 	int contador = 0;
 
 	while(longitud > 0){
-	bloquesGrabados[contador] = writeBlock(string_substring(string, contador * BLOCK_SIZE, BLOCK_SIZE), -1);
+		// length es BLOCK_SIZE, o si es menor solo los bytes a escribir
+	bloquesGrabados[contador] = writeBlock(string_substring(string, contador * BLOCK_SIZE, menorEntre(longitud, BLOCK_SIZE)), -1);
 	contador++;
 	longitud -= BLOCK_SIZE;
 	}
@@ -758,6 +767,7 @@ void stringToBlocks(char* string, char* blockCount, char* blocks){
 		strcat(blocks, ",");
 	}
 	blocks[strlen(blocks)-1] = ']';
+	blocks[strlen(blocks)] = '\0';
 }
 
 // Controlar previamente que no se pase del BLOCK_SIZE, si bloque es -1 busca el primero libre
@@ -781,9 +791,9 @@ int writeBlock(char* string, int bloque){
 
 /*
 Hacer free despues de usar! Ejemplo:
-char* output = calcularMD5("aaaaa");
-printf("Hash piola: %s", output);
-free(output);
+	char* output = calcularMD5("aaaaa");
+	printf("Hash piola: %s", output);
+	free(output);
 */
 char* calcularMD5(char *str) {
 	unsigned char digest[16];
@@ -793,6 +803,7 @@ char* calcularMD5(char *str) {
 	MD5_Init(&ctx);
 	MD5_Update(&ctx, str, strlen(str));
 	MD5_Final(digest, &ctx);
+
 
 	for (int i = 0, j = 0; i < 16; i++, j+=2)
 		sprintf(buf+j, "%02x", digest[i]);
@@ -807,9 +818,65 @@ void generarOxigeno(int32_t cantidad){
 
 	if(access(rutaMetadata, F_OK) != -1){ //Existe archivo metadata, lo manejo como config
 
-//		t_config* metadata = config_create(rutaMetadata);
-//		printf("\nBlocks: %s", config_get_string_value(metadata, "BLOCKS"));
-//		config_destroy(metadata);
+		t_config* metadata = config_create(rutaMetadata);
+
+		int blockCount = config_get_int_value(metadata, "BLOCK_COUNT");
+		int cantidadVieja = config_get_int_value(metadata, "SIZE");
+		int cantidadNueva = cantidad + cantidadVieja;
+		config_set_value(metadata, "SIZE", string_itoa(cantidadNueva));
+		int caracteresEnUltimoBloque = cantidadVieja % BLOCK_SIZE; //0 si esta completo
+
+		printf("\nCaracteres en ultimo bloque: %d\n", caracteresEnUltimoBloque);
+
+		// Genero nueva cadena en memoria y le calculo MD5
+		char* archivo = malloc(cantidadNueva + 1);
+		archivo = string_repeat('O', cantidadNueva);
+		char* MD5 = calcularMD5(archivo);
+		config_set_value(metadata, "MD5_ARCHIVO", MD5);
+
+		char* blocks = string_new();
+		string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
+
+		if(caracteresEnUltimoBloque > 0){// Termino de llenar último bloque antes de pedir otro
+			char** blocksArray = string_get_string_as_array(blocks);
+			int ultimoBloque = atoi(blocksArray[blockCount-1]);
+
+			puts("voy a llenar bloque existente");
+			printf("\nultimo bloque: %d\n", ultimoBloque);
+			memcpy(	blocksMap +	(ultimoBloque-1) * BLOCK_SIZE +		caracteresEnUltimoBloque,
+					string_substring(archivo, cantidadVieja, BLOCK_SIZE - caracteresEnUltimoBloque),
+					BLOCK_SIZE - caracteresEnUltimoBloque * sizeof(char));
+
+			cantidad -= (BLOCK_SIZE - caracteresEnUltimoBloque);
+		}
+
+		if(cantidad > 0){// Escribo los demas bloques
+			puts("avanzo a nuevos bloques");
+		char blockCountNuevo[MAX_BUFFER] = "";
+		char blocksNuevo[MAX_BUFFER] = "";
+
+
+		//string_substring_from(archivo, cantidadVieja + (BLOCK_SIZE - caracteresEnUltimoBloque))
+
+		stringToBlocks(string_substring_from(archivo, cantidadVieja + (BLOCK_SIZE - caracteresEnUltimoBloque)), blockCountNuevo, blocksNuevo);
+
+		// Rearmo lista Blocks, y actualizo los demas campos de metadata
+
+		blocks[strlen(blocks)-1] = ',';
+
+		memmove(blocksNuevo, blocksNuevo+1, strlen(blocksNuevo));
+
+		strcat(blocks, blocksNuevo);
+		puts(blocks);
+
+		config_set_value(metadata, "BLOCKS", blocks);
+		config_set_value(metadata, "BLOCK_COUNT", string_itoa(blockCount + atoi(blockCountNuevo)));
+		}
+
+		config_save(metadata);
+		config_destroy(metadata);
+		free(archivo);
+		free(MD5);
 
 	}else{// No existe archivo metadata, lo creo
 

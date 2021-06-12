@@ -1,7 +1,7 @@
 #ifndef I_MONGO_STORE_H_
 #define I_MONGO_STORE_H_
 
-#include "md5.h"
+#include<openssl/md5.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include<commons/log.h>
@@ -81,6 +81,7 @@ void inicializarBlocks();
 void escribir_archivo(char*, char*);
 int chequearSuperBloque();
 bool existeArchivo(char* path);
+int menorEntre(int, int);
 op_code_tareas string_to_op_code_tareas (char*);
 void buscarMensaje(inicio_tarea_msg*);
 void funcionPruebaDisc(int32_t*);
