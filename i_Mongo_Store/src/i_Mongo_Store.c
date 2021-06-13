@@ -9,13 +9,17 @@ int main(void) {
 	estadoSuperBloque();
 
 	int32_t dato = 77;
-	int32_t dato2 = 3;
-	generarRecurso(dato, 'O');
-	generarRecurso(dato, 'C');
-	generarRecurso(dato, 'B');
-	generarRecurso(dato2, 'O');
+//	int32_t dato2 = 3;
+//	generarRecurso(dato, 'O');
+//	generarRecurso(dato, 'C');
+//	generarRecurso(dato, 'B');
+//	generarRecurso(dato2, 'O');
 
 	estadoSuperBloque();
+	descartarBasura();
+	estadoSuperBloque();
+
+
 
 //	while(1){}
 
@@ -526,10 +530,9 @@ bool existeArchivo(char* path) {
 }
 
 int menorEntre(int a, int b){
-    if(a>b)
-        return b;
-    else
-        return a;
+
+    if(a>b) return b;
+    else    return a;
 }
 
 void inicializarFS(){
@@ -592,6 +595,7 @@ void crear_log(){
 }
 
 void setBitmap(int valor, int posicion){
+
 	if(valor == 0){
 		bitarray_clean_bit(bitmap, posicion - 1);
 	}else{
@@ -600,6 +604,7 @@ void setBitmap(int valor, int posicion){
 }
 
 int existeFS(){
+
 	if(existeArchivo(string_from_format("%s/SuperBloque.ims", PUNTO_MONTAJE)) &&
 			existeArchivo(string_from_format("%s/Blocks.ims", PUNTO_MONTAJE))){
 		return 1;
@@ -608,6 +613,7 @@ int existeFS(){
 
 // Devuelve 0 si el Bitmap esta lleno
 int primerBloqueLibre(){
+
 	int posicion = 0;
 	for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
 		if(!bitarray_test_bit(bitmap, i)){
@@ -648,6 +654,7 @@ void stringToBlocks(char* string, char* blockCount, char* blocks){
 
 // Controlar previamente que no se pase del BLOCK_SIZE, si bloque es -1 busca el primero libre
 int writeBlock(char* string, int bloque){
+
 	if(bloque == -1){
 		bloque = primerBloqueLibre();
 	}
@@ -672,6 +679,7 @@ Hacer free despues de usar! Ejemplo:
 	free(output);
 */
 char* calcularMD5(char *str) {
+
 	unsigned char digest[16];
 	char* buf = malloc(sizeof digest * 2 + 1);
 
@@ -679,7 +687,6 @@ char* calcularMD5(char *str) {
 	MD5_Init(&ctx);
 	MD5_Update(&ctx, str, strlen(str));
 	MD5_Final(digest, &ctx);
-
 
 	for (int i = 0, j = 0; i < 16; i++, j+=2)
 		sprintf(buf+j, "%02x", digest[i]);
@@ -769,6 +776,31 @@ int generarRecurso(int32_t cantidad, char recurso){
 
 		free(archivo);
 		free(MD5);
+	}
+	return EXIT_SUCCESS;
+}
+
+int descartarBasura(){
+	char* rutaMetadata= string_from_format("%s/Files/Basura.ims", PUNTO_MONTAJE);
+
+	if(access(rutaMetadata, F_OK) != -1){
+
+		t_config* metadata = config_create(rutaMetadata);
+		char** bloques = config_get_array_value(metadata, "BLOCKS");
+		int blockCount = config_get_int_value(metadata, "BLOCK_COUNT");
+
+		// Libero bloques
+		for(int i = 0; i < blockCount; i++){
+			setBitmap(0, atoi(bloques[i]));
+		}
+
+		config_destroy(metadata);
+		// Borro archivo Basura.ims
+		remove(rutaMetadata);
+
+	}else{
+		log_error(logger,"No existe el archivo Basura.ims");
+		return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;
 }

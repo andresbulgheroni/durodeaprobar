@@ -100,6 +100,7 @@ void stringToBlocks(char*, char*, char*);
 int writeBlock(char*, int);
 char* calcularMD5(char*);
 int generarRecurso(int32_t, char);
+int descartarBasura();
 
 // FUNCIONES PARA TESTING:
 
