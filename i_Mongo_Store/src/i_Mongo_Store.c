@@ -7,17 +7,30 @@ int main(void) {
 	inicializarFS();
 
 	estadoSuperBloque();
+//
+	int32_t dato1 = 132;
+	int32_t dato2 = 23;
+	int32_t dato3 = 32;
+	int32_t dato4 = 23;
 
-	int32_t dato = 77;
-//	int32_t dato2 = 3;
-//	generarRecurso(dato, 'O');
-//	generarRecurso(dato, 'C');
-//	generarRecurso(dato, 'B');
-//	generarRecurso(dato2, 'O');
+
+//	generarRecurso(33, 'O');
+//
+//	generarRecurso(33, 'C');
+	generarRecurso(dato1, 'O');
+	generarRecurso(dato2, 'C');
+
+//	generarRecurso(23, 'C');
+
+	generarRecurso(dato3, 'O');
+	generarRecurso(dato4, 'C');
+
 
 	estadoSuperBloque();
-	descartarBasura();
-	estadoSuperBloque();
+
+//	estadoSuperBloque();
+//	descartarBasura();
+//	estadoSuperBloque();
 
 
 
@@ -71,7 +84,7 @@ int main(void) {
 void timerSincronizacion_blocksMap(){
 
 	while(1){
-		msync(blocksMap, tamanioBlocks, MS_SYNC);
+		//msync(blocksMap, tamanioBlocks, MS_SYNC);
 		puts("\n-- Sincronizado blocks --\n");
 		sleep(TIEMPO_SINCRONIZACION);
 	}
@@ -237,96 +250,6 @@ char* diccionarioFiles_to_char(t_dictionary* dic){
 
 	return cadena;
 
-}
-
-char* consumir_oxigeno(int32_t parametros){
-
-	char* rutaTarea= string_new();
-	string_append(&rutaTarea, PUNTO_MONTAJE);
-	string_append(&rutaTarea, "/Files");
-	crearDirectorio(rutaTarea);
-	string_append(&rutaTarea, "/Oxigeno.ims");
-	if(access(rutaTarea, F_OK) != -1){ //Si existe
-		uint32_t cantCaracteres = (uint32_t) parametros;
-
-		char oxigeno = 'O' ;
-		int diferencia_caracteres = contar_caracteres(rutaTarea) - cantCaracteres;
-
-		remove(rutaTarea);
-		FILE* fp = fopen(rutaTarea,"w+b");
-
-		if(diferencia_caracteres >= 0){
-
-			for(int i=0; i < diferencia_caracteres; i++){
-				fwrite(&oxigeno, sizeof(char),1, fp);
-			}
-			fclose(fp);
-		}else{
-
-			fclose(fp);
-
-			log_info(logger,"Se quieren borrar mas caracteres de los que hay");
-
-		}
-
-	}else{
-
-		log_info(logger,"no existe el archivo");
-
-	}
-	return "BORRO";
-}
-
-char* consumir_comida(int32_t parametros){
-
-	char* rutaTarea= string_new();
-	string_append(&rutaTarea, PUNTO_MONTAJE);
-	string_append(&rutaTarea, "/Files");
-	crearDirectorio(rutaTarea);
-	string_append(&rutaTarea, "/Comida.ims");
-	if(access(rutaTarea, F_OK) != -1){ //Si existe
-		uint32_t caracteres = (uint32_t) parametros;
-		char comida = 'C' ;
-
-		int diferencia_caracteres = contar_caracteres(rutaTarea) - caracteres;
-
-		remove(rutaTarea);
-		FILE* fp = fopen(rutaTarea,"w+b");
-
-		if(diferencia_caracteres >= 0){
-
-			for(int i=0; i < diferencia_caracteres; i++){
-				fwrite(&comida, sizeof(char),1, fp);
-			}
-			fclose(fp);
-		}else{
-
-			fclose(fp);
-			log_info(logger,"Se quieren borrar mas caracteres de los que hay");
-		}
-
-	}else{
-
-		log_info(logger,"No existe el archivo");
-
-	}
-	return "BORRO";
-}
-
-
-char* descartar_basura(){
-
-	char* rutaTarea= string_new();
-	string_append(&rutaTarea, PUNTO_MONTAJE);
-	string_append(&rutaTarea, "/Files");
-	crearDirectorio(rutaTarea);
-	string_append(&rutaTarea, "/Basura.ims");
-	if(access(rutaTarea, F_OK) != -1){ //Si existe
-		remove(rutaTarea);
-	}else{
-		log_info(logger,"no existe el archivo");
-	}
-	return "BORRO";
 }
 
 void buscarMensaje(inicio_tarea_msg* tarea) {
@@ -690,7 +613,7 @@ char* calcularMD5(char *str) {
 
 	for (int i = 0, j = 0; i < 16; i++, j+=2)
 		sprintf(buf+j, "%02x", digest[i]);
-	buf[sizeof digest * 2] = 0;
+	buf[sizeof digest * 2] = '\0';
 
 	return buf;
 }
@@ -715,18 +638,36 @@ int generarRecurso(int32_t cantidad, char recurso){
 		config_set_value(metadata, "SIZE", string_itoa(cantidadNueva));
 
 		// Genero nueva cadena en memoria y le calculo MD5
-		char* archivo = malloc(cantidadNueva + 1);
-		archivo = string_repeat(recurso, cantidadNueva);
+		char* archivo = string_repeat(recurso, cantidadNueva);
 		char* MD5 = calcularMD5(archivo);
 		config_set_value(metadata, "MD5_ARCHIVO", MD5);
 
 		char* blocks = string_new();
 		string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
 
+		int blockCount = config_get_int_value(metadata, "BLOCK_COUNT");
+
+		int caracteresEnUltimoBloque = cantidadVieja % BLOCK_SIZE; //0 si esta completo
+
+		if(caracteresEnUltimoBloque > 0){// Termino de llenar último bloque antes de pedir otro
+					char** blocksArray = string_get_string_as_array(blocks);
+					int ultimoBloque = atoi(blocksArray[blockCount-1]);
+
+					memcpy(	blocksMap +	(ultimoBloque-1) * BLOCK_SIZE +		caracteresEnUltimoBloque,
+							string_substring(archivo, cantidadVieja, BLOCK_SIZE - caracteresEnUltimoBloque),
+							BLOCK_SIZE - caracteresEnUltimoBloque * sizeof(char));
+
+					cantidad -= (BLOCK_SIZE - caracteresEnUltimoBloque);
+				}
+
+		if(cantidad > 0){// Lleno nuevos bloques de ser necesario
+
 		char blockCountNuevo[MAX_BUFFER] = "";
 		char blocksNuevo[MAX_BUFFER] = "";
 
-		stringToBlocks(string_substring_from(archivo, cantidadVieja), blockCountNuevo, blocksNuevo);
+		stringToBlocks(string_substring_from(archivo, (BLOCK_SIZE - caracteresEnUltimoBloque) + cantidadVieja), blockCountNuevo, blocksNuevo);
+
+		free(MD5);
 
 		// Rearmo lista Blocks, y actualizo los demas campos de metadata
 		blocks[strlen(blocks)-1] = ',';
@@ -734,21 +675,20 @@ int generarRecurso(int32_t cantidad, char recurso){
 		strcat(blocks, blocksNuevo);
 		config_set_value(metadata, "BLOCKS", blocks);
 
-		int blockCount = config_get_int_value(metadata, "BLOCK_COUNT");
 		config_set_value(metadata, "BLOCK_COUNT", string_itoa(blockCount + atoi(blockCountNuevo)));
+
+		}
 
 		config_save(metadata);
 		config_destroy(metadata);
-		free(archivo);
-		free(MD5);
+
 
 	}else{// No existe archivo metadata, lo creo
 
 		char blockCount[MAX_BUFFER] = "";
 		char blocks[MAX_BUFFER] = "";
 
-		char* archivo = malloc(cantidad + 1);
-		archivo = string_repeat(recurso, cantidad);
+		char* archivo = string_repeat(recurso, cantidad);
 
 		// Genero MD5 y grabo archivo a bloques
 		char* MD5 = calcularMD5(archivo);
@@ -774,7 +714,6 @@ int generarRecurso(int32_t cantidad, char recurso){
 		txt_write_in_file(fp, metadata);
 		txt_close_file(fp);
 
-		free(archivo);
 		free(MD5);
 	}
 	return EXIT_SUCCESS;
@@ -801,6 +740,90 @@ int descartarBasura(){
 	}else{
 		log_error(logger,"No existe el archivo Basura.ims");
 		return EXIT_FAILURE;
+	}
+	return EXIT_SUCCESS;
+}
+
+int consumirRecurso(int32_t cantidad, char recurso){
+	char* rutaMetadata;
+	if(recurso == 'O')		rutaMetadata = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
+	else if(recurso == 'C') rutaMetadata = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
+	else{
+		log_error(logger, "Recurso a consumir invalido");
+		return EXIT_FAILURE;
+	}
+
+	if(access(rutaMetadata, F_OK) != -1){// Existe la metadata del recurso
+
+		t_config* metadata = config_create(rutaMetadata);
+		int cantidadVieja = config_get_int_value(metadata, "SIZE");
+		int cantidadNueva = cantidadVieja - cantidad;
+
+		char** bloques = config_get_array_value(metadata, "BLOCKS");
+		int blockCount = config_get_int_value(metadata, "BLOCK_COUNT");
+
+		if(cantidad >= cantidadVieja){// Quiero consumir todos los recursos o mas
+			//Libero todos los bloques
+			for(int i = 0; i < blockCount; i++){
+				setBitmap(0, atoi(bloques[i]));
+			}
+			log_info(logger, "Se consumieron todos los recursos %c, archivo vaciado", recurso);
+			config_destroy(metadata);
+			remove(rutaMetadata); //Borro archivo por la implementacion que hice del FS
+			return EXIT_SUCCESS;
+		}
+
+		config_set_value(metadata, "SIZE", string_itoa(cantidadNueva));
+
+		// Genero MD5
+		char* archivo = string_repeat(recurso, cantidadNueva);
+		char* MD5 = calcularMD5(archivo);
+		config_set_value(metadata, "MD5_ARCHIVO", MD5);
+
+		// Libero bloques y actualizo blocks / block_count
+
+//////////////////////////////////////////////////////////////////////////////////////// PARA HACER
+
+//		int blockCountNuevo = cantidadNueva / BLOCK_SIZE + (cantidadNueva % BLOCK_SIZE != 0);
+//
+//		if(blockCountNuevo > blockCount){// Tengo que borrar bloques
+//
+//		config_set_value(metadata, "BLOCK_COUNT", string_itoa(blockCountNuevo));
+//
+//		char* blocks = string_new();
+//		string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
+//		char** listaBlocks = string_get_string_as_array(blocks);
+//
+//		while(blockCount > blockCountNuevo){
+//			setBitmap(0, atoi(listaBlocks[blockCountNuevo-1]));
+//			listaBlocks[blockCountNuevo-1] = "\0";
+//			blockCountNuevo--;
+//		}
+//
+//		int contador = 0;
+//		char* blocksNuevo = string_new();
+//		while(contador < blockCountNuevo){
+//			string_append(&blocksNuevo, listaBlocks[contador]);
+//			string_append(&blocksNuevo, ",");
+//			contador++;
+//		}
+//
+//		puts("listaBlocks");
+//		config_set_value(metadata, "BLOCKS", blocksNuevo);
+//
+//		}
+//////////////////////////////////////////////////////////////////////////////////////// PARA HACER
+
+		config_save(metadata);
+		config_destroy(metadata);
+
+		free(MD5);
+	}else{// No existe la metadata del recurso
+
+		// Informar que no existe el archivo tambien por otro medio?
+
+		log_info(logger, "No existe el archivo de metadata a consumir");
+		return EXIT_SUCCESS;
 	}
 	return EXIT_SUCCESS;
 }

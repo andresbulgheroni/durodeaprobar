@@ -86,9 +86,6 @@ op_code_tareas string_to_op_code_tareas (char*);
 void buscarMensaje(inicio_tarea_msg*);
 void funcionPruebaDisc(int32_t*);
 void funcionPruebaTrip(int32_t*);
-char* consumir_oxigeno(int32_t);
-char* consumir_comida(int32_t);
-char* descartar_basura();
 t_bitarray* crearBitmap(char*);
 void timerSincronizacion_superBloqueMap();
 void timerSincronizacion_blocksMap();
@@ -101,6 +98,7 @@ int writeBlock(char*, int);
 char* calcularMD5(char*);
 int generarRecurso(int32_t, char);
 int descartarBasura();
+int consumirRecurso(int32_t, char);
 
 // FUNCIONES PARA TESTING:
 
