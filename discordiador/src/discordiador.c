@@ -9,8 +9,6 @@
  */
 #include "discordiador.h"
 
-int a=1;
-
 
 pthread_mutex_t mutex_tripulantes = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_sockets = PTHREAD_MUTEX_INITIALIZER;
@@ -180,17 +178,91 @@ void planificarSabotaje(){
 	while(true){
 	uint32_t socketSabotaje = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
 	t_paquete*mensaje=recibir_paquete(socketSabotaje);
-	sem_wait(&sem_sabotaje);
+
+
+	//sem_wait(&sem_sabotaje);
+	t_sabotaje*sabotaje;
+	sabotaje->coordenadas=1;
 	haySabotaje=1;
-	pasarATodosLosTripulantesAListaBloqueado();
+
+
 	PasarAEjecutarAlTripulanteMasCercano();
 	ponerATodosLosTripulantesAReady();
 	haySabotaje=0;
 	sem_post(&sem_sabotaje)
-	liberar_conexion(socketSabotaje);
+	//liberar_conexion(socketSabotaje);
 	}
 }
- */
+*/
+
+bool ordenarTripulantesDeMenorIdAMayor(void* elemento1,void*elemento2){
+
+	t_tripulante* tripulante1 =(t_tripulante*) elemento1;
+	t_tripulante*tripulante2 =(t_tripulante*) elemento2;
+
+	return  tripulante1->idTripulante > tripulante2->idTripulante;
+	}
+
+	void pasarATodosLosTripulantesAListaBloqueado(){
+
+		if(list_size(listaEjecutando) > 1){
+			list_sort(listaEjecutando,ordenarTripulantesDeMenorIdAMayor());
+		}
+
+			for(int i=0; i > list_size(listaEjecutando);i++){
+
+			pthread_mutex_lock(&mutex_listaEjecutando);
+			t_tripulante* tripulanteSacadoDeEjecutar= (t_tripulante*) list_remove(listaEjecutando,0);
+			pthread_mutex_unlock(&mutex_listaEjecutando);
+
+			agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(tripulanteSacadoDeEjecutar);
+		}
+
+
+			if(list_size(listaReady) > 1){
+					list_sort(listaReady,ordenarTripulantesDeMenorIdAMayor());
+				}
+
+			for(int i=0; i > list_size(listaReady);i++){
+
+					pthread_mutex_lock(&mutex_listaReady);
+					t_tripulante* tripulanteSacadoDeReady= (t_tripulante*) list_remove(listaReady,0);
+					pthread_mutex_unlock(&mutex_listaReady);
+
+					agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(tripulanteSacadoDeReady);
+				}
+
+				//faltaria la parte de bloqueados que iria dentro del tripulante
+
+	}
+
+	PasarAEjecutarAlTripulanteMasCercano(t_sabotaje*sabotaje){
+
+		t_tripulante* tripulanteMasCercano=tripulanteMasCercanoDelSabotaje(sabotaje);
+
+		while(!llegoAlSabotaje(tripulanteMasCercano,sabotaje)){
+			moverAlTripulanteHastaElSabotaje(tripulanteMasCercano,sabotaje);
+			sleep(RETARDO_CICLO_CPU);
+		}
+		for(int i=1; DURACION_SABOTAJE >= i; i++){
+			sleep(RETARDO_CICLO_CPU);
+			log_info(logger,"El tripulante con ID %d hizo %d de SABOTAJE de un total de %d",tripulanteMasCercano->idTripulante,i,DURACION_SABOTAJE);
+
+		}
+	}
+
+	void pasarTripulantesAlistaReady(){
+		for(int i=0; i > list_size(listaBloqueadosPorSabotaje);i++){
+
+						pthread_mutex_lock(&mutex_listaBloqueadosPorSabotaje);
+						t_tripulante* tripulanteSacadoDeBloqueadoPorSabotaje= (t_tripulante*) list_remove(listaBloqueadosPorSabotaje,0);
+						pthread_mutex_unlock(&mutex_listaBloqueadosPorSabotaje);
+
+						agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(tripulanteSacadoDeBloqueadoPorSabotaje);
+					}
+	}
+
+
 
 int getIndexTripulanteEnLista(t_list* lista, t_tripulante* tripulante) {
 	if (lista->head == NULL)
@@ -653,18 +725,21 @@ int distanciaA(t_coordenadas* desde, t_coordenadas* hasta){
 
 }
 
-int llegoAlSabotaje(t_tripulante* tripulante){
+int llegoAlSabotaje(t_tripulante* tripulante,t_sabotaje*sabotaje){
 
 	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
 	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
 
-	uint32_t posicionXsabotaje = tripulante->sabotaje->coordenadas->posX;
-	uint32_t posicionYsabotaje = tripulante->sabotaje->coordenadas->posY;
+//	uint32_t posicionXsabotaje = tripulante->sabotaje->coordenadas->posX;
+//	uint32_t posicionYsabotaje = tripulante->sabotaje->coordenadas->posY;
+
+	uint32_t posicionXsabotaje = sabotaje->coordenadas->posX;
+	uint32_t posicionYsabotaje = sabotaje->coordenadas->posY;
 
 	return (posicionXtripulante == posicionXsabotaje) && (posicionYtripulante == posicionYsabotaje);
 }
 
-void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante){
+void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaje){
 
 
 	sleep(RETARDO_CICLO_CPU);
@@ -674,8 +749,8 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante){
 	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
 	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
 
-	uint32_t posicionXsabotaje = tripulante->sabotaje->coordenadas->posX;
-	uint32_t posicionYsabotaje = tripulante->sabotaje->coordenadas->posY;
+	uint32_t posicionXsabotaje = sabotaje->coordenadas->posX;
+	uint32_t posicionYsabotaje = sabotaje->coordenadas->posY;
 
 	if (posicionXtripulante != posicionXsabotaje) {
 
@@ -888,10 +963,10 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
 
-	enviarMensajeDeInicioDeTripulante(tripulante);
+	//enviarMensajeDeInicioDeTripulante(tripulante);
 
 	usleep(150);
-	agregarTripulanteAListaReadyYAvisar(tripulante);
+	agregarTripulanteAListaReadyYAvisar(tripulante);	//TODO
 
 
 	solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
@@ -984,7 +1059,6 @@ void ejecutarTripulante(t_tripulante* tripulante){
 			if(llegoATarea(tripulante)){
 				log_info(logger,"va a ejecutar la tarea el tripulante %d",tripulante->idTripulante);
 
-				//usleep(100);
 
 				ejecucionDeTareaTripulanteFIFO(tripulante);
 
