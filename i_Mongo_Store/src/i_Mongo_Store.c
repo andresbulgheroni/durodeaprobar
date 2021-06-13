@@ -6,6 +6,7 @@ int main(void) {
 	crear_log();
 	inicializarFS();
 
+//////////////////////////////////////////////// Pruebas FS
 	estadoSuperBloque();
 
 	for(int i = 1; i<14;i++){
@@ -13,6 +14,9 @@ int main(void) {
 	}
 
 	estadoSuperBloque();
+//////////////////////////////////////////////// Pruebas FS
+
+
 
 //	while(1){}
 
@@ -598,7 +602,10 @@ char* calcularMD5(char *str) {
 
 int generarRecurso(int32_t cantidad, char recurso){
 
-	if(cantidad < 1) return EXIT_SUCCESS;
+	if(cantidad < 1){
+		log_error(logger, "Pasame una cantidad a generar positiva capo");
+		return EXIT_FAILURE;
+	}
 
 	char* rutaMetadata;
 	if(recurso == 'O')		rutaMetadata = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
