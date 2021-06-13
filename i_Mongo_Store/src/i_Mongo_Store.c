@@ -7,8 +7,14 @@ int main(void) {
 	inicializarFS();
 
 	estadoSuperBloque();
-	int32_t dato = 170;
+
+	int32_t dato = 77;
+	int32_t dato2 = 3;
 	generarRecurso(dato, 'O');
+	generarRecurso(dato, 'C');
+	generarRecurso(dato, 'B');
+	generarRecurso(dato2, 'O');
+
 	estadoSuperBloque();
 
 //	while(1){}
@@ -682,12 +688,16 @@ char* calcularMD5(char *str) {
 	return buf;
 }
 
-void generarRecurso(int32_t cantidad, char recurso){
+int generarRecurso(int32_t cantidad, char recurso){
 
 	char* rutaMetadata;
-	if(recurso == 'O')	rutaMetadata = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
+	if(recurso == 'O')		rutaMetadata = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
 	else if(recurso == 'C') rutaMetadata = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
-	else	rutaMetadata = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
+	else if(recurso == 'B') rutaMetadata = string_from_format("%s/Files/Basura.ims", PUNTO_MONTAJE);
+	else{
+		log_error(logger, "pasame un recurso valido para generar capo");
+		return EXIT_FAILURE;
+	}
 
 	if(access(rutaMetadata, F_OK) != -1){ //Existe archivo metadata, lo manejo como config
 
@@ -748,9 +758,7 @@ void generarRecurso(int32_t cantidad, char recurso){
 		string_append(&metadata, blocks);
 
 		string_append(&metadata, "\nCARACTER_LLENADO=");
-		if(recurso == 'O')	string_append(&metadata, "O");
-		else if(recurso == 'C') string_append(&metadata, "C");
-		else string_append(&metadata, "B");
+		string_append(&metadata, string_repeat(recurso, 1));
 
 		string_append(&metadata, "\nMD5_ARCHIVO=");
 		string_append(&metadata, MD5);
@@ -762,4 +770,5 @@ void generarRecurso(int32_t cantidad, char recurso){
 		free(archivo);
 		free(MD5);
 	}
+	return EXIT_SUCCESS;
 }

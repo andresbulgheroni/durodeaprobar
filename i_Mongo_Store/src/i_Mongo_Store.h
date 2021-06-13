@@ -99,7 +99,7 @@ int primerBloqueLibre();
 void stringToBlocks(char*, char*, char*);
 int writeBlock(char*, int);
 char* calcularMD5(char*);
-void generarRecurso(int32_t, char);
+int generarRecurso(int32_t, char);
 
 // FUNCIONES PARA TESTING:
 
