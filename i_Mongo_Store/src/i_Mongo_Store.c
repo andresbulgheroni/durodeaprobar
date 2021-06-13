@@ -4,13 +4,11 @@ int main(void) {
 
 	leerConfig();
 	crear_log();
-
 	inicializarFS();
 
-
 	estadoSuperBloque();
-	int32_t dato = 130;
-	generarOxigeno(dato);
+	int32_t dato = 170;
+	generarRecurso(dato, 'O');
 	estadoSuperBloque();
 
 //	while(1){}
@@ -231,51 +229,6 @@ char* diccionarioFiles_to_char(t_dictionary* dic){
 
 }
 
-char* generar_oxigeno(int32_t parametros){
-
-	char* oxigeno = "O";
-	char* metadataFiles = string_new();
-	string_append(&metadataFiles,"SIZE=");
-	string_append(&metadataFiles,"\nBLOCK_COUNT=");
-	string_append(&metadataFiles,"\nBLOCKS=");
-	string_append(&metadataFiles,"\nCARACTER_LLENADO=");
-	string_append(&metadataFiles,oxigeno);
-	string_append(&metadataFiles,"\nMD5_ARCHIVO=");
-	char* rutaTarea= string_new();
-	string_append(&rutaTarea, PUNTO_MONTAJE);
-	string_append(&rutaTarea, "/Files");
-	crearDirectorio(rutaTarea);
-	string_append(&rutaTarea, "/Oxigeno.ims");
-	FILE* fp;
-
-	if(access(rutaTarea, F_OK) != -1){ //Si existe
-
-		fp = fopen(rutaTarea, "r+b");
-		//sacar todos los datos del fp como un char* y se lo pasas a la funcion de armar diccionario
-		//saca todos valores, y opera como lo de abajo
-
-
-
-	}else{
-
-		fp = fopen(rutaTarea, "w+b");
-		t_dictionary* dic = armar_diccionario(metadataFiles);
-		config_set_value_propio(dic,"SIZE",string_itoa(parametros));
-		uint32_t block_count = (parametros / BLOCK_SIZE) + 1;
-		config_set_value_propio(dic,"BLOCK_COUNT",string_itoa(block_count));
-		//hay que verificar en el bitmap los bloques libres
-		//una vez obtenidos los guardamos como el block_count usando string_from_format en el diccionario
-		//luego en los bloques que nos dijo el bitmap escribimos el caracter de llenado las veces que dice parametros
-		//luego actualizamos el bitmap en 1 en los bloques que escribimos
-		char* cadena = diccionarioFiles_to_char(dic);
-		txt_write_in_file(fp, cadena);
-		dictionary_destroy(dic);
-		txt_close_file(fp);
-
-	}
-	return "Funciono";
-}
-
 char* consumir_oxigeno(int32_t parametros){
 
 	char* rutaTarea= string_new();
@@ -314,48 +267,6 @@ char* consumir_oxigeno(int32_t parametros){
 	return "BORRO";
 }
 
-char* generar_comida(int32_t parametros){
-
-	char* comida = "C";
-	char* metadataFiles = string_new();
-	string_append(&metadataFiles,"SIZE=");
-	string_append(&metadataFiles,"\nBLOCK_COUNT=");
-	string_append(&metadataFiles,"\nBLOCKS=");
-	string_append(&metadataFiles,"\nCARACTER_LLENADO=");
-	string_append(&metadataFiles,comida);
-	string_append(&metadataFiles,"\nMD5_ARCHIVO=");
-	char* rutaTarea= string_new();
-	string_append(&rutaTarea, PUNTO_MONTAJE);
-	string_append(&rutaTarea, "/Files");
-	crearDirectorio(rutaTarea);
-	string_append(&rutaTarea, "/Comida.ims");
-
-	if(access(rutaTarea, F_OK) != -1){ //Si existe
-
-		FILE* fp = fopen(rutaTarea, "w+b");
-		t_dictionary* dic = armar_diccionario(metadataFiles);
-		config_set_value_propio(dic,"SIZE",string_itoa(parametros));
-		uint32_t block_count = (parametros / BLOCK_SIZE) + 1;
-		config_set_value_propio(dic,"BLOCK_COUNT",string_itoa(block_count));
-		//hay que verificar en el bitmap los bloques libres
-		//una vez obtenidos los guardamos como el block_count usando string_from_format en el diccionario
-		//luego en los bloques que nos dijo el bitmap escribimos el caracter de llenado las veces que dice parametros
-		//luego actualizamos el bitmap en 1 en los bloques que escribimos
-		char* cadena = diccionarioFiles_to_char(dic);
-		txt_write_in_file(fp, cadena);
-		dictionary_destroy(dic);
-		txt_close_file(fp);
-
-	}else{
-
-		FILE* fp = txt_open_for_append(rutaTarea);
-		txt_write_in_file(fp, metadataFiles);
-		txt_close_file(fp);
-
-	}
-	return "Funciono";
-}
-
 char* consumir_comida(int32_t parametros){
 
 	char* rutaTarea= string_new();
@@ -392,47 +303,6 @@ char* consumir_comida(int32_t parametros){
 	return "BORRO";
 }
 
-char* generar_basura(int32_t parametros){
-
-	char* basura = "B";
-	char* metadataFiles = string_new();
-	string_append(&metadataFiles,"SIZE=");
-	string_append(&metadataFiles,"\nBLOCK_COUNT=");
-	string_append(&metadataFiles,"\nBLOCKS=");
-	string_append(&metadataFiles,"\nCARACTER_LLENADO=");
-	string_append(&metadataFiles,basura);
-	string_append(&metadataFiles,"\nMD5_ARCHIVO=");
-	char* rutaTarea= string_new();
-	string_append(&rutaTarea, PUNTO_MONTAJE);
-	string_append(&rutaTarea, "/Files");
-	crearDirectorio(rutaTarea);
-	string_append(&rutaTarea, "/Basura.ims");
-
-	if(access(rutaTarea, F_OK) != -1){ //Si existe
-
-		FILE* fp = fopen(rutaTarea, "w+b");
-		t_dictionary* dic = armar_diccionario(metadataFiles);
-		config_set_value_propio(dic,"SIZE",string_itoa(parametros));
-		uint32_t block_count = (parametros / BLOCK_SIZE) + 1;
-		config_set_value_propio(dic,"BLOCK_COUNT",string_itoa(block_count));
-		//hay que verificar en el bitmap los bloques libres
-		//una vez obtenidos los guardamos como el block_count usando string_from_format en el diccionario
-		//luego en los bloques que nos dijo el bitmap escribimos el caracter de llenado las veces que dice parametros
-		//luego actualizamos el bitmap en 1 en los bloques que escribimos
-		char* cadena = diccionarioFiles_to_char(dic);
-		txt_write_in_file(fp, cadena);
-		dictionary_destroy(dic);
-		txt_close_file(fp);
-
-	}else{
-
-		FILE* fp = txt_open_for_append(rutaTarea);
-		txt_write_in_file(fp, metadataFiles);
-		txt_close_file(fp);
-
-	}
-	return "Funciono";
-}
 
 char* descartar_basura(){
 
@@ -455,42 +325,42 @@ void buscarMensaje(inicio_tarea_msg* tarea) {
 
 	case GENERAR_OXIGENO:{
 
-		char* generarOxigeno = generar_oxigeno(tarea->parametros);
+//		char* generarOxigeno = generar_oxigeno(tarea->parametros);
 		//		enviar_paquete(generarOxigeno, estado, socket_cliente);
 		break;
 
 	}
 	case CONSUMIR_OXIGENO:{
 
-		char* consumirOxigeno = consumir_oxigeno(tarea->parametros);
+//		char* consumirOxigeno = consumir_oxigeno(tarea->parametros);
 		//		enviar_paquete(consumirOxigeno, estado, socket_cliente);
 		break;
 
 	}
 	case GENERAR_COMIDA:{
 
-		char* generarComida = generar_comida(tarea->parametros);
+//		char* generarComida = generar_comida(tarea->parametros);
 		//		enviar_paquete(generarComida, estado, socket_cliente);
 		break;
 
 	}
 	case CONSUMIR_COMIDA:{
 
-		char* consumirComida = consumir_comida(tarea->parametros);
+//		char* consumirComida = consumir_comida(tarea->parametros);
 		//		enviar_paquete(consumirComida, estado, socket_cliente);
 		break;
 
 	}
 	case GENERAR_BASURA:{
 
-		char* generarBasura = generar_basura(tarea->parametros);
+//		char* generarBasura = generar_basura(tarea->parametros);
 		//		enviar_paquete(generarBasura, estado, socket_cliente);
 		break;
 
 	}
 	case DESCARTAR_BASURA:{
 
-		char* descartarBasura = descartar_basura();
+//		char* descartarBasura = descartar_basura();
 		//		enviar_paquete(descartarBasura, estado, socket_cliente);
 		break;
 
@@ -812,66 +682,43 @@ char* calcularMD5(char *str) {
 	return buf;
 }
 
-// Version diego :D
-void generarOxigeno(int32_t cantidad){
-	char* rutaMetadata = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
+void generarRecurso(int32_t cantidad, char recurso){
+
+	char* rutaMetadata;
+	if(recurso == 'O')	rutaMetadata = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
+	else if(recurso == 'C') rutaMetadata = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
+	else	rutaMetadata = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
 
 	if(access(rutaMetadata, F_OK) != -1){ //Existe archivo metadata, lo manejo como config
 
 		t_config* metadata = config_create(rutaMetadata);
 
-		int blockCount = config_get_int_value(metadata, "BLOCK_COUNT");
 		int cantidadVieja = config_get_int_value(metadata, "SIZE");
 		int cantidadNueva = cantidad + cantidadVieja;
 		config_set_value(metadata, "SIZE", string_itoa(cantidadNueva));
-		int caracteresEnUltimoBloque = cantidadVieja % BLOCK_SIZE; //0 si esta completo
-
-		printf("\nCaracteres en ultimo bloque: %d\n", caracteresEnUltimoBloque);
 
 		// Genero nueva cadena en memoria y le calculo MD5
 		char* archivo = malloc(cantidadNueva + 1);
-		archivo = string_repeat('O', cantidadNueva);
+		archivo = string_repeat(recurso, cantidadNueva);
 		char* MD5 = calcularMD5(archivo);
 		config_set_value(metadata, "MD5_ARCHIVO", MD5);
 
 		char* blocks = string_new();
 		string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
 
-		if(caracteresEnUltimoBloque > 0){// Termino de llenar último bloque antes de pedir otro
-			char** blocksArray = string_get_string_as_array(blocks);
-			int ultimoBloque = atoi(blocksArray[blockCount-1]);
-
-			puts("voy a llenar bloque existente");
-			printf("\nultimo bloque: %d\n", ultimoBloque);
-			memcpy(	blocksMap +	(ultimoBloque-1) * BLOCK_SIZE +		caracteresEnUltimoBloque,
-					string_substring(archivo, cantidadVieja, BLOCK_SIZE - caracteresEnUltimoBloque),
-					BLOCK_SIZE - caracteresEnUltimoBloque * sizeof(char));
-
-			cantidad -= (BLOCK_SIZE - caracteresEnUltimoBloque);
-		}
-
-		if(cantidad > 0){// Escribo los demas bloques
-			puts("avanzo a nuevos bloques");
 		char blockCountNuevo[MAX_BUFFER] = "";
 		char blocksNuevo[MAX_BUFFER] = "";
 
-
-		//string_substring_from(archivo, cantidadVieja + (BLOCK_SIZE - caracteresEnUltimoBloque))
-
-		stringToBlocks(string_substring_from(archivo, cantidadVieja + (BLOCK_SIZE - caracteresEnUltimoBloque)), blockCountNuevo, blocksNuevo);
+		stringToBlocks(string_substring_from(archivo, cantidadVieja), blockCountNuevo, blocksNuevo);
 
 		// Rearmo lista Blocks, y actualizo los demas campos de metadata
-
 		blocks[strlen(blocks)-1] = ',';
-
 		memmove(blocksNuevo, blocksNuevo+1, strlen(blocksNuevo));
-
 		strcat(blocks, blocksNuevo);
-		puts(blocks);
-
 		config_set_value(metadata, "BLOCKS", blocks);
+
+		int blockCount = config_get_int_value(metadata, "BLOCK_COUNT");
 		config_set_value(metadata, "BLOCK_COUNT", string_itoa(blockCount + atoi(blockCountNuevo)));
-		}
 
 		config_save(metadata);
 		config_destroy(metadata);
@@ -884,8 +731,9 @@ void generarOxigeno(int32_t cantidad){
 		char blocks[MAX_BUFFER] = "";
 
 		char* archivo = malloc(cantidad + 1);
-		archivo = string_repeat('O', cantidad);
+		archivo = string_repeat(recurso, cantidad);
 
+		// Genero MD5 y grabo archivo a bloques
 		char* MD5 = calcularMD5(archivo);
 		stringToBlocks(archivo, blockCount, blocks);
 
@@ -900,7 +748,9 @@ void generarOxigeno(int32_t cantidad){
 		string_append(&metadata, blocks);
 
 		string_append(&metadata, "\nCARACTER_LLENADO=");
-		string_append(&metadata,"O");
+		if(recurso == 'O')	string_append(&metadata, "O");
+		else if(recurso == 'C') string_append(&metadata, "C");
+		else string_append(&metadata, "B");
 
 		string_append(&metadata, "\nMD5_ARCHIVO=");
 		string_append(&metadata, MD5);
