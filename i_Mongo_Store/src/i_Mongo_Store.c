@@ -7,32 +7,12 @@ int main(void) {
 	inicializarFS();
 
 	estadoSuperBloque();
-//
-	int32_t dato1 = 132;
-	int32_t dato2 = 23;
-	int32_t dato3 = 32;
-	int32_t dato4 = 23;
 
-
-//	generarRecurso(33, 'O');
-//
-//	generarRecurso(33, 'C');
-	generarRecurso(dato1, 'O');
-	generarRecurso(dato2, 'C');
-
-//	generarRecurso(23, 'C');
-
-	generarRecurso(dato3, 'O');
-	generarRecurso(dato4, 'C');
-
+	for(int i = 1; i<11;i++){
+		generarRecurso(20, 'O');
+	}
 
 	estadoSuperBloque();
-
-//	estadoSuperBloque();
-//	descartarBasura();
-//	estadoSuperBloque();
-
-
 
 //	while(1){}
 
@@ -324,9 +304,8 @@ void escribir_archivo(char* rutaArchivo, char* stringAEscribir) {
 void inicializarBlocks() {
 
 	tamanioBlocks = BLOCKS*BLOCK_SIZE;
-	char* rutaArchivoBlock = string_new();
-	string_append(&rutaArchivoBlock, PUNTO_MONTAJE);
-	string_append(&rutaArchivoBlock, "/Blocks.ims");
+
+	char* rutaArchivoBlock = string_from_format("%s/Blocks.ims", PUNTO_MONTAJE);
 
 	int fd = open(rutaArchivoBlock, O_CREAT | O_RDWR, 0777);
 
@@ -347,8 +326,11 @@ void inicializarBlocks() {
 
 	// Thread con timer para sincronizar mmap a disco, iniciarlo despues del mmap!
 	// Corre: msync(blocksMap, tamanioBlocks, MS_SYNC);
-	pthread_t hilo_sincro_blocksmap;
-	pthread_create(&hilo_sincro_blocksmap, NULL,(void*) timerSincronizacion_blocksMap, NULL);
+
+	// DESCOMENTAR CUANDO PRUEBE LAS CONEXIONES
+
+//	pthread_t hilo_sincro_blocksmap;
+//	pthread_create(&hilo_sincro_blocksmap, NULL,(void*) timerSincronizacion_blocksMap, NULL);
 
 	close(fd);
 
@@ -358,9 +340,7 @@ void inicializarBlocks() {
 
 void inicializarSuperBloque(){
 
-	char* ruta_SuperBloque = string_new();
-	string_append(&ruta_SuperBloque, PUNTO_MONTAJE);
-	string_append(&ruta_SuperBloque, "/SuperBloque.ims");
+	char* ruta_SuperBloque = string_from_format("%s/SuperBloque.ims", PUNTO_MONTAJE);
 
 	int fd = open(ruta_SuperBloque, O_RDWR, 0777);
 	if (fd == -1) {
@@ -389,9 +369,7 @@ void inicializarSuperBloque(){
 
 void crearSuperBloque(){
 
-	char* ruta_archivo = string_new();
-	string_append(&ruta_archivo, PUNTO_MONTAJE);
-	string_append(&ruta_archivo, "/SuperBloque.ims");
+	char* ruta_archivo = string_from_format("%s/SuperBloque.ims", PUNTO_MONTAJE);
 
 	int fd = open(ruta_archivo, O_CREAT | O_RDWR, 0777);
 	if (fd == -1) {
@@ -420,7 +398,7 @@ void crearSuperBloque(){
 	log_info(logger, "El tamano del bitmap creado es de %d bits.",
 			bitarray_get_max_bit(bitmap));
 	size_t tope = bitarray_get_max_bit(bitmap);
-	for (int i = 0; i < tope; i++) {
+	for (int i = 0; (unsigned)i < tope; i++) {
 		bitarray_clean_bit(bitmap, i);
 	}
 
@@ -538,7 +516,7 @@ int existeFS(){
 int primerBloqueLibre(){
 
 	int posicion = 0;
-	for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
+	for(int i=0; (unsigned)i<bitarray_get_max_bit(bitmap); i++){
 		if(!bitarray_test_bit(bitmap, i)){
 			posicion = i+1;
 			break;
@@ -620,6 +598,8 @@ char* calcularMD5(char *str) {
 
 int generarRecurso(int32_t cantidad, char recurso){
 
+	// Validar cantidad?
+
 	char* rutaMetadata;
 	if(recurso == 'O')		rutaMetadata = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
 	else if(recurso == 'C') rutaMetadata = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
@@ -641,6 +621,8 @@ int generarRecurso(int32_t cantidad, char recurso){
 		char* archivo = string_repeat(recurso, cantidadNueva);
 		char* MD5 = calcularMD5(archivo);
 		config_set_value(metadata, "MD5_ARCHIVO", MD5);
+
+
 
 		char* blocks = string_new();
 		string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
@@ -665,23 +647,20 @@ int generarRecurso(int32_t cantidad, char recurso){
 		char blockCountNuevo[MAX_BUFFER] = "";
 		char blocksNuevo[MAX_BUFFER] = "";
 
-		stringToBlocks(string_substring_from(archivo, (BLOCK_SIZE - caracteresEnUltimoBloque) + cantidadVieja), blockCountNuevo, blocksNuevo);
+		char* archivoRestante = string_substring(archivo, ((caracteresEnUltimoBloque > 0) ? (BLOCK_SIZE - caracteresEnUltimoBloque) : 0) + cantidadVieja, cantidad);
+		stringToBlocks(archivoRestante, blockCountNuevo, blocksNuevo);
 
-		free(MD5);
-
-		// Rearmo lista Blocks, y actualizo los demas campos de metadata
 		blocks[strlen(blocks)-1] = ',';
 		memmove(blocksNuevo, blocksNuevo+1, strlen(blocksNuevo));
-		strcat(blocks, blocksNuevo);
+		string_append(&blocks, blocksNuevo);
 		config_set_value(metadata, "BLOCKS", blocks);
 
 		config_set_value(metadata, "BLOCK_COUNT", string_itoa(blockCount + atoi(blockCountNuevo)));
 
 		}
-
+		free(MD5);
 		config_save(metadata);
 		config_destroy(metadata);
-
 
 	}else{// No existe archivo metadata, lo creo
 
