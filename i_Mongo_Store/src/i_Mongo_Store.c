@@ -8,8 +8,8 @@ int main(void) {
 
 	estadoSuperBloque();
 
-	for(int i = 1; i<11;i++){
-		generarRecurso(20, 'O');
+	for(int i = 1; i<14;i++){
+		generarRecurso(15, 'O');
 	}
 
 	estadoSuperBloque();
@@ -598,7 +598,7 @@ char* calcularMD5(char *str) {
 
 int generarRecurso(int32_t cantidad, char recurso){
 
-	// Validar cantidad?
+	if(cantidad < 1) return EXIT_SUCCESS;
 
 	char* rutaMetadata;
 	if(recurso == 'O')		rutaMetadata = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
