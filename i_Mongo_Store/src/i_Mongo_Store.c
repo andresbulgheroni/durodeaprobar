@@ -6,19 +6,19 @@ int main(void) {
 	crear_log();
 	inicializarFS();
 
-//////////////////////////////////////////////// Pruebas FS
+	//////////////////////////////////////////////// Pruebas FS
 	estadoSuperBloque();
 
 	for(int i = 1; i<14;i++){
-		generarRecurso(15, 'O');
+		generarRecurso(1, 'O');
 	}
 
 	estadoSuperBloque();
-//////////////////////////////////////////////// Pruebas FS
+	//////////////////////////////////////////////// Pruebas FS
 
 
 
-//	while(1){}
+	//	while(1){}
 
 	//	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 	//
@@ -68,7 +68,7 @@ int main(void) {
 void timerSincronizacion_blocksMap(){
 
 	while(1){
-		//msync(blocksMap, tamanioBlocks, MS_SYNC);
+		msync(blocksMap, tamanioBlocks, MS_SYNC);
 		puts("\n-- Sincronizado blocks --\n");
 		sleep(TIEMPO_SINCRONIZACION);
 	}
@@ -242,42 +242,42 @@ void buscarMensaje(inicio_tarea_msg* tarea) {
 
 	case GENERAR_OXIGENO:{
 
-//		char* generarOxigeno = generar_oxigeno(tarea->parametros);
+		//		char* generarOxigeno = generar_oxigeno(tarea->parametros);
 		//		enviar_paquete(generarOxigeno, estado, socket_cliente);
 		break;
 
 	}
 	case CONSUMIR_OXIGENO:{
 
-//		char* consumirOxigeno = consumir_oxigeno(tarea->parametros);
+		//		char* consumirOxigeno = consumir_oxigeno(tarea->parametros);
 		//		enviar_paquete(consumirOxigeno, estado, socket_cliente);
 		break;
 
 	}
 	case GENERAR_COMIDA:{
 
-//		char* generarComida = generar_comida(tarea->parametros);
+		//		char* generarComida = generar_comida(tarea->parametros);
 		//		enviar_paquete(generarComida, estado, socket_cliente);
 		break;
 
 	}
 	case CONSUMIR_COMIDA:{
 
-//		char* consumirComida = consumir_comida(tarea->parametros);
+		//		char* consumirComida = consumir_comida(tarea->parametros);
 		//		enviar_paquete(consumirComida, estado, socket_cliente);
 		break;
 
 	}
 	case GENERAR_BASURA:{
 
-//		char* generarBasura = generar_basura(tarea->parametros);
+		//		char* generarBasura = generar_basura(tarea->parametros);
 		//		enviar_paquete(generarBasura, estado, socket_cliente);
 		break;
 
 	}
 	case DESCARTAR_BASURA:{
 
-//		char* descartarBasura = descartar_basura();
+		//		char* descartarBasura = descartar_basura();
 		//		enviar_paquete(descartarBasura, estado, socket_cliente);
 		break;
 
@@ -333,23 +333,25 @@ void inicializarBlocks() {
 
 	// DESCOMENTAR CUANDO PRUEBE LAS CONEXIONES
 
-//	pthread_t hilo_sincro_blocksmap;
-//	pthread_create(&hilo_sincro_blocksmap, NULL,(void*) timerSincronizacion_blocksMap, NULL);
+	//	pthread_t hilo_sincro_blocksmap;
+	//	pthread_create(&hilo_sincro_blocksmap, NULL,(void*) timerSincronizacion_blocksMap, NULL);
 
 	close(fd);
 
 	log_debug(logger, "ARCHIVO %s LEIDO\n", rutaArchivoBlock);
-
+	free(rutaArchivoBlock);
 }
 
 void inicializarSuperBloque(){
 
 	char* ruta_SuperBloque = string_from_format("%s/SuperBloque.ims", PUNTO_MONTAJE);
 
+
 	int fd = open(ruta_SuperBloque, O_RDWR, 0777);
 	if (fd == -1) {
 		log_error(logger, "No se pudo abrir el SuperBloque");
 		perror("open file");
+		free(ruta_SuperBloque);
 		exit(1);
 	}
 
@@ -360,6 +362,7 @@ void inicializarSuperBloque(){
 	if (superBloqueMap == MAP_FAILED) {
 		perror("Error al inicializar SuperBloque");
 		close(fd);
+		free(ruta_SuperBloque);
 		exit(1);
 	}
 
@@ -368,7 +371,7 @@ void inicializarSuperBloque(){
 	close(fd);
 
 	log_debug(logger, "ARCHIVO %s LEIDO\n", ruta_SuperBloque);
-
+	free(ruta_SuperBloque);
 }
 
 void crearSuperBloque(){
@@ -409,7 +412,7 @@ void crearSuperBloque(){
 	close(fd);
 
 	log_debug(logger, "ARCHIVO %s CREADO\n", ruta_archivo);
-
+	free(ruta_archivo);
 }
 
 void crearDirectorio(char *path) {
@@ -436,8 +439,8 @@ bool existeArchivo(char* path) {
 
 int menorEntre(int a, int b){
 
-    if(a>b) return b;
-    else    return a;
+	if(a>b) return b;
+	else    return a;
 }
 
 void inicializarFS(){
@@ -449,7 +452,9 @@ void inicializarFS(){
 		puts("File System NO encontrado, generando...");
 		crearDirectorio(PUNTO_MONTAJE);
 		crearSuperBloque();
-		crearDirectorio(string_from_format("%s/Files", PUNTO_MONTAJE));
+		char* rutaPuntoMontaje = string_from_format("%s/Files", PUNTO_MONTAJE);
+		crearDirectorio(rutaPuntoMontaje);
+		free(rutaPuntoMontaje);
 	}
 	inicializarBlocks();
 
@@ -504,16 +509,24 @@ void setBitmap(int valor, int posicion){
 	if(valor == 0){
 		bitarray_clean_bit(bitmap, posicion - 1);
 	}else{
-	bitarray_set_bit(bitmap, posicion - 1);
+		bitarray_set_bit(bitmap, posicion - 1);
 	}
 }
 
 int existeFS(){
 
-	if(existeArchivo(string_from_format("%s/SuperBloque.ims", PUNTO_MONTAJE)) &&
-			existeArchivo(string_from_format("%s/Blocks.ims", PUNTO_MONTAJE))){
+	char* rutaSuperBloque = string_from_format("%s/SuperBloque.ims", PUNTO_MONTAJE);
+	char* rutaBlocks = string_from_format("%s/Blocks.ims", PUNTO_MONTAJE);
+
+	if(existeArchivo(rutaSuperBloque) && existeArchivo(rutaBlocks)){
+		free(rutaSuperBloque);
+		free(rutaBlocks);
 		return 1;
-	}else return 0;
+	}else{
+		free(rutaSuperBloque);
+		free(rutaBlocks);
+		return 0;
+	}
 }
 
 // Devuelve 0 si el Bitmap esta lleno
@@ -531,7 +544,7 @@ int primerBloqueLibre(){
 /*
 string: cadena a grabar en Blocks
 blockCount y blocks: parametros a devolver por referencia
-*/
+ */
 void stringToBlocks(char* string, char* blockCount, char* blocks){
 
 	int bloquesGrabados[BLOCKS];
@@ -540,21 +553,25 @@ void stringToBlocks(char* string, char* blockCount, char* blocks){
 
 	while(longitud > 0){
 		// length es BLOCK_SIZE, o si es menor solo los bytes a escribir
-	bloquesGrabados[contador] = writeBlock(string_substring(string, contador * BLOCK_SIZE, menorEntre(longitud, BLOCK_SIZE)), -1);
-	contador++;
-	longitud -= BLOCK_SIZE;
+		char* bloqueAGrabar = string_substring(string, contador * BLOCK_SIZE, menorEntre(longitud, BLOCK_SIZE));
+		bloquesGrabados[contador] = writeBlock(bloqueAGrabar, -1);
+		contador++;
+		longitud -= BLOCK_SIZE;
+		free(bloqueAGrabar);
 	}
 
-	strcpy(blockCount, string_itoa(contador));
-
+	char* contador_String = string_itoa(contador);
+	strcpy(blockCount, contador_String);
 	strcpy(blocks, "[");
-	for(int i=0; i<contador; i++)
-	{
-		strcat(blocks, string_itoa(bloquesGrabados[i]));
+	for(int i=0; i<contador; i++){
+		char* bloqueGrabado = string_itoa(bloquesGrabados[i]);
+		strcat(blocks, bloqueGrabado);
 		strcat(blocks, ",");
+		free(bloqueGrabado);
 	}
 	blocks[strlen(blocks)-1] = ']';
 	blocks[strlen(blocks)] = '\0';
+	free(contador_String);
 }
 
 // Controlar previamente que no se pase del BLOCK_SIZE, si bloque es -1 busca el primero libre
@@ -582,7 +599,7 @@ Hacer free despues de usar! Ejemplo:
 	char* output = calcularMD5("aaaaa");
 	printf("Hash piola: %s", output);
 	free(output);
-*/
+ */
 char* calcularMD5(char *str) {
 
 	unsigned char digest[16];
@@ -612,7 +629,7 @@ int generarRecurso(int32_t cantidad, char recurso){
 	else if(recurso == 'C') rutaMetadata = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
 	else if(recurso == 'B') rutaMetadata = string_from_format("%s/Files/Basura.ims", PUNTO_MONTAJE);
 	else{
-		log_error(logger, "pasame un recurso valido para generar capo");
+		log_error(logger, "Pasame un recurso valido para generar capo");
 		return EXIT_FAILURE;
 	}
 
@@ -622,14 +639,14 @@ int generarRecurso(int32_t cantidad, char recurso){
 
 		int cantidadVieja = config_get_int_value(metadata, "SIZE");
 		int cantidadNueva = cantidad + cantidadVieja;
-		config_set_value(metadata, "SIZE", string_itoa(cantidadNueva));
+
+		char* cantidadNueva_String = string_itoa(cantidadNueva);
+		config_set_value(metadata, "SIZE", cantidadNueva_String);
 
 		// Genero nueva cadena en memoria y le calculo MD5
 		char* archivo = string_repeat(recurso, cantidadNueva);
 		char* MD5 = calcularMD5(archivo);
 		config_set_value(metadata, "MD5_ARCHIVO", MD5);
-
-
 
 		char* blocks = string_new();
 		string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
@@ -639,32 +656,48 @@ int generarRecurso(int32_t cantidad, char recurso){
 		int caracteresEnUltimoBloque = cantidadVieja % BLOCK_SIZE; //0 si esta completo
 
 		if(caracteresEnUltimoBloque > 0){// Termino de llenar último bloque antes de pedir otro
-					char** blocksArray = string_get_string_as_array(blocks);
-					int ultimoBloque = atoi(blocksArray[blockCount-1]);
+			char** blocksArray = string_get_string_as_array(blocks);
+			int ultimoBloque = atoi(blocksArray[blockCount-1]);
 
-					memcpy(	blocksMap +	(ultimoBloque-1) * BLOCK_SIZE +		caracteresEnUltimoBloque,
-							string_substring(archivo, cantidadVieja, BLOCK_SIZE - caracteresEnUltimoBloque),
-							BLOCK_SIZE - caracteresEnUltimoBloque * sizeof(char));
+			char* porcionAGrabar = string_substring(archivo, cantidadVieja, BLOCK_SIZE - caracteresEnUltimoBloque);
 
-					cantidad -= (BLOCK_SIZE - caracteresEnUltimoBloque);
-				}
+			memcpy(	blocksMap +	(ultimoBloque-1) * BLOCK_SIZE +		caracteresEnUltimoBloque,
+					porcionAGrabar,
+					BLOCK_SIZE - caracteresEnUltimoBloque * sizeof(char));
+
+			cantidad -= (BLOCK_SIZE - caracteresEnUltimoBloque);
+
+
+			for(int i=0;i<blockCount;i++){
+				free(blocksArray[i]);
+			}
+			free(blocksArray);
+			free(porcionAGrabar);
+
+		}
 
 		if(cantidad > 0){// Lleno nuevos bloques de ser necesario
 
-		char blockCountNuevo[MAX_BUFFER] = "";
-		char blocksNuevo[MAX_BUFFER] = "";
+			char blockCountNuevo[MAX_BUFFER] = "";
+			char blocksNuevo[MAX_BUFFER] = "";
 
-		char* archivoRestante = string_substring(archivo, ((caracteresEnUltimoBloque > 0) ? (BLOCK_SIZE - caracteresEnUltimoBloque) : 0) + cantidadVieja, cantidad);
-		stringToBlocks(archivoRestante, blockCountNuevo, blocksNuevo);
+			char* archivoRestante = string_substring(archivo, ((caracteresEnUltimoBloque > 0) ? (BLOCK_SIZE - caracteresEnUltimoBloque) : 0) + cantidadVieja, cantidad);
+			stringToBlocks(archivoRestante, blockCountNuevo, blocksNuevo);
 
-		blocks[strlen(blocks)-1] = ',';
-		memmove(blocksNuevo, blocksNuevo+1, strlen(blocksNuevo));
-		string_append(&blocks, blocksNuevo);
-		config_set_value(metadata, "BLOCKS", blocks);
+			blocks[strlen(blocks)-1] = ',';
+			memmove(blocksNuevo, blocksNuevo+1, strlen(blocksNuevo));
+			string_append(&blocks, blocksNuevo);
+			config_set_value(metadata, "BLOCKS", blocks);
 
-		config_set_value(metadata, "BLOCK_COUNT", string_itoa(blockCount + atoi(blockCountNuevo)));
-
+			char* blockCountFinal = string_itoa(blockCount + atoi(blockCountNuevo));
+			config_set_value(metadata, "BLOCK_COUNT", blockCountFinal);
+			free(blockCountFinal);
+			free(archivoRestante);
 		}
+
+		free(archivo);
+		free(blocks);
+		free(cantidadNueva_String);
 		free(MD5);
 		config_save(metadata);
 		config_destroy(metadata);
@@ -682,7 +715,8 @@ int generarRecurso(int32_t cantidad, char recurso){
 
 		char* metadata = string_new();
 		string_append(&metadata, "SIZE=");
-		string_append(&metadata, string_itoa(cantidad));
+		char* cantidad_String = string_itoa(cantidad);
+		string_append(&metadata, cantidad_String);
 
 		string_append(&metadata, "\nBLOCK_COUNT=");
 		string_append(&metadata, blockCount);
@@ -691,7 +725,8 @@ int generarRecurso(int32_t cantidad, char recurso){
 		string_append(&metadata, blocks);
 
 		string_append(&metadata, "\nCARACTER_LLENADO=");
-		string_append(&metadata, string_repeat(recurso, 1));
+		char* caracterLlenado = string_repeat(recurso, 1);
+		string_append(&metadata, caracterLlenado);
 
 		string_append(&metadata, "\nMD5_ARCHIVO=");
 		string_append(&metadata, MD5);
@@ -700,8 +735,13 @@ int generarRecurso(int32_t cantidad, char recurso){
 		txt_write_in_file(fp, metadata);
 		txt_close_file(fp);
 
+		free(cantidad_String);
+		free(caracterLlenado);
+		free(metadata);
+		free(archivo);
 		free(MD5);
 	}
+	free(rutaMetadata);
 	return EXIT_SUCCESS;
 }
 
@@ -768,37 +808,37 @@ int consumirRecurso(int32_t cantidad, char recurso){
 
 		// Libero bloques y actualizo blocks / block_count
 
-//////////////////////////////////////////////////////////////////////////////////////// PARA HACER
+		//////////////////////////////////////////////////////////////////////////////////////// PARA HACER
 
-//		int blockCountNuevo = cantidadNueva / BLOCK_SIZE + (cantidadNueva % BLOCK_SIZE != 0);
-//
-//		if(blockCountNuevo > blockCount){// Tengo que borrar bloques
-//
-//		config_set_value(metadata, "BLOCK_COUNT", string_itoa(blockCountNuevo));
-//
-//		char* blocks = string_new();
-//		string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
-//		char** listaBlocks = string_get_string_as_array(blocks);
-//
-//		while(blockCount > blockCountNuevo){
-//			setBitmap(0, atoi(listaBlocks[blockCountNuevo-1]));
-//			listaBlocks[blockCountNuevo-1] = "\0";
-//			blockCountNuevo--;
-//		}
-//
-//		int contador = 0;
-//		char* blocksNuevo = string_new();
-//		while(contador < blockCountNuevo){
-//			string_append(&blocksNuevo, listaBlocks[contador]);
-//			string_append(&blocksNuevo, ",");
-//			contador++;
-//		}
-//
-//		puts("listaBlocks");
-//		config_set_value(metadata, "BLOCKS", blocksNuevo);
-//
-//		}
-//////////////////////////////////////////////////////////////////////////////////////// PARA HACER
+		//		int blockCountNuevo = cantidadNueva / BLOCK_SIZE + (cantidadNueva % BLOCK_SIZE != 0);
+		//
+		//		if(blockCountNuevo > blockCount){// Tengo que borrar bloques
+		//
+		//		config_set_value(metadata, "BLOCK_COUNT", string_itoa(blockCountNuevo));
+		//
+		//		char* blocks = string_new();
+		//		string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
+		//		char** listaBlocks = string_get_string_as_array(blocks);
+		//
+		//		while(blockCount > blockCountNuevo){
+		//			setBitmap(0, atoi(listaBlocks[blockCountNuevo-1]));
+		//			listaBlocks[blockCountNuevo-1] = "\0";
+		//			blockCountNuevo--;
+		//		}
+		//
+		//		int contador = 0;
+		//		char* blocksNuevo = string_new();
+		//		while(contador < blockCountNuevo){
+		//			string_append(&blocksNuevo, listaBlocks[contador]);
+		//			string_append(&blocksNuevo, ",");
+		//			contador++;
+		//		}
+		//
+		//		puts("listaBlocks");
+		//		config_set_value(metadata, "BLOCKS", blocksNuevo);
+		//
+		//		}
+		//////////////////////////////////////////////////////////////////////////////////////// PARA HACER
 
 		config_save(metadata);
 		config_destroy(metadata);
