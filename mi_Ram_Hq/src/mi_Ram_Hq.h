@@ -107,8 +107,15 @@ void terminar ();
 int32_t get_esquema_memoria(char* esquema_config);
 int32_t get_algoritmo(char* algoritmo_config);
 void recibir_mensaje(int32_t* conexion);
+char get_status(t_status_code codigo);
+
+//Paginacion
 void configurar_paginacion();
-void crear_patota(iniciar_patota_msg* mensaje);
+void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status);
+void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* status);
+void cambiar_estado_paginacion(cambio_estado_msg* mensaje, bool* status);
+char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status);
+void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* status); //TODO
 t_list* get_frames_libres();
 t_list* get_frames_a_ubicar(uint32_t cantidad);
 void traer_pagina_a_memoria(t_pagina_patota* pagina);
@@ -123,7 +130,12 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* datos);
 void guardar_en_memoria_swap(t_pagina_patota* pagina, void* datos);
 uint32_t generar_direccion_logica_paginacion(uint32_t pagina, uint32_t desplazamiento);
 void obtener_direccion_logica_paginacion(uint32_t* pagina, uint32_t* desplazamiento, uint32_t direccion);
+bool entra_en_swap(uint32_t cantidad);
+bool entra_en_memoria(uint32_t size_pcb);
+void* leer_datos_patota_paginacion(t_list* paginas);
+void liberar_memoria_principal_paginacion(t_pagina_patota* pagina);
+void liberar_memoria_virtual(t_pagina_patota* pagina);
 
-void* leer_datos_patota(uint32_t id_patota);
+
 
 #endif /* MI_RAM_HQ_H_ */
