@@ -782,3 +782,52 @@ char get_status(t_status_code codigo){
 
 }
 
+void liberar_memoria_principal_paginacion(t_pagina_patota* pagina){
+
+	if(pagina->presente){
+
+		switch(ALGORITMO_REEMPLAZO){
+			case LRU:{
+				bool encontrado(t_pagina_patota* patota){
+					return patota == pagina;
+				}
+
+				list_remove_by_condition(lista_para_reemplazo, encontrado);
+
+				break;
+			}
+			case CLOCK:{
+				t_buffer_clock* buff = list_get(lista_para_reemplazo, pagina->nro_frame);
+
+				buff->pagina = NULL;
+
+				break;
+			}
+		}
+
+		t_frame_libre* frame = malloc(sizeof(t_frame_libre));
+		frame->pos = pagina->nro_frame;
+		list_add(frames_libres_principal, frame);
+
+		bool cmp_frames_libres (t_frame_libre* frame1, t_frame_libre* frame2){
+			return frame1->pos < frame2->pos;
+		}
+
+		list_sort(frames_libres_principal, cmp_frames_libres);
+
+	}
+}
+
+void liberar_memoria_virtual(t_pagina_patota* pagina){
+
+	t_frame* frame = malloc(sizeof(t_frame));
+	frame->pos = pagina->nro_frame_mv;
+	list_add(frames_swap, frame);
+
+	bool cmp_frames_libres (t_frame* frame1, t_frame* frame2){
+		return frame1->pos < frame2->pos;
+	}
+
+	list_sort(frames_swap, cmp_frames_libres);
+
+}
