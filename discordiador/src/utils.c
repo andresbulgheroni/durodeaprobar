@@ -79,13 +79,6 @@ t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje){
 			break;
 
 		}
-		case INICIAR_TRIPULANTE:{
-
-			paquete->buffer = serializar_iniciar_tripulante_msg(mensaje);
-
-			break;
-
-		}
 		case SOLICITAR_SIGUIENTE_TAREA:{
 
 			paquete->buffer = serializar_solicitar_siguiente_tarea_msg(mensaje);
@@ -290,13 +283,6 @@ void* deserializar_paquete(t_paquete* paquete){
 			break;
 
 		}
-		case INICIAR_TRIPULANTE:{
-
-			mensaje = desserializar_iniciar_tripulante_msg(paquete->buffer->stream);
-
-			break;
-
-		}
 		case SOLICITAR_SIGUIENTE_TAREA:{
 
 			mensaje = desserializar_solicitar_siguiente_tarea_msg(paquete->buffer->stream);
@@ -386,8 +372,8 @@ t_buffer* serializar_iniciar_patota_msg(iniciar_patota_msg* mensaje){
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
-
-	buffer->size = sizeof(mensaje->idPatota) + sizeof(mensaje->tareas->length)
+	buffer->size = sizeof(mensaje->idPatota) + sizeof(mensaje->tareas->length) + sizeof(mensaje->cant_tripulantes)
+			+ list_size(mensaje->tripulantes) * (sizeof(uint32_t) * 3)
 			+ mensaje->tareas->length;
 
 	buffer->stream = malloc(buffer->size);
@@ -395,6 +381,18 @@ t_buffer* serializar_iniciar_patota_msg(iniciar_patota_msg* mensaje){
 	uint32_t offset = 0;
 
 	serializar_variable(buffer->stream, &(mensaje->idPatota), sizeof(uint32_t), &offset);
+	serializar_variable(buffer->stream, &(mensaje->cant_tripulantes), sizeof(mensaje->cant_tripulantes), &offset);
+
+	void serializar_tripulantes (tripulante_data_msg* tripulante){
+
+		serializar_variable(buffer->stream, &(tripulante->idTripulante), sizeof(tripulante->idTripulante), &offset);
+		serializar_variable(buffer->stream, &(tripulante->coordenadas->posX), sizeof(tripulante->coordenadas->posX), &offset);
+		serializar_variable(buffer->stream, &(tripulante->coordenadas->posY), sizeof(tripulante->coordenadas->posY), &offset);
+
+	}
+
+	list_iterate(mensaje->tareas, serializar_tripulantes);
+
 	serializar_string(buffer->stream, mensaje->tareas, &offset);
 
 	return buffer;
@@ -405,12 +403,13 @@ t_buffer* serializar_expulsar_tripulante_msg(expulsar_tripulante_msg* mensaje){
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
-	buffer->size = sizeof(mensaje->idTripulante);
+	buffer->size =  sizeof(mensaje->idPatota) + sizeof(mensaje->idTripulante);
 
 	buffer->stream = malloc(buffer->size);
 
 	uint32_t offset = 0;
 
+	serializar_variable(buffer->stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 
 	return buffer;
@@ -449,36 +448,17 @@ t_buffer* serializar_obtener_bitacora_rta(obtener_bitacora_rta* mensaje){
 
 }
 
-t_buffer* serializar_iniciar_tripulante_msg(iniciar_tripulante_msg* mensaje){
+t_buffer* serializar_solicitar_siguiente_tarea_msg(solicitar_siguiente_tarea_msg* mensaje){
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
-	buffer->size = sizeof(mensaje->idPatota) + sizeof(mensaje->idTripulante) +
-					sizeof(mensaje->coordenadas->posX) + sizeof(mensaje->coordenadas->posY);
+	buffer->size =  sizeof(mensaje->idPatota) + sizeof(mensaje->idTripulante);
 
 	buffer->stream = malloc(buffer->size);
 
 	uint32_t offset = 0;
 
 	serializar_variable(buffer->stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
-	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
-	serializar_variable(buffer->stream, &(mensaje->coordenadas->posX), sizeof(mensaje->coordenadas->posX), &offset);
-	serializar_variable(buffer->stream, &(mensaje->coordenadas->posY), sizeof(mensaje->coordenadas->posY), &offset);
-
-	return buffer;
-
-}
-
-t_buffer* serializar_solicitar_siguiente_tarea_msg(solicitar_siguiente_tarea_msg* mensaje){
-
-	t_buffer* buffer = malloc(sizeof(t_buffer));
-
-	buffer->size = sizeof(mensaje->idTripulante);
-
-	buffer->stream = malloc(buffer->size);
-
-	uint32_t offset = 0;
-
 	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 
 	return buffer;
@@ -511,12 +491,13 @@ t_buffer* serializar_cambio_estado_msg(cambio_estado_msg* mensaje){
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
-	buffer->size = sizeof(mensaje->idTripulante) + sizeof(mensaje->estado);
+	buffer->size = sizeof(mensaje->idPatota) + sizeof(mensaje->idTripulante) + sizeof(mensaje->estado);
 
 	buffer->stream = malloc(buffer->size);
 
 	uint32_t offset = 0;
 
+	serializar_variable(buffer->stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 	serializar_variable(buffer->stream, &(mensaje->estado), sizeof(mensaje->estado), &offset);
 
@@ -529,13 +510,14 @@ t_buffer* serializar_informar_movimiento_ram_msg(informar_movimiento_ram_msg* me
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
-	buffer->size = sizeof(mensaje->idTripulante) + sizeof(mensaje->coordenadasDestino->posX)
+	buffer->size = sizeof(mensaje->idPatota) + sizeof(mensaje->idTripulante) + sizeof(mensaje->coordenadasDestino->posX)
 			+ sizeof(mensaje->coordenadasDestino->posX);
 
 	buffer->stream = malloc(buffer->size);
 
 	uint32_t offset = 0;
 
+	serializar_variable(buffer->stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 	serializar_variable(buffer->stream, &(mensaje->coordenadasDestino->posX), sizeof(mensaje->coordenadasDestino->posX), &offset);
 	serializar_variable(buffer->stream, &(mensaje->coordenadasDestino->posY), sizeof(mensaje->coordenadasDestino->posY), &offset);
@@ -578,7 +560,7 @@ t_buffer* serializar_inicio_tarea_msg(inicio_tarea_msg* mensaje){
 
 	serializar_variable(buffer->stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 	serializar_string(buffer->stream, mensaje->nombreTarea, &offset);
-	serializar_variable(buffer->stream, mensaje->parametros, sizeof(mensaje->parametros), &offset);
+	serializar_variable(buffer->stream, &(mensaje->parametros), sizeof(mensaje->parametros), &offset);
 
 	return buffer;
 
@@ -663,7 +645,22 @@ iniciar_patota_msg* desserializar_iniciar_patota_msg(void* stream){
 	iniciar_patota_msg* mensaje = malloc(sizeof(iniciar_patota_msg));
 
 	uint32_t offset = 0;
-	deserializar_variable(stream, &(mensaje->idPatota), sizeof(uint32_t), &offset);
+	deserializar_variable(stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
+	deserializar_variable(stream, &(mensaje->cant_tripulantes), sizeof(mensaje->cant_tripulantes), &offset);
+	mensaje->tripulantes = list_create();
+
+	for(int32_t i = 0; i < mensaje->cant_tripulantes; i++){
+
+		tripulante_data_msg* tripulante = malloc(sizeof(tripulante_data_msg));
+		tripulante->coordenadas = malloc(sizeof(t_coordenadas));
+
+		deserializar_variable(stream, &(tripulante->idTripulante), sizeof(tripulante->idTripulante), &offset);
+		deserializar_variable(stream, &(tripulante->coordenadas->posX), sizeof(tripulante->coordenadas->posX), &offset);
+		deserializar_variable(stream, &(tripulante->coordenadas->posY), sizeof(tripulante->coordenadas->posY), &offset);
+
+		list_add(mensaje->tripulantes, tripulante);
+	}
+
 	mensaje->tareas = deserializar_string(stream, &offset);
 
 	return mensaje;
@@ -700,22 +697,6 @@ obtener_bitacora_rta* desserializar_obtener_bitacora_rta(void* stream){
 
 	uint32_t offset = 0;
 	mensaje->bitacora = deserializar_string(stream, &offset);
-
-	return mensaje;
-
-}
-
-iniciar_tripulante_msg* desserializar_iniciar_tripulante_msg(void* stream){
-
-	iniciar_tripulante_msg* mensaje = malloc(sizeof(iniciar_tripulante_msg));
-	mensaje->coordenadas = malloc(sizeof(t_coordenadas));
-
-	uint32_t offset = 0;
-
-	deserializar_variable(stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
-	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
-	deserializar_variable(stream, &(mensaje->coordenadas->posX), sizeof(mensaje->coordenadas->posX), &offset);
-	deserializar_variable(stream, &(mensaje->coordenadas->posY), sizeof(mensaje->coordenadas->posY), &offset);
 
 	return mensaje;
 

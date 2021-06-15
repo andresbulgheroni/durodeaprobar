@@ -208,8 +208,8 @@ int distanciaA(t_coordenadas*, t_coordenadas*);
 
 //SABOTAJE
 t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje*);
-void moverAlTripulanteHastaElSabotaje(t_tripulante*);
-int llegoAlSabotaje(t_tripulante*);
+void moverAlTripulanteHastaElSabotaje(t_tripulante*,t_sabotaje*);
+int llegoAlSabotaje(t_tripulante*,t_sabotaje*);
 
 //PLANIFICACION
 algoritmo_code stringACodigoAlgoritmo(const char* );
