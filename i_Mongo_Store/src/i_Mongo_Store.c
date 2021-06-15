@@ -705,9 +705,11 @@ int generarRecurso(int32_t cantidad, char recurso){
 
 		char* metadataNueva = string_new();
 		string_append(&metadataNueva, "SIZE=");
-		string_append(&metadataNueva, string_itoa(config_get_int_value(metadata,"SIZE")));
+		char* size = string_itoa(config_get_int_value(metadata,"SIZE"));
+		string_append(&metadataNueva, size);
 		string_append(&metadataNueva, "\nBLOCK_COUNT=");
-		string_append(&metadataNueva, string_itoa(config_get_int_value(metadata,"BLOCK_COUNT")));
+		char* bcount = string_itoa(config_get_int_value(metadata,"BLOCK_COUNT"));
+		string_append(&metadataNueva, bcount);
 		string_append(&metadataNueva, "\nBLOCKS=");
 		string_append(&metadataNueva, config_get_string_value(metadata,"BLOCKS"));
 		string_append(&metadataNueva, "\nCARACTER_LLENADO=");
@@ -717,6 +719,8 @@ int generarRecurso(int32_t cantidad, char recurso){
 
 		FILE* fp = fopen(rutaMetadata, "w+b");
 		txt_write_in_file(fp, metadataNueva);
+		free(size);
+		free(bcount);
 		free(metadataNueva);
 		txt_close_file(fp);
 		config_destroy(metadata);
