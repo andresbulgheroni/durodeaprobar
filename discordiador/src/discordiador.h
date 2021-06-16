@@ -227,8 +227,14 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*);
 
 
 
+bool ordenarTripulantesDeMenorIdAMayor(void* ,void*);
+void pasarATodosLosTripulantesAListaBloqueado();
+void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*);
+void pasarTripulantesAListaReady();
 
 
+void iniciarHiloSabotaje();
+void planificarSabotaje();
 
 
 //COSAS QUE NOSE SI VAN

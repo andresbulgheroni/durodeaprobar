@@ -176,95 +176,94 @@ void iniciarHiloSabotaje(){
 	pthread_detach(hiloSabotaje);
 }
 void planificarSabotaje(){
-	while(true){
 	uint32_t socketSabotaje = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
-	t_paquete*mensaje=recibir_paquete(socketSabotaje);
+	while(true){
 
+	t_paquete*mensaje=recibir_paquete(socketSabotaje);
 
 	//sem_wait(&sem_sabotaje);
 	t_sabotaje*sabotaje;
 	sabotaje->coordenadas=1;
 	haySabotaje=1;
 
-
 	PasarAEjecutarAlTripulanteMasCercano();
-	ponerATodosLosTripulantesAReady();
+	pasarTripulantesAListaReady();
+
 	haySabotaje=0;
-	sem_post(&sem_sabotaje)
+	sem_post(&sem_sabotaje);
 	//liberar_conexion(socketSabotaje);
 	}
 }
 */
 
-/*
- *
+
 bool ordenarTripulantesDeMenorIdAMayor(void* elemento1,void*elemento2){
 
 	t_tripulante* tripulante1 =(t_tripulante*) elemento1;
 	t_tripulante*tripulante2 =(t_tripulante*) elemento2;
 
 	return  tripulante1->idTripulante > tripulante2->idTripulante;
+}
+
+void pasarATodosLosTripulantesAListaBloqueado(){
+
+	if(list_size(listaEjecutando) > 1){
+		list_sort(listaEjecutando, (void*) ordenarTripulantesDeMenorIdAMayor);
 	}
 
-	void pasarATodosLosTripulantesAListaBloqueado(){
+	for(int i=0; i > list_size(listaEjecutando);i++){
 
-		if(list_size(listaEjecutando) > 1){
-			list_sort(listaEjecutando,ordenarTripulantesDeMenorIdAMayor());
-		}
+		pthread_mutex_lock(&mutex_listaEjecutando);
+		t_tripulante* tripulanteSacadoDeEjecutar= (t_tripulante*) list_remove(listaEjecutando,0);
+		pthread_mutex_unlock(&mutex_listaEjecutando);
 
-			for(int i=0; i > list_size(listaEjecutando);i++){
-
-			pthread_mutex_lock(&mutex_listaEjecutando);
-			t_tripulante* tripulanteSacadoDeEjecutar= (t_tripulante*) list_remove(listaEjecutando,0);
-			pthread_mutex_unlock(&mutex_listaEjecutando);
-
-			agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(tripulanteSacadoDeEjecutar);
-		}
-
-
-			if(list_size(listaReady) > 1){
-					list_sort(listaReady,ordenarTripulantesDeMenorIdAMayor());
-				}
-
-			for(int i=0; i > list_size(listaReady);i++){
-
-					pthread_mutex_lock(&mutex_listaReady);
-					t_tripulante* tripulanteSacadoDeReady= (t_tripulante*) list_remove(listaReady,0);
-					pthread_mutex_unlock(&mutex_listaReady);
-
-					agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(tripulanteSacadoDeReady);
-				}
-
-				//faltaria la parte de bloqueados que iria dentro del tripulante
-
+		agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(tripulanteSacadoDeEjecutar);
 	}
 
-	void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*sabotaje){
 
-		t_tripulante* tripulanteMasCercano=tripulanteMasCercanoDelSabotaje(sabotaje);
-
-		while(!llegoAlSabotaje(tripulanteMasCercano,sabotaje)){
-			moverAlTripulanteHastaElSabotaje(tripulanteMasCercano,sabotaje);
-			sleep(RETARDO_CICLO_CPU);
-		}
-		for(int i=1; DURACION_SABOTAJE >= i; i++){
-			sleep(RETARDO_CICLO_CPU);
-			log_info(logger,"El tripulante con ID %d hizo %d de SABOTAJE de un total de %d",tripulanteMasCercano->idTripulante,i,DURACION_SABOTAJE);
-
-		}
+	if(list_size(listaReady) > 1){
+		list_sort(listaReady,ordenarTripulantesDeMenorIdAMayor);
 	}
 
-	void pasarTripulantesAlistaReady(){
-		for(int i=0; i > list_size(listaBloqueadosPorSabotaje);i++){
+	for(int i=0; i > list_size(listaReady);i++){
 
-						pthread_mutex_lock(&mutex_listaBloqueadosPorSabotaje);
-						t_tripulante* tripulanteSacadoDeBloqueadoPorSabotaje= (t_tripulante*) list_remove(listaBloqueadosPorSabotaje,0);
-						pthread_mutex_unlock(&mutex_listaBloqueadosPorSabotaje);
+		pthread_mutex_lock(&mutex_listaReady);
+		t_tripulante* tripulanteSacadoDeReady= (t_tripulante*) list_remove(listaReady,0);
+		pthread_mutex_unlock(&mutex_listaReady);
 
-						agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(tripulanteSacadoDeBloqueadoPorSabotaje);
-					}
+		agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(tripulanteSacadoDeReady);
 	}
-*/
+
+	//faltaria la parte de bloqueados que iria dentro del tripulante
+
+}
+
+void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*sabotaje){
+
+	t_tripulante* tripulanteMasCercano=tripulanteMasCercanoDelSabotaje(sabotaje);
+
+	while(!llegoAlSabotaje(tripulanteMasCercano,sabotaje)){
+		moverAlTripulanteHastaElSabotaje(tripulanteMasCercano,sabotaje);
+		sleep(RETARDO_CICLO_CPU);
+	}
+	for(int i=1; DURACION_SABOTAJE >= i; i++){
+		sleep(RETARDO_CICLO_CPU);
+		log_info(logger,"El tripulante con ID %d hizo %d de SABOTAJE de un total de %d",tripulanteMasCercano->idTripulante,i,DURACION_SABOTAJE);
+
+	}
+}
+
+void pasarTripulantesAListaReady(){
+	for(int i=0; i > list_size(listaBloqueadosPorSabotaje);i++){
+
+		pthread_mutex_lock(&mutex_listaBloqueadosPorSabotaje);
+		t_tripulante* tripulanteSacadoDeBloqueadoPorSabotaje= (t_tripulante*) list_remove(listaBloqueadosPorSabotaje,0);
+		pthread_mutex_unlock(&mutex_listaBloqueadosPorSabotaje);
+
+		agregarTripulanteAListaReadyYAvisar(tripulanteSacadoDeBloqueadoPorSabotaje);
+	}
+}
+
 
 
 int getIndexTripulanteEnLista(t_list* lista, t_tripulante* tripulante) {
@@ -440,26 +439,26 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 				for(int i=0; i< list_size(posicionesTripulantes) ; i++){
 
-						t_coordenadas* coordenadasTripulantes = malloc(sizeof(t_coordenadas));
-						coordenadasTripulantes = list_get(posicionesTripulantes, i);
+					t_coordenadas* coordenadasTripulantes = malloc(sizeof(t_coordenadas));
+					coordenadasTripulantes = list_get(posicionesTripulantes, i);
 
-						tripulante_data_msg*tripulanteConCoordenadas=malloc(sizeof(tripulante_data_msg*));
-						tripulanteConCoordenadas->coordenadas= coordenadasTripulantes;
+					tripulante_data_msg*tripulanteConCoordenadas=malloc(sizeof(tripulante_data_msg*));
+					tripulanteConCoordenadas->coordenadas= coordenadasTripulantes;
 
-						tripulanteConCoordenadas->idTripulante = id_tripulante_para_enviar;
+					tripulanteConCoordenadas->idTripulante = id_tripulante_para_enviar;
 
-						list_add(posicionesTripulantesParaRam,tripulanteConCoordenadas);
+					list_add(posicionesTripulantesParaRam,tripulanteConCoordenadas);
 
-						id_tripulante_para_enviar++;
+					id_tripulante_para_enviar++;
 
-//						free(coordenadasTripulantes);
-//						free(coordenadasTripulantes);
+					//						free(coordenadasTripulantes);
+					//						free(coordenadasTripulantes);
 
 
 				}
 				mensajePatota->tripulantes=posicionesTripulantesParaRam;
 
-//				enviar_paquete(mensajePatota,INICIAR_PATOTA_MSG,socketPatota);
+				//				enviar_paquete(mensajePatota,INICIAR_PATOTA_MSG,socketPatota);
 
 
 
@@ -476,13 +475,13 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 				liberar_conexion(socketPatota);
 
-						}else{
-							log_info(logger, "No existe la tarea");
-						}
+			}else{
+				log_info(logger, "No existe la tarea");
+			}
 
-						break;
+			break;
 
-					}
+		}
 		case LISTAR_TRIPULANTES: {
 
 			time_t tiempo = time(0);
@@ -603,9 +602,11 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			obtener_bitacora_rta*mensajeBitacoraRta=deserializar_paquete(paqueteBitacora);
 
 
-			printf("el contenido de la bitacora es:%s",mensajeBitacoraRta->bitacora->string);
+			log_info(logger,"el contenido de la bitacora es:%s",mensajeBitacoraRta->bitacora->string);
 
 			liberar_conexion(socketBitacora);
+
+			//free(mensajeBitacora);
 
 
 			break;
@@ -770,8 +771,8 @@ int llegoAlSabotaje(t_tripulante* tripulante,t_sabotaje*sabotaje){
 	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
 	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
 
-//	uint32_t posicionXsabotaje = tripulante->sabotaje->coordenadas->posX;
-//	uint32_t posicionYsabotaje = tripulante->sabotaje->coordenadas->posY;
+	//	uint32_t posicionXsabotaje = tripulante->sabotaje->coordenadas->posX;
+	//	uint32_t posicionYsabotaje = tripulante->sabotaje->coordenadas->posY;
 
 	uint32_t posicionXsabotaje = sabotaje->coordenadas->posX;
 	uint32_t posicionYsabotaje = sabotaje->coordenadas->posY;
@@ -787,9 +788,9 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 	mensajeMovimientoSabotaje->idPatota = tripulante->idPatota;
 	mensajeMovimientoSabotaje->idTripulante = tripulante->idTripulante;
 
-//	informar_movimiento_mongo_msg* mensajeMovimientoSabotajeMongo=malloc(sizeof(informar_movimiento_mongo_msg));
-//	mensajeMovimientoSabotajeMongo->idTripulante = tripulante->idTripulante;
-//	mensajeMovimientoSabotajeMongo->coordenadasOrigen=tripulante->coordenadas;
+	//	informar_movimiento_mongo_msg* mensajeMovimientoSabotajeMongo=malloc(sizeof(informar_movimiento_mongo_msg));
+	//	mensajeMovimientoSabotajeMongo->idTripulante = tripulante->idTripulante;
+	//	mensajeMovimientoSabotajeMongo->coordenadasOrigen=tripulante->coordenadas;
 
 
 
@@ -847,9 +848,9 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 	mensajeMovimientoTarea->idPatota = tripulante->idPatota;
 	mensajeMovimientoTarea->idTripulante = tripulante->idTripulante;
 
-//		informar_movimiento_mongo_msg*mensajeMovimientoTareaMongo = malloc(sizeof(informar_movimiento_ram_msg));
-//		mensajeMovimientoTareaMongo->idTripulante = tripulante->idTripulante;
-//		mensajeMovimientoTareaMongo->coordenadasOrigen=tripulante->coordenadas;
+	//		informar_movimiento_mongo_msg*mensajeMovimientoTareaMongo = malloc(sizeof(informar_movimiento_ram_msg));
+	//		mensajeMovimientoTareaMongo->idTripulante = tripulante->idTripulante;
+	//		mensajeMovimientoTareaMongo->coordenadasOrigen=tripulante->coordenadas;
 
 
 
@@ -882,11 +883,11 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 	mensajeMovimientoTarea->coordenadasDestino=tripulante->coordenadas;
 
-//		mensajeMovimientoTareaMongo->coordenadasDestino=tripulante->coordenadas;
+	//		mensajeMovimientoTareaMongo->coordenadasDestino=tripulante->coordenadas;
 
 	enviar_paquete(mensajeMovimientoTarea,INFORMAR_MOVIMIENTO_RAM,tripulante->socketTripulanteRam);
 
-//		enviar_paquete(mensajeMovimientoTareaMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
+	//		enviar_paquete(mensajeMovimientoTareaMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
 
 
 
@@ -1083,12 +1084,12 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 							log_info(logger,"la tarea es de CPU del tripulante %d",tripulante->idTripulante);
 
-//							inicio_tarea_msg* mandarTareaCpu=malloc(sizeof(inicio_tarea_msg));
-//							mandarTareaCpu->idTripulante = tripulante->idTripulante;
-//							mandarTareaCpu->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
-//							mandarTareaCpu->parametros =0;
-//
-//							enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
+							//							inicio_tarea_msg* mandarTareaCpu=malloc(sizeof(inicio_tarea_msg));
+							//							mandarTareaCpu->idTripulante = tripulante->idTripulante;
+							//							mandarTareaCpu->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
+							//							mandarTareaCpu->parametros =0;
+							//
+							//							enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
 
 						}
 						if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU){
@@ -1102,12 +1103,12 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 
 							//ENVIAR MENSAJE A IMONGO	enviar_paquete(mensaje, codigo, socketCliente)
-//							inicio_tarea_msg* mandarTareaIO=malloc(sizeof(inicio_tarea_msg));
-//							mandarTareaIO->idTripulante = tripulante->idTripulante;
-//							mandarTareaIO->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
-//							mandarTareaIO->parametros = tripulante->tareaAsignada->parametros;
-//
-//							enviar_paquete(mandarTareaIO, INICIO_TAREA,tripulante->socketTripulanteImongo);
+							//							inicio_tarea_msg* mandarTareaIO=malloc(sizeof(inicio_tarea_msg));
+							//							mandarTareaIO->idTripulante = tripulante->idTripulante;
+							//							mandarTareaIO->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
+							//							mandarTareaIO->parametros = tripulante->tareaAsignada->parametros;
+							//
+							//							enviar_paquete(mandarTareaIO, INICIO_TAREA,tripulante->socketTripulanteImongo);
 							log_info(logger,"el mensaje a imongo ha sido enviado exitosamentedel tripulante %d",tripulante->idTripulante);
 
 
@@ -1347,7 +1348,7 @@ void ejecucionRR(t_tripulante*tripulante){
 			//
 			//							enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
 
-				}
+		}
 
 	}
 
@@ -1411,17 +1412,17 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 			log_info(logger,"se termino la tarea y de quantum le queda %d del tripulante con ID: %d\n",tripulante->quantumDisponible,tripulante->idTripulante);
 
 			t_tarea*tareaPrueba=malloc(sizeof(t_tarea));
-						t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
-						coordenadas->posX=3;
-						coordenadas->posY=4;
-						tareaPrueba->nombreTarea="GENERAR_OXIGENO";
-						tareaPrueba->coordenadas=coordenadas;
-						tareaPrueba->duracion=2;
-						tripulante->tareaAsignada=tareaPrueba;
+			t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
+			coordenadas->posX=3;
+			coordenadas->posY=4;
+			tareaPrueba->nombreTarea="GENERAR_OXIGENO";
+			tareaPrueba->coordenadas=coordenadas;
+			tareaPrueba->duracion=2;
+			tripulante->tareaAsignada=tareaPrueba;
 
-						log_info(logger,"se le asigno otra tarea al tripulante%d",tripulante->idTripulante);
+			log_info(logger,"se le asigno otra tarea al tripulante%d",tripulante->idTripulante);
 
-						sem_post(tripulante->semaforoDelTripulante);		//es el post al semaforo del tripulante para que no salga
+			sem_post(tripulante->semaforoDelTripulante);		//es el post al semaforo del tripulante para que no salga
 
 		}
 
@@ -1439,8 +1440,8 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 
 			if(tripulante->tareaAsignada==NULL){
-						//log_info(logger,"acaba de solicitar otra tarea el tripulante %d",tripulante->idTripulante);
-						/*solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
+				//log_info(logger,"acaba de solicitar otra tarea el tripulante %d",tripulante->idTripulante);
+				/*solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
 								mensajeTarea->idTripulante=tripulante->idTripulante;
 								enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
 								printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
@@ -1449,22 +1450,22 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 								solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
 								tripulante->tareaAsignada=mensajeTareaRta;
 								free(mensajeTarea);
-						 */
-						t_tarea*tareaPrueba=malloc(sizeof(t_tarea));
-						t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
-						coordenadas->posX=3;
-						coordenadas->posY=4;
-						tareaPrueba->nombreTarea="GENERAR_OXIGENO";
-						tareaPrueba->coordenadas=coordenadas;
-						tareaPrueba->duracion=2;
-						tripulante->tareaAsignada=tareaPrueba;
+				 */
+				t_tarea*tareaPrueba=malloc(sizeof(t_tarea));
+				t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
+				coordenadas->posX=3;
+				coordenadas->posY=4;
+				tareaPrueba->nombreTarea="GENERAR_OXIGENO";
+				tareaPrueba->coordenadas=coordenadas;
+				tareaPrueba->duracion=2;
+				tripulante->tareaAsignada=tareaPrueba;
 
-						log_info(logger,"se le asigno otra tarea al tripulante%d",tripulante->idTripulante);
+				log_info(logger,"se le asigno otra tarea al tripulante%d",tripulante->idTripulante);
 
-						agregarTripulanteAListaReadyYAvisar(tripulante);
-									sem_post(&sem_planificarMultitarea);
+				agregarTripulanteAListaReadyYAvisar(tripulante);
+				sem_post(&sem_planificarMultitarea);
 
-					}
+			}
 
 		}
 
