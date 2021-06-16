@@ -99,6 +99,7 @@ char* calcularMD5(char*);
 int generarRecurso(int32_t, char);
 int descartarBasura();
 int consumirRecurso(int32_t, char);
+int writeBitacora(int32_t, char*);
 
 // FUNCIONES PARA TESTING:
 

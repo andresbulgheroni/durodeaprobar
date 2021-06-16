@@ -9,9 +9,14 @@ int main(void) {
 	//////////////////////////////////////////////// Pruebas FS
 	estadoSuperBloque();
 
-	for(int i = 1; i<14;i++){
-		generarRecurso(1, 'O');
-	}
+//	for(int i = 1; i<6;i++){
+//		generarRecurso(16, 'O');
+//	}
+
+	char* bitacora = string_new();
+	string_append(&bitacora, "fiumba.");
+	writeBitacora(1, bitacora);
+	free(bitacora);
 
 	estadoSuperBloque();
 	//////////////////////////////////////////////// Pruebas FS
@@ -649,7 +654,6 @@ int generarRecurso(int32_t cantidad, char recurso){
 		// Genero nueva cadena en memoria y le calculo MD5
 		char* archivo = string_repeat(recurso, cantidadNueva);
 		char* MD5 = calcularMD5(archivo);
-		config_set_value(metadata, "MD5_ARCHIVO", MD5);
 
 		char* blocks = string_new();
 		string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
@@ -698,11 +702,6 @@ int generarRecurso(int32_t cantidad, char recurso){
 			free(archivoRestante);
 		}
 
-		free(archivo);
-		free(blocks);
-		free(cantidadNueva_String);
-		free(MD5);
-
 		char* metadataNueva = string_new();
 		string_append(&metadataNueva, "SIZE=");
 		char* size = string_itoa(config_get_int_value(metadata,"SIZE"));
@@ -715,16 +714,20 @@ int generarRecurso(int32_t cantidad, char recurso){
 		string_append(&metadataNueva, "\nCARACTER_LLENADO=");
 		string_append(&metadataNueva, config_get_string_value(metadata,"CARACTER_LLENADO"));
 		string_append(&metadataNueva, "\nMD5_ARCHIVO=");
-		string_append(&metadataNueva, config_get_string_value(metadata,"MD5_ARCHIVO"));
+		string_append(&metadataNueva, MD5);
 
-		FILE* fp = fopen(rutaMetadata, "w+b");
+		FILE* fp = fopen(rutaMetadata, "w+");
 		txt_write_in_file(fp, metadataNueva);
+		txt_close_file(fp);
+
+		free(archivo);
+		free(blocks);
+		free(cantidadNueva_String);
+		free(MD5);
 		free(size);
 		free(bcount);
 		free(metadataNueva);
-		txt_close_file(fp);
 		config_destroy(metadata);
-
 
 	}else{// No existe archivo metadata, lo creo
 
@@ -875,5 +878,115 @@ int consumirRecurso(int32_t cantidad, char recurso){
 		log_info(logger, "No existe el archivo de metadata a consumir");
 		return EXIT_SUCCESS;
 	}
+	return EXIT_SUCCESS;
+}
+
+// Pasar string con algun token separador al final, como un punto
+int writeBitacora(int32_t tripulante, char* string){
+
+	char* rutaMetadata;
+	rutaMetadata = string_from_format("%s/Files/Bitacoras/Tripulante%d.ims", PUNTO_MONTAJE, tripulante);
+
+	if(access(rutaMetadata, F_OK) != -1){ //Existe archivo metadata, lo manejo como config
+
+		t_config* metadata = config_create(rutaMetadata);
+
+		int cantidadVieja = config_get_int_value(metadata, "SIZE");
+		int cantidad = string_length(string); // La cantidad de caracteres que voy a escribir
+		int cantidadNueva = cantidad + cantidadVieja;
+
+		printf("cantidad: %d", cantidad);
+
+		char* cantidadNueva_String = string_itoa(cantidadNueva);
+
+		char* blocks = string_new();
+		string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
+
+		int blockCount = 0;
+		char** arrayBlocks = config_get_array_value(metadata, "BLOCKS");
+		while(arrayBlocks[blockCount] != NULL) blockCount++;
+
+		int caracteresEnUltimoBloque = cantidadVieja % BLOCK_SIZE; //0 si esta completo
+
+		if(caracteresEnUltimoBloque > 0){// Termino de llenar último bloque antes de pedir otro
+			char** blocksArray = string_get_string_as_array(blocks);
+			int ultimoBloque = atoi(blocksArray[blockCount-1]);
+
+			char* porcionAGrabar = string_substring(string, 0, BLOCK_SIZE - caracteresEnUltimoBloque);
+
+			memcpy(	blocksMap +	(ultimoBloque-1) * BLOCK_SIZE +		caracteresEnUltimoBloque,
+					porcionAGrabar,
+					BLOCK_SIZE - caracteresEnUltimoBloque * sizeof(char));
+
+			cantidad -= (BLOCK_SIZE - caracteresEnUltimoBloque);
+
+
+			for(int i=0;i<blockCount;i++){
+				free(blocksArray[i]);
+			}
+			free(blocksArray);
+			free(porcionAGrabar);
+		}
+
+		if(cantidad > 0){// Lleno nuevos bloques de ser necesario
+
+			char blockCountNuevo[MAX_BUFFER] = "";
+			char blocksNuevo[MAX_BUFFER] = "";
+
+			char* archivoRestante = string_substring(string,
+					((caracteresEnUltimoBloque > 0) ? (BLOCK_SIZE - caracteresEnUltimoBloque) : 0),
+					cantidad);
+			stringToBlocks(archivoRestante, blockCountNuevo, blocksNuevo);
+
+			blocks[strlen(blocks)-1] = ',';
+			memmove(blocksNuevo, blocksNuevo+1, strlen(blocksNuevo));
+			string_append(&blocks, blocksNuevo);
+			config_set_value(metadata, "BLOCKS", blocks);
+
+			free(archivoRestante);
+		}
+
+		char* metadataNueva = string_new();
+		string_append(&metadataNueva, "SIZE=");
+		string_append(&metadataNueva, cantidadNueva_String);
+		string_append(&metadataNueva, "\nBLOCKS=");
+		string_append(&metadataNueva, config_get_string_value(metadata,"BLOCKS"));
+
+		FILE* fp = fopen(rutaMetadata, "w+");
+		txt_write_in_file(fp, metadataNueva);
+		txt_close_file(fp);
+
+		for(int i=0;i<blockCount;i++){
+			free(arrayBlocks[i]);
+		}
+		free(arrayBlocks);
+		free(blocks);
+		free(cantidadNueva_String);
+		free(metadataNueva);
+		config_destroy(metadata);
+
+	}else{// No existe archivo metadata, lo creo
+
+		char blockCount[MAX_BUFFER] = "";
+		char blocks[MAX_BUFFER] = "";
+
+		stringToBlocks(string, blockCount, blocks);
+		char* size = string_itoa(string_length(string));
+
+		char* metadata = string_new();
+		string_append(&metadata, "SIZE=");
+		string_append(&metadata, size);
+
+		string_append(&metadata, "\nBLOCKS=");
+		string_append(&metadata, blocks);
+
+		FILE* fp = txt_open_for_append(rutaMetadata);
+		txt_write_in_file(fp, metadata);
+		txt_close_file(fp);
+
+		free(size);
+		free(metadata);
+	}
+	free(rutaMetadata);
 	return EXIT_SUCCESS;
 }
