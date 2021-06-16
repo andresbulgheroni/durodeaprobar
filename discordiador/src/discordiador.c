@@ -1083,6 +1083,13 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 							log_info(logger,"la tarea es de CPU del tripulante %d",tripulante->idTripulante);
 
+//							inicio_tarea_msg* mandarTareaCpu=malloc(sizeof(inicio_tarea_msg));
+//							mandarTareaCpu->idTripulante = tripulante->idTripulante;
+//							mandarTareaCpu->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
+//							mandarTareaCpu->parametros =0;
+//
+//							enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
+
 						}
 						if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU){
 
@@ -1093,7 +1100,14 @@ void ejecutarTripulante(t_tripulante* tripulante){
 							log_info(logger,"se realiza un ciclo de CPU para enviar tarea del tripulante %d",tripulante->idTripulante);
 							sleep(RETARDO_CICLO_CPU);
 
+
 							//ENVIAR MENSAJE A IMONGO	enviar_paquete(mensaje, codigo, socketCliente)
+//							inicio_tarea_msg* mandarTareaIO=malloc(sizeof(inicio_tarea_msg));
+//							mandarTareaIO->idTripulante = tripulante->idTripulante;
+//							mandarTareaIO->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
+//							mandarTareaIO->parametros = tripulante->tareaAsignada->parametros;
+//
+//							enviar_paquete(mandarTareaIO, INICIO_TAREA,tripulante->socketTripulanteImongo);
 							log_info(logger,"el mensaje a imongo ha sido enviado exitosamentedel tripulante %d",tripulante->idTripulante);
 
 
@@ -1324,6 +1338,16 @@ void ejecucionRR(t_tripulante*tripulante){
 			distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
 
 		}
+		if(distancia == 0 && (string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)==TAREA_CPU)){
+
+			//inicio_tarea_msg* mandarTareaCpu=malloc(sizeof(inicio_tarea_msg));
+			//							mandarTareaCpu->idTripulante = tripulante->idTripulante;
+			//							mandarTareaCpu->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
+			//							mandarTareaCpu->parametros =0;
+			//
+			//							enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
+
+				}
 
 	}
 
@@ -1362,6 +1386,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 	if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)==TAREA_CPU){
 		log_info(logger, "el tripulante %d esta realizando una tarea de CPU ",tripulante->idTripulante);
+
 
 
 		while(tripulante->misCiclosDeCPU<tripulante->tareaAsignada->duracion && (tripulante->quantumDisponible)>0){
@@ -1471,6 +1496,13 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 			sleep(RETARDO_CICLO_CPU);
 
 			//ENVIAR MENSAJE A IMONGO	enviar_paquete(mensaje, codigo, socketCliente)
+			//inicio_tarea_msg* mandarTareaIO=malloc(sizeof(inicio_tarea_msg));
+			//							mandarTareaIO->idTripulante = tripulante->idTripulante;
+			//							mandarTareaIO->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
+			//							mandarTareaIO->parametros = tripulante->tareaAsignada->parametros;
+			//
+			//							enviar_paquete(mandarTareaIO, INICIO_TAREA,tripulante->socketTripulanteImongo);
+
 			log_info(logger,"el mensaje a imongo ha sido enviado exitosamentedel tripulante %d",tripulante->idTripulante);
 
 			tripulante->quantumDisponible--;
@@ -1483,8 +1515,6 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 
 			sem_post(&sem_planificarMultitarea);		//ES UNA IO PUEDO EJECUTAR OTRO TRIPULANTE
-
-
 
 			sem_post(&semaforoInicioCicloBloqueado);		//tiraSemaforoPostALHiloBLoqueado
 

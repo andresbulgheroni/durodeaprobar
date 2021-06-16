@@ -141,6 +141,7 @@ typedef struct
 	char* nombreTarea;		//TODO
 	t_coordenadas* coordenadas;
 	uint32_t duracion;
+	uint32_t parametros;
 
 } t_tarea;
 
