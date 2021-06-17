@@ -116,7 +116,7 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status);
 void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* status);
 void cambiar_estado_paginacion(cambio_estado_msg* mensaje, bool* status);
 char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status);
-void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* status); //TODO
+void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* status);
 t_list* get_frames_libres();
 t_list* get_frames_a_ubicar(uint32_t cantidad);
 void traer_pagina_a_memoria(t_pagina_patota* pagina);

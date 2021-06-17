@@ -57,7 +57,6 @@ void recibir_mensaje(int32_t* conexion){
 			}
 			case INFORMAR_MOVIMIENTO_RAM:{
 
-				//FALTA ID PATOTA EN EL MENSAJE
 				informar_movimiento_ram_msg* mensaje = deserializar_paquete(paquete);
 
 				switch(ESQUEMA_MEMORIA){
@@ -73,7 +72,6 @@ void recibir_mensaje(int32_t* conexion){
 			}
 			case CAMBIO_ESTADO:{
 
-				//FALTA ID PATOTA EN EL MENSAJE
 				cambio_estado_msg* mensaje = deserializar_paquete(paquete);
 
 
@@ -89,19 +87,31 @@ void recibir_mensaje(int32_t* conexion){
 			}
 			case SOLICITAR_SIGUIENTE_TAREA:{
 
-				//FALTA ID PATOTA EN EL MENSAJE
 				solicitar_siguiente_tarea_msg* mensaje = deserializar_paquete(paquete);
 
+				bool completo_tareas = false;
+				char* tarea;
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: break;
-					case PAGINACION_VIRTUAL: siguiente_tarea_paginacion(mensaje, NULL);break;
+					case PAGINACION_VIRTUAL: tarea = siguiente_tarea_paginacion(mensaje, completo_tareas, NULL);break;
 				}
+
+				if(completo_tareas){
+
+					enviar_paquete(NULL, COMPLETO_TAREAS, *conexion);
+
+				}else{
+					t_string* tarea_msg = get_t_string(tarea);
+					enviar_paquete(tarea_msg, SOLICITAR_SIGUIENTE_TAREA_RTA, *conexion);
+					free(tarea_msg);
+				}
+
+				free(mensaje);
 
 				break;
 			}
 			case EXPULSAR_TRIPULANTE_MSG:{
 
-				//FALTA ID PATOTA EN EL MENSAJE
 				expulsar_tripulante_msg* mensaje = deserializar_paquete(paquete);
 
 				switch(ESQUEMA_MEMORIA){
@@ -258,7 +268,7 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 		uint32_t size_pcb = cantidad_frames * TAMANIO_PAGINA;
 
 		status = entra_en_swap(cantidad_frames);
-		status = entra_en_memoria(size_pcb);
+		status = entra_en_memoria(size_pcb);// PREGUNTAR SI ESTA BIEN
 
 		if(status){
 
