@@ -3,36 +3,41 @@
 int main(void) {
 
 	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
-
 	leerConfig();
 	crear_log();
 	inicializarFS();
-
 	signal(SIGUSR1, sighandler);
 
-	//////////////////////////////////////////////// Pruebas FS
+	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 	estadoSuperBloque();
 
-	//	generarRecurso(18,'O');
-	//	consumirRecurso(1, 'O');
-
-	char* bitacora = string_new();
-	string_append(&bitacora, "fiumba\n");
-	string_append(&bitacora, "morgan freemaaaaan\n");
-	string_append(&bitacora, "tucson\n");
-	string_append(&bitacora, "Quieren bajarme y no saben como hacer, porque este pibito no va a correr\n");
-	writeBitacora(1, bitacora);
-	free(bitacora);
-
-	char* tareas = readBitacora(1);
-	printf("\nBitacora:\n\n%s", tareas);
-	free(tareas);
-
+	generarRecurso(190,'O');
+	estadoSuperBloque();
+	consumirRecurso(100, 'O');
 
 	estadoSuperBloque();
-	//////////////////////////////////////////////// Pruebas FS
+	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 
-	//	while(1){}
+	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
+	//	estadoSuperBloque();
+	//
+	//	char* bitacora = string_new();
+	//	string_append(&bitacora, "fiumba\n");
+	//	string_append(&bitacora, "morgan freemaaaaan\n");
+	//	string_append(&bitacora, "tucson\n");
+	//	string_append(&bitacora, "Quieren bajarme y no saben como hacer, porque este pibito no va a correr\n");
+	//	writeBitacora(1, bitacora);
+	//	free(bitacora);
+	//
+	//	char* tareas = readBitacora(1);
+	//	printf("\nBitacora:\n\n%s", tareas);
+	//
+	//	if(tareas != NULL){
+	//	free(tareas);
+	//	}
+	//
+	//	estadoSuperBloque();
+	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
 
 	//	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 	//
@@ -44,11 +49,8 @@ int main(void) {
 	//		pthread_detach(hilo_mensaje);
 	//
 	//	}
-	//
-	//	puts("fin programa");
 
 	return EXIT_SUCCESS;
-
 }
 
 // Reemplazo el main por el que usó Andres para probar la conexion con su modulo, dejo la version vieja para referencia
@@ -139,6 +141,10 @@ void funcionPruebaTrip(int32_t* socketCliente){
 
 		break;
 
+	}
+
+	default:{
+		log_error(logger, "Codigo de op invalido");
 	}
 
 	}
@@ -558,6 +564,7 @@ int primerBloqueLibre(){
 	}
 	return posicion;
 }
+
 /*
 string: cadena a grabar en Blocks
 blockCount y blocks: parametros a devolver por referencia
@@ -682,7 +689,6 @@ int generarRecurso(int32_t cantidad, char recurso){
 					BLOCK_SIZE - caracteresEnUltimoBloque * sizeof(char));
 
 			cantidad -= (BLOCK_SIZE - caracteresEnUltimoBloque);
-
 
 			for(int i=0;i<blockCount;i++){
 				free(blocksArray[i]);
@@ -818,98 +824,82 @@ int consumirRecurso(int32_t cantidad, char recurso){
 	if(access(rutaMetadata, F_OK) != -1){// Existe la metadata del recurso
 
 		t_config* metadata = config_create(rutaMetadata);
-		int cantidadVieja = config_get_int_value(metadata, "SIZE");
-		int cantidadNueva = cantidadVieja - cantidad;
+		int sizeViejo = config_get_int_value(metadata, "SIZE");
+		int sizeNuevo = sizeViejo - cantidad;
 
-		char** bloques = config_get_array_value(metadata, "BLOCKS");
-		int blockCount = config_get_int_value(metadata, "BLOCK_COUNT");
+		char** blocksViejo = config_get_array_value(metadata, "BLOCKS");
+		int blockCountViejo = config_get_int_value(metadata, "BLOCK_COUNT");
 
-		if(cantidad >= cantidadVieja){// Quiero consumir todos los recursos o mas
+		if(cantidad >= sizeViejo){// Quiero consumir todos los recursos o mas
 			//Libero todos los bloques
-			for(int i = 0; i < blockCount; i++){
-				setBitmap(0, atoi(bloques[i]));
+			for(int i = 0; i < blockCountViejo; i++){
+				setBitmap(0, atoi(blocksViejo[i]));
+				free(blocksViejo[i]);
 			}
-			log_info(logger, "Se consumieron todos los recursos %c, archivo vaciado", recurso);
+			log_info(logger, "Se consumieron todos los recursos \"%c\", archivo vaciado", recurso);
 			config_destroy(metadata);
 			remove(rutaMetadata); //Borro archivo por la implementacion que hice del FS
+			free(rutaMetadata);
+			free(blocksViejo);
 			return EXIT_SUCCESS;
 		}
 
+		int blockCountNuevo = sizeNuevo / BLOCK_SIZE + ((sizeNuevo % BLOCK_SIZE != 0)? 1 : 0);
+
+		// Libero bloques
+		while(blockCountViejo > blockCountNuevo){
+			setBitmap(0, atoi(blocksViejo[blockCountViejo - 1]));
+			//printf("\nLibere el bloque: %d", atoi(blocksViejo[blockCountViejo - 1]));
+			free(blocksViejo[blockCountViejo - 1]);
+			blockCountViejo--;
+		}
+
+		// Armo nueva cadena blocks
+		char* blocksNuevo = string_new();
+		string_append(&blocksNuevo, "[");
+		for(int i = 0; i < blockCountNuevo; i++){
+			string_append(&blocksNuevo, blocksViejo[i]);
+			string_append(&blocksNuevo, ",");
+			free(blocksViejo[i]);
+		}
+		blocksNuevo[strlen(blocksNuevo)-1] = ']';
+
 		// Genero MD5 nuevo
-		char* archivo = string_repeat(recurso, cantidadNueva);
+		char* archivo = string_repeat(recurso, sizeNuevo);
 		char* MD5 = calcularMD5(archivo);
 
-		// Libero bloques y actualizo blocks / block_count
+		// Escribo nueva metadata
+		char* metadataNueva = string_new();
 
-		//////////////////////////////////////////////////////////////////////////////////////// PARA HACER
+		string_append(&metadataNueva, "SIZE=");
+		char* sizeNuevo_String = string_itoa(sizeNuevo);
+		string_append(&metadataNueva, sizeNuevo_String);
 
-		//		int blockCountNuevo = cantidadNueva / BLOCK_SIZE + ((cantidadNueva % BLOCK_SIZE != 0)? 1 : 0);
-		//
-		//		if(blockCountNuevo < blockCount){// Tengo que liberar bloques
-		//			////////////
-		//			char* blocks = string_new();
-		//			string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
-		//
-		//			int contador = blockCountNuevo;
-		//
-		//			// Libero bloques
-		//			while(contador < blockCount){
-		////				setBitmap(0, atoi(bloques[contador-1]));
-		//				//					listaBlocks[contador-1] = NULL;
-		//				contador--;
-		//			}
-		//
-		//			contador = 0;
-		//
-		//			char* blocksNuevo = string_new();
-		//			string_append(&blocksNuevo, "[");
-		//			while(contador < blockCountNuevo){
-		//				string_append(&blocksNuevo, bloques[contador]);
-		//				string_append(&blocksNuevo, ",");
-		//				contador++;
-		//			}
-		//			blocksNuevo[strlen(blocksNuevo)-1] = ']';
-		//
-		//			config_set_value(metadata, "BLOCKS", blocksNuevo);
-		//
-		//		}
-		//
-		//		char* metadataNueva = string_new();
-		//
-		//		string_append(&metadataNueva, "SIZE=");
-		//		char* cantidadNueva_String = string_itoa(cantidadNueva);
-		//		string_append(&metadataNueva, cantidadNueva_String);
-		//
-		//		string_append(&metadataNueva, "\nBLOCK_COUNT=");
-		//		char* blockCountNuevo_String = string_itoa(blockCountNuevo);
-		//		string_append(&metadataNueva, blockCountNuevo_String);
-		//
-		//		string_append(&metadataNueva, "\nBLOCKS=");
-		//		string_append(&metadataNueva, config_get_string_value(metadata,"BLOCKS"));
-		//
-		//		string_append(&metadataNueva, "\nCARACTER_LLENADO=");
-		//		string_append(&metadataNueva, config_get_string_value(metadata,"CARACTER_LLENADO"));
-		//
-		//		string_append(&metadataNueva, "\nMD5_ARCHIVO=");
-		//		string_append(&metadataNueva, MD5);
-		//
-		//		FILE* fp = fopen(rutaMetadata, "w+");
-		//		txt_write_in_file(fp, metadataNueva);
-		//		txt_close_file(fp);
-		//
-		//
-		//		for(int i=0;i<blockCount;i++){
-		//			free(bloques[i]);
-		//		}
-		//		free(bloques);
-		//		free(archivo);
-		//		free(cantidadNueva_String);
-		//		free(MD5);
-		//		free(blockCountNuevo_String);
-		//		free(metadataNueva);
-		//		config_destroy(metadata);
+		string_append(&metadataNueva, "\nBLOCK_COUNT=");
+		char* blockCountNuevo_String = string_itoa(blockCountNuevo);
+		string_append(&metadataNueva, blockCountNuevo_String);
 
-		//////////////////////////////////////////////////////////////////////////////////////// PARA HACER
+		string_append(&metadataNueva, "\nBLOCKS=");
+		string_append(&metadataNueva, blocksNuevo);
+
+		string_append(&metadataNueva, "\nCARACTER_LLENADO=");
+		string_append(&metadataNueva, config_get_string_value(metadata,"CARACTER_LLENADO"));
+
+		string_append(&metadataNueva, "\nMD5_ARCHIVO=");
+		string_append(&metadataNueva, MD5);
+
+		FILE* fp = fopen(rutaMetadata, "w+");
+		txt_write_in_file(fp, metadataNueva);
+		txt_close_file(fp);
+
+		config_destroy(metadata);
+		free(archivo);
+		free(MD5);
+		free(sizeNuevo_String);
+		free(blockCountNuevo_String);
+		free(blocksNuevo);
+		free(blocksViejo);
+		free(metadataNueva);
 
 	}else{// No existe la metadata del recurso
 
@@ -918,10 +908,11 @@ int consumirRecurso(int32_t cantidad, char recurso){
 		log_info(logger, "No existe el archivo de metadata a consumir");
 		return EXIT_SUCCESS;
 	}
+	free(rutaMetadata);
 	return EXIT_SUCCESS;
 }
 
-// Pasar string con algun token separador al final, como un \n
+// Pasar string con un token separador al final, como \n
 int writeBitacora(int32_t tripulante, char* string){
 
 	char* rutaMetadata;
@@ -957,7 +948,6 @@ int writeBitacora(int32_t tripulante, char* string){
 					BLOCK_SIZE - caracteresEnUltimoBloque * sizeof(char));
 
 			cantidad -= (BLOCK_SIZE - caracteresEnUltimoBloque);
-
 
 			for(int i=0;i<blockCount;i++){
 				free(blocksArray[i]);
@@ -1044,7 +1034,6 @@ char* readBitacora(int32_t tripulante){
 		char* blocks = string_new();
 		string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
 		char** blocksArray = string_get_string_as_array(blocks);
-		//	char** blocks = config_get_array_value(metadata, "BLOCKS");
 
 		char* bitacora = malloc(size * sizeof(char)+ 1);
 		bitacora[size] = '\0';
@@ -1052,7 +1041,6 @@ char* readBitacora(int32_t tripulante){
 		int contador = 0;
 
 		while((unsigned)size >= BLOCK_SIZE){
-
 			memcpy(bitacora + (BLOCK_SIZE * contador), blocksMap + (BLOCK_SIZE * (atoi(blocksArray[contador]) - 1)), BLOCK_SIZE);
 			size -= BLOCK_SIZE;
 			contador++;
@@ -1061,8 +1049,6 @@ char* readBitacora(int32_t tripulante){
 		if(size > 0){
 			memcpy(bitacora + (BLOCK_SIZE * contador), blocksMap + (BLOCK_SIZE * (atoi(blocksArray[contador]) - 1)), size);
 		}
-
-
 
 		for(int i=0;i<blockCount;i++){
 			free(blocksArray[i]);
@@ -1075,6 +1061,7 @@ char* readBitacora(int32_t tripulante){
 
 	}else{// No existe archivo metadata de la tarea
 		log_error(logger, "404: Bitacora de tripulante not found");
+		free(rutaMetadata);
 		return NULL;
 	}
 }

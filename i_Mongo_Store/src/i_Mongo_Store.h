@@ -111,32 +111,11 @@ void estadoSuperBloque(){
 	printf("BLOCKS: %d\n",superBloqueMap[4]);
 
 	puts("------------------------------------");
-	for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
+	for(int i=0; (unsigned)i<bitarray_get_max_bit(bitmap); i++){
 		if(bitarray_test_bit(bitmap, i))printf("\n%d.\tOCUPADO", i+1);
 		else printf("\n%d.\tLIBRE", i+1);
 	}
 	puts("\n------------------------------------");
-}
-
-
-void estadoBitmap(){
-
-		int posicion;
-
-		for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
-			if(bitarray_test_bit(bitmap, i))printf("\n%d.\tOCUPADO", i+1);
-					else printf("\n%d.\tLIBRE", i+1);
-		}
-		printf("\n");
-
-		for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
-			if(!bitarray_test_bit(bitmap, i)){
-				posicion = i+1;
-						break;
-			}
-		}
-		printf("\nPrimer bloque libre en bitmap: %d \n", posicion);
-
 }
 
 #endif /* I_MONGO_STORE_H_ */
