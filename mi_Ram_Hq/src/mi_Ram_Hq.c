@@ -862,89 +862,38 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 
 void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje, bool* status){
 
+	crear_estructura_tabla_seg(mensaje, status);
+	//deberia devolver la estructura
+
+	almacenar_patota();
+	// implementa almacenar_segmento por cada segmento
+	// si uno de los segmentos no entra rechazo todo? supongo que si
+
+	// agregarla al dictionary
+}
+
+
+void crear_estructura_tabla_seg(iniciar_patota_msg* mensaje, bool* status){
+
 	if(!dictionary_has_key(tablas_seg_patota, string_itoa(mensaje->idPatota))){
-		/*
-		//Saco cantidad de frames/paginas que va a ocupar
-		uint32_t cantidad_frames = ceil((sizeof(t_pcb) + mensaje->cant_tripulantes * (sizeof(t_tcb))
-				+  mensaje->tareas->length) / TAMANIO_PAGINA);
-		uint32_t size_pcb = cantidad_frames * TAMANIO_PAGINA;
 
-		status = entra_en_swap(cantidad_frames);
-		status = entra_en_memoria(size_pcb);
+		uint32_t size_pcb = sizeof(t_pcb);
+		uint32_t size_tcb = sizeof(t_tcb);
+		t_segmentos_patota tabla_patota;
+		tabla_patota.segmentos = list_create();
+		segmento tcb;
 
-		if(status){
+		segmento pcb = crear_segmento(size_pcb);
+		list_add(tabla_patota.segmentos, pcb);
 
-			t_list* paginas = list_create();
-			uint32_t direccion_tareas = sizeof(t_pcb);
-
-			//Cargo datos de pcb y tcb para copiarlos a memoria
-			t_pcb* pcb = malloc(sizeof(t_pcb));
-			t_list* tcbs = list_create();
-
-			pcb->pid = mensaje->idPatota;
-
-			void cargar_tcb(tripulante_data_msg* tripulante){
-
-				t_tcb* tcb = malloc(sizeof(t_tcb));
-
-				tcb->tid = tripulante->idTripulante;
-				tcb->estado = 'R';
-				tcb->posX = tripulante->coordenadas->posX;
-				tcb->posY = tripulante->coordenadas->posY;
-				tcb->proxima_instruccion = 0;
-				tcb->direccion_patota = 0;
-
-				list_add(tcbs, tcb);
-				direccion_tareas += sizeof(t_tcb);
-
-			}
-
-			list_iterate(mensaje->tripulantes, cargar_tcb);
-
-			pcb->direccion_tareas = direccion_tareas;//generar_direccion_logica_paginacion(direccion_tareas / TAMANIO_PAGINA, direccion_tareas % TAMANIO_PAGINA);
-
-			// Pongo los datos en un void* por conveniencia para el paso mem principal
-			void* datos = malloc(size_pcb);
-			int32_t offset = 0;
-
-			memcpy(datos + offset, pcb, sizeof(t_pcb));
-			offset += sizeof(t_pcb);
-
-			void cargarTcbDatos(t_tcb* tcb){
-
-				memcpy(datos + offset, tcb, sizeof(t_tcb));
-				offset += sizeof(t_tcb);
-
-			}
-			list_iterate(tcbs, cargarTcbDatos);
-
-			memcpy(datos + offset, mensaje->tareas->string, mensaje->tareas->length);
-
-			// Creo las paginas y paso los datos a memoria principal y swap
-			offset = 0;
-			for(int32_t i = 0; i < cantidad_frames; i++){
-
-				t_pagina_patota* pagina = malloc(sizeof(t_pagina_patota));
-				pagina->nro_frame = get_frame();
-				pagina->nro_frame_mv = get_frame_memoria_virtual();
-				pagina->presente = true;
-				pagina->uso = true;
-				pagina->modificado = false;
-
-				guardar_en_memoria_swap(pagina, datos + i * TAMANIO_PAGINA);
-				guardar_en_memoria_principal(pagina,  datos + i * TAMANIO_PAGINA);
-
-				list_add(pagina);
-
-			}
-
-			//Guardo tabla de paginas
-			dictionary_put(tabla_paginas_patota, string_itoa(mensaje->idPatota), paginas);
+		for(int i = 0; i++; i<mensaje->cant_tripulantes){
+			tcb = crear_segmento(size_tcb);
+			list_add(tabla_patota.segmentos, tcb);
 
 		}
-*/
+		/* las validaciones las hago despues cuando quiero meterlo en memoria,
+		aca solo creo la estructura de la tabla de segmentos */
 	}
-
 }
 
 

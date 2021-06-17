@@ -70,7 +70,6 @@ char* IP;
 char* PUERTO;
 
 void* memoria_principal;
-//Segmentacion
 
 //Paginacion
 
@@ -142,7 +141,15 @@ void liberar_memoria_virtual(t_pagina_patota* pagina);
 typedef struct{
 
 	uint32_t inicio;
-	uint32_t tamanio; //por ahora lo puse asi como dice el enunciado, dsp si queres cambialo
+	uint32_t tamanio;
+
+}segmento;
+
+typedef struct{
+
+	//uint32_t inicio;
+	//uint32_t tamanio; //por ahora lo puse asi como dice el enunciado, dsp si queres cambialo
+	t_list *segmentos;
 
 } t_segmentos_patota;
 
@@ -154,6 +161,11 @@ typedef enum{
 	BF = 1
 } criterio_seleccion;
 
+void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje, bool* status);
+void crear_estructura_tabla_seg(iniciar_patota_msg* mensaje, bool* status);
+segmento crear_segmento(uint32_t size); //*? para crearlo necesito reservar memoria?
+void almacenar_segmento();
+void almacenar_patota();
 void compactacion(); //sin implementar
 
 #endif /* MI_RAM_HQ_H_ */
