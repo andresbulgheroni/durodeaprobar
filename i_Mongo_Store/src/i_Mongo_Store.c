@@ -2,26 +2,35 @@
 
 int main(void) {
 
+	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
+
 	leerConfig();
 	crear_log();
 	inicializarFS();
 
+	signal(SIGUSR1, sighandler);
+
 	//////////////////////////////////////////////// Pruebas FS
 	estadoSuperBloque();
 
-//	for(int i = 1; i<6;i++){
-//		generarRecurso(16, 'O');
-//	}
+	//	generarRecurso(18,'O');
+	//	consumirRecurso(1, 'O');
 
 	char* bitacora = string_new();
-	string_append(&bitacora, "fiumba.");
+	string_append(&bitacora, "fiumba\n");
+	string_append(&bitacora, "morgan freemaaaaan\n");
+	string_append(&bitacora, "tucson\n");
+	string_append(&bitacora, "Quieren bajarme y no saben como hacer, porque este pibito no va a correr\n");
 	writeBitacora(1, bitacora);
 	free(bitacora);
 
+	char* tareas = readBitacora(1);
+	printf("\nBitacora:\n\n%s", tareas);
+	free(tareas);
+
+
 	estadoSuperBloque();
 	//////////////////////////////////////////////// Pruebas FS
-
-
 
 	//	while(1){}
 
@@ -451,10 +460,10 @@ int menorEntre(int a, int b){
 void inicializarFS(){
 
 	if(existeFS()){
-		puts("File System existente detectado, recuperando...");
+		puts("File System existente detectado, recuperando...\n");
 		inicializarSuperBloque();
 	} else {
-		puts("File System NO encontrado, generando...");
+		puts("File System NO encontrado, generando...\n");
 		crearDirectorio(PUNTO_MONTAJE);
 		crearSuperBloque();
 		char* rutaPuntoMontaje = string_from_format("%s/Files", PUNTO_MONTAJE);
@@ -826,51 +835,82 @@ int consumirRecurso(int32_t cantidad, char recurso){
 			return EXIT_SUCCESS;
 		}
 
-		config_set_value(metadata, "SIZE", string_itoa(cantidadNueva));
-
-		// Genero MD5
+		// Genero MD5 nuevo
 		char* archivo = string_repeat(recurso, cantidadNueva);
 		char* MD5 = calcularMD5(archivo);
-		config_set_value(metadata, "MD5_ARCHIVO", MD5);
 
 		// Libero bloques y actualizo blocks / block_count
 
 		//////////////////////////////////////////////////////////////////////////////////////// PARA HACER
 
-		//		int blockCountNuevo = cantidadNueva / BLOCK_SIZE + (cantidadNueva % BLOCK_SIZE != 0);
+		//		int blockCountNuevo = cantidadNueva / BLOCK_SIZE + ((cantidadNueva % BLOCK_SIZE != 0)? 1 : 0);
 		//
-		//		if(blockCountNuevo > blockCount){// Tengo que borrar bloques
+		//		if(blockCountNuevo < blockCount){// Tengo que liberar bloques
+		//			////////////
+		//			char* blocks = string_new();
+		//			string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
 		//
-		//		config_set_value(metadata, "BLOCK_COUNT", string_itoa(blockCountNuevo));
+		//			int contador = blockCountNuevo;
 		//
-		//		char* blocks = string_new();
-		//		string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
-		//		char** listaBlocks = string_get_string_as_array(blocks);
+		//			// Libero bloques
+		//			while(contador < blockCount){
+		////				setBitmap(0, atoi(bloques[contador-1]));
+		//				//					listaBlocks[contador-1] = NULL;
+		//				contador--;
+		//			}
 		//
-		//		while(blockCount > blockCountNuevo){
-		//			setBitmap(0, atoi(listaBlocks[blockCountNuevo-1]));
-		//			listaBlocks[blockCountNuevo-1] = "\0";
-		//			blockCountNuevo--;
+		//			contador = 0;
+		//
+		//			char* blocksNuevo = string_new();
+		//			string_append(&blocksNuevo, "[");
+		//			while(contador < blockCountNuevo){
+		//				string_append(&blocksNuevo, bloques[contador]);
+		//				string_append(&blocksNuevo, ",");
+		//				contador++;
+		//			}
+		//			blocksNuevo[strlen(blocksNuevo)-1] = ']';
+		//
+		//			config_set_value(metadata, "BLOCKS", blocksNuevo);
+		//
 		//		}
 		//
-		//		int contador = 0;
-		//		char* blocksNuevo = string_new();
-		//		while(contador < blockCountNuevo){
-		//			string_append(&blocksNuevo, listaBlocks[contador]);
-		//			string_append(&blocksNuevo, ",");
-		//			contador++;
-		//		}
+		//		char* metadataNueva = string_new();
 		//
-		//		puts("listaBlocks");
-		//		config_set_value(metadata, "BLOCKS", blocksNuevo);
+		//		string_append(&metadataNueva, "SIZE=");
+		//		char* cantidadNueva_String = string_itoa(cantidadNueva);
+		//		string_append(&metadataNueva, cantidadNueva_String);
 		//
+		//		string_append(&metadataNueva, "\nBLOCK_COUNT=");
+		//		char* blockCountNuevo_String = string_itoa(blockCountNuevo);
+		//		string_append(&metadataNueva, blockCountNuevo_String);
+		//
+		//		string_append(&metadataNueva, "\nBLOCKS=");
+		//		string_append(&metadataNueva, config_get_string_value(metadata,"BLOCKS"));
+		//
+		//		string_append(&metadataNueva, "\nCARACTER_LLENADO=");
+		//		string_append(&metadataNueva, config_get_string_value(metadata,"CARACTER_LLENADO"));
+		//
+		//		string_append(&metadataNueva, "\nMD5_ARCHIVO=");
+		//		string_append(&metadataNueva, MD5);
+		//
+		//		FILE* fp = fopen(rutaMetadata, "w+");
+		//		txt_write_in_file(fp, metadataNueva);
+		//		txt_close_file(fp);
+		//
+		//
+		//		for(int i=0;i<blockCount;i++){
+		//			free(bloques[i]);
 		//		}
+		//		free(bloques);
+		//		free(archivo);
+		//		free(cantidadNueva_String);
+		//		free(MD5);
+		//		free(blockCountNuevo_String);
+		//		free(metadataNueva);
+		//		config_destroy(metadata);
+
 		//////////////////////////////////////////////////////////////////////////////////////// PARA HACER
 
-		config_save(metadata);
-		config_destroy(metadata);
-
-		free(MD5);
 	}else{// No existe la metadata del recurso
 
 		// Informar que no existe el archivo tambien por otro medio?
@@ -881,7 +921,7 @@ int consumirRecurso(int32_t cantidad, char recurso){
 	return EXIT_SUCCESS;
 }
 
-// Pasar string con algun token separador al final, como un punto
+// Pasar string con algun token separador al final, como un \n
 int writeBitacora(int32_t tripulante, char* string){
 
 	char* rutaMetadata;
@@ -894,8 +934,6 @@ int writeBitacora(int32_t tripulante, char* string){
 		int cantidadVieja = config_get_int_value(metadata, "SIZE");
 		int cantidad = string_length(string); // La cantidad de caracteres que voy a escribir
 		int cantidadNueva = cantidad + cantidadVieja;
-
-		printf("cantidad: %d", cantidad);
 
 		char* cantidadNueva_String = string_itoa(cantidadNueva);
 
@@ -989,4 +1027,61 @@ int writeBitacora(int32_t tripulante, char* string){
 	}
 	free(rutaMetadata);
 	return EXIT_SUCCESS;
+}
+
+// Hacer free si es != NULL
+char* readBitacora(int32_t tripulante){
+
+	char* rutaMetadata;
+	rutaMetadata = string_from_format("%s/Files/Bitacoras/Tripulante%d.ims", PUNTO_MONTAJE, tripulante);
+
+	if(access(rutaMetadata, F_OK) != -1){ //Existe archivo metadata de la bitacora
+
+		t_config* metadata = config_create(rutaMetadata);
+		int size = config_get_int_value(metadata, "SIZE");
+		int blockCount = size / BLOCK_SIZE + ((size % BLOCK_SIZE > 0) ? 1 : 0);
+
+		char* blocks = string_new();
+		string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
+		char** blocksArray = string_get_string_as_array(blocks);
+		//	char** blocks = config_get_array_value(metadata, "BLOCKS");
+
+		char* bitacora = malloc(size * sizeof(char)+ 1);
+		bitacora[size] = '\0';
+
+		int contador = 0;
+
+		while((unsigned)size >= BLOCK_SIZE){
+
+			memcpy(bitacora + (BLOCK_SIZE * contador), blocksMap + (BLOCK_SIZE * (atoi(blocksArray[contador]) - 1)), BLOCK_SIZE);
+			size -= BLOCK_SIZE;
+			contador++;
+		}
+
+		if(size > 0){
+			memcpy(bitacora + (BLOCK_SIZE * contador), blocksMap + (BLOCK_SIZE * (atoi(blocksArray[contador]) - 1)), size);
+		}
+
+
+
+		for(int i=0;i<blockCount;i++){
+			free(blocksArray[i]);
+		}
+		free(blocksArray);
+		free(rutaMetadata);
+		free(blocks);
+		config_destroy(metadata);
+		return bitacora;
+
+	}else{// No existe archivo metadata de la tarea
+		log_error(logger, "404: Bitacora de tripulante not found");
+		return NULL;
+	}
+}
+
+void sighandler() {
+	puts("Me sabotearon");
+
+	// Avisarle al modulo de Andy
+
 }

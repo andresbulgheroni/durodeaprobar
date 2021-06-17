@@ -100,6 +100,8 @@ int generarRecurso(int32_t, char);
 int descartarBasura();
 int consumirRecurso(int32_t, char);
 int writeBitacora(int32_t, char*);
+char* readBitacora(int32_t);
+void sighandler();
 
 // FUNCIONES PARA TESTING:
 
