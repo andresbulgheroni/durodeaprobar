@@ -16,6 +16,17 @@ int main(void) {
 
 	init();
 
+	pthread_t hilo_server;
+	pthread_create(&hilo_server,NULL,(void*)recibir_mensaje, NULL);
+	pthread_join(hilo_server, NULL);
+
+	terminar();
+
+	return EXIT_SUCCESS;
+}
+
+void iniciar_servidor(){
+
 	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 
 	while(true){
@@ -27,9 +38,6 @@ int main(void) {
 
 	}
 
-	terminar();
-
-	return EXIT_SUCCESS;
 }
 
 void recibir_mensaje(int32_t* conexion){
