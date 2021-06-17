@@ -63,8 +63,9 @@ uint32_t TAMANIO_MEMORIA;
 int32_t ESQUEMA_MEMORIA;
 uint32_t TAMANIO_PAGINA;
 uint32_t TAMANIO_SWAP;
+int32_t CRITERIO_SELECCION;
 char* PATH_SWAP;
-uint32_t ALGORITMO_REEMPLAZO;
+int32_t ALGORITMO_REEMPLAZO;
 char* IP;
 char* PUERTO;
 
@@ -136,6 +137,23 @@ void* leer_datos_patota_paginacion(t_list* paginas);
 void liberar_memoria_principal_paginacion(t_pagina_patota* pagina);
 void liberar_memoria_virtual(t_pagina_patota* pagina);
 
+/* Segmentacion */
 
+typedef struct{
+
+	uint32_t inicio;
+	uint32_t tamanio; //por ahora lo puse asi como dice el enunciado, dsp si queres cambialo
+
+} t_segmentos_patota;
+
+//lista con todas las tablas de segmentos
+t_dictionary* tablas_seg_patota;
+
+typedef enum{
+	FF = 0,
+	BF = 1
+} criterio_seleccion;
+
+void compactacion(); //sin implementar
 
 #endif /* MI_RAM_HQ_H_ */
