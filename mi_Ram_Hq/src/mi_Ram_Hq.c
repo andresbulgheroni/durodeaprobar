@@ -10,6 +10,13 @@
 
 #include "mi_Ram_Hq.h"
 
+pthread_mutex_t  m_MEM_PRINCIPAL = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t  m_MEM_VIRTUAL = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t  m_TABLAS_PAGINAS = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t  m_TABLA_LIBRES_P = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t  m_TABLA_LIBRES_V = PTHREAD_MUTEX_INITIALIZER;
+
+
 NIVEL* mapa;
 
 int main(void) {
@@ -17,7 +24,7 @@ int main(void) {
 	init();
 
 	pthread_t hilo_server;
-	pthread_create(&hilo_server,NULL,(void*)recibir_mensaje, NULL);
+	pthread_create(&hilo_server,NULL,(void*)hilo_servidor, NULL);
 	pthread_join(hilo_server, NULL);
 
 	terminar();
@@ -25,7 +32,7 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
-void iniciar_servidor(){
+void hilo_servidor(){
 
 	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 
@@ -101,7 +108,7 @@ void recibir_mensaje(int32_t* conexion){
 				char* tarea;
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: break;
-					case PAGINACION_VIRTUAL: tarea = siguiente_tarea_paginacion(mensaje, completo_tareas, NULL);break;
+					case PAGINACION_VIRTUAL: tarea = siguiente_tarea_paginacion(mensaje, &completo_tareas, NULL);break;
 				}
 
 				if(completo_tareas){
@@ -256,6 +263,7 @@ uint32_t generar_direccion_logica_paginacion(uint32_t pagina, uint32_t desplazam
 	return direccion;
 
 }
+
 void obtener_direccion_logica_paginacion(uint32_t* pagina, uint32_t* desplazamiento, uint32_t direccion){
 
 	uint32_t bits_derecha = floor(log(TAMANIO_PAGINA) / log(2)) + 1;
@@ -275,8 +283,8 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 				+  mensaje->tareas->length) / TAMANIO_PAGINA);
 		uint32_t size_pcb = cantidad_frames * TAMANIO_PAGINA;
 
-		status = entra_en_swap(cantidad_frames);
-		status = entra_en_memoria(size_pcb);// PREGUNTAR SI ESTA BIEN
+		*status = entra_en_swap(cantidad_frames);
+		*status = entra_en_memoria(size_pcb);// PREGUNTAR SI ESTA BIEN
 
 		if(status){
 

@@ -108,6 +108,7 @@ int32_t get_esquema_memoria(char* esquema_config);
 int32_t get_algoritmo(char* algoritmo_config);
 void recibir_mensaje(int32_t* conexion);
 char get_status(t_status_code codigo);
+void hilo_servidor();
 
 //Paginacion
 void configurar_paginacion();
