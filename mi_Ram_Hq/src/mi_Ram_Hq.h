@@ -63,13 +63,13 @@ uint32_t TAMANIO_MEMORIA;
 int32_t ESQUEMA_MEMORIA;
 uint32_t TAMANIO_PAGINA;
 uint32_t TAMANIO_SWAP;
+int32_t CRITERIO_SELECCION;
 char* PATH_SWAP;
-uint32_t ALGORITMO_REEMPLAZO;
+int32_t ALGORITMO_REEMPLAZO;
 char* IP;
 char* PUERTO;
 
 void* memoria_principal;
-//Segmentacion
 
 //Paginacion
 
@@ -136,6 +136,35 @@ void* leer_datos_patota_paginacion(t_list* paginas);
 void liberar_memoria_principal_paginacion(t_pagina_patota* pagina);
 void liberar_memoria_virtual(t_pagina_patota* pagina);
 
+/* Segmentacion */
 
+typedef struct{
+
+	uint32_t inicio;
+	uint32_t tamanio;
+
+}segmento;
+
+typedef struct{
+
+	t_list *segmentos;
+
+} tabla_segmentos_patota;
+
+//lista con todas las tablas de segmentos
+t_dictionary* tablas_seg_patota;
+
+typedef enum{
+	FF = 0,
+	BF = 1
+} criterio_seleccion;
+
+void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje, bool* status);
+void crear_estructura_tabla_seg(iniciar_patota_msg* mensaje, bool* status);
+segmento crear_segmento(uint32_t size); //*? para crearlo necesito reservar memoria?
+void almacenar_segmento_bf();
+void almacenar_segmento_ff();
+void almacenar_patota();
+void compactacion(); //sin implementar
 
 #endif /* MI_RAM_HQ_H_ */

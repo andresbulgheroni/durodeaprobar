@@ -151,6 +151,7 @@ void init (){
 	PATH_SWAP = config_get_string_value(config, "PATH_SWAP");
 	ALGORITMO_REEMPLAZO = get_algoritmo(config_get_string_value(config, "ALGORITMO_REEMPLAZO"));;
 	IP = config_get_string_value(config, "IP");
+	CRITERIO_SELECCION = get_criterio(config_get_string_value(config, "CRITERIO_SELECCION"));
 	PUERTO = config_get_string_value(config, "PUERTO");
 
 	memoria_principal = malloc(TAMANIO_MEMORIA);
@@ -800,6 +801,21 @@ char get_status(t_status_code codigo){
 
 }
 
+int32_t get_criterio(char* algoritmo_config) {
+
+	if(strcmp("FF", algoritmo_config) == 0){
+
+		return FF;
+
+	} else if(strcmp("BF", algoritmo_config) == 0){
+
+		return BF;
+
+	}
+
+	return -1;
+}
+
 void liberar_memoria_principal_paginacion(t_pagina_patota* pagina){
 
 	if(pagina->presente){
@@ -849,3 +865,77 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 	list_sort(frames_swap, cmp_frames_libres);
 
 }
+
+/*   SEGMENTACION   */
+
+void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje, bool* status){
+
+	tabla_segmentos_patota tabla_patota;
+
+	tabla_patota = crear_estructura_tabla_seg(mensaje, status); //punteros...
+
+	almacenar_patota(tabla_patota);
+	// implementa almacenar_segmento por cada segmento
+	// si uno de los segmentos no entra rechazo toodo? supongo que si
+
+	dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), NULL); //le clave un null xq no se q va ahi, no entendi
+	// agrego la tabla al dictionary con todas las tablas
+
+}
+
+
+tabla_segmentos_patota* crear_estructura_tabla_seg(iniciar_patota_msg* mensaje, bool* status){
+
+	tabla_segmentos_patota tabla_patota;
+
+	if(!dictionary_has_key(tablas_seg_patota, string_itoa(mensaje->idPatota))){
+
+		uint32_t size_pcb = sizeof(t_pcb);
+		uint32_t size_tcb = sizeof(t_tcb);
+		tabla_patota.segmentos = list_create();
+		segmento tcb;
+
+		segmento pcb = crear_segmento(size_pcb);
+		list_add(tabla_patota.segmentos, pcb);
+
+		for(int i = 0; i++; i<mensaje->cant_tripulantes){
+			tcb = crear_segmento(size_tcb);
+			list_add(tabla_patota.segmentos, tcb);
+
+		}
+		/* las validaciones las hago despues cuando quiero meterlo en memoria,
+		aca solo creo la estructura de la tabla de segmentos */
+	}
+
+	return *tabla_patota; //en algun lugar necesito usar un malloc?
+}
+
+void almacenar_patota(tabla_segmentos_patota* patota){
+	switch(CRITERIO_SELECCION){
+			case FF:{
+
+				list_iterate(patota->segmentos, almacenar_segmento_ff);
+
+				break;
+			}
+			case BF:{
+
+				list_iterate(patota->segmentos, almacenar_segmento_bf);
+
+				break;
+			}
+		}
+} //deberia retornar algo? para ver si funciono o no
+
+void almacenar_segmento_bf(){
+
+
+}
+
+void almacenar_segmento_ff(){
+
+
+}
+
+
+
