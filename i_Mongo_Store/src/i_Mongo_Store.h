@@ -102,6 +102,11 @@ int consumirRecurso(int32_t, char);
 int writeBitacora(int32_t, char*);
 char* readBitacora(int32_t);
 void sighandler();
+int fsckSuperBloque_Bloques();
+int fsckSuperBloque_Bitmap();
+int fsckFiles_Size();
+int fsckFiles_BlockCount();
+int fsckFiles_Blocks();
 
 // FUNCIONES PARA TESTING:
 

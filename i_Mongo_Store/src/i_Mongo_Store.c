@@ -813,6 +813,7 @@ int descartarBasura(){
 }
 
 int consumirRecurso(int32_t cantidad, char recurso){
+
 	char* rutaMetadata;
 	if(recurso == 'O')		rutaMetadata = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
 	else if(recurso == 'C') rutaMetadata = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
@@ -822,6 +823,11 @@ int consumirRecurso(int32_t cantidad, char recurso){
 	}
 
 	if(access(rutaMetadata, F_OK) != -1){// Existe la metadata del recurso
+
+		if(cantidad < 1){
+			free(rutaMetadata);
+			return EXIT_SUCCESS;
+		}
 
 		t_config* metadata = config_create(rutaMetadata);
 		int sizeViejo = config_get_int_value(metadata, "SIZE");
@@ -1071,4 +1077,29 @@ void sighandler() {
 
 	// Avisarle al modulo de Andy
 
+}
+
+int fsckSuperBloque_Bloques(){
+
+	return EXIT_SUCCESS;
+}
+
+int fsckSuperBloque_Bitmap(){
+
+	return EXIT_SUCCESS;
+}
+
+int fsckFiles_Size(){
+
+	return EXIT_SUCCESS;
+}
+
+int fsckFiles_BlockCount(){
+
+	return EXIT_SUCCESS;
+}
+
+int fsckFiles_Blocks(){
+
+	return EXIT_SUCCESS;
 }
