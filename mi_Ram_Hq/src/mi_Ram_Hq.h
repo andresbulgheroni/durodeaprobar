@@ -147,11 +147,9 @@ typedef struct{
 
 typedef struct{
 
-	//uint32_t inicio;
-	//uint32_t tamanio; //por ahora lo puse asi como dice el enunciado, dsp si queres cambialo
 	t_list *segmentos;
 
-} t_segmentos_patota;
+} tabla_segmentos_patota;
 
 //lista con todas las tablas de segmentos
 t_dictionary* tablas_seg_patota;
@@ -164,7 +162,8 @@ typedef enum{
 void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje, bool* status);
 void crear_estructura_tabla_seg(iniciar_patota_msg* mensaje, bool* status);
 segmento crear_segmento(uint32_t size); //*? para crearlo necesito reservar memoria?
-void almacenar_segmento();
+void almacenar_segmento_bf();
+void almacenar_segmento_ff();
 void almacenar_patota();
 void compactacion(); //sin implementar
 

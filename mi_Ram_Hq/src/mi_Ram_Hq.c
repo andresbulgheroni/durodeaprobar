@@ -862,24 +862,28 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 
 void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje, bool* status){
 
-	crear_estructura_tabla_seg(mensaje, status);
-	//deberia devolver la estructura
+	tabla_segmentos_patota tabla_patota;
 
-	almacenar_patota();
+	tabla_patota = crear_estructura_tabla_seg(mensaje, status); //punteros...
+
+	almacenar_patota(tabla_patota);
 	// implementa almacenar_segmento por cada segmento
-	// si uno de los segmentos no entra rechazo todo? supongo que si
+	// si uno de los segmentos no entra rechazo toodo? supongo que si
 
-	// agregarla al dictionary
+	dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), NULL); //le clave un null xq no se q va ahi, no entendi
+	// agrego la tabla al dictionary con todas las tablas
+
 }
 
 
-void crear_estructura_tabla_seg(iniciar_patota_msg* mensaje, bool* status){
+tabla_segmentos_patota* crear_estructura_tabla_seg(iniciar_patota_msg* mensaje, bool* status){
+
+	tabla_segmentos_patota tabla_patota;
 
 	if(!dictionary_has_key(tablas_seg_patota, string_itoa(mensaje->idPatota))){
 
 		uint32_t size_pcb = sizeof(t_pcb);
 		uint32_t size_tcb = sizeof(t_tcb);
-		t_segmentos_patota tabla_patota;
 		tabla_patota.segmentos = list_create();
 		segmento tcb;
 
@@ -894,14 +898,36 @@ void crear_estructura_tabla_seg(iniciar_patota_msg* mensaje, bool* status){
 		/* las validaciones las hago despues cuando quiero meterlo en memoria,
 		aca solo creo la estructura de la tabla de segmentos */
 	}
+
+	return *tabla_patota; //en algun lugar necesito usar un malloc?
 }
 
+void almacenar_patota(tabla_segmentos_patota* patota){
+	switch(CRITERIO_SELECCION){
+			case FF:{
+
+				list_iterate(patota->segmentos, almacenar_segmento_ff);
+
+				break;
+			}
+			case BF:{
+
+				list_iterate(patota->segmentos, almacenar_segmento_bf);
+
+				break;
+			}
+		}
+} //deberia retornar algo? para ver si funciono o no
+
+void almacenar_segmento_bf(){
 
 
+}
+
+void almacenar_segmento_ff(){
 
 
-
-
+}
 
 
 
