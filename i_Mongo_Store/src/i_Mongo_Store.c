@@ -19,24 +19,24 @@ int main(void) {
 	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 
 	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
-	//	estadoSuperBloque();
-	//
-	//	char* bitacora = string_new();
-	//	string_append(&bitacora, "fiumba\n");
-	//	string_append(&bitacora, "morgan freemaaaaan\n");
-	//	string_append(&bitacora, "tucson\n");
-	//	string_append(&bitacora, "Quieren bajarme y no saben como hacer, porque este pibito no va a correr\n");
-	//	writeBitacora(1, bitacora);
-	//	free(bitacora);
-	//
-	//	char* tareas = readBitacora(1);
-	//	printf("\nBitacora:\n\n%s", tareas);
-	//
-	//	if(tareas != NULL){
-	//	free(tareas);
-	//	}
-	//
-	//	estadoSuperBloque();
+	estadoSuperBloque();
+
+	char* bitacora = string_new();
+	string_append(&bitacora, "fiumba\n");
+	string_append(&bitacora, "morgan freemaaaaan\n");
+	string_append(&bitacora, "tucson\n");
+	string_append(&bitacora, "Quieren bajarme y no saben como hacer, porque este pibito no va a correr\n");
+	writeBitacora(1, bitacora);
+	free(bitacora);
+
+	char* tareas = readBitacora(1);
+	printf("\nBitacora:\n\n%s", tareas);
+
+	if(tareas != NULL){
+		free(tareas);
+	}
+
+	estadoSuperBloque();
 	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
 
 	//	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
@@ -91,67 +91,105 @@ void timerSincronizacion_blocksMap(){
 
 }
 
-void funcionPruebaDisc(int32_t* socketCliente){
-
-	bool terminado = false;
-	while (!terminado){
-		t_paquete* paquete = recibir_paquete(*socketCliente);
-		switch(paquete->codigo){
-		case OBTENER_BITACORA_MSG:{
-			puts("funciono");
-			break;
-		}
-		default: terminado = true; break;
-		}
-	}
-	pthread_exit(NULL);
-
-}
+//void funcionPruebaDisc(int32_t* socketCliente){
+//
+//	bool terminado = false;
+//	while (!terminado){
+//		t_paquete* paquete = recibir_paquete(*socketCliente);
+//		switch(paquete->codigo){
+//		case OBTENER_BITACORA_MSG:{
+//			puts("funciono");
+//			break;
+//		}
+//		default: terminado = true; break;
+//		}
+//	}
+//	pthread_exit(NULL);
+//
+//}
 
 void funcionPruebaTrip(int32_t* socketCliente){
 
+	char* cadena = string_new();
 	t_paquete* paquete = recibir_paquete(*socketCliente);
+
 	switch(paquete->codigo){
 
-	case INFORMAR_MOVIMIENTO_MONGO:{
+	case OBTENER_BITACORA_MSG:{
+
+		obtener_bitacora_msg* bitacoraMsg = deserializar_paquete(paquete);
+		cadena = readBitacora(bitacoraMsg->idTripulante);
+		enviar_paquete(cadena,OBTENER_BITACORA_RTA,*socketCliente);
 
 		break;
 
-	}
-	case INICIO_TAREA:{
+	} case INFORMAR_MOVIMIENTO_MONGO:{
+
+		informar_movimiento_mongo_msg* movimientoMsg = deserializar_paquete(paquete);
+		string_append(&cadena, "Se mueve de ");
+		string_append(&cadena, string_itoa(movimientoMsg->coordenadasOrigen->posX));
+		string_append(&cadena, "|");
+		string_append(&cadena, string_itoa(movimientoMsg->coordenadasOrigen->posY));
+		string_append(&cadena, " a ");
+		string_append(&cadena, string_itoa(movimientoMsg->coordenadasDestino->posX));
+		string_append(&cadena, "|");
+		string_append(&cadena, string_itoa(movimientoMsg->coordenadasDestino->posY));
+		writeBitacora(movimientoMsg->idTripulante,cadena);
+		free(movimientoMsg);
+
+		break;
+
+	} case INICIO_TAREA:{
 
 		inicio_tarea_msg* tareaMsg = deserializar_paquete(paquete);
-		buscarMensaje(tareaMsg);
-		break;
-
-	}
-	case FIN_TAREA:{
-
-		break;
-
-	}
-
-	case ATENDER_SABOTAJE:{
+		string_append(&cadena, "Comienza ejecución de tarea ");
+		string_append(&cadena, tareaMsg->nombreTarea->string);
+		writeBitacora(tareaMsg->idTripulante,cadena);
+		hacerTarea(tareaMsg);
+		free(tareaMsg);
 
 		break;
 
-	}
+	} case FIN_TAREA:{
 
-	case RESOLUCION_SABOTAJE:{
+		fin_tarea_msg* tareaMsg = deserializar_paquete(paquete);
+		string_append(&cadena, "Se finaliza la tarea ");
+		string_append(&cadena, tareaMsg->nombreTarea->string);
+		writeBitacora(tareaMsg->idTripulante,cadena);
+		free(tareaMsg);
 
 		break;
 
-	}
+	} case ATENDER_SABOTAJE:{
 
-	default:{
+		atender_sabotaje_msg* sabotajeMsg = deserializar_paquete(paquete);
+		string_append(&cadena, "Se corre en pánico hacia la ubicación del sabotaje");
+		writeBitacora(sabotajeMsg->idTripulante,cadena);
+		free(sabotajeMsg);
+
+		break;
+
+	} case RESOLUCION_SABOTAJE:{
+
+		resolucion_sabotaje_msg* sabotajeMsg = deserializar_paquete(paquete);
+		string_append(&cadena, "Se resuelve el sabotaje");
+		writeBitacora(sabotajeMsg->idTripulante,cadena);
+		free(sabotajeMsg);
+
+		break;
+
+	} default:
+
 		log_error(logger, "Codigo de op invalido");
-	}
+
+		break;
 
 	}
+
+	free(paquete);
+	free(cadena);
 
 }
-
-
 
 t_dictionary* armar_diccionario(char* stream){
 
@@ -256,55 +294,52 @@ char* diccionarioFiles_to_char(t_dictionary* dic){
 
 }
 
-void buscarMensaje(inicio_tarea_msg* tarea) {
+void hacerTarea(inicio_tarea_msg* tarea) {
 
 	switch(string_to_op_code_tareas(tarea->nombreTarea->string)){
 
 	case GENERAR_OXIGENO:{
 
-		//		char* generarOxigeno = generar_oxigeno(tarea->parametros);
-		//		enviar_paquete(generarOxigeno, estado, socket_cliente);
+		generarRecurso(tarea->parametros, 'O');
+
 		break;
 
-	}
-	case CONSUMIR_OXIGENO:{
+	} case CONSUMIR_OXIGENO:{
 
-		//		char* consumirOxigeno = consumir_oxigeno(tarea->parametros);
-		//		enviar_paquete(consumirOxigeno, estado, socket_cliente);
+		consumirRecurso(tarea->parametros, 'O');
+
 		break;
 
-	}
-	case GENERAR_COMIDA:{
+	} case GENERAR_COMIDA:{
 
-		//		char* generarComida = generar_comida(tarea->parametros);
-		//		enviar_paquete(generarComida, estado, socket_cliente);
+		generarRecurso(tarea->parametros, 'C');
+
 		break;
 
-	}
-	case CONSUMIR_COMIDA:{
+	} case CONSUMIR_COMIDA:{
 
-		//		char* consumirComida = consumir_comida(tarea->parametros);
-		//		enviar_paquete(consumirComida, estado, socket_cliente);
+		consumirRecurso(tarea->parametros, 'C');
+
 		break;
 
-	}
-	case GENERAR_BASURA:{
+	} case GENERAR_BASURA:{
 
-		//		char* generarBasura = generar_basura(tarea->parametros);
-		//		enviar_paquete(generarBasura, estado, socket_cliente);
+		generarRecurso(tarea->parametros, 'B');
+
 		break;
 
-	}
-	case DESCARTAR_BASURA:{
+	} case DESCARTAR_BASURA:{
 
-		//		char* descartarBasura = descartar_basura();
-		//		enviar_paquete(descartarBasura, estado, socket_cliente);
+		descartarBasura();
+
 		break;
 
-	}
-	default:
+	} default:
+
 		log_info(logger,"codigo de operacion incorrecto");
+
 		break;
+
 	}
 
 }
@@ -1081,7 +1116,19 @@ void sighandler() {
 
 int fsckSuperBloque_Bloques(){
 
+	uint32_t cantBloques;
+	FILE* fp = fopen("/home/utnso/polus/SuperBloque.ims","r+");
+	fseek(fp,sizeof(uint32_t),SEEK_SET);
+	fread(&cantBloques,sizeof(uint32_t),1,fp);
+
+	if(superBloqueMap[4] != cantBloques){
+		memcpy(superBloqueMap+sizeof(uint32_t), &cantBloques, sizeof(uint32_t));
+	}
+
+	fclose(fp);
+
 	return EXIT_SUCCESS;
+
 }
 
 int fsckSuperBloque_Bitmap(){

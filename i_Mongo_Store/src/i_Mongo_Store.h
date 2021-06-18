@@ -83,7 +83,7 @@ int chequearSuperBloque();
 bool existeArchivo(char* path);
 int menorEntre(int, int);
 op_code_tareas string_to_op_code_tareas (char*);
-void buscarMensaje(inicio_tarea_msg*);
+void hacerTarea(inicio_tarea_msg*);
 void funcionPruebaDisc(int32_t*);
 void funcionPruebaTrip(int32_t*);
 t_bitarray* crearBitmap(char*);
