@@ -410,6 +410,11 @@ void inicializarSuperBloque(){
 		exit(1);
 	}
 
+	FILE* fp = fopen(ruta_SuperBloque,"r");
+	fread(&BLOCK_SIZE,sizeof(uint32_t),1,fp);
+	fread(&BLOCKS,sizeof(uint32_t),1,fp);
+	fclose(fp);
+
 	int offset = 2 * sizeof(uint32_t);
 	int cantidadBloques = BLOCKS / 8;
 
@@ -505,6 +510,8 @@ void inicializarFS(){
 		inicializarSuperBloque();
 	} else {
 		puts("File System NO encontrado, generando...\n");
+		BLOCKS= (uint32_t) config_get_int_value(config,"BLOCKS");
+		BLOCK_SIZE= (uint32_t) config_get_int_value(config,"BLOCK_SIZE");
 		crearDirectorio(PUNTO_MONTAJE);
 		crearSuperBloque();
 		char* rutaPuntoMontaje = string_from_format("%s/Files", PUNTO_MONTAJE);
@@ -551,8 +558,6 @@ void leerConfig() {
 	PUNTO_MONTAJE = config_get_string_value(config, "PUNTO_MONTAJE");
 	TIEMPO_SINCRONIZACION = config_get_int_value(config,"TIEMPO_SINCRONIZACION");
 	POSICIONES_SABOTAJE = config_get_string_value(config, "POSICIONES_SABOTAJE"); // ver esto, es una lista en realidad
-	BLOCKS= (uint32_t) config_get_int_value(config,"BLOCKS");
-	BLOCK_SIZE= (uint32_t) config_get_int_value(config,"BLOCK_SIZE");
 }
 
 void crear_log(){
