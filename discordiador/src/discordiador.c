@@ -169,7 +169,7 @@ op_code_tareas string_to_op_code_tareas (char* string){
 		return TAREA_CPU;
 	}
 }
-/*
+
 void iniciarHiloSabotaje(){
 	pthread_t hiloSabotaje;
 	pthread_create(&hiloSabotaje, NULL, (void*) planificarSabotaje,NULL);
@@ -179,22 +179,30 @@ void planificarSabotaje(){
 	uint32_t socketSabotaje = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
 	while(true){
 
-	t_paquete*mensaje=recibir_paquete(socketSabotaje);
+	t_paquete*paqueteSabotaje=recibir_paquete(socketSabotaje);
+	notificar_sabotaje_msg*mensajeDeSabotaje=deserializar_paquete(paqueteSabotaje);
 
 	//sem_wait(&sem_sabotaje);
 	t_sabotaje*sabotaje;
-	sabotaje->coordenadas=1;
+	sabotaje->coordenadas=mensajeDeSabotaje->coordenadas;
+	sabotaje->id_sabotaje=mensajeDeSabotaje->idSabotaje;
 	haySabotaje=1;
 
-	PasarAEjecutarAlTripulanteMasCercano();
+	pasarATodosLosTripulantesAListaBloqueado();
+
+	t_tripulante* tripulanteMasCercano=tripulanteMasCercanoDelSabotaje(sabotaje);
+
+	pasarAEjecutarAlTripulanteMasCercano(sabotaje,tripulanteMasCercano);
+
 	pasarTripulantesAListaReady();
+
+	agregarTripulanteAListaReadyYAvisar(tripulanteMasCercano);		//aca va al final de la lista de ready
 
 	haySabotaje=0;
 	sem_post(&sem_sabotaje);
 	//liberar_conexion(socketSabotaje);
 	}
 }
-*/
 
 
 bool ordenarTripulantesDeMenorIdAMayor(void* elemento1,void*elemento2){
@@ -238,9 +246,9 @@ void pasarATodosLosTripulantesAListaBloqueado(){
 
 }
 
-void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*sabotaje){
+void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*sabotaje,t_tripulante* tripulanteMasCercano){
 
-	t_tripulante* tripulanteMasCercano=tripulanteMasCercanoDelSabotaje(sabotaje);
+
 
 	while(!llegoAlSabotaje(tripulanteMasCercano,sabotaje)){
 		moverAlTripulanteHastaElSabotaje(tripulanteMasCercano,sabotaje);

@@ -229,7 +229,10 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*);
 
 bool ordenarTripulantesDeMenorIdAMayor(void* ,void*);
 void pasarATodosLosTripulantesAListaBloqueado();
-void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*);
+void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*,t_tripulante*);
+
+void pasarAEjecutarAlTripulanteMasCercano();
+
 void pasarTripulantesAListaReady();
 
 
