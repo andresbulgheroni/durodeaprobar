@@ -876,15 +876,34 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 
 /*   SEGMENTACION   */
 
-void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje, bool* status){
+void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje){ //saque el status
 
 	tabla_segmentos_patota tabla_patota;
 
-	tabla_patota = crear_estructura_tabla_seg(mensaje, status); //punteros...
+	tabla_patota = crear_estructura_tabla_seg(mensaje); //punteros...
 
-	almacenar_patota(tabla_patota);
-	// implementa almacenar_segmento por cada segmento
-	// si uno de los segmentos no entra rechazo toodo? supongo que si
+	// trato de guardar los datos para pasarlos a memoria
+
+	t_pcb* pcb = malloc(sizeof(t_pcb));
+	pcb->pid = mensaje->idPatota;		//que le meto adentro?
+
+	t_tcb* tcb[mensaje->cant_tripulantes];
+
+	for(int i = 0; i<mensaje->cant_tripulantes; i++ ){
+		tcb[i] = malloc(sizeof(t_tcb)); //esto esta bien? mmm medio falopa
+		//cargar_tcb(tcb[i]); //esto esta claramente mal, como itero en los msj de trip, de donde los saco?
+		tcb[i]->tid = i; //nqv pero para poner algo
+	}
+
+	//se fija si hay lugar
+	uint32_t offset = 0; //enrealidad no es 0
+	memcpy(memoria_principal + offset, pcb, sizeof(t_pcb)); //preguntar como es el tema de memcpy...
+
+	for(int j = 0; j<mensaje->cant_tripulantes; j++){
+	//se fija si hay lugar
+	offset = 1; //tendria que fijarse q lugar esta libre y lo pone ahi
+	memcpy(memoria_principal + offset, tcb[j], sizeof(t_tcb));
+	}
 
 	dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), NULL); //le clave un null xq no se q va ahi, no entendi
 	// agrego la tabla al dictionary con todas las tablas
@@ -892,7 +911,7 @@ void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje, bool* status){
 }
 
 
-tabla_segmentos_patota* crear_estructura_tabla_seg(iniciar_patota_msg* mensaje, bool* status){
+tabla_segmentos_patota* crear_estructura_tabla_seg(iniciar_patota_msg* mensaje){
 
 	tabla_segmentos_patota tabla_patota;
 
@@ -911,14 +930,12 @@ tabla_segmentos_patota* crear_estructura_tabla_seg(iniciar_patota_msg* mensaje, 
 			list_add(tabla_patota.segmentos, tcb);
 
 		}
-		/* las validaciones las hago despues cuando quiero meterlo en memoria,
-		aca solo creo la estructura de la tabla de segmentos */
 	}
 
 	return *tabla_patota; //en algun lugar necesito usar un malloc?
 }
 
-void almacenar_patota(tabla_segmentos_patota* patota){
+void almacenar_patota(tabla_segmentos_patota* patota){ //no va, me fijo donde pongo el criterio
 	switch(CRITERIO_SELECCION){
 			case FF:{
 
@@ -945,5 +962,14 @@ void almacenar_segmento_ff(){
 
 }
 
+void cargar_tcb(tripulante_data_msg* tripulante, t_tcb* tcb){
 
+		tcb->tid = tripulante->idTripulante;
+		tcb->estado = 'R';
+		tcb->posX = tripulante->coordenadas->posX;
+		tcb->posY = tripulante->coordenadas->posY;
+		tcb->proxima_instruccion = 0;
+		tcb->direccion_patota = 0;
+
+}
 
