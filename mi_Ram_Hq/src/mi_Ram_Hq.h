@@ -140,17 +140,11 @@ void liberar_memoria_virtual(t_pagina_patota* pagina);
 /* Segmentacion */
 
 typedef struct{
-
+	uint32_t numero_segmento;
 	uint32_t inicio;
 	uint32_t tamanio;
 
 }segmento;
-
-typedef struct{
-
-	t_list *segmentos;
-
-} tabla_segmentos_patota;
 
 //lista con todas las tablas de segmentos
 t_dictionary* tablas_seg_patota;
@@ -161,16 +155,21 @@ typedef enum{
 } criterio_seleccion;
 
 t_list* segmentos_ocupados();
+t_list* segmentos_libres();
+
+void inicializar_segmentacion();
 
 void cargar_tcb(tripulante_data_msg* tripulante, t_tcb* tcb);
 
 void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje);
+
 void crear_estructura_tabla_seg(iniciar_patota_msg* mensaje);
+
 segmento crear_segmento(uint32_t size); //*? para crearlo necesito reservar memoria?
-int32_t buscar_espacio_libre(uint32_t size);
-void almacenar_segmento_bf();
-void almacenar_segmento_ff();
-void almacenar_patota();
-void compactacion(); //sin implementar
+
+int32_t get_espacio_libre(uint32_t size);
+int32_t hay_espacio_libre(uint32_t size);
+
+void compactar_memoria(); //sin implementar
 
 #endif /* MI_RAM_HQ_H_ */

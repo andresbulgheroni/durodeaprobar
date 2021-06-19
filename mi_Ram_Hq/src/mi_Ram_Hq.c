@@ -874,113 +874,7 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 
 }
 
-
-/*   SEGMENTACION   */
-
-
-void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje){ //saque el status
-
-	t_list *tabla_segmentos_patota;
-	tabla_segmentos_patota = crear_estructura_tabla_seg(mensaje); //punteros...
-
-	// trato de guardar los datos para pasarlos a memoria
-
-	t_pcb* pcb = malloc(sizeof(t_pcb));
-	pcb->pid = mensaje->idPatota;		//que le meto adentro?
-
-	t_tcb* tcb[mensaje->cant_tripulantes];
-
-	for(int i = 0; i<mensaje->cant_tripulantes; i++ ){
-		tcb[i] = malloc(sizeof(t_tcb)); //esto esta bien? mmm medio falopa
-		//cargar_tcb(tcb[i]); //esto esta claramente mal, como itero en los msj de trip, de donde los saco?
-		tcb[i]->tid = i; //nqv pero para poner algo
-	}
-
-	uint32_t offset;
-
-	//guarda el pcb
-	if(buscar_espacio_libre(sizeof(t_pcb))){ // MODIFICAR esta mal porque puede devolver mas de uno
-		offset = buscar_espacio_libre(sizeof(t_pcb));
-	}
-	memcpy(memoria_principal + offset, pcb, sizeof(t_pcb)); //preguntar como es el tema de memcpy...
-
-	//agregar el segmento ocupado ahora o al final, o lo hago con la tabla de paginas?
-
-	//guarda los tcb
-	for(int j = 0; j<mensaje->cant_tripulantes; j++){
-		//se fija si hay lugar
-		if(buscar_espacio_libre(sizeof(t_pcb))){
-				offset = buscar_espacio_libre(sizeof(t_pcb));
-			}
-		memcpy(memoria_principal + offset, tcb[j], sizeof(t_tcb));
-	}
-
-	//dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), NULL); //le clave un null xq no se q va ahi, no entendi
-	// agrego la tabla al dictionary con todas las tablas
-
-}
-
-int32_t buscar_espacio_libre(uint32_t size){
-	if(list_is_empty(segmentos_ocupados)){
-		return 0;
-	}
-	else{
-		return 0;
-	}
-}
-
-tabla_segmentos_patota* crear_estructura_tabla_seg(iniciar_patota_msg* mensaje){
-
-	//tabla_segmentos_patota tabla_patota; hay que sacarlo saco
-	t_list *tabla_segmentos_patota;
-
-	if(!dictionary_has_key(tablas_seg_patota, string_itoa(mensaje->idPatota))){
-
-		uint32_t size_pcb = sizeof(t_pcb);
-		uint32_t size_tcb = sizeof(t_tcb);
-		tabla_segmentos_patota = list_create();
-		segmento tcb;
-
-		segmento pcb = crear_segmento(size_pcb);
-		list_add(tabla_segmentos_patota, pcb);
-
-		for(int i = 0; i++; i<mensaje->cant_tripulantes){
-			tcb = crear_segmento(size_tcb);
-			list_add(tabla_segmentos_patota, tcb);
-
-		}
-	}
-
-	return tabla_segmentos_patota; //en algun lugar necesito usar un malloc?
-}
-
-void almacenar_patota(tabla_segmentos_patota* patota){ //no va, me fijo donde pongo el criterio
-	switch(CRITERIO_SELECCION){
-			case FF:{
-
-				list_iterate(patota->segmentos, almacenar_segmento_ff);
-
-				break;
-			}
-			case BF:{
-
-				list_iterate(patota->segmentos, almacenar_segmento_bf);
-
-				break;
-			}
-		}
-} //deberia retornar algo? para ver si funciono o no
-
-void almacenar_segmento_bf(){
-
-
-}
-
-void almacenar_segmento_ff(){
-
-
-}
-
+//por ahora lo dejo aca, dsp habria que organizar un poco el codigo
 void cargar_tcb(tripulante_data_msg* tripulante, t_tcb* tcb){
 
 		tcb->tid = tripulante->idTripulante;
@@ -991,4 +885,176 @@ void cargar_tcb(tripulante_data_msg* tripulante, t_tcb* tcb){
 		tcb->direccion_patota = 0;
 
 }
+
+/*   SEGMENTACION   */
+
+//no esta referenciada de ningun lado
+void inicializar_segmentacion(){
+	segmento memoria_vacia;
+	memoria_vacia.inicio = 0;
+	memoria_vacia.tamanio = TAMANIO_MEMORIA;
+	list_add(segmentos_libres, memoria_vacia);
+}
+
+void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje){ //status
+
+	t_list *tabla_segmentos_patota;
+	tabla_segmentos_patota = crear_estructura_tabla_seg(mensaje);
+
+	//Guardo los datos para pasarlos a memoria
+
+	//pcb
+	t_pcb* pcb = malloc(sizeof(t_pcb));
+	pcb->pid = mensaje->idPatota;		//por ahora solo eso, hasta que ubique las tareas?
+
+	//tareas
+	char* tareas = malloc(); //malloc que?
+
+	//tcbs
+	t_tcb* tcb[mensaje->cant_tripulantes];
+	for(int i = 0; i<mensaje->cant_tripulantes; i++){
+		tcb[i] = malloc(sizeof(t_tcb));
+		//cargar_tcb(tcb[i]); //esto esta claramente mal, como itero en los msj de trip, de donde los saco?
+		tcb[i]->tid = i; //nqv pero para poner algo
+	}
+
+	uint32_t offset;
+
+	//guarda el pcb
+	if(hay_espacio_libre(sizeof(t_pcb))){
+		offset = get_espacio_libre(sizeof(t_pcb));
+		memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
+	} else {
+		compactar_memoria();
+		if(hay_espacio_libre(sizeof(t_pcb))){
+			offset = get_espacio_libre(sizeof(t_pcb));
+			memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
+		} else {
+			//aca hay error, se cancela toodo
+		}
+	}
+
+	//guarda las tareas
+	if(hay_espacio_libre(sizeof(tareas))){
+			offset = get_espacio_libre(sizeof(tareas));
+			memcpy(memoria_principal + offset, tareas, sizeof(tareas));
+		} else {
+			compactar_memoria();
+			if(hay_espacio_libre(sizeof(tareas))){
+				offset = get_espacio_libre(sizeof(tareas));
+				memcpy(memoria_principal + offset, pcb, sizeof(tareas));
+			} else {
+				//aca hay error, se cancela toodo
+			}
+		}
+
+	//guarda los tcb
+	for(int j = 0; j<mensaje->cant_tripulantes; j++){
+		//se fija si hay lugar
+		if(hay_espacio_libre(sizeof(t_pcb))){
+				offset = get_espacio_libre(sizeof(t_pcb));
+				memcpy(memoria_principal + offset, tcb[j], sizeof(t_tcb));
+		} else {
+			compactar_memoria();
+			if(hay_espacio_libre(sizeof(t_pcb))){
+				offset = get_espacio_libre(sizeof(t_pcb));
+				memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
+			} else {
+					//aca hay error, se cancela toodo
+			}
+		}
+	}
+	//FALTA PONER EL INICIO EN CADA SEGMENTO EN LA TABLA DE SEGMENTOS
+
+	//si llego hasta aca sin romper nada guardo las tablas
+
+	//aca tengo mis dudas con lo que estoy guardando
+	dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), NULL); //le clave un null xq no se q va ahi, no entendi
+
+	//agrego los segmentos a la lista de segmentos ocupados
+	list_add_all(segmentos_ocupados, tabla_segmentos_patota);
+
+	//falta modificar la lista segmentos_libres
+}
+
+//SIN TERMINAR
+void sacar_segmento_lista_libres(segmento *segmento_nuevo){
+
+	uint32_t dir_fisica_segmento_nuevo = obtener_direccion_fisica(segmento_nuevo);
+
+	bool se_encuentra_direccion_fisica(segmento seg, uint32_t direccion_fisica){
+		uint32_t dir_fisica_segmento = obtener_direccion_fisica(seg);
+		return seg.inicio >= direccion_fisica && dir_fisica_segmento <= direccion_fisica;
+	}
+	//esto seguro esta mal
+	segmento a_modificar = list_filter(segmentos_libres, se_encuentra_direccion_fisica);
+}
+
+uint32_t obtener_direccion_fisica(segmento *seg){
+	uint32_t inicio = seg->inicio;
+	uint32_t tamanio = seg->tamanio;
+	return inicio + tamanio;
+}
+
+//SIN TERMINAR
+int32_t hay_espacio_libre(uint32_t size){
+	t_list *lista_auxiliar = filter(segmentos_libres, entra_en_el_segmento(size)); //es *lista_auxiliar?
+	return !list_is_empty(lista_auxiliar); //es valido eso sintacticamente?
+}
+
+bool entra_en_el_segmento(uint32_t tamanio, segmento seg){
+		return seg.tamanio > tamanio;
+	}
+
+//SIN TERMINAR
+int32_t get_espacio_libre(uint32_t size){
+	if(list_is_empty(segmentos_ocupados)){
+		return 0;
+	}
+	else{
+		t_list *lista_auxiliar = filter(segmentos_libres, entra_en_el_segmento(size)); //esto no anda (filter)
+		if(list_size(lista_auxiliar) == 1){
+			segmento seg = list_get(lista_auxiliar, 0);
+			return seg.inicio;
+		} else {
+			return 0; //aca hay que implementar FF y BF
+		}
+
+	}
+}
+
+/* devuelve una tabla de paginas, solo falta completar el inicio
+ * de todos los segmentos y tambien el tamanio de tareas*/
+
+t_list* crear_estructura_tabla_seg(iniciar_patota_msg* mensaje){
+
+	t_list *tabla_segmentos_patota;
+
+	tabla_segmentos_patota = list_create();
+
+	segmento pcb;
+	pcb.numero_segmento = 0; 			// el pcb siempre es el segmento 0
+	pcb.tamanio = sizeof(t_pcb);
+
+	segmento tareas;
+	tareas.numero_segmento = 1;			// las tareas son siempre el segmento 1
+
+	list_add(tabla_segmentos_patota, pcb);
+	list_add(tabla_segmentos_patota, tareas);
+
+	segmento tcb[mensaje->cant_tripulantes];
+	for(int i = 0; i<mensaje->cant_tripulantes; i++){
+		tcb[i].numero_segmento = i + 2;	// los tcb son los segmentos 2 en adelante
+		tcb[i].tamanio = sizeof(t_tcb);
+		list_add(tabla_segmentos_patota, tcb[i]);
+	}
+
+	return tabla_segmentos_patota;
+}
+
+
+//IMPORTANTE
+//if(!dictionary_has_key(tablas_seg_patota, string_itoa(mensaje->idPatota))) falta esta validacion
+
+
 
