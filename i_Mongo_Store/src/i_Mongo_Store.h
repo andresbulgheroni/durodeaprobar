@@ -78,7 +78,6 @@ void inicializarFS();
 void inicializarSuperBloque();
 void crearSuperBloque();
 void inicializarBlocks();
-void escribir_archivo(char*, char*);
 int chequearSuperBloque();
 bool existeArchivo(char* path);
 int menorEntre(int, int);
@@ -112,8 +111,8 @@ int fsckFiles_Blocks();
 
 void estadoSuperBloque(){
 	puts("");
-	printf("BLOCK SIZE: %d\n",superBloqueMap[0]);
-	printf("BLOCKS: %d\n",superBloqueMap[4]);
+	printf("BLOCK SIZE: %d\n", BLOCK_SIZE);
+	printf("BLOCKS: %d\n", BLOCKS);
 
 	puts("------------------------------------");
 	for(int i=0; (unsigned)i<bitarray_get_max_bit(bitmap); i++){

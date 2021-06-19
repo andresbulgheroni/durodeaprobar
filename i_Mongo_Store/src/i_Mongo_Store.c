@@ -37,19 +37,22 @@ int main(void) {
 	}
 
 	estadoSuperBloque();
-	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
+	////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
 
-	//	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
+	//		int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 	//
-	//	while(true){
+	//		while(true){
 	//
-	//		int32_t socket_cliente = esperar_cliente(socket_servidor);
-	//		pthread_t hilo_mensaje;
-	//		pthread_create(&hilo_mensaje,NULL,(void*)funcionPruebaDisc, (void*) (&socket_cliente));
-	//		pthread_detach(hilo_mensaje);
+	//			int32_t socket_cliente = esperar_cliente(socket_servidor);
+	//			pthread_t hilo_mensaje;
+	//			pthread_create(&hilo_mensaje,NULL,(void*)funcionPruebaDisc, (void*) (&socket_cliente));
+	//			pthread_detach(hilo_mensaje);
 	//
-	//	}
+	//		}
 
+	fsckSuperBloque_Bloques();
+
+	config_destroy(config);
 	return EXIT_SUCCESS;
 }
 
@@ -85,7 +88,7 @@ void timerSincronizacion_blocksMap(){
 
 	while(1){
 		msync(blocksMap, tamanioBlocks, MS_SYNC);
-		puts("\n-- Sincronizado blocks --\n");
+		log_info(logger, "Sincronizando archivo blocks...");
 		sleep(TIEMPO_SINCRONIZACION);
 	}
 
@@ -110,7 +113,6 @@ void timerSincronizacion_blocksMap(){
 
 void funcionPruebaTrip(int32_t* socketCliente){
 
-	char* cadena = string_new();
 	t_paquete* paquete = recibir_paquete(*socketCliente);
 
 	switch(paquete->codigo){
@@ -118,14 +120,19 @@ void funcionPruebaTrip(int32_t* socketCliente){
 	case OBTENER_BITACORA_MSG:{
 
 		obtener_bitacora_msg* bitacoraMsg = deserializar_paquete(paquete);
-		cadena = readBitacora(bitacoraMsg->idTripulante);
-		enviar_paquete(cadena,OBTENER_BITACORA_RTA,*socketCliente);
+		char* bitacora;
+		bitacora = readBitacora(bitacoraMsg->idTripulante);
+		enviar_paquete(bitacora,OBTENER_BITACORA_RTA,*socketCliente);
+		if(bitacora != NULL){
+			free(bitacora);
+		}
 
 		break;
 
 	} case INFORMAR_MOVIMIENTO_MONGO:{
 
 		informar_movimiento_mongo_msg* movimientoMsg = deserializar_paquete(paquete);
+		char* cadena = string_new();
 		string_append(&cadena, "Se mueve de ");
 		string_append(&cadena, string_itoa(movimientoMsg->coordenadasOrigen->posX));
 		string_append(&cadena, "|");
@@ -134,47 +141,61 @@ void funcionPruebaTrip(int32_t* socketCliente){
 		string_append(&cadena, string_itoa(movimientoMsg->coordenadasDestino->posX));
 		string_append(&cadena, "|");
 		string_append(&cadena, string_itoa(movimientoMsg->coordenadasDestino->posY));
+		string_append(&cadena, "\n");
 		writeBitacora(movimientoMsg->idTripulante,cadena);
 		free(movimientoMsg);
+		free(cadena);
 
 		break;
 
 	} case INICIO_TAREA:{
 
 		inicio_tarea_msg* tareaMsg = deserializar_paquete(paquete);
+		char* cadena = string_new();
 		string_append(&cadena, "Comienza ejecución de tarea ");
 		string_append(&cadena, tareaMsg->nombreTarea->string);
+		string_append(&cadena, "\n");
 		writeBitacora(tareaMsg->idTripulante,cadena);
 		hacerTarea(tareaMsg);
 		free(tareaMsg);
+		free(cadena);
 
 		break;
 
 	} case FIN_TAREA:{
 
 		fin_tarea_msg* tareaMsg = deserializar_paquete(paquete);
+		char* cadena = string_new();
 		string_append(&cadena, "Se finaliza la tarea ");
 		string_append(&cadena, tareaMsg->nombreTarea->string);
+		string_append(&cadena, "\n");
 		writeBitacora(tareaMsg->idTripulante,cadena);
 		free(tareaMsg);
+		free(cadena);
 
 		break;
 
 	} case ATENDER_SABOTAJE:{
 
 		atender_sabotaje_msg* sabotajeMsg = deserializar_paquete(paquete);
+		char* cadena = string_new();
 		string_append(&cadena, "Se corre en pánico hacia la ubicación del sabotaje");
+		string_append(&cadena, "\n");
 		writeBitacora(sabotajeMsg->idTripulante,cadena);
 		free(sabotajeMsg);
+		free(cadena);
 
 		break;
 
 	} case RESOLUCION_SABOTAJE:{
 
 		resolucion_sabotaje_msg* sabotajeMsg = deserializar_paquete(paquete);
+		char* cadena = string_new();
 		string_append(&cadena, "Se resuelve el sabotaje");
+		string_append(&cadena, "\n");
 		writeBitacora(sabotajeMsg->idTripulante,cadena);
 		free(sabotajeMsg);
+		free(cadena);
 
 		break;
 
@@ -187,7 +208,6 @@ void funcionPruebaTrip(int32_t* socketCliente){
 	}
 
 	free(paquete);
-	free(cadena);
 
 }
 
@@ -247,24 +267,6 @@ void config_set_value_propio(t_dictionary *self, char *key, char *value) {
 	config_remove_key_propio(self, key);
 	char* duplicate_value = string_duplicate(value);
 	dictionary_put(self, key, (void*)duplicate_value);
-
-}
-
-int contar_caracteres(char* path){
-
-	FILE* fp = fopen(path, "r");
-
-	int count = 0;
-	char c;
-	for (c = getc(fp); c != EOF; c = getc(fp))
-
-		// Increment count for this character
-		count = count + 1;
-
-	// Close the file
-	fclose(fp);
-
-	return count;
 
 }
 
@@ -344,22 +346,6 @@ void hacerTarea(inicio_tarea_msg* tarea) {
 
 }
 
-void escribir_archivo(char* rutaArchivo, char* stringAEscribir) {
-
-	FILE *fp = txt_open_for_append(rutaArchivo);
-
-	if (fp == NULL) {
-		log_error(logger, "Error al crear archivo %s\n", rutaArchivo);
-		exit(1);
-	}
-	txt_write_in_file(fp, stringAEscribir);
-	txt_close_file(fp);
-
-	log_debug(logger, "ARCHIVO %s ACTUALIZADO\n", rutaArchivo);
-	return;
-
-}
-
 void inicializarBlocks() {
 
 	tamanioBlocks = BLOCKS*BLOCK_SIZE;
@@ -400,7 +386,6 @@ void inicializarBlocks() {
 void inicializarSuperBloque(){
 
 	char* ruta_SuperBloque = string_from_format("%s/SuperBloque.ims", PUNTO_MONTAJE);
-
 
 	int fd = open(ruta_SuperBloque, O_RDWR, 0777);
 	if (fd == -1) {
@@ -507,17 +492,24 @@ void inicializarFS(){
 
 	if(existeFS()){
 		puts("File System existente detectado, recuperando...\n");
+
 		inicializarSuperBloque();
 	} else {
 		puts("File System NO encontrado, generando...\n");
-		BLOCKS= (uint32_t) config_get_int_value(config,"BLOCKS");
-		BLOCK_SIZE= (uint32_t) config_get_int_value(config,"BLOCK_SIZE");
+
+		BLOCKS = (uint32_t) config_get_int_value(config,"BLOCKS");
+		BLOCK_SIZE = (uint32_t) config_get_int_value(config,"BLOCK_SIZE");
+
 		crearDirectorio(PUNTO_MONTAJE);
+
 		crearSuperBloque();
+
 		char* rutaPuntoMontaje = string_from_format("%s/Files", PUNTO_MONTAJE);
 		crearDirectorio(rutaPuntoMontaje);
+
 		char* rutaBitacoras = string_from_format("%s/Bitacoras", rutaPuntoMontaje);
 		crearDirectorio(rutaBitacoras);
+
 		free(rutaBitacoras);
 		free(rutaPuntoMontaje);
 	}
@@ -1121,17 +1113,47 @@ void sighandler() {
 
 int fsckSuperBloque_Bloques(){
 
-	uint32_t cantBloques;
-	FILE* fp = fopen("/home/utnso/polus/SuperBloque.ims","r+");
-	fseek(fp,sizeof(uint32_t),SEEK_SET);
-	fread(&cantBloques,sizeof(uint32_t),1,fp);
+	//	uint32_t cantBloques;
+	//	FILE* fp = fopen("/home/utnso/polus/SuperBloque.ims","r+");
+	//	fseek(fp,sizeof(uint32_t),SEEK_SET);
+	//	fread(&cantBloques,sizeof(uint32_t),1,fp);
+	//
+	//	if(superBloqueMap[4] != cantBloques){
+	//		memcpy(superBloqueMap+sizeof(uint32_t), &cantBloques, sizeof(uint32_t));
+	//	}
+	//
+	//	fclose(fp);
 
-	if(superBloqueMap[4] != cantBloques){
-		memcpy(superBloqueMap+sizeof(uint32_t), &cantBloques, sizeof(uint32_t));
+
+	// Estas comparando el mismo valor
+
+	// Me parece que es ver el tamaño del archivo en disco, dividirlo por BLOCK_SIZE,
+	// y compararlo con lo que dice en BLOCKS:
+
+
+	char* rutaBlocks = string_from_format("%s/Blocks.ims", PUNTO_MONTAJE);
+	char* rutaSuperBloque = string_from_format("%s/SuperBloque.ims", PUNTO_MONTAJE);
+
+	FILE* blocks = fopen(rutaBlocks, "r");
+	fseek(blocks, 0L, SEEK_END);
+	uint32_t blocksReales = ftell(blocks) / BLOCK_SIZE;	// Tamaño del SuperBloque / tamaño de cada bloque = cantidad de bloques
+	fclose(blocks);
+
+	FILE* superbloque = fopen(rutaSuperBloque, "r");
+	uint32_t blocksSaboteado;
+	fseek(superbloque, sizeof(uint32_t),SEEK_SET);
+	fread(&blocksSaboteado, sizeof(uint32_t), 1, superbloque);
+
+	if(blocksReales != blocksSaboteado){
+		memcpy(superBloqueMap + sizeof(uint32_t), &blocksReales, sizeof(uint32_t));
+		log_info(logger, "Sabotaje en superbloque corregido, cambio BLOCKS = %d por BLOCKS = %d", blocksSaboteado, blocksReales);
+	}else{
+		log_info(logger, "La cantidad de bloques es correcta, no hubo sabotaje rey");
 	}
 
-	fclose(fp);
-
+	fclose(superbloque);
+	free(rutaSuperBloque);
+	free(rutaBlocks);
 	return EXIT_SUCCESS;
 
 }
