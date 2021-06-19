@@ -674,6 +674,7 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 			if(!list_any_satisfy(paginas_leidas, ya_leida)){
 
+
 				t_pagina_patota* patota = list_get(paginas, pagina);
 				leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina));
 				int32_t* pagina_leida = malloc(sizeof(int32_t));
