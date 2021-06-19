@@ -1120,9 +1120,9 @@ void cargar_tcb(tripulante_data_msg* tripulante, t_tcb* tcb){
 
 //no esta referenciada de ningun lado
 void inicializar_segmentacion(){
-	segmento memoria_vacia;
-	memoria_vacia.inicio = 0;
-	memoria_vacia.tamanio = TAMANIO_MEMORIA;
+	segmento* memoria_vacia;
+	memoria_vacia->inicio = 0;
+	memoria_vacia->tamanio = TAMANIO_MEMORIA;
 	list_add(segmentos_libres, memoria_vacia);
 }
 
@@ -1212,12 +1212,12 @@ void sacar_segmento_lista_libres(segmento *segmento_nuevo){
 
 	uint32_t dir_fisica_segmento_nuevo = obtener_direccion_fisica(segmento_nuevo);
 
-	bool se_encuentra_direccion_fisica(segmento seg, uint32_t direccion_fisica){
+	bool se_encuentra_direccion_fisica(segmento* seg, uint32_t direccion_fisica){
 		uint32_t dir_fisica_segmento = obtener_direccion_fisica(seg);
-		return seg.inicio >= direccion_fisica && dir_fisica_segmento <= direccion_fisica;
+		return seg->inicio >= direccion_fisica && dir_fisica_segmento <= direccion_fisica;
 	}
 	//esto seguro esta mal
-	segmento a_modificar = list_filter(segmentos_libres, se_encuentra_direccion_fisica);
+	segmento* a_modificar = list_filter(segmentos_libres, se_encuentra_direccion_fisica);
 }
 
 uint32_t obtener_direccion_fisica(segmento *seg){
@@ -1232,8 +1232,8 @@ int32_t hay_espacio_libre(uint32_t size){
 	return !list_is_empty(lista_auxiliar); //es valido eso sintacticamente?
 }
 
-bool entra_en_el_segmento(uint32_t tamanio, segmento seg){
-		return seg.tamanio > tamanio;
+bool entra_en_el_segmento(uint32_t tamanio, segmento* seg){
+		return seg->tamanio > tamanio;
 	}
 
 //SIN TERMINAR
@@ -1244,8 +1244,8 @@ int32_t get_espacio_libre(uint32_t size){
 	else{
 		t_list *lista_auxiliar = filter(segmentos_libres, entra_en_el_segmento(size)); //esto no anda (filter)
 		if(list_size(lista_auxiliar) == 1){
-			segmento seg = list_get(lista_auxiliar, 0);
-			return seg.inicio;
+			segmento* seg = list_get(lista_auxiliar, 0);
+			return seg->inicio;
 		} else {
 			return 0; //aca hay que implementar FF y BF
 		}
@@ -1262,20 +1262,20 @@ t_list* crear_estructura_tabla_seg(iniciar_patota_msg* mensaje){
 
 	tabla_segmentos_patota = list_create();
 
-	segmento pcb;
-	pcb.numero_segmento = 0; 			// el pcb siempre es el segmento 0
-	pcb.tamanio = sizeof(t_pcb);
+	segmento* pcb;
+	pcb->numero_segmento = 0; 			// el pcb siempre es el segmento 0
+	pcb->tamanio = sizeof(t_pcb);
 
-	segmento tareas;
-	tareas.numero_segmento = 1;			// las tareas son siempre el segmento 1
+	segmento* tareas;
+	tareas->numero_segmento = 1;			// las tareas son siempre el segmento 1
 
 	list_add(tabla_segmentos_patota, pcb);
 	list_add(tabla_segmentos_patota, tareas);
 
-	segmento tcb[mensaje->cant_tripulantes];
+	segmento* tcb[mensaje->cant_tripulantes];
 	for(int i = 0; i<mensaje->cant_tripulantes; i++){
-		tcb[i].numero_segmento = i + 2;	// los tcb son los segmentos 2 en adelante
-		tcb[i].tamanio = sizeof(t_tcb);
+		tcb[i]->numero_segmento = i + 2;	// los tcb son los segmentos 2 en adelante
+		tcb[i]->tamanio = sizeof(t_tcb);
 		list_add(tabla_segmentos_patota, tcb[i]);
 	}
 
