@@ -159,15 +159,15 @@ typedef enum{
 t_list* segmentos_ocupados();
 t_list* segmentos_libres();
 
-void inicializar_segmentacion();
+void inicializar_segmentacion();	// revisar los tipos del add, creo que no anda
+
+void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status)
+
+//-----------------------------
 
 void cargar_tcb(tripulante_data_msg* tripulante, t_tcb* tcb);
 
 void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje);
-
-t_list* crear_estructura_tabla_seg(iniciar_patota_msg* mensaje);
-
-segmento crear_segmento(uint32_t size); //*? para crearlo necesito reservar memoria?
 
 int32_t get_espacio_libre(uint32_t size);
 int32_t hay_espacio_libre(uint32_t size);
