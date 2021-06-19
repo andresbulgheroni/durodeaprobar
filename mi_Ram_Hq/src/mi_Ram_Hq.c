@@ -874,13 +874,14 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 
 }
 
+
 /*   SEGMENTACION   */
+
 
 void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje){ //saque el status
 
-	tabla_segmentos_patota tabla_patota;
-
-	tabla_patota = crear_estructura_tabla_seg(mensaje); //punteros...
+	t_list *tabla_segmentos_patota;
+	tabla_segmentos_patota = crear_estructura_tabla_seg(mensaje); //punteros...
 
 	// trato de guardar los datos para pasarlos a memoria
 
@@ -895,44 +896,62 @@ void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje){ //saque el statu
 		tcb[i]->tid = i; //nqv pero para poner algo
 	}
 
-	//se fija si hay lugar
-	uint32_t offset = 0; //enrealidad no es 0
+	uint32_t offset;
+
+	//guarda el pcb
+	if(buscar_espacio_libre(sizeof(t_pcb))){ // MODIFICAR esta mal porque puede devolver mas de uno
+		offset = buscar_espacio_libre(sizeof(t_pcb));
+	}
 	memcpy(memoria_principal + offset, pcb, sizeof(t_pcb)); //preguntar como es el tema de memcpy...
 
+	//agregar el segmento ocupado ahora o al final, o lo hago con la tabla de paginas?
+
+	//guarda los tcb
 	for(int j = 0; j<mensaje->cant_tripulantes; j++){
-	//se fija si hay lugar
-	offset = 1; //tendria que fijarse q lugar esta libre y lo pone ahi
-	memcpy(memoria_principal + offset, tcb[j], sizeof(t_tcb));
+		//se fija si hay lugar
+		if(buscar_espacio_libre(sizeof(t_pcb))){
+				offset = buscar_espacio_libre(sizeof(t_pcb));
+			}
+		memcpy(memoria_principal + offset, tcb[j], sizeof(t_tcb));
 	}
 
-	dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), NULL); //le clave un null xq no se q va ahi, no entendi
+	//dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), NULL); //le clave un null xq no se q va ahi, no entendi
 	// agrego la tabla al dictionary con todas las tablas
 
 }
 
+int32_t buscar_espacio_libre(uint32_t size){
+	if(list_is_empty(segmentos_ocupados)){
+		return 0;
+	}
+	else{
+		return 0;
+	}
+}
 
 tabla_segmentos_patota* crear_estructura_tabla_seg(iniciar_patota_msg* mensaje){
 
-	tabla_segmentos_patota tabla_patota;
+	//tabla_segmentos_patota tabla_patota; hay que sacarlo saco
+	t_list *tabla_segmentos_patota;
 
 	if(!dictionary_has_key(tablas_seg_patota, string_itoa(mensaje->idPatota))){
 
 		uint32_t size_pcb = sizeof(t_pcb);
 		uint32_t size_tcb = sizeof(t_tcb);
-		tabla_patota.segmentos = list_create();
+		tabla_segmentos_patota = list_create();
 		segmento tcb;
 
 		segmento pcb = crear_segmento(size_pcb);
-		list_add(tabla_patota.segmentos, pcb);
+		list_add(tabla_segmentos_patota, pcb);
 
 		for(int i = 0; i++; i<mensaje->cant_tripulantes){
 			tcb = crear_segmento(size_tcb);
-			list_add(tabla_patota.segmentos, tcb);
+			list_add(tabla_segmentos_patota, tcb);
 
 		}
 	}
 
-	return *tabla_patota; //en algun lugar necesito usar un malloc?
+	return tabla_segmentos_patota; //en algun lugar necesito usar un malloc?
 }
 
 void almacenar_patota(tabla_segmentos_patota* patota){ //no va, me fijo donde pongo el criterio
