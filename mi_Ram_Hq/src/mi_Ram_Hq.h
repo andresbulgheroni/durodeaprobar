@@ -39,7 +39,7 @@ typedef enum{
 } algoritmo_reemplazo;
 
 typedef struct{
-	uint32_t nro_frame;
+	int32_t nro_frame;
 	uint32_t nro_frame_mv;
 	bool presente;
 	bool uso;
@@ -115,8 +115,8 @@ void configurar_paginacion();
 void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status);
 void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* status);
 void cambiar_estado_paginacion(cambio_estado_msg* mensaje, bool* status);
-char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status);
-void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* status);
+char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status); //TODO correccion
+void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* status); // TODO correccion
 t_list* get_frames_libres();
 t_list* get_frames_a_ubicar(uint32_t cantidad);
 void traer_pagina_a_memoria(t_pagina_patota* pagina);
@@ -124,7 +124,7 @@ bool memoria_llena();
 bool swap_lleno();
 int32_t get_frame();
 t_list* swap_libres();
-int32_t get_frame_memoria_virtual(t_pagina_patota* pagina);
+int32_t get_frame_memoria_virtual();
 int32_t reemplazo_Clock();
 int32_t reemplazo_LRU();
 void guardar_en_memoria_principal(t_pagina_patota* pagina, void* datos);
@@ -133,9 +133,11 @@ uint32_t generar_direccion_logica_paginacion(uint32_t pagina, uint32_t desplazam
 void obtener_direccion_logica_paginacion(uint32_t* pagina, uint32_t* desplazamiento, uint32_t direccion);
 bool entra_en_swap(uint32_t cantidad);
 bool entra_en_memoria(uint32_t size_pcb);
-void* leer_datos_patota_paginacion(t_list* paginas);
+void leer_pagina_de_memoria(t_pagina_patota* pagina, void* to);
 void liberar_memoria_principal_paginacion(t_pagina_patota* pagina);
 void liberar_memoria_virtual(t_pagina_patota* pagina);
+int32_t paginas_necesarias(uint32_t offset, uint32_t size);
+
 
 /* Segmentacion */
 
@@ -163,7 +165,7 @@ void cargar_tcb(tripulante_data_msg* tripulante, t_tcb* tcb);
 
 void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje);
 
-void crear_estructura_tabla_seg(iniciar_patota_msg* mensaje);
+t_list* crear_estructura_tabla_seg(iniciar_patota_msg* mensaje);
 
 segmento crear_segmento(uint32_t size); //*? para crearlo necesito reservar memoria?
 
