@@ -162,9 +162,14 @@ typedef enum{
 	BF = 1
 } criterio_seleccion;
 
-void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje, bool* status);
-void crear_estructura_tabla_seg(iniciar_patota_msg* mensaje, bool* status);
+t_list* segmentos_ocupados();
+
+void cargar_tcb(tripulante_data_msg* tripulante, t_tcb* tcb);
+
+void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje);
+void crear_estructura_tabla_seg(iniciar_patota_msg* mensaje);
 segmento crear_segmento(uint32_t size); //*? para crearlo necesito reservar memoria?
+int32_t buscar_espacio_libre(uint32_t size);
 void almacenar_segmento_bf();
 void almacenar_segmento_ff();
 void almacenar_patota();
