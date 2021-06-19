@@ -355,7 +355,7 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 
 				guardar_en_memoria_swap(pagina, datos + i * TAMANIO_PAGINA);
 
-				list_add(pagina);
+				list_add(paginas, pagina);
 
 			}
 
@@ -423,7 +423,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 			if(!list_any_satisfy(paginas_leidas, ya_leida)){
 
-				t_pagina_patota* patota = list_get(pagina + i);
+				t_pagina_patota* patota = list_get(paginas, pagina + i);
 				leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina + i));
 				int32_t* pagina_leida = malloc(sizeof(int32_t));
 				*pagina_leida = pagina + i;
@@ -454,7 +454,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 				if(!list_any_satisfy(paginas_leidas, ya_leida)){
 
-					t_pagina_patota* patota = list_get(pagina + i);
+					t_pagina_patota* patota = list_get(paginas, pagina + i);
 					leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina + i));
 					int32_t* pagina_leida = malloc(sizeof(int32_t));
 					*pagina_leida = pagina + i;
@@ -474,7 +474,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 			offset += sizeof(uint32_t);
 			pagina = floor(offset/TAMANIO_PAGINA);
 
-			int32_t paginas_ne = paginas_necesarias(offset, sizeof(uint32_t));
+			paginas_ne = paginas_necesarias(offset, sizeof(uint32_t));
 
 			for(uint32_t i = 0; i < paginas_ne; i++){
 
@@ -486,7 +486,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 				if(!list_any_satisfy(paginas_leidas, ya_leida)){
 
-					t_pagina_patota* patota = list_get(pagina + i);
+					t_pagina_patota* patota = list_get(paginas, pagina + i);
 					leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina + i));
 					int32_t* pagina_leida = malloc(sizeof(int32_t));
 					*pagina_leida = pagina + i;
@@ -539,13 +539,13 @@ void cambiar_estado_paginacion(cambio_estado_msg* mensaje, bool* status){
 
 			bool ya_leida(int32_t* nro_frame){
 
-				return nro_frame == pagina + i;
+				return *nro_frame == pagina + i;
 
 			}
 
 			if(!list_any_satisfy(paginas_leidas, ya_leida)){
 
-				t_pagina_patota* patota = list_get(pagina + i);
+				t_pagina_patota* patota = list_get(paginas, pagina + i);
 				leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina + i));
 				int32_t* pagina_leida = malloc(sizeof(int32_t));
 				*pagina_leida = pagina + i;
@@ -573,7 +573,7 @@ void cambiar_estado_paginacion(cambio_estado_msg* mensaje, bool* status){
 
 			if(!list_any_satisfy(paginas_leidas, ya_leida)){
 
-				t_pagina_patota* patota = list_get(pagina);
+				t_pagina_patota* patota = list_get(paginas, pagina);
 				leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina));
 				int32_t* pagina_leida = malloc(sizeof(int32_t));
 				*pagina_leida = pagina;
@@ -608,30 +608,85 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 	t_list* paginas = dictionary_get(tabla_paginas_patota, string_itoa(mensaje->idPatota));
 
-	void* datos = leer_datos_patota_paginacion(paginas);
+	t_list* paginas_leidas = list_create();
+	void* datos =  malloc(list_size(paginas) * TAMANIO_PAGINA);
+	uint32_t offset = sizeof(uint32_t);
+	int32_t paginas_ne = paginas_necesarias(offset, sizeof(uint32_t));
+	uint32_t pagina = floor(offset/TAMANIO_PAGINA);
+
+	for(uint32_t i = 0; i < paginas_ne; i++){
+
+
+		t_pagina_patota* patota = list_get(paginas, pagina + i);
+		leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina + i));
+		int32_t* pagina_leida = malloc(sizeof(int32_t));
+		*pagina_leida = pagina + i;
+		list_add(paginas_leidas, pagina_leida);
+
+	}
 
 	uint32_t direccion_tareas;
 
-	memcpy(&direccion_tareas, datos + sizeof(uint32_t), sizeof(uint32_t));
+	memcpy(&direccion_tareas, datos + offset, sizeof(uint32_t));
 
-	uint32_t offset = sizeof(t_pcb);
 	bool encontrado = false;
 	uint32_t tarea_actual;
 	while(!encontrado){
 
 		uint32_t tid;
-		memcpy(&tid, datos + offset, sizeof(uint32_t));
+		int32_t paginas_ne = paginas_necesarias(offset, sizeof(tid));
+
+		for(uint32_t i = 0; i < paginas_ne; i++){
+
+
+			bool ya_leida(int32_t* nro_frame){
+
+				return *nro_frame == pagina + i;
+
+			}
+
+			if(!list_any_satisfy(paginas_leidas, ya_leida)){
+
+				t_pagina_patota* patota = list_get(paginas, pagina + i);
+				leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina + i));
+				int32_t* pagina_leida = malloc(sizeof(int32_t));
+				*pagina_leida = pagina + i;
+				list_add(paginas_leidas, pagina_leida);
+
+			}
+
+		}
+
+		memcpy(&tid, datos + offset, sizeof(tid));
 
 		if(tid == mensaje->idTripulante){
 
 			encontrado = true;
 
 			offset += sizeof(uint32_t) * 3 + sizeof(char);
-			memcpy(tarea_actual, datos + offset, sizeof(uint32_t));
+			pagina = floor(offset/TAMANIO_PAGINA);
 
+			bool ya_leida(int32_t* nro_frame){
+
+				return nro_frame == pagina;
+
+			}
+
+			if(!list_any_satisfy(paginas_leidas, ya_leida)){
+
+				t_pagina_patota* patota = list_get(paginas, pagina);
+				leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina));
+				int32_t* pagina_leida = malloc(sizeof(int32_t));
+				*pagina_leida = pagina;
+				list_add(paginas_leidas, pagina_leida);
+
+			}
+
+			memcpy(&tarea_actual, datos + offset, sizeof(tarea_actual));
 		}else{
 
 			offset += sizeof(t_tcb);
+			pagina = floor(offset/TAMANIO_PAGINA);
 
 		}
 
@@ -640,19 +695,37 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 	uint32_t i = 0;
 	do{
 
-		char* letra = malloc(1);
+		pagina = floor(direccion_tareas/TAMANIO_PAGINA);
+
+		bool ya_leida(int32_t* nro_frame){
+
+			return nro_frame == pagina;
+
+		}
+
+		if(!list_any_satisfy(paginas_leidas, ya_leida)){
+
+			t_pagina_patota* patota = list_get(paginas, pagina);
+			leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina));
+			int32_t* pagina_leida = malloc(sizeof(int32_t));
+			*pagina_leida = pagina;
+			list_add(paginas_leidas, pagina_leida);
+
+		}
+
+		char letra;
 		memcpy(letra, datos + direccion_tareas, 1);
-		if(strcmp(letra, "\n") == 0){
+		if(letra == '\n'){
 			if(i < tarea_actual){
 				tarea = "";
 			}
 			i++;
 
-		} else if (strcmp(letra, "\0") == 0){
-			termino = true;
+		} else if (letra == '/0'){
+			*termino = true;
 			break;
 		}else{
-			string_append(tarea, letra);
+			string_append(&tarea, &letra);
 			direccion_tareas++;
 		}
 
@@ -667,9 +740,11 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* status){
 	//falta verificar si no encuentra el id
+
+	//REVISAR PARA LEER PAGINA A PAGINA
 	t_list* paginas = dictionary_get(tabla_paginas_patota, string_itoa(mensaje->idPatota));
 
-	void* datos = leer_datos_patota_paginacion(paginas);
+	void* datos = malloc(list_size(paginas) * TAMANIO_PAGINA);
 
 	uint32_t size_viejo = list_size(paginas) * TAMANIO_PAGINA;
 	uint32_t cant_frames = ceil((size_viejo - sizeof(t_tcb)) / TAMANIO_PAGINA);
