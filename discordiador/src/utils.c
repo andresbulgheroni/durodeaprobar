@@ -465,23 +465,18 @@ t_buffer* serializar_solicitar_siguiente_tarea_msg(solicitar_siguiente_tarea_msg
 
 }
 
-t_buffer* serializar_solicitar_siguiente_tarea_rta(solicitar_siguiente_tarea_rta* mensaje){
+t_buffer* serializar_solicitar_siguiente_tarea_rta(t_string* mensaje){
 
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
-	buffer->size = sizeof(mensaje->tarea->nombre_parametros->length) + mensaje->tarea->nombre_parametros->length
-					+ sizeof(mensaje->tarea->coordenadas->posX)
-					+ sizeof(mensaje->tarea->coordenadas->posY) + sizeof(mensaje->tarea->duracion);
+	buffer->size = sizeof(mensaje->length) + mensaje->length;
 
 	buffer->stream = malloc(buffer->size);
 
 	uint32_t offset = 0;
 
-	serializar_string(buffer->stream,  mensaje->tarea->nombre_parametros, &offset);
-	serializar_variable(buffer->stream, &(mensaje->tarea->coordenadas->posX), sizeof(mensaje->tarea->coordenadas->posX), &offset);
-	serializar_variable(buffer->stream, &(mensaje->tarea->coordenadas->posY), sizeof(mensaje->tarea->coordenadas->posY), &offset);
-	serializar_variable(buffer->stream, &(mensaje->tarea->duracion), sizeof(mensaje->tarea->duracion), &offset);
+	serializar_string(buffer->stream,  mensaje, &offset);
 
 	return buffer;
 
@@ -717,18 +712,24 @@ solicitar_siguiente_tarea_msg* desserializar_solicitar_siguiente_tarea_msg(void*
 
 solicitar_siguiente_tarea_rta* desserializar_solicitar_siguiente_tarea_rta(void* stream){
 
-	solicitar_siguiente_tarea_rta* mensaje = malloc(sizeof(solicitar_siguiente_tarea_rta));
-
 	uint32_t offset = 0;
+
+	t_string* tarea_mensaje = deserializar_string(stream, &offset);
+
+	char** partes = string_n_split(tarea_mensaje->string, 10, ";");
+
+	solicitar_siguiente_tarea_rta* mensaje = malloc(sizeof(solicitar_siguiente_tarea_rta));
 
 	tarea_data_msg* tarea = malloc(sizeof(tarea_data_msg));
 	tarea->coordenadas = malloc(sizeof(t_coordenadas));
 	mensaje->tarea = tarea;
 
-	tarea->nombre_parametros = deserializar_string(stream, &offset);
-	deserializar_variable(stream, &(tarea->coordenadas->posX), sizeof(tarea->coordenadas->posX), &offset);
-	deserializar_variable(stream, &(tarea->coordenadas->posY), sizeof(tarea->coordenadas->posY), &offset);
-	deserializar_variable(stream, &(tarea->duracion), sizeof(tarea->duracion), &offset);
+	tarea->nombre_parametros = partes[0];
+	tarea->coordenadas->posX = atoi(partes[1]);
+	tarea->coordenadas->posY = atoi(partes[2]);
+	tarea->duracion = atoi(partes[3]);
+
+	free(tarea_mensaje);
 
 	return mensaje;
 

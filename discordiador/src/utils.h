@@ -225,7 +225,7 @@ t_buffer* serializar_expulsar_tripulante_msg(expulsar_tripulante_msg* mensaje);
 t_buffer* serializar_obtener_bitacora_msg(obtener_bitacora_msg* mensaje);
 t_buffer* serializar_obtener_bitacora_rta(obtener_bitacora_rta* mensaje);
 t_buffer* serializar_solicitar_siguiente_tarea_msg(solicitar_siguiente_tarea_msg* mensaje);
-t_buffer* serializar_solicitar_siguiente_tarea_rta(solicitar_siguiente_tarea_rta* mensaje);
+t_buffer* serializar_solicitar_siguiente_tarea_rta(t_string* mensaje);
 t_buffer* serializar_cambio_estado_msg(cambio_estado_msg* mensaje);
 t_buffer* serializar_informar_movimiento_ram_msg(informar_movimiento_ram_msg* mensaje);
 t_buffer* serializar_informar_movimiento_mongo_msg(informar_movimiento_mongo_msg* mensaje);

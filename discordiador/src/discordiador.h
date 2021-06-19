@@ -155,8 +155,8 @@ typedef struct
 	uint32_t misCiclosDeCPU;
 	t_tarea* tareaAsignada;
 	uint32_t quantumDisponible;
-	uint32_t socketTripulanteRam;
-	uint32_t socketTripulanteImongo;
+	int socketTripulanteRam;
+	int socketTripulanteImongo;
 
 	uint32_t fueExpulsado; //1 o 0
 
