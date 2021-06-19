@@ -641,7 +641,7 @@ iniciar_patota_msg* desserializar_iniciar_patota_msg(void* stream){
 
 	uint32_t offset = 0;
 	deserializar_variable(stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
-	deserializar_variable(stream, &(mensaje->cant_tripulantes), sizof(mensaje->cant_tripulantes), &offset);
+	deserializar_variable(stream, &(mensaje->cant_tripulantes), sizeof(mensaje->cant_tripulantes), &offset);
 	mensaje->tripulantes = list_create();
 
 	for(int32_t i = 0; i < mensaje->cant_tripulantes; i++){
