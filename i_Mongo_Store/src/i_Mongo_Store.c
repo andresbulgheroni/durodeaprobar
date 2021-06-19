@@ -124,8 +124,7 @@ void funcionPruebaTrip(int32_t* socketCliente){
 	case OBTENER_BITACORA_MSG:{
 
 		obtener_bitacora_msg* bitacoraMsg = deserializar_paquete(paquete);
-		char* bitacora;
-		bitacora = readBitacora(bitacoraMsg->idTripulante);
+		char* bitacora = readBitacora(bitacoraMsg->idTripulante);
 		enviar_paquete(bitacora,OBTENER_BITACORA_RTA,*socketCliente);
 		if(bitacora != NULL){
 			free(bitacora);
@@ -212,91 +211,6 @@ void funcionPruebaTrip(int32_t* socketCliente){
 	}
 
 	free(paquete);
-
-}
-
-t_dictionary* armar_diccionario(char* stream){
-
-	t_dictionary* diccionario = dictionary_create();
-
-	char** lines = string_split(stream, "\n");
-
-	void add_cofiguration(char *line) {
-		if (!string_starts_with(line, "#")) {
-			char** keyAndValue = string_n_split(line, 2, "=");
-			dictionary_put(diccionario, keyAndValue[0], keyAndValue[1]);
-			free(keyAndValue[0]);
-			free(keyAndValue);
-		}
-	}
-	string_iterate_lines(lines, add_cofiguration);
-	string_iterate_lines(lines, (void*) free);
-
-	free(lines);
-
-	return diccionario;
-
-}
-
-char *config_get_string_value_propio(t_dictionary *self, char *key) {
-
-	return dictionary_get(self, key);
-
-}
-
-char** config_get_array_value_propio(t_dictionary *self, char* key) {
-
-	char* value_in_dictionary = config_get_string_value_propio(self, key);
-	return string_get_string_as_array(value_in_dictionary);
-
-}
-
-int config_get_int_value_propio(t_dictionary *self, char *key) {
-
-	char *value = config_get_string_value_propio(self, key);
-	return atoi(value);
-
-}
-
-void config_remove_key_propio(t_dictionary *self, char *key) {
-
-	if(dictionary_has_key(self, key)) {
-		dictionary_remove_and_destroy(self, key, free);
-	}
-
-}
-
-void config_set_value_propio(t_dictionary *self, char *key, char *value) {
-
-	config_remove_key_propio(self, key);
-	char* duplicate_value = string_duplicate(value);
-	dictionary_put(self, key, (void*)duplicate_value);
-
-}
-
-char* diccionarioFiles_to_char(t_dictionary* dic){
-
-	char* cadena = string_new();
-	char* keyAndValue;
-	char* valor;
-
-	valor = config_get_string_value_propio(dic, "SIZE");
-	keyAndValue = string_from_format("%s=%s\n","SIZE",valor);
-	string_append(&cadena, keyAndValue);
-	valor = config_get_string_value_propio(dic, "BLOCK_COUNT");
-	keyAndValue = string_from_format("%s=%s\n","BLOCK_COUNT",valor);
-	string_append(&cadena, keyAndValue);
-	valor = config_get_string_value_propio(dic, "BLOCKS");
-	keyAndValue = string_from_format("%s=%s\n","BLOCKS",valor);
-	string_append(&cadena, keyAndValue);
-	valor = config_get_string_value_propio(dic, "CARACTER_LLENADO");
-	keyAndValue = string_from_format("%s=%s\n","CARACTER_LLENADO",valor);
-	string_append(&cadena, keyAndValue);
-	valor = config_get_string_value_propio(dic, "MD5_ARCHIVO");
-	keyAndValue = string_from_format("%s=%s","MD5_ARCHIVO",valor);
-	string_append(&cadena, keyAndValue);
-
-	return cadena;
 
 }
 
@@ -1109,6 +1023,7 @@ char* readBitacora(int32_t tripulante){
 }
 
 void sighandler() {
+
 	puts("Me sabotearon");
 
 	// Avisarle al modulo de Andy
@@ -1116,24 +1031,6 @@ void sighandler() {
 }
 
 int fsckSuperBloque_Bloques(){
-
-	//	uint32_t cantBloques;
-	//	FILE* fp = fopen("/home/utnso/polus/SuperBloque.ims","r+");
-	//	fseek(fp,sizeof(uint32_t),SEEK_SET);
-	//	fread(&cantBloques,sizeof(uint32_t),1,fp);
-	//
-	//	if(superBloqueMap[4] != cantBloques){
-	//		memcpy(superBloqueMap+sizeof(uint32_t), &cantBloques, sizeof(uint32_t));
-	//	}
-	//
-	//	fclose(fp);
-
-
-	// Estas comparando el mismo valor
-
-	// Me parece que es ver el tamaño del archivo en disco, dividirlo por BLOCK_SIZE,
-	// y compararlo con lo que dice en BLOCKS:
-
 
 	char* rutaBlocks = string_from_format("%s/Blocks.ims", PUNTO_MONTAJE);
 	char* rutaSuperBloque = string_from_format("%s/SuperBloque.ims", PUNTO_MONTAJE);
@@ -1171,9 +1068,9 @@ int fsckFiles_Size(){
 
 	// Validar contra el MD5
 
-//	Como no tengo size para ir a leer a los bloques y sacar el nuevo MD5,
-//	hay que ponerse a generar MD5s hasta que coicida con el de la metadata
-//  Cuando encuentre el size que lo hace coincidir, grabo ese en la metadata
+	//	Como no tengo size para ir a leer a los bloques y sacar el nuevo MD5,
+	//	hay que ponerse a generar MD5s hasta que coicida con el de la metadata
+	//  Cuando encuentre el size que lo hace coincidir, grabo ese en la metadata
 
 	return EXIT_SUCCESS;
 }
