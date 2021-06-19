@@ -39,6 +39,12 @@ int main(void) {
 	estadoSuperBloque();
 	////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
 
+	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
+	fsckSuperBloque_Bloques();
+	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
+
+
+
 	//		int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 	//
 	//		while(true){
@@ -49,8 +55,6 @@ int main(void) {
 	//			pthread_detach(hilo_mensaje);
 	//
 	//		}
-
-	fsckSuperBloque_Bloques();
 
 	config_destroy(config);
 	return EXIT_SUCCESS;
@@ -1164,6 +1168,12 @@ int fsckSuperBloque_Bitmap(){
 }
 
 int fsckFiles_Size(){
+
+	// Validar contra el MD5
+
+//	Como no tengo size para ir a leer a los bloques y sacar el nuevo MD5,
+//	hay que ponerse a generar MD5s hasta que coicida con el de la metadata
+//  Cuando encuentre el size que lo hace coincidir, grabo ese en la metadata
 
 	return EXIT_SUCCESS;
 }
