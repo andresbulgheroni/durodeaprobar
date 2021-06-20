@@ -1114,6 +1114,8 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 
 void inicializar_segmentacion(){
 	segmento* memoria_vacia;
+	list_create(segmentos_ocupados);
+	list_create(segmentos_libres);
 	memoria_vacia->inicio = 0;
 	memoria_vacia->tamanio = TAMANIO_MEMORIA;
 	list_add(segmentos_libres, memoria_vacia); //chequear error de tipos
@@ -1124,7 +1126,25 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 	if(!dictionary_has_key(tablas_seg_patota, string_itoa(mensaje->idPatota))){
 
 		t_list* tabla_patota = list_create();
-		uint32_t direccion_tareas = sizeof(t_pcb);
+
+		uint32_t size_tareas = mensaje->tareas->length;
+
+		//Creo los segmentos para la tabla de segmentos
+
+		segmento* seg_pcb = malloc(sizeof(segmento));
+		seg_pcb->numero_segmento = 0;
+		seg_pcb->tamanio = sizeof(t_pcb);
+
+		segmento* seg_tareas = malloc(sizeof(segmento));
+		seg_tareas->numero_segmento = 1;
+		seg_tareas->tamanio = size_tareas; //chequear
+
+		segmento* seg_tcb[mensaje->cant_tripulantes];
+		for(int j = 0; j < mensaje->cant_tripulantes; j++){
+			seg_tcb[j] = malloc(sizeof(segmento));
+			seg_tcb[j]->numero_segmento = j+2;
+			seg_tcb[j]->tamanio = sizeof(t_pcb);
+		}
 
 		//Cargo datos para copiarlos a memoria
 
@@ -1137,7 +1157,6 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 		void cargar_tcb(tripulante_data_msg* tripulante){
 
 			t_tcb* tcb = malloc(sizeof(t_tcb));
-
 			tcb->tid = tripulante->idTripulante;
 			tcb->estado = 'R';
 			tcb->posX = tripulante->coordenadas->posX;
@@ -1146,25 +1165,40 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 			tcb->direccion_patota = 0;
 
 			list_add(tcbs, tcb);
-			direccion_tareas += sizeof(t_tcb);
 
 		}
 
 		list_iterate(mensaje->tripulantes, cargar_tcb);
-
-		pcb->direccion_tareas = direccion_tareas;//generar_direccion_logica_paginacion(direccion_tareas / TAMANIO_PAGINA, direccion_tareas % TAMANIO_PAGINA);
 
 		uint32_t offset;
 
 		//guarda el pcb
 		if(hay_espacio_libre(sizeof(t_pcb))){
 			offset = get_espacio_libre(sizeof(t_pcb));
+			seg_pcb->inicio = offset;
 			memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
 		} else {
 			compactar_memoria();
 			if(hay_espacio_libre(sizeof(t_pcb))){
 				offset = get_espacio_libre(sizeof(t_pcb));
+				seg_pcb->inicio = offset;
 				memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
+			} else {
+				//aca hay error, se cancela toodo
+			}
+		}
+
+		//guarda las tareas
+		if(hay_espacio_libre(size_tareas)){
+			offset = get_espacio_libre(size_tareas);
+			seg_tareas->inicio = offset;
+			memcpy(memoria_principal + offset, mensaje->tareas->string, size_tareas);
+		} else {
+			compactar_memoria();
+			if(hay_espacio_libre(size_tareas)){
+				offset = get_espacio_libre(size_tareas);
+				seg_tareas->inicio = offset;
+				memcpy(memoria_principal + offset, mensaje->tareas->string, size_tareas);
 			} else {
 				//aca hay error, se cancela toodo
 			}
@@ -1174,11 +1208,13 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 		void cargarTcbDatos(t_tcb* tcb){
 			if(hay_espacio_libre(sizeof(t_tcb))){
 				offset = get_espacio_libre(sizeof(t_tcb));
+				seg_tcb->inicio = offset;
 				memcpy(memoria_principal + offset, tcb, sizeof(t_tcb));
 			} else {
 				compactar_memoria();
 				if(hay_espacio_libre(sizeof(t_tcb))){
 					offset = get_espacio_libre(sizeof(t_tcb));
+					seg_tcb->inicio = offset;
 					memcpy(memoria_principal + offset, tcb, sizeof(t_tcb));
 				} else {
 					//aca rompe si hay error
@@ -1188,47 +1224,34 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 		list_iterate(tcbs, cargarTcbDatos);
 
-		//TAREAS
-		//memcpy(datos + offset, mensaje->tareas->string, mensaje->tareas->length);
-
-
 		//Guardo tabla de paginas
 		dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_patota); //que pongo
 
+		//agrego los segmentos a la lista de segmentos ocupados
+		list_add_all(segmentos_ocupados, tabla_patota);
+
+		//modifico la lista de segmentos libres
 	}
 }
 
-	//tareas
-	//char* tareas = malloc(); //malloc que?
 
-	//FALTA PONER EL INICIO EN CADA SEGMENTO EN LA TABLA DE SEGMENTOS
+//SIN TERMINAR necesita revision
+void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 
-	//si llego hasta aca sin romper nada guardo las tablas
+	uint32_t dir_fisica_seg_nuevo = obtener_direccion_fisica(segmento_nuevo);
 
-
-	//agrego los segmentos a la lista de segmentos ocupados
-	//list_add_all(segmentos_ocupados, tabla_segmentos_patota);
-
-	//falta modificar la lista segmentos_libres
-
-
-//SIN TERMINAR
-void sacar_segmento_lista_libres(segmento *segmento_nuevo){
-
-	uint32_t dir_fisica_segmento_nuevo = obtener_direccion_fisica(segmento_nuevo);
-
-	bool se_encuentra_direccion_fisica(segmento* seg, uint32_t direccion_fisica){
+	bool se_encuentra_direccion_fisica(segmento* seg){
 		uint32_t dir_fisica_segmento = obtener_direccion_fisica(seg);
-		return seg->inicio >= direccion_fisica && dir_fisica_segmento <= direccion_fisica;
+		return seg->inicio >= dir_fisica_seg_nuevo && dir_fisica_segmento <= dir_fisica_seg_nuevo;
 	}
-	//esto seguro esta mal
-	segmento* a_modificar = list_filter(segmentos_libres, se_encuentra_direccion_fisica);
+
+	segmento* seg_a_modificar = malloc(sizeof(segmento));
+	seg_a_modificar = list_filter(segmentos_libres, se_encuentra_direccion_fisica);
+
 }
 
-uint32_t obtener_direccion_fisica(segmento *seg){
-	uint32_t inicio = seg->inicio;
-	uint32_t tamanio = seg->tamanio;
-	return inicio + tamanio;
+uint32_t obtener_direccion_fisica(segmento* seg){
+	return seg->inicio + seg->tamanio;
 }
 
 //SIN TERMINAR
