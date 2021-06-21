@@ -1112,8 +1112,10 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 
 /*   SEGMENTACION   */
 
+
+/* crea las listas de segmentos libres y ocupados */
 void inicializar_segmentacion(){
-	segmento* memoria_vacia;
+	segmento* memoria_vacia = malloc(sizeof(segmento));
 	list_create(segmentos_ocupados);
 	list_create(segmentos_libres);
 	memoria_vacia->inicio = 0;
@@ -1121,6 +1123,8 @@ void inicializar_segmentacion(){
 	list_add(segmentos_libres, memoria_vacia); //chequear error de tipos
 }
 
+
+/* guarda la patota en memoria, crea la tabla de segmentos y la guarda en el dictionary*/
 void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 	if(!dictionary_has_key(tablas_seg_patota, string_itoa(mensaje->idPatota))){
@@ -1172,6 +1176,8 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 		uint32_t offset;
 
+		uint32_t error_guardado = 0;
+
 		//guarda el pcb
 		if(hay_espacio_libre(sizeof(t_pcb))){
 			offset = get_espacio_libre(sizeof(t_pcb));
@@ -1184,7 +1190,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 				seg_pcb->inicio = offset;
 				memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
 			} else {
-				//aca hay error, se cancela toodo
+				error_guardado = 1;
 			}
 		}
 
@@ -1200,7 +1206,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 				seg_tareas->inicio = offset;
 				memcpy(memoria_principal + offset, mensaje->tareas->string, size_tareas);
 			} else {
-				//aca hay error, se cancela toodo
+				error_guardado = 1;
 			}
 		}
 
@@ -1217,20 +1223,27 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 					seg_tcb->inicio = offset;
 					memcpy(memoria_principal + offset, tcb, sizeof(t_tcb));
 				} else {
-					//aca rompe si hay error
+					error_guardado = 1;
 				}
 			}
 		}
 
 		list_iterate(tcbs, cargarTcbDatos);
 
-		//Guardo tabla de paginas
-		dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_patota); //que pongo
+		if(!error_guardado){
 
-		//agrego los segmentos a la lista de segmentos ocupados
-		list_add_all(segmentos_ocupados, tabla_patota);
+			//Guardo tabla de paginas
+			dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_patota); //que pongo
 
-		//modifico la lista de segmentos libres
+			//agrego los segmentos a la lista de segmentos ocupados
+			list_add_all(segmentos_ocupados, tabla_patota);
+
+			//modifico la lista de segmentos libres
+
+		} else {
+
+			//aviso que no se pudo guardar la patota?
+		}
 	}
 }
 
@@ -1238,49 +1251,100 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 //SIN TERMINAR necesita revision
 void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 
+	uint32_t inicio_seg_nuevo = segmento_nuevo->inicio;
 	uint32_t dir_fisica_seg_nuevo = obtener_direccion_fisica(segmento_nuevo);
 
-	bool se_encuentra_direccion_fisica(segmento* seg){
+	bool se_encuentra_contenido(segmento* seg){
 		uint32_t dir_fisica_segmento = obtener_direccion_fisica(seg);
-		return seg->inicio >= dir_fisica_seg_nuevo && dir_fisica_segmento <= dir_fisica_seg_nuevo;
+		return seg->inicio == inicio_seg_nuevo && dir_fisica_segmento >= dir_fisica_seg_nuevo;
 	}
 
 	segmento* seg_a_modificar = malloc(sizeof(segmento));
-	seg_a_modificar = list_filter(segmentos_libres, se_encuentra_direccion_fisica);
+	seg_a_modificar = list_get(list_filter(segmentos_libres, se_encuentra_contenido, 0));
+	//ESTO ESTA BIEN PARA OBTENER EL SEGMENTO?
 
+	bool es_el_segmento(segmento* seg){
+		return seg->inicio == seg_a_modificar->inicio && seg->tamanio == seg_a_modificar->tamanio;
+	}
+
+	list_remove_by_condition(segmentos_libres, es_el_segmento);
+
+	uint32_t dir_fisica_seg_libre = obtener_direccion_fisica(seg_a_modificar);
+
+	if(dir_fisica_seg_libre != dir_fisica_seg_nuevo){
+
+		seg_a_modificar->inicio = dir_fisica_seg_nuevo; //el segmento libre nuevo arranca donde termina el otro
+		list_add(segmentos_libres, seg_a_modificar);
+		//falta el tema del orden
+		ordenar_lista_segmentos_libres();
+	}
 }
+
+
+void ordenar_lista_segmentos_libres(){
+	//IMPLEMENTAR
+}
+
 
 uint32_t obtener_direccion_fisica(segmento* seg){
 	return seg->inicio + seg->tamanio;
 }
 
-//SIN TERMINAR
-int32_t hay_espacio_libre(uint32_t size){
-	t_list *lista_auxiliar = filter(segmentos_libres, entra_en_el_segmento(size)); //es *lista_auxiliar?
-	return !list_is_empty(lista_auxiliar); //es valido eso sintacticamente?
-}
 
-bool entra_en_el_segmento(uint32_t tamanio, segmento* seg){
-		return seg->tamanio > tamanio;
+/* le paso el tamanio de un segmento, devuelve 1 si hay espacio y 0 si no hay espacio */
+int32_t hay_espacio_libre(uint32_t size){
+	t_list* lista_auxiliar = list_create();
+
+	bool entra_en_el_segmento(segmento* seg){
+		return seg->tamanio > size;
 	}
 
+	list_add_all(lista_auxiliar, filter(segmentos_libres, entra_en_el_segmento));
+
+	return !list_is_empty(lista_auxiliar);
+}
+
+
 //SIN TERMINAR
-int32_t get_espacio_libre(uint32_t size){
+int32_t get_espacio_libre(uint32_t size){ //ver de hacerlo de otra manera sin tantos if anidados
 	if(list_is_empty(segmentos_ocupados)){
 		return 0;
-	}
-	else{
-		t_list *lista_auxiliar = filter(segmentos_libres, entra_en_el_segmento(size)); //esto no anda (filter)
-		if(list_size(lista_auxiliar) == 1){
-			segmento* seg = list_get(lista_auxiliar, 0); // CHEQUEAR RETORNO
-			return seg->inicio;
-		} else {
-			return 0; //aca hay que implementar FF y BF
+
+	} else {
+
+		t_list* lista_auxiliar = list_create();
+
+		bool entra_en_el_segmento(segmento* seg){
+			return seg->tamanio > size;
 		}
 
+		list_add_all(lista_auxiliar, filter(segmentos_libres, entra_en_el_segmento));
+
+		segmento* primer_seg_libre = malloc(sizeof(segmento));
+		primer_seg_libre = list_get(lista_auxiliar, 0);
+
+		if(list_size(lista_auxiliar) == 1){
+
+			return primer_seg_libre->inicio;
+
+		} else {
+			if(CRITERIO_SELECCION == "FF"){ //horroroso
+
+				return primer_seg_libre->inicio;
+
+			} else {
+
+				return 0;
+
+			}
+		}
 	}
 }
 
+
+void compactar(){
+	//IMPLEMENTAR
+}
 
 
 
