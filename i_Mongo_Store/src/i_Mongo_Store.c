@@ -2,61 +2,66 @@
 
 int main(void) {
 
-	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
-	leerConfig();
-	crear_log();
-	inicializarFS();
-	signal(SIGUSR1, sighandler);
-
-	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
-	estadoSuperBloque();
-
-	generarRecurso(190,'O');
-	estadoSuperBloque();
-	consumirRecurso(100, 'O');
-
-	estadoSuperBloque();
-	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
-
-	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
-	estadoSuperBloque();
-
-	char* bitacora = string_new();
-	string_append(&bitacora, "fiumba\n");
-	string_append(&bitacora, "morgan freemaaaaan\n");
-	string_append(&bitacora, "tucson\n");
-	string_append(&bitacora, "Quieren bajarme y no saben como hacer, porque este pibito no va a correr\n");
-	writeBitacora(1, bitacora);
-	free(bitacora);
-
-	char* tareas = readBitacora(1);
-	printf("\nBitacora:\n\n%s", tareas);
-
-	if(tareas != NULL){
-		free(tareas);
-	}
-
-	estadoSuperBloque();
-	////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
-
-	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
-	fsckSuperBloque_Bloques();
-	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
-
-
-
+	//	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
+	//	leerConfig();
+	//	crear_log();
+	//	inicializarFS();
+	//	signal(SIGUSR1, sighandler);
+	//
+	t_list* listaArchivox = list_create();
+	listaArchivox = listaArchivosDeBitacora();
+	int a = list_size(listaArchivox);
+	printf("DAME LA CANTIDAD DE ARCHIVOS BIEN POR FAVOR: %d", a);
+	//
+	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
+	//	estadoSuperBloque();
+	//
+	//	generarRecurso(190,'O');
+	//	estadoSuperBloque();
+	//	consumirRecurso(100, 'O');
+	//
+	//	estadoSuperBloque();
+	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
+	//
+	//	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
+	//	estadoSuperBloque();
+	//
+	//	char* bitacora = string_new();
+	//	string_append(&bitacora, "fiumba\n");
+	//	string_append(&bitacora, "morgan freemaaaaan\n");
+	//	string_append(&bitacora, "tucson\n");
+	//	string_append(&bitacora, "Quieren bajarme y no saben como hacer, porque este pibito no va a correr\n");
+	//	writeBitacora(1, bitacora);
+	//	free(bitacora);
+	//
+	//	char* tareas = readBitacora(1);
+	//	printf("\nBitacora:\n\n%s", tareas);
+	//
+	//	if(tareas != NULL){
+	//		free(tareas);
+	//	}
+	//
+	//	estadoSuperBloque();
+	//	////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
+	//
+	//	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
+	//	fsckSuperBloque_Bloques();
+	//	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
+	//
+	//
+	//
 	//		int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 	//
 	//		while(true){
 	//
 	//			int32_t socket_cliente = esperar_cliente(socket_servidor);
 	//			pthread_t hilo_mensaje;
-	//			pthread_create(&hilo_mensaje,NULL,(void*)funcionPruebaDisc, (void*) (&socket_cliente));
+	//			pthread_create(&hilo_mensaje,NULL,(void*)funcionPruebaDisc,(void*) socket_cliente);
 	//			pthread_detach(hilo_mensaje);
 	//
 	//		}
-
-	config_destroy(config);
+	//
+	//	config_destroy(config);
 	return EXIT_SUCCESS;
 }
 
@@ -115,9 +120,9 @@ void timerSincronizacion_blocksMap(){
 //
 //}
 
-void funcionPruebaTrip(int32_t* socketCliente){
+void funcionPruebaTrip(int32_t socketCliente){
 
-	t_paquete* paquete = recibir_paquete(*socketCliente);
+	t_paquete* paquete = recibir_paquete(socketCliente);
 
 	switch(paquete->codigo){
 
@@ -125,7 +130,7 @@ void funcionPruebaTrip(int32_t* socketCliente){
 
 		obtener_bitacora_msg* bitacoraMsg = deserializar_paquete(paquete);
 		char* bitacora = readBitacora(bitacoraMsg->idTripulante);
-		enviar_paquete(bitacora,OBTENER_BITACORA_RTA,*socketCliente);
+		enviar_paquete(bitacora,OBTENER_BITACORA_RTA,socketCliente);
 		if(bitacora != NULL){
 			free(bitacora);
 		}
@@ -1061,6 +1066,11 @@ int fsckSuperBloque_Bloques(){
 
 int fsckSuperBloque_Bitmap(){
 
+
+
+
+
+
 	return EXIT_SUCCESS;
 }
 
@@ -1084,3 +1094,26 @@ int fsckFiles_Blocks(){
 
 	return EXIT_SUCCESS;
 }
+
+
+t_list* listaArchivosDeBitacora() {
+
+	DIR *d;
+	t_list* listaArchivos = list_create();
+	struct dirent *dir;
+	d = opendir("/home/utnso/polus/Files/Bitacoras/");
+	if (d) {
+		while ((dir = readdir(d)) != NULL) {
+			if( strcmp( dir->d_name, "." ) != 0 &&
+					strcmp( dir->d_name, ".." ) != 0 ){
+
+					list_add(listaArchivos,dir->d_name);
+
+			}
+		}
+		closedir(d);
+	}
+	return listaArchivos;
+
+}
+
