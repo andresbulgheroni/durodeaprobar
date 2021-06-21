@@ -42,6 +42,8 @@ int main(void){
 	//config_destroy(config);
 	log_destroy(logger);
 
+
+
 	return EXIT_SUCCESS;
 
 }
@@ -184,8 +186,8 @@ void planificarSabotaje(){
 
 	//sem_wait(&sem_sabotaje);
 	t_sabotaje*sabotajeActivo;
-	sabotajeActivo->coordenadas=mensajeDeSabotaje->coordenadas;
-	sabotajeActivo->id_sabotaje=mensajeDeSabotaje->idSabotaje;
+	sabotajeActivo->coordenadas = mensajeDeSabotaje->coordenadas;
+	sabotajeActivo->id_sabotaje = mensajeDeSabotaje->idSabotaje;
 	haySabotaje=1;
 
 	pasarATodosLosTripulantesAListaBloqueado();
@@ -602,12 +604,18 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			obtener_bitacora_msg*mensajeBitacora=malloc(sizeof(obtener_bitacora_msg));
 			mensajeBitacora->idTripulante=id;
 
+			printf("solicito la bitacora el ID: %d:",id);
 			enviar_paquete(mensajeBitacora,OBTENER_BITACORA_MSG,socketBitacora);
 
+			puts("se mando el mensaje correctamente");
 
 			//recibirMensaje()
 			t_paquete*paqueteBitacora = recibir_paquete(socketBitacora);
+			printf("el valor del socket es:%d",socketBitacora);
+			puts("recibo mensaje");
 			obtener_bitacora_rta*mensajeBitacoraRta=deserializar_paquete(paqueteBitacora);
+
+			puts("deserializo mensaje");
 
 
 			log_info(logger,"el contenido de la bitacora es:%s",mensajeBitacoraRta->bitacora->string);
@@ -856,10 +864,11 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 	mensajeMovimientoTarea->idPatota = tripulante->idPatota;
 	mensajeMovimientoTarea->idTripulante = tripulante->idTripulante;
 
-	//		informar_movimiento_mongo_msg*mensajeMovimientoTareaMongo = malloc(sizeof(informar_movimiento_ram_msg));
-	//		mensajeMovimientoTareaMongo->idTripulante = tripulante->idTripulante;
-	//		mensajeMovimientoTareaMongo->coordenadasOrigen=tripulante->coordenadas;
+			informar_movimiento_mongo_msg*mensajeMovimientoTareaMongo = malloc(sizeof(informar_movimiento_mongo_msg));
+			mensajeMovimientoTareaMongo->idTripulante = tripulante->idTripulante;
+			mensajeMovimientoTareaMongo->coordenadasOrigen = tripulante->coordenadas;
 
+			printf("se mueve de: %d %d",mensajeMovimientoTareaMongo->coordenadasOrigen->posX,mensajeMovimientoTareaMongo->coordenadasOrigen->posY);
 
 
 	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
@@ -889,13 +898,18 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 	}
 	log_movimiento_tripulante(tripulante->idTripulante,tripulante->coordenadas->posX,tripulante->coordenadas->posY);
 
+
+
 	mensajeMovimientoTarea->coordenadasDestino=tripulante->coordenadas;
 
-	//		mensajeMovimientoTareaMongo->coordenadasDestino=tripulante->coordenadas;
+	mensajeMovimientoTareaMongo->coordenadasDestino=tripulante->coordenadas;
+
+	printf("hacia la posicion: %d %d\n",mensajeMovimientoTareaMongo->coordenadasDestino->posX,mensajeMovimientoTareaMongo->coordenadasDestino->posY);
+
 
 	enviar_paquete(mensajeMovimientoTarea,INFORMAR_MOVIMIENTO_RAM,tripulante->socketTripulanteRam);
 
-	//		enviar_paquete(mensajeMovimientoTareaMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
+	enviar_paquete(mensajeMovimientoTareaMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
 
 
 
@@ -1010,14 +1024,14 @@ void planificarSegunRR(){
 
 
 void ejecutarTripulante(t_tripulante* tripulante){
-	//INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+	//INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
 
 
 
 	printf("hola soy:%d\n",tripulante->idTripulante);
 
-	//	//int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
-	//	//tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
+		int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
+		tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
 
 	int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
