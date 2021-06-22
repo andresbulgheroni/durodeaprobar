@@ -53,41 +53,21 @@ int main(void) {
 
 */
 
+	informar_movimiento_mongo_msg* mensaje = deserializar_paquete(paquete);
 
-	//Prueba Expulsar Tripulante
+	log_info(logger, "TID: %d", mensaje->idTripulante);
+	log_info(logger, "Pos: %d|%d", mensaje->coordenadasOrigen->posX, mensaje->coordenadasOrigen->posY);
+	log_info(logger, "Pos: %d|%d", mensaje->coordenadasDestino->posX, mensaje->coordenadasDestino->posY);
 
-	while(paquete->codigo != DESCONECTADO){
+	free(mensaje->coordenadasDestino);
+	free(mensaje);
 
-		switch(paquete->codigo){
-		case EXPULSAR_TRIPULANTE_MSG:{
+	t_string* tarea = get_t_string("PRUEBA 2;2;3;5");
+	enviar_paquete(tarea, SOLICITAR_SIGUIENTE_TAREA_RTA, socketCliente);
 
-			expulsar_tripulante_msg* mensaje = deserializar_paquete(paquete);
+	free(tarea);
 
-			log_debug(logger, "%d", mensaje->idTripulante);
-
-			free(mensaje);
-			break;
-		}
-		case COMPLETO_TAREAS:{
-
-			log_debug(logger, "COMPLETO TAREAS");
-			free(paquete);
-			break;
-		}
-		case DESCONECTADO:
-		default : break;
-		}
-
-		paquete = recibir_paquete(socketCliente);
-
-	}
-
-	if(paquete->codigo == DESCONECTADO){
-
-		log_debug(logger, "desconectado");
-		free(paquete);
-
-	}
+	while(1);
 
 	return 0;
 }

@@ -48,7 +48,7 @@ int main(void) {
 */
 
 
-
+/*
 	//Prueba Expulsar Tripulante
 
 	expulsar_tripulante_msg* mensaje = malloc(sizeof(expulsar_tripulante_msg));
@@ -73,7 +73,34 @@ int main(void) {
 
 	enviar_paquete(NULL, COMPLETO_TAREAS, conexion);
 
-	sleep(5);
+	sleep(5);*/
+
+	informar_movimiento_mongo_msg* mensaje1 = malloc(sizeof(informar_movimiento_mongo_msg));
+	mensaje1->coordenadasOrigen = malloc(sizeof(t_coordenadas));
+	mensaje1->coordenadasDestino = malloc(sizeof(t_coordenadas));
+
+	mensaje1->idTripulante = 2;
+	mensaje1->coordenadasOrigen->posX = 6;
+	mensaje1->coordenadasOrigen->posY = 8;
+	mensaje1->coordenadasDestino->posX = 5;
+	mensaje1->coordenadasDestino->posY = 7;
+
+	enviar_paquete(mensaje1, INFORMAR_MOVIMIENTO_MONGO, conexion);
+
+	free(mensaje1->coordenadasDestino);
+	free(mensaje1);
+
+	t_paquete* paquete = recibir_paquete(conexion);
+	solicitar_siguiente_tarea_rta* mensaje2 = deserializar_paquete(paquete);
+
+	log_info(logger, "Tarea : %s", mensaje2->tarea->nombre_parametros);
+	log_info(logger, "Duracion: %d", mensaje2->tarea->duracion);
+	log_info(logger, "Pos: %d|%d", mensaje2->tarea->coordenadas->posX, mensaje2->tarea->coordenadas->posY);
+
+	free(mensaje2->tarea->nombre_parametros);
+	free(mensaje2->tarea->coordenadas);
+	free(mensaje2->tarea);
+	free(mensaje2);
 
 	liberar_conexion(conexion);
 
