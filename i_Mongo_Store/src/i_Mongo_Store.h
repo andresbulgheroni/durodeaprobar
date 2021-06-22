@@ -83,7 +83,7 @@ int menorEntre(int, int);
 op_code_tareas string_to_op_code_tareas (char*);
 void hacerTarea(inicio_tarea_msg*);
 void funcionPruebaDisc(int32_t*);
-void funcionPruebaTrip(int32_t);
+void funcionPruebaTrip(int32_t*);
 t_bitarray* crearBitmap(char*);
 void timerSincronizacion_blocksMap();
 void setBitmap(int, int);
@@ -103,6 +103,7 @@ int fsckSuperBloque_Bitmap();
 int fsckFiles_Size();
 int fsckFiles_BlockCount();
 int fsckFiles_Blocks();
+void haySabotajeEnElArchivo(char* directorio);
 t_list* listaArchivosDeBitacora();
 
 // FUNCIONES PARA TESTING:

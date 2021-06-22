@@ -2,16 +2,12 @@
 
 int main(void) {
 
-	//	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
-	//	leerConfig();
-	//	crear_log();
-	//	inicializarFS();
+	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
+	leerConfig();
+	crear_log();
+	inicializarFS();
 	//	signal(SIGUSR1, sighandler);
 	//
-	t_list* listaArchivox = list_create();
-	listaArchivox = listaArchivosDeBitacora();
-	int a = list_size(listaArchivox);
-	printf("DAME LA CANTIDAD DE ARCHIVOS BIEN POR FAVOR: %d", a);
 	//
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 	//	estadoSuperBloque();
@@ -43,25 +39,26 @@ int main(void) {
 	//
 	//	estadoSuperBloque();
 	//	////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
-	//
-	//	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
+
+	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
 	//	fsckSuperBloque_Bloques();
-	//	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
+	fsckSuperBloque_Bitmap();
+	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
+
+
+
+	//	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 	//
+	//	while(true){
 	//
+	//		int32_t socket_cliente = esperar_cliente(socket_servidor);
+	//		pthread_t hilo_mensaje;
+	//		pthread_create(&hilo_mensaje,NULL,(void*)funcionPruebaDisc,(void*) (&socket_cliente));
+	//		pthread_detach(hilo_mensaje);
 	//
-	//		int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
-	//
-	//		while(true){
-	//
-	//			int32_t socket_cliente = esperar_cliente(socket_servidor);
-	//			pthread_t hilo_mensaje;
-	//			pthread_create(&hilo_mensaje,NULL,(void*)funcionPruebaDisc,(void*) socket_cliente);
-	//			pthread_detach(hilo_mensaje);
-	//
-	//		}
-	//
-	//	config_destroy(config);
+	//	}
+
+	config_destroy(config);
 	return EXIT_SUCCESS;
 }
 
@@ -120,9 +117,9 @@ void timerSincronizacion_blocksMap(){
 //
 //}
 
-void funcionPruebaTrip(int32_t socketCliente){
+void funcionPruebaTrip(int32_t* socketCliente){
 
-	t_paquete* paquete = recibir_paquete(socketCliente);
+	t_paquete* paquete = recibir_paquete(*socketCliente);
 
 	switch(paquete->codigo){
 
@@ -130,7 +127,7 @@ void funcionPruebaTrip(int32_t socketCliente){
 
 		obtener_bitacora_msg* bitacoraMsg = deserializar_paquete(paquete);
 		char* bitacora = readBitacora(bitacoraMsg->idTripulante);
-		enviar_paquete(bitacora,OBTENER_BITACORA_RTA,socketCliente);
+		enviar_paquete(bitacora,OBTENER_BITACORA_RTA,*socketCliente);
 		if(bitacora != NULL){
 			free(bitacora);
 		}
@@ -1066,12 +1063,85 @@ int fsckSuperBloque_Bloques(){
 
 int fsckSuperBloque_Bitmap(){
 
+	t_list* listaArchivosBitacora = listaArchivosDeBitacora("/home/utnso/polus/Files/Bitacoras/");
+	int tam = list_size(listaArchivosBitacora);
 
+	for(int i=0; i<tam;i++){
 
+		char* path = string_new();
+		string_append(&path,"/home/utnso/polus/Files/Bitacoras/");
+		char* nombreArch = list_get(listaArchivosBitacora,i);
+		string_append(&path,nombreArch);
+		t_config* metadata = config_create(path);
+		char** blocks = config_get_array_value(metadata, "BLOCKS");
 
+		int j = 0;
+		while(blocks[j]!=NULL){
+
+			puts(blocks[j]);
+
+			if(bitarray_test_bit(bitmap, atoi(blocks[j])-1) == 1){
+				puts("SIN SABOTAJES");
+			}else{
+				puts("HAY SABOTAJES");
+			}
+
+			j++;
+
+		}
+		free(blocks);
+		free(metadata);
+		free(path);
+	}
+
+	void elementsDestroyer(void* element){
+
+		free(element);
+
+	}
+
+	list_destroy_and_destroy_elements(listaArchivosBitacora, elementsDestroyer);
+
+	if(existeArchivo("/home/utnso/polus/Files/Oxigeno.ims")){
+		haySabotajeEnElArchivo("/home/utnso/polus/Files/Oxigeno.ims");
+	}
+	if(existeArchivo("/home/utnso/polus/Files/Comida.ims")){
+		haySabotajeEnElArchivo("/home/utnso/polus/Files/Comida.ims");
+	}
+	if(existeArchivo("/home/utnso/polus/Files/Basura.ims")){
+		haySabotajeEnElArchivo("/home/utnso/polus/Files/Basura.ims");
+	}
 
 
 	return EXIT_SUCCESS;
+
+}
+
+void haySabotajeEnElArchivo(char* directorio){
+
+	char* path = string_new();
+	string_append(&path,directorio);
+	t_config* metadata = config_create(path);
+	char** blocks = config_get_array_value(metadata, "BLOCKS");
+
+	int j = 0;
+	while(blocks[j]!=NULL){
+
+		puts(blocks[j]);
+
+		if(bitarray_test_bit(bitmap, atoi(blocks[j])-1) == 1){
+			puts("SIN SABOTAJES");
+		}else{
+			puts("HAY SABOTAJES");
+		}
+
+		j++;
+
+	}
+	free(blocks);
+	free(metadata);
+	free(path);
+
 }
 
 int fsckFiles_Size(){
@@ -1096,18 +1166,18 @@ int fsckFiles_Blocks(){
 }
 
 
-t_list* listaArchivosDeBitacora() {
+t_list* listaArchivosDeBitacora(char* directorio) {
 
 	DIR *d;
 	t_list* listaArchivos = list_create();
 	struct dirent *dir;
-	d = opendir("/home/utnso/polus/Files/Bitacoras/");
+	d = opendir(directorio);
 	if (d) {
 		while ((dir = readdir(d)) != NULL) {
 			if( strcmp( dir->d_name, "." ) != 0 &&
 					strcmp( dir->d_name, ".." ) != 0 ){
 
-					list_add(listaArchivos,dir->d_name);
+				list_add(listaArchivos,dir->d_name);
 
 			}
 		}
