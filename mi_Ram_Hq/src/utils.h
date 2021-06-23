@@ -120,7 +120,7 @@ typedef struct {
 
 typedef struct {
 
-	t_string* nombre_parametros;
+	char* nombre_parametros;
 	t_coordenadas* coordenadas;
 	uint32_t duracion;
 

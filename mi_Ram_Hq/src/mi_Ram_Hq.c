@@ -604,7 +604,6 @@ void cambiar_estado_paginacion(cambio_estado_msg* mensaje, bool* status){
 	}
 	list_destroy_and_destroy_elements(paginas_leidas, liberar_nros_usadas);
 	free(datos);
-	free(datos);
 }
 
 char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status){
@@ -738,6 +737,10 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 	}while(i <= tarea_actual);
 
+	void liberar_nros_usadas(int32_t* frame){
+		free(frame);
+	}
+	list_destroy_and_destroy_elements(paginas_leidas, liberar_nros_usadas);
 	free(datos);
 
 	return tarea;
@@ -750,44 +753,86 @@ void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* stat
 	//REVISAR PARA LEER PAGINA A PAGINA
 	t_list* paginas = dictionary_get(tabla_paginas_patota, string_itoa(mensaje->idPatota));
 
-	void* datos = malloc(list_size(paginas) * TAMANIO_PAGINA);
-
 	uint32_t size_viejo = list_size(paginas) * TAMANIO_PAGINA;
+	void* datos = malloc(size_viejo);
 	uint32_t cant_frames = ceil((size_viejo - sizeof(t_tcb)) / TAMANIO_PAGINA);
 	uint32_t size_pcb = cant_frames * TAMANIO_PAGINA;
-
 	void* datos_nuevo = malloc(size_pcb);
 
-	uint32_t pagina_modificar = 0;
-
-	memcpy(datos_nuevo, datos, sizeof(t_tcb));
-
+	t_list* paginas_leidas = list_create();
 	bool encontrado = false;
-	uint32_t offset_viejo = sizeof(t_tcb);
-	uint32_t offset_nuevo = sizeof(t_tcb);
+	uint32_t offset_viejo = sizeof(t_pcb);
+	uint32_t offset_nuevo = sizeof(t_pcb);
+	uint32_t pagina = floor(offset_viejo/TAMANIO_PAGINA);
+
 
 	while(!encontrado){
 
 		uint32_t tid;
+		uint32_t paginas_ne = paginas_necesarias(offset_viejo, sizeof(tid));
+
+		for(uint32_t i = 0; i < paginas_ne; i++){
+
+
+			bool ya_leida(int32_t* nro_frame){
+
+				return *nro_frame == pagina + i;
+
+			}
+
+			if(!list_any_satisfy(paginas_leidas, ya_leida)){
+
+				t_pagina_patota* patota = list_get(paginas, pagina + i);
+				leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina + i));
+				int32_t* pagina_leida = malloc(sizeof(int32_t));
+				*pagina_leida = pagina + i;
+				list_add(paginas_leidas, pagina_leida);
+
+			}
+
+		}
+
 		memcpy(&tid, datos + offset_viejo, sizeof(uint32_t));
 
 		if(tid == mensaje->idTripulante){
 
 			encontrado = true;
-			pagina_modificar = floor(offset_viejo/TAMANIO_PAGINA);
 			offset_viejo += sizeof(t_tcb);
+			pagina = floor(offset_viejo/TAMANIO_PAGINA);
+			paginas_ne = paginas_necesarias(offset_viejo, size_viejo - offset_viejo);
+
+			for(uint32_t i = 0; i < paginas_ne; i++){
+
+
+				bool ya_leida(int32_t* nro_frame){
+
+					return *nro_frame == pagina + i;
+
+				}
+
+				if(!list_any_satisfy(paginas_leidas, ya_leida)){
+
+					t_pagina_patota* patota = list_get(paginas, pagina + i);
+					leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina + i));
+					int32_t* pagina_leida = malloc(sizeof(int32_t));
+					*pagina_leida = pagina + i;
+					list_add(paginas_leidas, pagina_leida);
+
+				}
+
+
+			}
+
+			memcpy(datos_nuevo + offset_nuevo, datos + offset_viejo, size_viejo - offset_viejo);
+
 
 		}else{
-
-			memcpy(datos_nuevo + offset_nuevo, datos + offset_viejo, sizeof(t_tcb));
 			offset_nuevo += sizeof(t_tcb);
 			offset_viejo += sizeof(t_tcb);
-
 		}
 
 	}
 
-	memcpy(datos_nuevo + offset_nuevo, datos + offset_viejo, size_viejo - offset_viejo);
 
 	if(list_size(paginas) > cant_frames){
 
@@ -805,7 +850,7 @@ void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* stat
 
 	}
 
-	for(int32_t i = pagina_modificar; i < cant_frames; i++){
+	for(int32_t i = pagina; i < cant_frames; i++){
 
 		t_pagina_patota* pagina = list_get(paginas, i);
 
@@ -813,7 +858,12 @@ void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* stat
 
 	}
 
+	void liberar_nros_usadas(int32_t* frame){
+		free(frame);
+	}
+	list_destroy_and_destroy_elements(paginas_leidas, liberar_nros_usadas);
 	free(datos);
+	free(datos_nuevo);
 
 }
 

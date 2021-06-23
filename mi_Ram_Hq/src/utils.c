@@ -641,7 +641,7 @@ iniciar_patota_msg* desserializar_iniciar_patota_msg(void* stream){
 
 	uint32_t offset = 0;
 	deserializar_variable(stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
-	deserializar_variable(stream, &(mensaje->cant_tripulantes), sizof(mensaje->cant_tripulantes), &offset);
+	deserializar_variable(stream, &(mensaje->cant_tripulantes), sizeof(mensaje->cant_tripulantes), &offset);
 	mensaje->tripulantes = list_create();
 
 	for(int32_t i = 0; i < mensaje->cant_tripulantes; i++){
@@ -720,14 +720,14 @@ solicitar_siguiente_tarea_rta* desserializar_solicitar_siguiente_tarea_rta(void*
 
 	solicitar_siguiente_tarea_rta* mensaje = malloc(sizeof(solicitar_siguiente_tarea_rta));
 
-	tarea_data_msg* tarea = malloc(sizeof(tarea_data_msg));
-	tarea->coordenadas = malloc(sizeof(t_coordenadas));
-	mensaje->tarea = tarea;
+	mensaje->tarea = malloc(sizeof(tarea_data_msg));
+	mensaje->tarea->coordenadas = malloc(sizeof(t_coordenadas));
+	mensaje->tarea->nombre_parametros = malloc(strlen(partes[0] ) + 1);
 
-	tarea->nombre_parametros = partes[0];
-	tarea->coordenadas->posX = atoi(partes[1]);
-	tarea->coordenadas->posY = atoi(partes[2]);
-	tarea->duracion = atoi(partes[3]);
+	strcpy(mensaje->tarea->nombre_parametros,partes[0]);
+	mensaje->tarea->coordenadas->posX = atoi(partes[1]);
+	mensaje->tarea->coordenadas->posY = atoi(partes[2]);
+	mensaje->tarea->duracion = atoi(partes[3]);
 
 	free(tarea_mensaje);
 
@@ -756,6 +756,7 @@ informar_movimiento_ram_msg* desserializar_informar_movimiento_ram_msg(void* str
 
 	uint32_t offset = 0;
 
+	deserializar_variable(stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 	deserializar_variable(stream, &(mensaje->coordenadasDestino->posX), sizeof(mensaje->coordenadasDestino->posX), &offset);
 	deserializar_variable(stream, &(mensaje->coordenadasDestino->posY), sizeof(mensaje->coordenadasDestino->posY), &offset);
