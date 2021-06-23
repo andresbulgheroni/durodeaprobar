@@ -609,11 +609,13 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			puts("se mando el mensaje correctamente");
 
+			free(mensajeBitacora);
+
 			//recibirMensaje()
 			t_paquete*paqueteBitacora = recibir_paquete(socketBitacora);
 			printf("el valor del socket es:%d",socketBitacora);
-			puts("recibo mensaje");
-			obtener_bitacora_rta*mensajeBitacoraRta=deserializar_paquete(paqueteBitacora);
+
+			obtener_bitacora_rta*mensajeBitacoraRta = deserializar_paquete(paqueteBitacora);
 
 			puts("deserializo mensaje");
 
@@ -622,7 +624,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			liberar_conexion(socketBitacora);
 
-			//free(mensajeBitacora);
+
 
 
 			break;
@@ -864,11 +866,15 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 	mensajeMovimientoTarea->idPatota = tripulante->idPatota;
 	mensajeMovimientoTarea->idTripulante = tripulante->idTripulante;
 
-			informar_movimiento_mongo_msg*mensajeMovimientoTareaMongo = malloc(sizeof(informar_movimiento_mongo_msg));
-			mensajeMovimientoTareaMongo->idTripulante = tripulante->idTripulante;
-			mensajeMovimientoTareaMongo->coordenadasOrigen = tripulante->coordenadas;
+	mensajeMovimientoTarea->coordenadasDestino = malloc(sizeof(t_coordenadas));
 
-			printf("se mueve de: %d %d",mensajeMovimientoTareaMongo->coordenadasOrigen->posX,mensajeMovimientoTareaMongo->coordenadasOrigen->posY);
+//	informar_movimiento_mongo_msg* mensajeMovimientoMongo = malloc(sizeof(informar_movimiento_mongo_msg));
+//		mensajeMovimientoMongo->coordenadasOrigen = malloc(sizeof(t_coordenadas));
+//		mensajeMovimientoMongo->coordenadasDestino = malloc(sizeof(t_coordenadas));					//TODO
+//
+//		mensajeMovimientoMongo->idTripulante = tripulante->idTripulante;
+//		mensajeMovimientoMongo->coordenadasOrigen->posX = tripulante->coordenadas->posX;
+//		mensajeMovimientoMongo->coordenadasOrigen->posY = tripulante->coordenadas->posY;
 
 
 	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
@@ -900,17 +906,26 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 
 
-	mensajeMovimientoTarea->coordenadasDestino=tripulante->coordenadas;
+	mensajeMovimientoTarea->coordenadasDestino->posX = tripulante->coordenadas->posX;
+	mensajeMovimientoTarea->coordenadasDestino->posY = tripulante->coordenadas->posY;
 
-	mensajeMovimientoTareaMongo->coordenadasDestino=tripulante->coordenadas;
+	//mensajeMovimientoMongo->coordenadasDestino->posX = tripulante->coordenadas->posX;
+	//mensajeMovimientoMongo->coordenadasDestino->posY = tripulante->coordenadas->posY;
 
-	printf("hacia la posicion: %d %d\n",mensajeMovimientoTareaMongo->coordenadasDestino->posX,mensajeMovimientoTareaMongo->coordenadasDestino->posY);
+	//printf("hacia la posicion: %d %d\n",mensajeMovimientoMongo->coordenadasDestino->posX,mensajeMovimientoMongo->coordenadasDestino->posY);
 
 
 	enviar_paquete(mensajeMovimientoTarea,INFORMAR_MOVIMIENTO_RAM,tripulante->socketTripulanteRam);
 
-	enviar_paquete(mensajeMovimientoTareaMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
+	//enviar_paquete(mensajeMovimientoMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
 
+
+	free(mensajeMovimientoTarea);
+	free(mensajeMovimientoTarea->coordenadasDestino);
+
+//	free(mensajeMovimientoMongo);
+//	free(mensajeMovimientoMongo->coordenadasDestino);
+//	free(mensajeMovimientoMongo->coordenadasOrigen);
 
 
 }
@@ -1030,8 +1045,8 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 	printf("hola soy:%d\n",tripulante->idTripulante);
 
-		int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
-		tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
+//		int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);		//TODO
+//		tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
 
 	int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
@@ -1056,7 +1071,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 			solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
 
-			char** nombreTarea = string_split(mensajeTareaRta->tarea->nombre_parametros->string, " ");
+			char** nombreTarea = string_split(mensajeTareaRta->tarea->nombre_parametros, " ");		//es un char*
 
 			if(nombreTarea[1] ==NULL){
 
@@ -1201,7 +1216,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 							solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
 
-							char** nombreTarea = string_split(mensajeTareaRta->tarea->nombre_parametros->string, " ");
+							char** nombreTarea = string_split(mensajeTareaRta->tarea->nombre_parametros, " ");	//es un char*
 
 							if(nombreTarea[1] ==NULL){
 
