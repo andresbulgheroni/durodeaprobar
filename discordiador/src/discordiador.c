@@ -327,6 +327,7 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 	for(int i=0; i<(list_size(posicionesTripulantes)) ; i++){
 
 		t_tripulante* tripulante = malloc(sizeof(t_tripulante));
+		tripulante->coordenadas = malloc(sizeof(t_coordenadas));									//TODO
 		char* posicion = list_get(posicionesTripulantes,i);
 		tripulante->coordenadas = get_coordenadas(posicion);
 		tripulante->idTripulante = id_tripulante;
@@ -447,13 +448,12 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 				}
 
 
-				for(int i=0; i< list_size(posicionesTripulantes) ; i++){
+				for(int i=0; i< list_size(posicionesTripulantes) ; i++){			//TODO
 
-					t_coordenadas* coordenadasTripulantes = malloc(sizeof(t_coordenadas));
-					coordenadasTripulantes = list_get(posicionesTripulantes, i);
 
-					tripulante_data_msg*tripulanteConCoordenadas=malloc(sizeof(tripulante_data_msg*));
-					tripulanteConCoordenadas->coordenadas= coordenadasTripulantes;
+					tripulante_data_msg*tripulanteConCoordenadas=malloc(sizeof(tripulante_data_msg));
+					tripulanteConCoordenadas->coordenadas =	malloc(sizeof(t_coordenadas));
+					tripulanteConCoordenadas->coordenadas=  get_coordenadas(list_get(posicionesTripulantes, i));
 
 					tripulanteConCoordenadas->idTripulante = id_tripulante_para_enviar;
 
@@ -557,6 +557,11 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 		}
 		case INICIAR_PLANIFICACION: { //Con este comando se dará inicio a la planificación (es un semaforo sem init)
 
+			if(list_is_empty(listaReady)){
+				puts("asegurese de que el discordiador tenga tripulantes en ready. Pruebe de nuevo");			//TODO
+			}
+
+			if(!list_is_empty(listaReady)){
 
 			sem_post(&sem_pausarPlanificacion);
 
@@ -584,6 +589,8 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 				list_iterate(listaBloqueados,(void*) iterador);
 
 			}
+			}
+
 			break;
 		}
 		case PAUSAR_PLANIFICACION: { //Este comando lo que busca es detener la planificación en cualquier momento(semaforo)
