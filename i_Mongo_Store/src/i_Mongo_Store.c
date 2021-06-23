@@ -1100,7 +1100,7 @@ void haySabotajeBitmapEnElArchivo(char* directorio){
 			log_info(logger, "no hay sabotaje en ese BLOCK");
 		}else{
 			setBitmap(1, atoi(blocks[j]));
-			log_info(logger, "Sabotaje en superbloque corregido, seteo BLOCK = %d en 1 en el Bitmap ", (blocks[j]-1));
+			log_info(logger, "Sabotaje en superbloque corregido, seteo BLOCK = %d en 1 en el Bitmap ", atoi(blocks[j])-1));
 		}
 
 		j++;
