@@ -486,6 +486,7 @@ void setBitmap(int valor, int posicion){
 	}else{
 		bitarray_set_bit(bitmap, posicion - 1);
 	}
+
 }
 
 int existeFS(){
@@ -1063,61 +1064,29 @@ int fsckSuperBloque_Bloques(){
 
 int fsckSuperBloque_Bitmap(){
 
-	t_list* listaArchivosBitacora = listaArchivosDeBitacora("/home/utnso/polus/Files/Bitacoras/");
-	int tam = list_size(listaArchivosBitacora);
-
-	for(int i=0; i<tam;i++){
-
-		char* path = string_new();
-		string_append(&path,"/home/utnso/polus/Files/Bitacoras/");
-		char* nombreArch = list_get(listaArchivosBitacora,i);
-		string_append(&path,nombreArch);
-		t_config* metadata = config_create(path);
-		char** blocks = config_get_array_value(metadata, "BLOCKS");
-
-		int j = 0;
-		while(blocks[j]!=NULL){
-
-			puts(blocks[j]);
-
-			if(bitarray_test_bit(bitmap, atoi(blocks[j])-1) == 1){
-				puts("SIN SABOTAJES");
-			}else{
-				puts("HAY SABOTAJES");
-			}
-
-			j++;
-
-		}
-		free(blocks);
-		free(metadata);
-		free(path);
-	}
-
-	void elementsDestroyer(void* element){
-
-		free(element);
-
-	}
-
-	list_destroy_and_destroy_elements(listaArchivosBitacora, elementsDestroyer);
-
 	if(existeArchivo("/home/utnso/polus/Files/Oxigeno.ims")){
-		haySabotajeEnElArchivo("/home/utnso/polus/Files/Oxigeno.ims");
-	}
-	if(existeArchivo("/home/utnso/polus/Files/Comida.ims")){
-		haySabotajeEnElArchivo("/home/utnso/polus/Files/Comida.ims");
-	}
-	if(existeArchivo("/home/utnso/polus/Files/Basura.ims")){
-		haySabotajeEnElArchivo("/home/utnso/polus/Files/Basura.ims");
+
+		haySabotajeBitmapEnElArchivo("/home/utnso/polus/Files/Oxigeno.ims");
+
 	}
 
+	if(existeArchivo("/home/utnso/polus/Files/Comida.ims")){
+
+		haySabotajeBitmapEnElArchivo("/home/utnso/polus/Files/Comida.ims");
+
+	}
+
+	if(existeArchivo("/home/utnso/polus/Files/Basura.ims")){
+
+		haySabotajeBitmapEnElArchivo("/home/utnso/polus/Files/Basura.ims");
+
+	}
 
 	return EXIT_SUCCESS;
 
 }
 
-void haySabotajeEnElArchivo(char* directorio){
+void haySabotajeBitmapEnElArchivo(char* directorio){
 
 	char* path = string_new();
 	string_append(&path,directorio);
@@ -1127,20 +1096,25 @@ void haySabotajeEnElArchivo(char* directorio){
 	int j = 0;
 	while(blocks[j]!=NULL){
 
-		puts(blocks[j]);
-
 		if(bitarray_test_bit(bitmap, atoi(blocks[j])-1) == 1){
-			puts("SIN SABOTAJES");
+			log_info(logger, "no hay sabotaje en ese BLOCK");
 		}else{
-			puts("HAY SABOTAJES");
+			setBitmap(1, atoi(blocks[j]));
+			log_info(logger, "Sabotaje en superbloque corregido, seteo BLOCK = %d en 1 en el Bitmap ", (blocks[j]-1));
 		}
 
 		j++;
 
 	}
-	free(blocks);
-	free(metadata);
+
 	free(path);
+	int i = 0;
+	while(blocks[i] != NULL){
+		free(blocks[i]);
+		i++;
+	}
+	free(blocks);
+	config_destroy(metadata);
 
 }
 
@@ -1164,26 +1138,3 @@ int fsckFiles_Blocks(){
 
 	return EXIT_SUCCESS;
 }
-
-
-t_list* listaArchivosDeBitacora(char* directorio) {
-
-	DIR *d;
-	t_list* listaArchivos = list_create();
-	struct dirent *dir;
-	d = opendir(directorio);
-	if (d) {
-		while ((dir = readdir(d)) != NULL) {
-			if( strcmp( dir->d_name, "." ) != 0 &&
-					strcmp( dir->d_name, ".." ) != 0 ){
-
-				list_add(listaArchivos,dir->d_name);
-
-			}
-		}
-		closedir(d);
-	}
-	return listaArchivos;
-
-}
-

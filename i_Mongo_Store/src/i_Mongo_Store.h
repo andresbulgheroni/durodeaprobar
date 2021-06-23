@@ -103,7 +103,7 @@ int fsckSuperBloque_Bitmap();
 int fsckFiles_Size();
 int fsckFiles_BlockCount();
 int fsckFiles_Blocks();
-void haySabotajeEnElArchivo(char* directorio);
+void haySabotajeBitmapEnElArchivo(char* directorio);
 t_list* listaArchivosDeBitacora();
 
 // FUNCIONES PARA TESTING:
