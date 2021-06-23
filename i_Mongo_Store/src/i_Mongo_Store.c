@@ -1064,23 +1064,31 @@ int fsckSuperBloque_Bloques(){
 
 int fsckSuperBloque_Bitmap(){
 
-	if(existeArchivo("/home/utnso/polus/Files/Oxigeno.ims")){
+	char* rutaArchivoOxigeno = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
+	char* rutaArchivoComida = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
+	char* rutaArchivoBasura = string_from_format("%s/Files/Basura.ims", PUNTO_MONTAJE);
 
-		haySabotajeBitmapEnElArchivo("/home/utnso/polus/Files/Oxigeno.ims");
+	if(existeArchivo(rutaArchivoOxigeno)){
 
-	}
-
-	if(existeArchivo("/home/utnso/polus/Files/Comida.ims")){
-
-		haySabotajeBitmapEnElArchivo("/home/utnso/polus/Files/Comida.ims");
+		haySabotajeBitmapEnElArchivo(rutaArchivoOxigeno);
 
 	}
 
-	if(existeArchivo("/home/utnso/polus/Files/Basura.ims")){
+	if(existeArchivo(rutaArchivoComida)){
 
-		haySabotajeBitmapEnElArchivo("/home/utnso/polus/Files/Basura.ims");
+		haySabotajeBitmapEnElArchivo(rutaArchivoComida);
 
 	}
+
+	if(existeArchivo(rutaArchivoBasura)){
+
+		haySabotajeBitmapEnElArchivo(rutaArchivoBasura);
+
+	}
+
+	free(rutaArchivoOxigeno);
+	free(rutaArchivoComida);
+	free(rutaArchivoBasura);
 
 	return EXIT_SUCCESS;
 
@@ -1097,10 +1105,10 @@ void haySabotajeBitmapEnElArchivo(char* directorio){
 	while(blocks[j]!=NULL){
 
 		if(bitarray_test_bit(bitmap, atoi(blocks[j])-1) == 1){
-			log_info(logger, "no hay sabotaje en ese BLOCK");
+			log_info(logger, "no hay sabotaje en el Bitmap");
 		}else{
 			setBitmap(1, atoi(blocks[j]));
-			log_info(logger, "Sabotaje en superbloque corregido, seteo BLOCK = %d en 1 en el Bitmap ", atoi(blocks[j])-1));
+			log_info(logger, "Sabotaje en superbloque corregido, seteo BLOCK = %d en 1 en el Bitmap ", atoi(blocks[j])-1);
 		}
 
 		j++;
