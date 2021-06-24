@@ -1161,7 +1161,7 @@ int32_t get_criterio(char* algoritmo_config) {
 	return -1;
 }
 
-/* crea las listas de segmentos libres y ocupados */
+/* crea la lista de segmentos libres */
 void inicializar_segmentacion(){
 	segmento* memoria_vacia = malloc(sizeof(segmento));
 	list_create(segmentos_libres);
@@ -1279,9 +1279,9 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 		if(!error_guardado){
 
 			//Guardo tabla de paginas
-			dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_patota); //que pongo
+			dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_patota);
 
-			//modifico la lista de segmentos libres
+			list_iterate(tabla_patota, sacar_segmento_lista_libres);
 
 		} else {
 
@@ -1290,7 +1290,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 	}
 }
 
-//SIN TERMINAR necesita revision
+/*saca un segmento de la lista libres, si sobraba segmento guarda el sobrante, falta revision*/
 void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 
 	uint32_t inicio_seg_nuevo = segmento_nuevo->inicio;
@@ -1302,7 +1302,7 @@ void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 	}
 
 	segmento* seg_a_modificar = malloc(sizeof(segmento));
-	seg_a_modificar = list_get(list_filter(segmentos_libres, se_encuentra_contenido, 0));
+	seg_a_modificar = list_get(list_filter(segmentos_libres, se_encuentra_contenido), 0);
 	//ESTO ESTA BIEN PARA OBTENER EL SEGMENTO?
 
 	bool es_el_segmento(segmento* seg){
@@ -1317,14 +1317,14 @@ void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 
 		seg_a_modificar->inicio = dir_fisica_seg_nuevo; //el segmento libre nuevo arranca donde termina el otro
 		list_add(segmentos_libres, seg_a_modificar);
-		//falta el tema del orden
+
 		ordenar_lista_segmentos_libres();
 	}
 }
 
 //SIN HACER
 void ordenar_lista_segmentos_libres(){
-	//IMPLEMENTAR
+	//list_sort(segmentos_libres, funcion_que_no_se_como_hacer);
 }
 
 uint32_t obtener_direccion_fisica(segmento* seg){
@@ -1386,18 +1386,20 @@ int32_t get_espacio_libre(uint32_t size){
 	}
 }
 
-//SIN TERMINAR
+/* agrega el segmento a la lista de segmentos libres */
 void liberar_segmento(segmento* seg){
-
+	//deberia chequear si esta? antes de agregar
 	list_add(segmentos_libres, seg);
-	//chequear orden
+	ordenar_lista_segmentos_libres();
 
 }
 
 //SIN HACER
 void compactar(){
 
-	//IMPLEMENTAR
+	//se me ocurre buscar en el dictionary y por cada patota moverlos para arriba
+	//con el espacio sobrante hago un nuevo segmento libre que vaya desde ese punto a 2048
+
 }
 
 
