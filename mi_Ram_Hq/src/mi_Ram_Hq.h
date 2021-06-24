@@ -156,16 +156,13 @@ typedef enum{
 	BF = 1
 } criterio_seleccion;
 
-t_list* segmentos_ocupados();
 t_list* segmentos_libres();
 
 void inicializar_segmentacion();	// revisar los tipos del add, creo que no anda
 
-void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status)
+void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status);
 
 //-----------------------------
-
-void cargar_tcb(tripulante_data_msg* tripulante, t_tcb* tcb);
 
 void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje);
 
