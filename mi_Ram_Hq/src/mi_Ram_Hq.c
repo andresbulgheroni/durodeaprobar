@@ -67,7 +67,7 @@ void recibir_mensaje(int32_t* conexion){
 				bool status = true;
 
 				switch(ESQUEMA_MEMORIA){
-					case SEGMENTACION_PURA: break;
+					case SEGMENTACION_PURA: crear_patota_segmentacion(mensaje, &status);break;
 					case PAGINACION_VIRTUAL: crear_patota_paginacion(mensaje, &status);break;
 				}
 
@@ -105,7 +105,6 @@ void recibir_mensaje(int32_t* conexion){
 			case CAMBIO_ESTADO:{
 
 				cambio_estado_msg* mensaje = deserializar_paquete(paquete);
-
 
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: break;
@@ -1349,10 +1348,135 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 		} else {
 
-			//aviso que no se pudo guardar la patota?
+			status = 0; //asi? falopa
 		}
 	}
 }
+
+/*
+void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool* status){
+
+	pthread_mutex_lock(&m_TABLAS_PAGINAS);
+
+	t_list* paginas = dictionary_get(tabla_paginas_patota, string_itoa(mensaje->idPatota));
+	t_list* paginas_leidas = list_create();
+	void* datos = malloc(list_size(paginas) * TAMANIO_PAGINA);
+	uint32_t offset = sizeof(t_pcb);
+	uint32_t pagina = floor(offset/TAMANIO_PAGINA);
+	bool encontrado = false;
+	while(!encontrado){
+		uint32_t tid;
+		int32_t paginas_ne = paginas_necesarias(offset, sizeof(tid));
+
+		for(uint32_t i = 0; i < paginas_ne; i++){
+
+			bool ya_leida(int32_t* nro_frame){
+
+				return *nro_frame == (pagina + i);
+
+			}
+
+			if(!list_any_satisfy(paginas_leidas, ya_leida)){
+
+				t_pagina_patota* patota = list_get(paginas, pagina + i);
+				leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina + i));
+				int32_t* pagina_leida = malloc(sizeof(int32_t));
+				*pagina_leida = pagina + i;
+				list_add(paginas_leidas, pagina_leida);
+
+			}
+
+		}
+
+		memcpy(&tid, datos + offset, sizeof(tid));
+
+		if(tid == mensaje->idTripulante){
+
+			encontrado = true;
+
+			offset += sizeof(uint32_t) + sizeof(char);
+			pagina = floor(offset/TAMANIO_PAGINA);
+
+			int32_t paginas_ne = paginas_necesarias(offset, sizeof(uint32_t));
+
+			for(uint32_t i = 0; i < paginas_ne; i++){
+
+				bool ya_leida(int32_t* nro_frame){
+
+					return *nro_frame == (pagina + i);
+
+				}
+
+				if(!list_any_satisfy(paginas_leidas, ya_leida)){
+
+					t_pagina_patota* patota = list_get(paginas, pagina + i);
+					leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina + i));
+					int32_t* pagina_leida = malloc(sizeof(int32_t));
+					*pagina_leida = pagina + i;
+					list_add(paginas_leidas, pagina_leida);
+
+				}
+
+			}
+
+			memcpy(datos + offset, mensaje->coordenadasDestino->posX, sizeof(uint32_t));
+			for(uint32_t i = 0; i < paginas_ne; i++){
+
+				modificar_en_memoria_principal(list_get(paginas, pagina + i), datos + (pagina + i) * TAMANIO_PAGINA);
+
+			}
+
+			offset += sizeof(uint32_t);
+			pagina = floor(offset/TAMANIO_PAGINA);
+
+			paginas_ne = paginas_necesarias(offset, sizeof(uint32_t));
+
+			for(uint32_t i = 0; i < paginas_ne; i++){
+
+				bool ya_leida(int32_t* nro_frame){
+
+					return *nro_frame == (pagina + i);
+
+				}
+
+				if(!list_any_satisfy(paginas_leidas, ya_leida)){
+
+					t_pagina_patota* patota = list_get(paginas, pagina + i);
+					leer_pagina_de_memoria(patota, datos + TAMANIO_PAGINA * (pagina + i));
+					int32_t* pagina_leida = malloc(sizeof(int32_t));
+					*pagina_leida = pagina + i;
+					list_add(paginas_leidas, pagina_leida);
+
+				}
+
+			}
+
+			memcpy(datos + offset, &(mensaje->coordenadasDestino->posX), sizeof(uint32_t));
+			for(uint32_t i = 0; i < paginas_ne; i++){
+
+				modificar_en_memoria_principal(list_get(paginas, pagina + i), datos + (pagina + i) * TAMANIO_PAGINA);
+
+			}
+
+		}else{
+
+			offset += sizeof(t_tcb);
+			pagina = floor(offset/TAMANIO_PAGINA);
+
+		}
+
+	}
+
+	void liberar_nros_usadas(int32_t* frame){
+		free(frame);
+	}
+	list_destroy_and_destroy_elements(paginas_leidas, liberar_nros_usadas);
+	free(datos);
+
+	pthread_mutex_unlock(&m_TABLAS_PAGINAS);
+
+}
+*/
 
 /*saca un segmento de la lista libres, si sobraba segmento guarda el sobrante, falta revision*/
 void sacar_segmento_lista_libres(segmento* segmento_nuevo){
@@ -1386,9 +1510,13 @@ void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 	}
 }
 
-//SIN HACER
 void ordenar_lista_segmentos_libres(){
-	//list_sort(segmentos_libres, funcion_que_no_se_como_hacer);
+
+	bool ordenar_segmentos(segmento* primer_segmento, segmento* segundo_segmento){
+		return primer_segmento->inicio > segundo_segmento->inicio;
+	}
+
+	list_sort(segmentos_libres, ordenar_segmentos);
 }
 
 uint32_t obtener_direccion_fisica(segmento* seg){

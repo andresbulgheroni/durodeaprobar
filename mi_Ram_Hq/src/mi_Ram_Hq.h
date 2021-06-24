@@ -149,7 +149,7 @@ typedef struct{
 
 }segmento;
 
-//lista con todas las tablas de segmentos
+//agrupa todas las tablas de segmentos
 t_dictionary* tablas_seg_patota;
 
 typedef enum{
@@ -157,18 +157,18 @@ typedef enum{
 	BF = 1
 } criterio_seleccion;
 
+//lista de segmentos libres
 t_list* segmentos_libres();
-
-void inicializar_segmentacion();	// revisar los tipos del add, creo que no anda
-
-void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status);
-
-//-----------------------------
-
-void crear_tabla_segmentos_patota(iniciar_patota_msg* mensaje);
-
+void sacar_segmento_lista_libres(segmento* segmento_nuevo);
+void ordenar_lista_segmentos_libres();
+void liberar_segmento(segmento* seg);
 int32_t get_espacio_libre(uint32_t size);
 int32_t hay_espacio_libre(uint32_t size);
+
+void inicializar_segmentacion();
+
+void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status);
+void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool* status);
 
 void compactar_memoria(); //sin implementar
 
