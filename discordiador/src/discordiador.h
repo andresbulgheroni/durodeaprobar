@@ -189,6 +189,7 @@ int cantidadElementosArray(char**);
 
 void sacarTripulanteDeLista(t_tripulante* , t_list* );
 
+char* convertirEnumAString (t_status_code);
 void inicializarAtributosATripulante(t_list*);
 void crearHilosTripulantes();
 void ejecutarTripulante(t_tripulante*);
@@ -202,6 +203,7 @@ void log_movimiento_tripulante(uint32_t, uint32_t, uint32_t);
 void log_tripulante_cambio_de_cola_planificacion(uint32_t, char*, char*);
 void planificarBloqueo();
 void inicioHiloPlanificarBloqueo();
+
 
 void moverAlTripulanteHastaLaTarea(t_tripulante*);
 int llegoATarea(t_tripulante*);
@@ -224,18 +226,12 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*);
 
 
 
-
-
+//SABOTAJE
 
 bool ordenarTripulantesDeMenorIdAMayor(void* ,void*);
 void pasarATodosLosTripulantesAListaBloqueado();
 void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*,t_tripulante*);
-
-void pasarAEjecutarAlTripulanteMasCercano();
-
 void pasarTripulantesAListaReady();
-
-
 void iniciarHiloSabotaje();
 void planificarSabotaje();
 
