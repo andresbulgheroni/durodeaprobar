@@ -10,13 +10,13 @@ int main(void) {
 	//
 	//
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
-	//	estadoSuperBloque();
-	//
-	//	generarRecurso(190,'O');
-	//	estadoSuperBloque();
-	//	consumirRecurso(100, 'O');
-	//
-	//	estadoSuperBloque();
+//			estadoSuperBloque();
+//
+//			generarRecurso(190,'O');
+//			estadoSuperBloque();
+//			consumirRecurso(100, 'O');
+//
+//			estadoSuperBloque();
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 	//
 	//	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
@@ -42,7 +42,9 @@ int main(void) {
 
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
 	//	fsckSuperBloque_Bloques();
-	fsckSuperBloque_Bitmap();
+	//	fsckSuperBloque_Bitmap();
+	 fsckFiles_BlockCount();
+	//	fsckFiles_Blocks();
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
 
 
@@ -122,101 +124,101 @@ void funcionPruebaTrip(int32_t* socketCliente){
 	bool terminado = false;
 	while (!terminado){
 
-	t_paquete* paquete = recibir_paquete(*socketCliente);
+		t_paquete* paquete = recibir_paquete(*socketCliente);
 
-	switch(paquete->codigo){
+		switch(paquete->codigo){
 
-	case OBTENER_BITACORA_MSG:{
+		case OBTENER_BITACORA_MSG:{
 
-		obtener_bitacora_msg* bitacoraMsg = deserializar_paquete(paquete);
-		char* bitacora = readBitacora(bitacoraMsg->idTripulante);
-		enviar_paquete(bitacora,OBTENER_BITACORA_RTA,*socketCliente);
-		if(bitacora != NULL){
-			free(bitacora);
+			obtener_bitacora_msg* bitacoraMsg = deserializar_paquete(paquete);
+			char* bitacora = readBitacora(bitacoraMsg->idTripulante);
+			enviar_paquete(bitacora,OBTENER_BITACORA_RTA,*socketCliente);
+			if(bitacora != NULL){
+				free(bitacora);
+			}
+
+			break;
+
+		} case INFORMAR_MOVIMIENTO_MONGO:{
+
+			informar_movimiento_mongo_msg* movimientoMsg = deserializar_paquete(paquete);
+			char* cadena = string_new();
+			string_append(&cadena, "Se mueve de ");
+			string_append(&cadena, string_itoa(movimientoMsg->coordenadasOrigen->posX));
+			string_append(&cadena, "|");
+			string_append(&cadena, string_itoa(movimientoMsg->coordenadasOrigen->posY));
+			string_append(&cadena, " a ");
+			string_append(&cadena, string_itoa(movimientoMsg->coordenadasDestino->posX));
+			string_append(&cadena, "|");
+			string_append(&cadena, string_itoa(movimientoMsg->coordenadasDestino->posY));
+			string_append(&cadena, "\n");
+			writeBitacora(movimientoMsg->idTripulante,cadena);
+			free(movimientoMsg);
+			free(cadena);
+
+			break;
+
+		} case INICIO_TAREA:{
+
+			inicio_tarea_msg* tareaMsg = deserializar_paquete(paquete);
+			char* cadena = string_new();
+			string_append(&cadena, "Comienza ejecución de tarea ");
+			string_append(&cadena, tareaMsg->nombreTarea->string);
+			string_append(&cadena, "\n");
+			writeBitacora(tareaMsg->idTripulante,cadena);
+			hacerTarea(tareaMsg);
+			free(tareaMsg);
+			free(cadena);
+
+			break;
+
+		} case FIN_TAREA:{
+
+			fin_tarea_msg* tareaMsg = deserializar_paquete(paquete);
+			char* cadena = string_new();
+			string_append(&cadena, "Se finaliza la tarea ");
+			string_append(&cadena, tareaMsg->nombreTarea->string);
+			string_append(&cadena, "\n");
+			writeBitacora(tareaMsg->idTripulante,cadena);
+			free(tareaMsg);
+			free(cadena);
+
+			break;
+
+		} case ATENDER_SABOTAJE:{
+
+			atender_sabotaje_msg* sabotajeMsg = deserializar_paquete(paquete);
+			char* cadena = string_new();
+			string_append(&cadena, "Se corre en pánico hacia la ubicación del sabotaje");
+			string_append(&cadena, "\n");
+			writeBitacora(sabotajeMsg->idTripulante,cadena);
+			free(sabotajeMsg);
+			free(cadena);
+
+			break;
+
+		} case RESOLUCION_SABOTAJE:{
+
+			resolucion_sabotaje_msg* sabotajeMsg = deserializar_paquete(paquete);
+			char* cadena = string_new();
+			string_append(&cadena, "Se resuelve el sabotaje");
+			string_append(&cadena, "\n");
+			writeBitacora(sabotajeMsg->idTripulante,cadena);
+			free(sabotajeMsg);
+			free(cadena);
+
+			break;
+
+		} default:
+
+			terminado = true;
+			log_error(logger, "Codigo de op invalido");
+
+			break;
+
 		}
 
-		break;
-
-	} case INFORMAR_MOVIMIENTO_MONGO:{
-
-		informar_movimiento_mongo_msg* movimientoMsg = deserializar_paquete(paquete);
-		char* cadena = string_new();
-		string_append(&cadena, "Se mueve de ");
-		string_append(&cadena, string_itoa(movimientoMsg->coordenadasOrigen->posX));
-		string_append(&cadena, "|");
-		string_append(&cadena, string_itoa(movimientoMsg->coordenadasOrigen->posY));
-		string_append(&cadena, " a ");
-		string_append(&cadena, string_itoa(movimientoMsg->coordenadasDestino->posX));
-		string_append(&cadena, "|");
-		string_append(&cadena, string_itoa(movimientoMsg->coordenadasDestino->posY));
-		string_append(&cadena, "\n");
-		writeBitacora(movimientoMsg->idTripulante,cadena);
-		free(movimientoMsg);
-		free(cadena);
-
-		break;
-
-	} case INICIO_TAREA:{
-
-		inicio_tarea_msg* tareaMsg = deserializar_paquete(paquete);
-		char* cadena = string_new();
-		string_append(&cadena, "Comienza ejecución de tarea ");
-		string_append(&cadena, tareaMsg->nombreTarea->string);
-		string_append(&cadena, "\n");
-		writeBitacora(tareaMsg->idTripulante,cadena);
-		hacerTarea(tareaMsg);
-		free(tareaMsg);
-		free(cadena);
-
-		break;
-
-	} case FIN_TAREA:{
-
-		fin_tarea_msg* tareaMsg = deserializar_paquete(paquete);
-		char* cadena = string_new();
-		string_append(&cadena, "Se finaliza la tarea ");
-		string_append(&cadena, tareaMsg->nombreTarea->string);
-		string_append(&cadena, "\n");
-		writeBitacora(tareaMsg->idTripulante,cadena);
-		free(tareaMsg);
-		free(cadena);
-
-		break;
-
-	} case ATENDER_SABOTAJE:{
-
-		atender_sabotaje_msg* sabotajeMsg = deserializar_paquete(paquete);
-		char* cadena = string_new();
-		string_append(&cadena, "Se corre en pánico hacia la ubicación del sabotaje");
-		string_append(&cadena, "\n");
-		writeBitacora(sabotajeMsg->idTripulante,cadena);
-		free(sabotajeMsg);
-		free(cadena);
-
-		break;
-
-	} case RESOLUCION_SABOTAJE:{
-
-		resolucion_sabotaje_msg* sabotajeMsg = deserializar_paquete(paquete);
-		char* cadena = string_new();
-		string_append(&cadena, "Se resuelve el sabotaje");
-		string_append(&cadena, "\n");
-		writeBitacora(sabotajeMsg->idTripulante,cadena);
-		free(sabotajeMsg);
-		free(cadena);
-
-		break;
-
-	} default:
-
-		terminado = true;
-		log_error(logger, "Codigo de op invalido");
-
-		break;
-
-	}
-
-	free(paquete);
+		free(paquete);
 
 	}
 
@@ -1101,6 +1103,169 @@ int fsckSuperBloque_Bitmap(){
 
 }
 
+
+
+int fsckFiles_Size(){
+
+	/* ir a leer a los bloques y sacar el md5 de lo que esta ahi
+	compararlo con el md5 de la metadata,
+	si son iguales -> no hay sabotaje (para comparar los strings uso strcmp
+	si son diferentes -> tengo que comenzar a generar md5 hasta que uno coincida
+	tengo que leer hasta cant blocks * block size, desde 1
+	 */
+
+	return EXIT_SUCCESS;
+}
+
+int fsckFiles_BlockCount(){
+
+	char* rutaArchivoOxigeno = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
+	char* rutaArchivoComida = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
+	char* rutaArchivoBasura = string_from_format("%s/Files/Basura.ims", PUNTO_MONTAJE);
+
+	if(existeArchivo(rutaArchivoOxigeno)){
+
+		haySabotajeCountEnElArchivo(rutaArchivoOxigeno);
+
+	}
+
+	if(existeArchivo(rutaArchivoComida)){
+
+		haySabotajeCountEnElArchivo(rutaArchivoComida);
+
+	}
+
+	if(existeArchivo(rutaArchivoBasura)){
+
+		haySabotajeCountEnElArchivo(rutaArchivoBasura);
+
+	}
+
+	free(rutaArchivoOxigeno);
+	free(rutaArchivoComida);
+	free(rutaArchivoBasura);
+
+	return EXIT_SUCCESS;
+
+}
+
+
+int fsckFiles_Blocks(){
+
+	char* rutaArchivoOxigeno = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
+	char* rutaArchivoComida = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
+	char* rutaArchivoBasura = string_from_format("%s/Files/Basura.ims", PUNTO_MONTAJE);
+
+	if(existeArchivo(rutaArchivoOxigeno)){
+
+		t_config* metadata = config_create(rutaArchivoOxigeno);
+		char** blocks = config_get_array_value(metadata, "BLOCKS");
+		uint32_t size = config_get_int_value(metadata, "SIZE");
+
+		int j,i = 0;
+		while(blocks[j]!=NULL){
+
+			if(atoi(blocks[j]) > BLOCKS){
+				log_info(logger, "hay sabotaje del BLOCKS");
+				i=j;
+			} else {
+				log_info(logger, "no hay sabotaje del BLOCKS");
+			}
+
+			j++;
+		}
+
+		if(i != 0){
+			consumirRecurso(size,'O');
+			generarRecurso(size,'O');
+		}
+
+		int x = 0;
+		while(blocks[x] != NULL){
+			free(blocks[x]);
+			x++;
+		}
+		free(blocks);
+		config_destroy(metadata);
+
+	}
+
+	if(existeArchivo(rutaArchivoComida)){
+
+		t_config* metadata = config_create(rutaArchivoComida);
+		char** blocks = config_get_array_value(metadata, "BLOCKS");
+		uint32_t size = config_get_int_value(metadata, "SIZE");
+
+		int j,i = 0;
+		while(blocks[j]!=NULL){
+
+			if(atoi(blocks[j]) > BLOCKS){
+				log_info(logger, "hay sabotaje del BLOCKS");
+				i=j;
+			} else {
+				log_info(logger, "no hay sabotaje del BLOCKS");
+			}
+
+			j++;
+		}
+
+		if(i != 0){
+			consumirRecurso(size,'C');
+			generarRecurso(size,'C');
+		}
+
+		int x = 0;
+		while(blocks[x] != NULL){
+			free(blocks[x]);
+			x++;
+		}
+		free(blocks);
+		config_destroy(metadata);
+
+	}
+
+	if(existeArchivo(rutaArchivoBasura)){
+
+		t_config* metadata = config_create(rutaArchivoBasura);
+		char** blocks = config_get_array_value(metadata, "BLOCKS");
+		uint32_t size = config_get_int_value(metadata, "SIZE");
+
+		int j,i = 0;
+		while(blocks[j]!=NULL){
+
+			if(atoi(blocks[j]) > BLOCKS){
+				log_info(logger, "hay sabotaje del BLOCKS");
+				i=j;
+			} else {
+				log_info(logger, "no hay sabotaje del BLOCKS");
+			}
+
+			j++;
+		}
+
+		if(i != 0){
+			descartarBasura();
+			generarRecurso(size,'B');
+		}
+
+		int x = 0;
+		while(blocks[x] != NULL){
+			free(blocks[x]);
+			x++;
+		}
+		free(blocks);
+		config_destroy(metadata);
+
+	}
+
+	free(rutaArchivoOxigeno);
+	free(rutaArchivoComida);
+	free(rutaArchivoBasura);
+
+	return EXIT_SUCCESS;
+
+}
+
 void haySabotajeBitmapEnElArchivo(char* directorio){
 
 	t_config* metadata = config_create(directorio);
@@ -1130,37 +1295,60 @@ void haySabotajeBitmapEnElArchivo(char* directorio){
 
 }
 
-int fsckFiles_Size(){
+void haySabotajeCountEnElArchivo(char* directorio){
 
-	/* ir a leer a los bloques y sacar el md5 de lo que esta ahi
-	compararlo con el md5 de la metadata,
-	si son iguales -> no hay sabotaje (para comparar los strings uso strcmp
-	si son diferentes -> tengo que comenzar a generar md5 hasta que uno coincida
-	tengo que leer hasta cant blocks * block size, desde 1
-	*/
+	t_config* metadata = config_create(directorio);
+	char** blocks = config_get_array_value(metadata, "BLOCKS");
+	char* blocksRepeat = config_get_string_value(metadata, "BLOCKS");
+	uint32_t blockCount = config_get_int_value(metadata, "BLOCK_COUNT");
+	char* size = config_get_string_value(metadata, "SIZE");
+	char* caracter = config_get_string_value(metadata, "CARACTER_LLENADO");
+	char* archivomd5 = config_get_string_value(metadata, "MD5_ARCHIVO");
 
-	return EXIT_SUCCESS;
-}
+	int j = 0;
+	while(blocks[j]!=NULL){
+		j++;
+	}
 
-int fsckFiles_BlockCount(){
+	int x = 0;
+	if(j == blockCount){
+		x = blockCount;
+		log_info(logger, "no hay sabotaje del BLOCK_COUNT");
 
-//	int j = 0;
-//		while(blocks[j]!=NULL){
-//
-//			j++;
-//
-//		}
-	// comparar J que seria cant de bloques con el campo block_count del metadata
-	//si son diferentes, corregir el block_count con el valor de J.
+	} else {
+		x = j;
+		log_info(logger, "Sabotaje en el BLOCK_COUNT corregido");
 
-	return EXIT_SUCCESS;
-}
+	}
 
-int fsckFiles_Blocks(){
+	config_set_value(metadata,"BLOCK_COUNT", string_itoa(x));
 
-	// comparar el blocks con el blocks global y si hay sabotaje
-	// libero el archivo y lo vuelvo a generar con el size correcto.
-	// liberar el archivo seria descartar/cosumir y generar archivo es generarRecurso
+	char* metadataFiles = string_new();
+	string_append(&metadataFiles,"SIZE=");
+	string_append(&metadataFiles,size);
+	string_append(&metadataFiles,"\nBLOCK_COUNT=");
+	string_append(&metadataFiles,string_itoa(blockCount));
+	string_append(&metadataFiles,"\nBLOCKS=");
+	string_append(&metadataFiles,blocksRepeat);
+	string_append(&metadataFiles,"\nCARACTER_LLENADO=");
+	string_append(&metadataFiles,caracter);
+	string_append(&metadataFiles,"\nMD5_ARCHIVO=");
+	string_append(&metadataFiles,archivomd5);
 
-	return EXIT_SUCCESS;
+	FILE* fp = fopen(directorio, "w+");
+	txt_write_in_file(fp, metadataFiles);
+	txt_close_file(fp);
+
+	int i = 0;
+	while(blocks[i] != NULL){
+		free(blocks[i]);
+		i++;
+	}
+	free(blocks);
+	free(blocksRepeat);
+	free(size);
+	free(caracter);
+	free(archivomd5);
+	config_destroy(metadata);
+
 }
