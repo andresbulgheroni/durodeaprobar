@@ -928,7 +928,7 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 
 	free(mensajeMovimientoTarea);
-	free(mensajeMovimientoTarea->coordenadasDestino);
+//	free(mensajeMovimientoTarea->coordenadasDestino);
 
 //	free(mensajeMovimientoMongo);
 //	free(mensajeMovimientoMongo->coordenadasDestino);
