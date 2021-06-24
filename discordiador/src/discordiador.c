@@ -461,8 +461,8 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 					id_tripulante_para_enviar++;
 
-					//						free(coordenadasTripulantes);
-					//						free(coordenadasTripulantes);
+					//						free(tripulanteConCoordenadas->coordenadas);
+					//						free(tripulanteConCoordenadas);
 
 
 				}
@@ -926,13 +926,14 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 	//enviar_paquete(mensajeMovimientoMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
 
-
-	free(mensajeMovimientoTarea);
 //	free(mensajeMovimientoTarea->coordenadasDestino);
 
-//	free(mensajeMovimientoMongo);
+
+		free(mensajeMovimientoTarea);
+
 //	free(mensajeMovimientoMongo->coordenadasDestino);
 //	free(mensajeMovimientoMongo->coordenadasOrigen);
+	//	free(mensajeMovimientoMongo);
 
 
 }
