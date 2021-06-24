@@ -163,6 +163,7 @@ typedef struct
 	sem_t*semaforoCiclo;
 	sem_t*semaforoBloqueadoTripulante;
 	sem_t*semaforoDelTripulante;
+	sem_t*semaforoDelSabotaje;
 
 } t_tripulante;
 

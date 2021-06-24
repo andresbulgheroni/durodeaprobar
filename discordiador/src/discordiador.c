@@ -200,6 +200,13 @@ void planificarSabotaje(){
 
 	agregarTripulanteAListaReadyYAvisar(tripulanteMasCercano);		//aca va al final de la lista de ready
 
+	if(!list_is_empty(listaBloqueados)){
+	void iterador(t_tripulante*tripulante){
+		sem_post(tripulante->semaforoDelSabotaje);		//esto es para el tripulante que este bloqueado y justo le llega un sabotaje
+	}
+	list_iterate(listaBloqueados,(void*) iterador);
+	}
+
 	haySabotaje=0;
 	sem_post(&sem_sabotaje);
 	//liberar_conexion(socketSabotaje);
@@ -1414,6 +1421,9 @@ void planificarBloqueo(){
 			if(estaPlanificando==0){
 				sem_wait(tripulante->semaforoCiclo);
 			}
+//			if(haySabotaje==1){
+//				sem_wait(tripulante->semaforoDelSabotaje);		//TODO
+//			}
 
 			sleep(RETARDO_CICLO_CPU);
 
