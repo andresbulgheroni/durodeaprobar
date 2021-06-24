@@ -119,6 +119,9 @@ void timerSincronizacion_blocksMap(){
 
 void funcionPruebaTrip(int32_t* socketCliente){
 
+	bool terminado = false;
+	while (!terminado){
+
 	t_paquete* paquete = recibir_paquete(*socketCliente);
 
 	switch(paquete->codigo){
@@ -206,6 +209,7 @@ void funcionPruebaTrip(int32_t* socketCliente){
 
 	} default:
 
+		terminado = true;
 		log_error(logger, "Codigo de op invalido");
 
 		break;
@@ -214,6 +218,9 @@ void funcionPruebaTrip(int32_t* socketCliente){
 
 	free(paquete);
 
+	}
+
+	pthread_exit(NULL);
 }
 
 void hacerTarea(inicio_tarea_msg* tarea) {
@@ -1096,9 +1103,7 @@ int fsckSuperBloque_Bitmap(){
 
 void haySabotajeBitmapEnElArchivo(char* directorio){
 
-	char* path = string_new();
-	string_append(&path,directorio);
-	t_config* metadata = config_create(path);
+	t_config* metadata = config_create(directorio);
 	char** blocks = config_get_array_value(metadata, "BLOCKS");
 
 	int j = 0;
@@ -1115,7 +1120,6 @@ void haySabotajeBitmapEnElArchivo(char* directorio){
 
 	}
 
-	free(path);
 	int i = 0;
 	while(blocks[i] != NULL){
 		free(blocks[i]);
@@ -1128,21 +1132,35 @@ void haySabotajeBitmapEnElArchivo(char* directorio){
 
 int fsckFiles_Size(){
 
-	// Validar contra el MD5
-
-	//	Como no tengo size para ir a leer a los bloques y sacar el nuevo MD5,
-	//	hay que ponerse a generar MD5s hasta que coicida con el de la metadata
-	//  Cuando encuentre el size que lo hace coincidir, grabo ese en la metadata
+	/* ir a leer a los bloques y sacar el md5 de lo que esta ahi
+	compararlo con el md5 de la metadata,
+	si son iguales -> no hay sabotaje (para comparar los strings uso strcmp
+	si son diferentes -> tengo que comenzar a generar md5 hasta que uno coincida
+	tengo que leer hasta cant blocks * block size, desde 1
+	*/
 
 	return EXIT_SUCCESS;
 }
 
 int fsckFiles_BlockCount(){
 
+//	int j = 0;
+//		while(blocks[j]!=NULL){
+//
+//			j++;
+//
+//		}
+	// comparar J que seria cant de bloques con el campo block_count del metadata
+	//si son diferentes, corregir el block_count con el valor de J.
+
 	return EXIT_SUCCESS;
 }
 
 int fsckFiles_Blocks(){
+
+	// comparar el blocks con el blocks global y si hay sabotaje
+	// libero el archivo y lo vuelvo a generar con el size correcto.
+	// liberar el archivo seria descartar/cosumir y generar archivo es generarRecurso
 
 	return EXIT_SUCCESS;
 }
