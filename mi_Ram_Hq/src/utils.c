@@ -26,7 +26,7 @@ t_string* get_t_string(char* string){
 
 bool leer_buffer(int32_t codigo){
 
-	return codigo != DESCONECTADO && codigo != COMPLETO_TAREAS;
+	return codigo != DESCONECTADO && codigo != COMPLETO_TAREAS && codigo != OK;
 
 }
 
@@ -149,6 +149,13 @@ t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje){
 			break;
 
 		}
+		case FAIL:{
+
+			paquete->buffer = serializar_fail_msg(mensaje);
+
+			break;
+		}
+		case OK:
 		case DESCONECTADO:
 		case COMPLETO_TAREAS:
 		default: break;
@@ -633,6 +640,22 @@ t_buffer* serializar_notificar_sabotaje_msg(notificar_sabotaje_msg* mensaje){
 
 }
 
+t_buffer* serializar_fail_msg(t_string* mensaje){
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+
+	buffer->size = sizeof(mensaje->length) + mensaje->length;
+
+	buffer->stream = malloc(buffer->size);
+
+	uint32_t offset = 0;
+
+	serializar_string(buffer->stream,  mensaje, &offset);
+
+	return buffer;
+
+}
+
 //DESERIALIZDO MENSAJES
 
 iniciar_patota_msg* desserializar_iniciar_patota_msg(void* stream){
@@ -849,6 +872,15 @@ notificar_sabotaje_msg* desserializar_notificar_sabotaje_msg(void* stream){
 	deserializar_variable(stream, &(mensaje->idSabotaje), sizeof(mensaje->idSabotaje), &offset);
 	deserializar_variable(stream, &(mensaje->coordenadas->posX), sizeof(mensaje->coordenadas->posX), &offset);
 	deserializar_variable(stream, &(mensaje->coordenadas->posY), sizeof(mensaje->coordenadas->posY), &offset);
+
+	return mensaje;
+
+}
+
+t_string* desserializar_fail_msg(void* stream){
+
+	uint32_t offset = 0;
+	t_string* mensaje = deserializar_string(stream, &offset);
 
 	return mensaje;
 
