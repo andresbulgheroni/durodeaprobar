@@ -1226,9 +1226,11 @@ int32_t get_criterio(char* algoritmo_config) {
 void inicializar_segmentacion(){
 	segmento* memoria_vacia = malloc(sizeof(segmento));
 	list_create(segmentos_libres);
+	list_create(segmentos_en_memoria);
 	memoria_vacia->inicio = 0;
 	memoria_vacia->tamanio = TAMANIO_MEMORIA;
-	list_add(segmentos_libres, memoria_vacia); //chequear error de tipos
+	list_add(segmentos_libres, memoria_vacia);
+	tablas_seg_patota = dictionary_create(); //esto??
 }
 
 /* guarda la patota en memoria, crea la tabla de segmentos y la guarda en el dictionary*/
@@ -1343,6 +1345,8 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 			dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_patota);
 
 			list_iterate(tabla_patota, sacar_segmento_lista_libres);
+
+			list_add_all(segmentos_en_memoria, tabla_patota);
 
 		} else {
 
@@ -1572,19 +1576,62 @@ int32_t get_espacio_libre(uint32_t size){
 	}
 }
 
-/* agrega el segmento a la lista de segmentos libres */
+/* agrega el segmento a la lista de segmentos libres y lo saca de segmentos en memoria*/
 void liberar_segmento(segmento* seg){
 	//deberia chequear si esta? antes de agregar
+
+	//agrega a la lista de segmentos libres
 	list_add(segmentos_libres, seg);
 	ordenar_lista_segmentos_libres();
 
+	//lo saca de la lista de segmentos en memoria
+	bool es_el_segmento(segmento* seg_a_comparar){
+		return seg->inicio == seg_a_comparar->inicio && seg->tamanio == seg_a_comparar->tamanio;
+	}
+	remove_by_condition(segmentos_en_memoria, es_el_segmento);
 }
 
-//SIN HACER
+/* junta todos los segmentos en la parte superior de la memoria y crea un segmento libre con el restante */
 void compactar(){
 
-	//se me ocurre buscar en el dictionary y por cada patota moverlos para arriba
-	//con el espacio sobrante hago un nuevo segmento libre que vaya desde ese punto a 2048
+	bool ordenar_segmentos(segmento* seg1, segmento* seg2){
+		return seg1->inicio < seg2->inicio;
+	}
+
+	list_sort(segmentos_en_memoria, ordenar_segmentos());
+
+	segmento* seg_anterior = malloc(sizeof(segmento));
+	seg_anterior = list_get(segmentos_en_memoria, 0);
+	uint32_t direc_fisica_seg_anterior = obtener_direccion_fisica(seg_anterior);
+
+	if(seg_anterior->inicio != 0){
+		seg_anterior->inicio = 0;
+		direc_fisica_seg_anterior = obtener_direccion_fisica(seg_anterior);
+
+	}
+
+	void modificar_inicio(segmento *seg){
+		if(direc_fisica_seg_anterior != seg->inicio){
+			seg->inicio = direc_fisica_seg_anterior;
+		}
+		seg_anterior = seg;
+		direc_fisica_seg_anterior = obtener_direccion_fisica(seg);
+	}
+
+	list_iterate(segmentos_en_memoria, modificar_inicio());
+
+	uint32_t cant_segmentos = list_size(segmentos_en_memoria);
+	segmento* ult_seg = malloc(sizeof(segmento));
+	ult_seg = list_get(segmentos_en_memoria, cant_segmentos - 1);
+
+	uint32_t tamanio_ocupado_en_memoria = obtener_direccion_fisica(ult_seg);
+
+	segmento* segmento_libre = malloc(sizeof(segmento));
+	segmento_libre->inicio = tamanio_ocupado_en_memoria;
+	segmento_libre->tamanio = TAMANIO_MEMORIA - tamanio_ocupado_en_memoria;
+
+	list_clean(segmentos_libres);
+	list_add(segmentos_libres, segmento_libre);
 
 }
 

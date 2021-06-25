@@ -157,6 +157,9 @@ typedef enum{
 	BF = 1
 } criterio_seleccion;
 
+//lista con todos los segmentos en memoria
+t_list* segmentos_en_memoria();
+
 //lista de segmentos libres
 t_list* segmentos_libres();
 void sacar_segmento_lista_libres(segmento* segmento_nuevo);
