@@ -2,50 +2,50 @@
 
 int main(void) {
 
-		printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
-		leerConfig();
-		crear_log();
-		inicializarFS();
+	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
+	leerConfig();
+	crear_log();
+	inicializarFS();
 	//	signal(SIGUSR1, sighandler);
 	//
 	//
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
-//				estadoSuperBloque();
-//
-//				generarRecurso(190,'O');
-//				estadoSuperBloque();
-//				consumirRecurso(100, 'O');
-
-//				estadoSuperBloque();
+	//				estadoSuperBloque();
+	//
+	//				generarRecurso(10,'O');
+	//				estadoSuperBloque();
+	//				consumirRecurso(100, 'O');
+	//
+	//				estadoSuperBloque();
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 	//
 	//	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
-//		estadoSuperBloque();
-//
-//		char* bitacora = string_new();
-//		string_append(&bitacora, "DALEE DALEEE\n");
-//		string_append(&bitacora, "UYUYU UN MONTON\n");
-//		string_append(&bitacora, "tucson\n");
-//		string_append(&bitacora, "Quieren bajarme y no saben como hacer, porque este pibito no va a correr\n");
-//		writeBitacora(4, bitacora);
-//		free(bitacora);
-//
-//		char* tareas = readBitacora(4);
-//		printf("\nBitacora:\n\n%s", tareas);
-//
-//		if(tareas != NULL){
-//			free(tareas);
-//		}
-//
-//		estadoSuperBloque();
+	//		estadoSuperBloque();
+	//
+	//		char* bitacora = string_new();
+	//		string_append(&bitacora, "DALEE DALEEE\n");
+	//		string_append(&bitacora, "UYUYU UN MONTON\n");
+	//		string_append(&bitacora, "tucson\n");
+	//		string_append(&bitacora, "Quieren bajarme y no saben como hacer, porque este pibito no va a correr\n");
+	//		writeBitacora(4, bitacora);
+	//		free(bitacora);
+	//
+	//		char* tareas = readBitacora(4);
+	//		printf("\nBitacora:\n\n%s", tareas);
+	//
+	//		if(tareas != NULL){
+	//			free(tareas);
+	//		}
+	//
+	//		estadoSuperBloque();
 	//	////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
 
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
 	//	fsckSuperBloque_Bloques();
-		fsckSuperBloque_Bitmap();
+	//		fsckSuperBloque_Bitmap();
 	//	fsckFiles_BlockCount();
 	//	fsckFiles_Blocks();
-	//	fsckFiles_Size();
+	fsckFiles_Size();
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
 
 
@@ -1099,21 +1099,21 @@ int fsckSuperBloque_Bitmap(){
 
 	char* rutaBitacoras = string_from_format("%s/Files/Bitacoras", PUNTO_MONTAJE);
 
-	    DIR *d;
-	    struct dirent *dir;
-	    d = opendir(rutaBitacoras);
-	    if (d) {
-	        while ((dir = readdir(d)) != NULL && strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 ) {
+	DIR *d;
+	struct dirent *dir;
+	d = opendir(rutaBitacoras);
+	if (d) {
+		while ((dir = readdir(d)) != NULL && strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 ) {
 
-	            char* rutaArchivoTripulante = string_from_format("%s/Files/Bitacoras/%s", PUNTO_MONTAJE, dir->d_name);
+			char* rutaArchivoTripulante = string_from_format("%s/Files/Bitacoras/%s", PUNTO_MONTAJE, dir->d_name);
 
-	            haySabotajeBitmapEnElArchivo(rutaArchivoTripulante);
+			haySabotajeBitmapEnElArchivo(rutaArchivoTripulante);
 
-	            free(rutaArchivoTripulante);
+			free(rutaArchivoTripulante);
 
-	        }
-	        closedir(d);
-	    }
+		}
+		closedir(d);
+	}
 
 	free(rutaBitacoras);
 	free(rutaArchivoOxigeno);
@@ -1123,8 +1123,6 @@ int fsckSuperBloque_Bitmap(){
 	return EXIT_SUCCESS;
 
 }
-
-
 
 int fsckFiles_Size(){
 
@@ -1136,11 +1134,9 @@ int fsckFiles_Size(){
 
 		t_config* metadata = config_create(rutaArchivoOxigeno);
 
-		int blockCountBloques = 0;
-		char** arrayBlocks = config_get_array_value(metadata, "BLOCKS");
-		while(arrayBlocks[blockCountBloques] != NULL) blockCountBloques++;
+		int blockCountBloques = config_get_int_value(metadata, "BLOCK_COUNT");
 
-		char* archivoMD5metadata = config_get_string_value(metadata, "MD5");
+		char* archivoMD5 = config_get_string_value(metadata, "MD5_ARCHIVO");
 		int size = config_get_int_value(metadata, "SIZE");
 		char* md5oxigeno = string_repeat('O',size);
 		char* md5archivo = calcularMD5(md5oxigeno);
@@ -1148,25 +1144,32 @@ int fsckFiles_Size(){
 		int totalIteraciones = blockCountBloques * BLOCK_SIZE;
 		int sizeCorregido = 0;
 
-		if (strcmp(md5archivo,archivoMD5metadata)){
+		if (strcmp(md5archivo,archivoMD5)){
 
-			log_info(logger, "No hay sabotaje del BLOCK_COUNT, todo piola rey");
+			int count = 0;
+			while(count <= totalIteraciones){
+				char* md5oxigenoCorregido = string_repeat('O',count);
+				char* md5archivoCalculado = calcularMD5(md5oxigenoCorregido);
+				if(!strcmp(md5archivoCalculado,archivoMD5)){
+					sizeCorregido = count;
+				}
+				count++;
+				free(md5oxigenoCorregido);
+				free(md5archivoCalculado);
+			}
+			log_info(logger, "Sabotaje en el SIZE, corrijo %d a %d", size, sizeCorregido);
+
+			char* sizeCorrect = string_itoa(sizeCorregido);
+			config_set_value(metadata,"SIZE", sizeCorrect);
+			free(sizeCorrect);
 
 		}else{
 
-			char* md5archivoCalculado = calcularMD5(md5oxigeno);
-			while(sizeCorregido <= totalIteraciones && !strcmp(md5archivoCalculado,archivoMD5metadata)){
-				md5oxigeno = string_repeat('O',sizeCorregido);
-				md5archivoCalculado = calcularMD5(md5oxigeno);
-				sizeCorregido++;
-			}
-
-			log_info(logger, "Sabotaje en el SIZE, corrijo %s a %s", size, sizeCorregido);
-			config_set_value(metadata,"SIZE", string_itoa(sizeCorregido));
-			free(md5oxigeno);
-			free(md5archivoCalculado);
+			log_info(logger, "No hay sabotaje del SIZE");
 
 		}
+
+		free(md5archivo);
 
 		char* metadataFiles = string_new();
 		string_append(&metadataFiles,"SIZE=");
@@ -1184,50 +1187,52 @@ int fsckFiles_Size(){
 		txt_write_in_file(fp, metadataFiles);
 		txt_close_file(fp);
 
-
-		for(int i=0;i<blockCountBloques;i++){
-			free(arrayBlocks[i]);
-		}
-		free(arrayBlocks);
 		free(metadataFiles);
-		free(archivoMD5metadata);
-		free(md5archivo);
-
+		free(md5oxigeno);
 		config_destroy(metadata);
 
 	}
 
 	if(existeArchivo(rutaArchivoComida)){
 
-		t_config* metadata = config_create(rutaArchivoBasura);
+		t_config* metadata = config_create(rutaArchivoOxigeno);
 
-		int blockCountBloques = 0;
-		char** arrayBlocks = config_get_array_value(metadata, "BLOCKS");
-		while(arrayBlocks[blockCountBloques] != NULL) blockCountBloques++;
+		int blockCountBloques = config_get_int_value(metadata, "BLOCK_COUNT");
 
-		char* archivoMD5metadata = config_get_string_value(metadata, "MD5");
+		char* archivoMD5 = config_get_string_value(metadata, "MD5_ARCHIVO");
 		int size = config_get_int_value(metadata, "SIZE");
 		char* md5comida = string_repeat('C',size);
+		char* md5archivo = calcularMD5(md5comida);
 
 		int totalIteraciones = blockCountBloques * BLOCK_SIZE;
 		int sizeCorregido = 0;
 
-		if (strcmp(md5comida,archivoMD5metadata)){
+		if (strcmp(md5archivo,archivoMD5)){
 
-			log_info(logger, "No hay sabotaje del BLOCK_COUNT, todo piola rey");
+			int count = 0;
+			while(count <= totalIteraciones){
+				char* md5comidaCorregido = string_repeat('C',count);
+				char* md5archivoCalculado = calcularMD5(md5comidaCorregido);
+				if(!strcmp(md5archivoCalculado,archivoMD5)){
+					sizeCorregido = count;
+				}
+				count++;
+				free(md5comidaCorregido);
+				free(md5archivoCalculado);
+			}
+			log_info(logger, "Sabotaje en el SIZE, corrijo %d a %d", size, sizeCorregido);
+
+			char* sizeCorrect = string_itoa(sizeCorregido);
+			config_set_value(metadata,"SIZE", sizeCorrect);
+			free(sizeCorrect);
 
 		}else{
 
-			while(sizeCorregido <= totalIteraciones && !strcmp(md5comida,archivoMD5metadata)){
-				md5comida = string_repeat('C',sizeCorregido);
-				sizeCorregido++;
-			}
-
-			log_info(logger, "Sabotaje en el SIZE, corrijo %s a %s", size, sizeCorregido);
-			config_set_value(metadata,"SIZE", string_itoa(sizeCorregido));
-			free(md5comida);
+			log_info(logger, "No hay sabotaje del SIZE");
 
 		}
+
+		free(md5archivo);
 
 		char* metadataFiles = string_new();
 		string_append(&metadataFiles,"SIZE=");
@@ -1245,49 +1250,52 @@ int fsckFiles_Size(){
 		txt_write_in_file(fp, metadataFiles);
 		txt_close_file(fp);
 
-
-		for(int i=0;i<blockCountBloques;i++){
-			free(arrayBlocks[i]);
-		}
-		free(arrayBlocks);
 		free(metadataFiles);
-		free(archivoMD5metadata);
-
+		free(md5comida);
 		config_destroy(metadata);
 
 	}
 
 	if(existeArchivo(rutaArchivoBasura)){
 
-		t_config* metadata = config_create(rutaArchivoBasura);
+		t_config* metadata = config_create(rutaArchivoOxigeno);
 
-		int blockCountBloques = 0;
-		char** arrayBlocks = config_get_array_value(metadata, "BLOCKS");
-		while(arrayBlocks[blockCountBloques] != NULL) blockCountBloques++;
+		int blockCountBloques = config_get_int_value(metadata, "BLOCK_COUNT");
 
-		char* archivoMD5metadata = config_get_string_value(metadata, "MD5");
+		char* archivoMD5 = config_get_string_value(metadata, "MD5_ARCHIVO");
 		int size = config_get_int_value(metadata, "SIZE");
 		char* md5basura = string_repeat('B',size);
+		char* md5archivo = calcularMD5(md5basura);
 
 		int totalIteraciones = blockCountBloques * BLOCK_SIZE;
 		int sizeCorregido = 0;
 
-		if (strcmp(md5basura,archivoMD5metadata)){
+		if (strcmp(md5archivo,archivoMD5)){
 
-			log_info(logger, "No hay sabotaje del BLOCK_COUNT, todo piola rey");
+			int count = 0;
+			while(count <= totalIteraciones){
+				char* md5basuraCorregido = string_repeat('B',count);
+				char* md5archivoCalculado = calcularMD5(md5basuraCorregido);
+				if(!strcmp(md5archivoCalculado,archivoMD5)){
+					sizeCorregido = count;
+				}
+				count++;
+				free(md5basuraCorregido);
+				free(md5archivoCalculado);
+			}
+			log_info(logger, "Sabotaje en el SIZE, corrijo %d a %d", size, sizeCorregido);
+
+			char* sizeCorrect = string_itoa(sizeCorregido);
+			config_set_value(metadata,"SIZE", sizeCorrect);
+			free(sizeCorrect);
 
 		}else{
 
-			while((sizeCorregido <= totalIteraciones) && !strcmp(md5basura,archivoMD5metadata)){
-				md5basura = string_repeat('B',sizeCorregido);
-				sizeCorregido++;
-			}
-
-			log_info(logger, "Sabotaje en el SIZE, corrijo %s a %s", size, sizeCorregido);
-			config_set_value(metadata,"SIZE", string_itoa(sizeCorregido));
-			free(md5basura);
+			log_info(logger, "No hay sabotaje del SIZE");
 
 		}
+
+		free(md5archivo);
 
 		char* metadataFiles = string_new();
 		string_append(&metadataFiles,"SIZE=");
@@ -1305,14 +1313,8 @@ int fsckFiles_Size(){
 		txt_write_in_file(fp, metadataFiles);
 		txt_close_file(fp);
 
-
-		for(int i=0;i<blockCountBloques;i++){
-			free(arrayBlocks[i]);
-		}
-		free(arrayBlocks);
 		free(metadataFiles);
-		free(archivoMD5metadata);
-
+		free(md5basura);
 		config_destroy(metadata);
 
 	}
