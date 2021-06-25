@@ -258,12 +258,21 @@ void pasarATodosLosTripulantesAListaBloqueado(){
 void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*sabotaje,t_tripulante* tripulanteMasCercano){
 
 
-
 	while(!llegoAlSabotaje(tripulanteMasCercano,sabotaje)){
+
+		if(estaPlanificando==0){
+			sem_wait(tripulanteMasCercano->semaforoCiclo);
+		}
+
 		moverAlTripulanteHastaElSabotaje(tripulanteMasCercano,sabotaje);
 		sleep(RETARDO_CICLO_CPU);
 	}
 	for(int i=1; DURACION_SABOTAJE >= i; i++){
+
+		if(estaPlanificando==0){
+			sem_wait(tripulanteMasCercano->semaforoCiclo);
+		}
+
 		sleep(RETARDO_CICLO_CPU);
 		log_info(logger,"El tripulante con ID %d hizo %d de SABOTAJE de un total de %d",tripulanteMasCercano->idTripulante,i,DURACION_SABOTAJE);
 
@@ -640,8 +649,6 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			log_info(logger,"el contenido de la bitacora es:%s",mensajeBitacoraRta->bitacora->string);
 
 			liberar_conexion(socketBitacora);
-
-
 
 
 			break;
