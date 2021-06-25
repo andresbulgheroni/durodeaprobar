@@ -933,7 +933,7 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 	//enviar_paquete(mensajeMovimientoMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
 
-//	free(mensajeMovimientoTarea->coordenadasDestino);
+	free(mensajeMovimientoTarea->coordenadasDestino);
 
 
 		free(mensajeMovimientoTarea);
@@ -1127,7 +1127,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	sem_post(&sem_hiloTripulante);
 
 
-	while(tripulante->estado != FINISHED || tripulante->fueExpulsado == 1){		//TODO
+	while(tripulante->estado != FINISHED || tripulante->fueExpulsado != 1){		//TODO
 
 
 
@@ -1147,7 +1147,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 				distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
 				log_info(logger,"se esta moviendo a la tarea la tarea el tripulante %d",tripulante->idTripulante);
 
-				while (distancia != 0 && distancia != -1) {
+				while (distancia != 0 && distancia != -1 && tripulante->fueExpulsado != 1 && haySabotaje != 1) {
 
 					if(estaPlanificando==0){
 						sem_wait(tripulante->semaforoCiclo);
@@ -1158,7 +1158,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 					distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
 
-					if(llegoATarea(tripulante)){
+					if(llegoATarea(tripulante) && tripulante->fueExpulsado != 1 && haySabotaje != 1){
 
 						log_info(logger,"llego a la tarea el tripulante %d",tripulante->idTripulante);
 
@@ -1174,8 +1174,8 @@ void ejecutarTripulante(t_tripulante* tripulante){
 							//							enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
 
 						}
-						if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU){
-
+						if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU ){			//TODO  //si no mand la tarea y hay sabotaje esta mal
+																										//&& tripulante->fueExpulsado != 1 && haySabotaje != 1
 							if(estaPlanificando==0){
 								sem_wait(tripulante->semaforoCiclo);
 							}
@@ -1303,7 +1303,7 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 
 	if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)==TAREA_CPU){
 		log_info(logger, "el tripulante %d esta realizando una tarea de CPU ",tripulante->idTripulante);
-		while(tripulante->misCiclosDeCPU<tripulante->tareaAsignada->duracion){
+		while(tripulante->misCiclosDeCPU<tripulante->tareaAsignada->duracion && tripulante->fueExpulsado != 1 && haySabotaje != 1){
 
 			if(estaPlanificando==0){
 				sem_wait(tripulante->semaforoCiclo);
@@ -1318,7 +1318,7 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 		}
 
 
-		if(tripulante->misCiclosDeCPU==tripulante->tareaAsignada->duracion){
+		if(tripulante->misCiclosDeCPU==tripulante->tareaAsignada->duracion && tripulante->fueExpulsado != 1 && haySabotaje != 1){
 
 			tripulante->tareaAsignada=NULL;
 			printf("se paso la tarea a nulo del tripulante con ID: %d\n",tripulante->idTripulante);
@@ -1326,9 +1326,12 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 			sem_post(tripulante->semaforoDelTripulante);
 
 		}
+		if(tripulante->fueExpulsado == 1 || haySabotaje == 1){		//TODO
+			sem_post(&sem_planificarMultitarea);
+		}
 
 	}
-	else if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU){
+	else if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU ){		//aca no agrego si hay sabotaje dejo que entre a bloqueados y salga
 
 
 
@@ -1349,7 +1352,7 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 
 
 		tripulante->estado=FINISHED;
-
+		if(tripulante->fueExpulsado !=1){
 		/*	solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
 		mensajeTarea->idTripulante=tripulante->idTripulante;
 		enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
@@ -1393,7 +1396,7 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 				}
 
 	*/
-
+		}
 	}
 
 
@@ -1416,7 +1419,7 @@ void planificarBloqueo(){
 
 		int r=1;
 
-		while(tripulante->tareaAsignada->duracion>=r){		// DURACION DE LA TAREA BLOQUEADA
+		while(tripulante->tareaAsignada->duracion>=r && tripulante->fueExpulsado != 1){		// DURACION DE LA TAREA BLOQUEADA
 
 			if(estaPlanificando==0){
 				sem_wait(tripulante->semaforoCiclo);
