@@ -200,6 +200,13 @@ void planificarSabotaje(){
 
 	agregarTripulanteAListaReadyYAvisar(tripulanteMasCercano);		//aca va al final de la lista de ready
 
+	if(!list_is_empty(listaBloqueados)){
+	void iterador(t_tripulante*tripulante){
+		sem_post(tripulante->semaforoDelSabotaje);		//esto es para el tripulante que este bloqueado y justo le llega un sabotaje
+	}
+	list_iterate(listaBloqueados,(void*) iterador);
+	}
+
 	haySabotaje=0;
 	sem_post(&sem_sabotaje);
 	//liberar_conexion(socketSabotaje);
@@ -461,8 +468,8 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 					id_tripulante_para_enviar++;
 
-					//						free(coordenadasTripulantes);
-					//						free(coordenadasTripulantes);
+					//						free(tripulanteConCoordenadas->coordenadas);
+					//						free(tripulanteConCoordenadas);
 
 
 				}
@@ -926,13 +933,14 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 	//enviar_paquete(mensajeMovimientoMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
 
-
-	free(mensajeMovimientoTarea);
 //	free(mensajeMovimientoTarea->coordenadasDestino);
 
-//	free(mensajeMovimientoMongo);
+
+		free(mensajeMovimientoTarea);
+
 //	free(mensajeMovimientoMongo->coordenadasDestino);
 //	free(mensajeMovimientoMongo->coordenadasOrigen);
+	//	free(mensajeMovimientoMongo);
 
 
 }
@@ -1413,6 +1421,9 @@ void planificarBloqueo(){
 			if(estaPlanificando==0){
 				sem_wait(tripulante->semaforoCiclo);
 			}
+//			if(haySabotaje==1){
+//				sem_wait(tripulante->semaforoDelSabotaje);		//TODO
+//			}
 
 			sleep(RETARDO_CICLO_CPU);
 
