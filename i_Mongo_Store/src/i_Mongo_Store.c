@@ -875,7 +875,6 @@ int consumirRecurso(int32_t cantidad, char recurso){
 		// Informar que no existe el archivo tambien por otro medio?
 
 		log_info(logger, "No existe el archivo de metadata a consumir");
-		return EXIT_SUCCESS;
 	}
 	free(rutaMetadata);
 	return EXIT_SUCCESS;
@@ -1146,9 +1145,9 @@ int fsckFiles_Size(){
 
 		if (strcmp(md5archivo,archivoMD5)){
 
-			int count = 0;
+			int count = 0;	// Esto deberia ser 1, sino estas generando una cadena vacia al pedo
 			while(count <= totalIteraciones){
-				char* md5oxigenoCorregido = string_repeat('O',count);
+				char* md5oxigenoCorregido = string_repeat('O',count);	// no es el md5, pone "archivoPosible" por ej
 				char* md5archivoCalculado = calcularMD5(md5oxigenoCorregido);
 				if(!strcmp(md5archivoCalculado,archivoMD5)){
 					sizeCorregido = count;
@@ -1265,7 +1264,7 @@ int fsckFiles_Size(){
 		char* archivoMD5 = config_get_string_value(metadata, "MD5_ARCHIVO");
 		int size = config_get_int_value(metadata, "SIZE");
 		char* md5basura = string_repeat('B',size);
-		char* md5archivo = calcularMD5(md5basura);
+		char* md5archivo = calcularMD5(md5basura);	// El nombre se confunde con archivoMD5
 
 		int totalIteraciones = blockCountBloques * BLOCK_SIZE;
 		int sizeCorregido = 0;
