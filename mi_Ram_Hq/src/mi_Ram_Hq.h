@@ -27,6 +27,8 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <math.h>
+#include <signal.h>
+#include <time.h>
 
 typedef enum{
 	SEGMENTACION_PURA = 1,
@@ -109,6 +111,7 @@ int32_t get_algoritmo(char* algoritmo_config);
 void recibir_mensaje(int32_t* conexion);
 char get_status(t_status_code codigo);
 void hilo_servidor();
+void sig_handler(int n);
 
 //Paginacion
 void configurar_paginacion();
@@ -139,6 +142,7 @@ void liberar_memoria_virtual(t_pagina_patota* pagina);
 int32_t paginas_necesarias(uint32_t offset, uint32_t size);
 void pasar_de_swap_a_principal(t_pagina_patota* pagina);
 void modificar_en_memoria_principal(t_pagina_patota* pagina, void* datos);
+void dump_paginacion();
 
 /* Segmentacion */
 
