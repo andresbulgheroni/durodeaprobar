@@ -1131,7 +1131,6 @@ int32_t get_algoritmo(char* algoritmo_config) {
 	return -1;
 }
 
-
 char get_status(t_status_code codigo){
 
 	switch(codigo){
@@ -1355,40 +1354,16 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 /* modifica las coordenadas de un tripulante en memoria */
 void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool* status){
 
-	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
-
-	uint32_t id_tripulante = mensaje->idTripulante;
-
-	segmento* seg_tripulante = malloc(sizeof(segmento));
-
 	void* buffer = malloc(sizeof(t_tcb));
-	uint32_t offset;
+	uint32_t offset = encontrar_tripulante(mensaje->idTripulante, mensaje->idPatota);
 
-	uint32_t cant_tripulantes_patota = list_size(tabla_patota) - 2; //el pcb y las tareas
-	uint32_t contador = 2;
-	uint32_t tid;
-
-	uint32_t encontrado = 0;
-
-	while(!encontrado){
-		seg_tripulante = list_get(tabla_patota, contador);
-		offset = seg_tripulante->inicio;
-		memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
-		memcpy(&tid, buffer, sizeof(tid));
-		if(tid == mensaje->idTripulante){
-				encontrado = 1;
-		}
-		contador++;
-		if(contador > cant_tripulantes_patota){
-			//error
-		}
-	}
-
+	//traigo de memoria el tcb con el offset encontrado
+	memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
 	//reemplazo los valores
-	uint32_t offset_buffer = sizeof(tid) + sizeof(char);
-	memcpy(buffer + offset_buffer, mensaje->coordenadasDestino->posX);
-	offset_buffer += sizeof(uint32_t);
-	memcpy(buffer + offset_buffer, mensaje->coordenadasDestino->posY);
+	uint32_t offset_buffer = sizeof(uint32_t) + sizeof(char); //id y estado
+	memcpy(buffer + offset_buffer, mensaje->coordenadasDestino->posX, sizeof(uint32_t));
+	offset_buffer += sizeof(uint32_t); //posX
+	memcpy(buffer + offset_buffer, mensaje->coordenadasDestino->posY, sizeof(uint32_t));
 
 	//lo copio en memoria modificado
 	memcpy(memoria_principal + offset, buffer, sizeof(t_tcb));
@@ -1397,6 +1372,46 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 
 void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 
+	void* buffer = malloc(sizeof(t_tcb));
+	uint32_t offset = encontrar_tripulante(mensaje->idTripulante, mensaje->idPatota);
+
+	char estado = get_status(mensaje->estado);
+
+	//traigo de memoria el tcb con el offset encontrado
+	memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
+	//reemplazo los valores
+	uint32_t offset_buffer = sizeof(uint32_t); //id
+	memcpy(buffer + offset_buffer, &estado, sizeof(char));
+
+	//lo copio en memoria modificado
+	memcpy(memoria_principal + offset, buffer, sizeof(t_tcb));
+}
+
+
+uint32_t encontrar_tripulante(uint32_t id_tripulante, uint32_t id_patota){
+	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
+	segmento* seg_tripulante = malloc(sizeof(segmento));
+
+	uint32_t cant_tripulantes_patota = list_size(tabla_patota) - 2;
+	uint32_t contador = 2;
+	uint32_t tid;
+
+	uint32_t encontrado = 0;
+	uint32_t offset;
+	void* buffer = malloc(sizeof(t_tcb));
+
+	while(!encontrado){
+		seg_tripulante = list_get(tabla_patota, contador);
+		offset = seg_tripulante->inicio;
+		memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
+		memcpy(&tid, buffer, sizeof(tid));
+		if(tid == id_tripulante){
+				encontrado = 1;
+		}
+		contador++;
+	}
+
+	return offset;
 }
 
 /*saca un segmento de la lista libres, si sobraba segmento guarda el sobrante, falta revision*/

@@ -171,6 +171,8 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status);
 void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool* status);
 void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status);
 
+uint32_t encontrar_tripulante(uint32_t id_tripulante, uint32_t id_patota);
+
 void compactar_memoria(); //sin implementar
 
 #endif /* MI_RAM_HQ_H_ */
