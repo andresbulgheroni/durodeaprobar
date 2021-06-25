@@ -1145,7 +1145,7 @@ int fsckFiles_Size(){
 
 		if (strcmp(md5archivo,archivoMD5)){
 
-			int count = 0;	// Esto deberia ser 1, sino estas generando una cadena vacia al pedo
+			int count = 1;
 			while(count <= totalIteraciones){
 				char* md5oxigenoCorregido = string_repeat('O',count);	// no es el md5, pone "archivoPosible" por ej
 				char* md5archivoCalculado = calcularMD5(md5oxigenoCorregido);
@@ -1208,7 +1208,7 @@ int fsckFiles_Size(){
 
 		if (strcmp(md5archivo,archivoMD5)){
 
-			int count = 0;
+			int count = 1;
 			while(count <= totalIteraciones){
 				char* md5comidaCorregido = string_repeat('C',count);
 				char* md5archivoCalculado = calcularMD5(md5comidaCorregido);
@@ -1271,7 +1271,7 @@ int fsckFiles_Size(){
 
 		if (strcmp(md5archivo,archivoMD5)){
 
-			int count = 0;
+			int count = 1;
 			while(count <= totalIteraciones){
 				char* md5basuraCorregido = string_repeat('B',count);
 				char* md5archivoCalculado = calcularMD5(md5basuraCorregido);
