@@ -2,42 +2,42 @@
 
 int main(void) {
 
-	//	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
-	//	leerConfig();
-	//	crear_log();
-	//	inicializarFS();
+		printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
+		leerConfig();
+		crear_log();
+		inicializarFS();
 	//	signal(SIGUSR1, sighandler);
 	//
 	//
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
-	//			estadoSuperBloque();
-	//
-	//			generarRecurso(190,'O');
-	//			estadoSuperBloque();
-	//			consumirRecurso(100, 'O');
-	//
-	//			estadoSuperBloque();
+//				estadoSuperBloque();
+//
+//				generarRecurso(190,'O');
+//				estadoSuperBloque();
+//				consumirRecurso(100, 'O');
+
+//				estadoSuperBloque();
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 	//
 	//	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
-	//	estadoSuperBloque();
-	//
-	//	char* bitacora = string_new();
-	//	string_append(&bitacora, "fiumba\n");
-	//	string_append(&bitacora, "morgan freemaaaaan\n");
-	//	string_append(&bitacora, "tucson\n");
-	//	string_append(&bitacora, "Quieren bajarme y no saben como hacer, porque este pibito no va a correr\n");
-	//	writeBitacora(1, bitacora);
-	//	free(bitacora);
-	//
-	//	char* tareas = readBitacora(1);
-	//	printf("\nBitacora:\n\n%s", tareas);
-	//
-	//	if(tareas != NULL){
-	//		free(tareas);
-	//	}
-	//
-	//	estadoSuperBloque();
+//		estadoSuperBloque();
+//
+//		char* bitacora = string_new();
+//		string_append(&bitacora, "DALEE DALEEE\n");
+//		string_append(&bitacora, "UYUYU UN MONTON\n");
+//		string_append(&bitacora, "tucson\n");
+//		string_append(&bitacora, "Quieren bajarme y no saben como hacer, porque este pibito no va a correr\n");
+//		writeBitacora(4, bitacora);
+//		free(bitacora);
+//
+//		char* tareas = readBitacora(4);
+//		printf("\nBitacora:\n\n%s", tareas);
+//
+//		if(tareas != NULL){
+//			free(tareas);
+//		}
+//
+//		estadoSuperBloque();
 	//	////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
 
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
@@ -778,7 +778,7 @@ int descartarBasura(){
 int consumirRecurso(int32_t cantidad, char recurso){
 
 	char* rutaMetadata;
-	if(recurso == 'O')		rutaMetadata = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
+	if(recurso == 'O')	rutaMetadata = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
 	else if(recurso == 'C') rutaMetadata = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
 	else{
 		log_error(logger, "Recurso a consumir invalido");
@@ -1077,22 +1077,7 @@ int fsckSuperBloque_Bitmap(){
 	char* rutaArchivoOxigeno = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
 	char* rutaArchivoComida = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
 	char* rutaArchivoBasura = string_from_format("%s/Files/Basura.ims", PUNTO_MONTAJE);
-	char* rutaArchivosBitacora = string_from_format("%s/Files/Bitacoras/", PUNTO_MONTAJE);
 
-	t_list* lista = listaArchivosDeBitacora();
-	int count = 0;
-
-	while(count< list_size(lista)){
-
-		char* rutaArchivo = string_new();
-		string_append(&rutaArchivo,rutaArchivosBitacora);
-		string_append(&rutaArchivo,list_get(lista,count));
-		string_append(&rutaArchivo, ".ims");
-		haySabotajeBitmapEnElArchivo(rutaArchivoBasura);
-		free(rutaArchivo);
-		count++;
-
-	}
 
 	if(existeArchivo(rutaArchivoOxigeno)){
 
@@ -1112,11 +1097,28 @@ int fsckSuperBloque_Bitmap(){
 
 	}
 
-	free(lista);
+	char* rutaBitacoras = string_from_format("%s/Files/Bitacoras", PUNTO_MONTAJE);
+
+	    DIR *d;
+	    struct dirent *dir;
+	    d = opendir(rutaBitacoras);
+	    if (d) {
+	        while ((dir = readdir(d)) != NULL && strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 ) {
+
+	            char* rutaArchivoTripulante = string_from_format("%s/Files/Bitacoras/%s", PUNTO_MONTAJE, dir->d_name);
+
+	            haySabotajeBitmapEnElArchivo(rutaArchivoTripulante);
+
+	            free(rutaArchivoTripulante);
+
+	        }
+	        closedir(d);
+	    }
+
+	free(rutaBitacoras);
 	free(rutaArchivoOxigeno);
 	free(rutaArchivoComida);
 	free(rutaArchivoBasura);
-	free(rutaArchivosBitacora);
 
 	return EXIT_SUCCESS;
 
@@ -1547,46 +1549,5 @@ void haySabotajeCountEnElArchivo(char* directorio){
 	free(metadataFiles);
 
 	config_destroy(metadata);
-
-}
-
-t_list* listaArchivosDeBitacora() {
-
-	DIR *d;
-	t_list* listaArchivos = list_create();
-	struct dirent *dir;
-	d = opendir("/home/utnso/polus/Files/Bitacoras");
-	if (d) {
-		while ((dir = readdir(d)) != NULL) {
-			if( strcmp( dir->d_name, "." ) != 0 &&
-					strcmp( dir->d_name, ".." ) != 0 ){
-
-				char* cadena = arrayToChar(dir->d_name);
-				list_add(listaArchivos,cadena);
-
-			}
-		}
-		closedir(d);
-	}
-
-	return listaArchivos;
-
-}
-
-char* arrayToChar(char cadena[]){
-
-	char* a = string_new();
-	for(int i=0; cadena[i]!='\0';i++){
-
-		if(cadena[i]!='\0'){
-			char caracter = cadena[i];
-			char* aux = malloc(1);
-			memcpy(aux,&caracter,1);
-			string_append(&a,aux);
-			free(aux);
-		}
-	}
-
-	return a;
 
 }
