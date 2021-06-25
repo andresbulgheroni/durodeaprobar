@@ -1339,6 +1339,16 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 		list_iterate(tcbs, cargarTcbDatos);
 
+		//Libero las estructuras para guardar en memoria
+		free(pcb);
+
+		void liberar_tcbs(t_tcb* tcb){
+			free(tcb);
+		}
+		list_destroy_and_destroy_elements(tcbs, liberar_tcbs);
+
+		//los segmentos no deberia liberarlos no? porque estan siendo referenciados por las listas
+
 		if(!error_guardado){
 
 			//Guardo tabla de paginas
@@ -1372,6 +1382,8 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 	//lo copio en memoria modificado
 	memcpy(memoria_principal + offset, buffer, sizeof(t_tcb));
 
+	//libero memoria
+	free(buffer);
 }
 
 /* modifica el estado de un tripulante en memoria */
@@ -1390,6 +1402,9 @@ void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 
 	//lo copio en memoria modificado
 	memcpy(memoria_principal + offset, buffer, sizeof(t_tcb));
+
+	//libero memoria
+	free(buffer);
 }
 
 /* SIN TERMINAR*/
@@ -1405,7 +1420,7 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 	return tarea;
 }
 
-/* saca el segmento de la tabla de segmentos y agrega el segmento libre a la lista de libres */
+/* REVISAR COMENTARIO saca el segmento de la tabla de segmentos y agrega el segmento libre a la lista de libres */
 void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* status){
 
 	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
@@ -1416,7 +1431,7 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 	void liberar_seg(segmento* seg){
 		free(seg);
 	}
-	// saco el segmento de la tabla de segmentos de la patota
+	// saco el segmento de la tabla de segmentos de la patota asi no lo estaria cambiando en la tabla auxiliar?
 	list_remove_and_destroy_element(tabla_patota, index, liberar_seg);
 
 	// agrego el segmento liberado a la lista de segmentos libres
@@ -1424,6 +1439,7 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 
 }
 
+/* REVISAR FREE */
 segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
 	segmento* seg_tripulante = malloc(sizeof(segmento));
@@ -1446,10 +1462,14 @@ segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota)
 		}
 		contador++;
 	}
+	//libero memoria? hace falta?
+	free(buffer);
+	//libero tabla_patota tambien?
 
 	return seg_tripulante;
 }
 
+/* REVISAR FREE */
 uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
 	segmento* seg_tripulante = malloc(sizeof(segmento));
@@ -1473,10 +1493,14 @@ uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 		contador++;
 	}
 
+	//libero memoria
+	free(seg_tripulante);
+	//libero la lista?
+
 	return offset;
 }
 
-/*saca un segmento de la lista libres, si sobraba segmento guarda el sobrante, falta revision*/
+/*saca un segmento de la lista libres, si sobraba segmento guarda el sobrante, falta revision y free*/
 void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 
 	uint32_t inicio_seg_nuevo = segmento_nuevo->inicio;
