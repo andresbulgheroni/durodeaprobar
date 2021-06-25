@@ -2,10 +2,17 @@
 
 int main(void) {
 
-	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
-	leerConfig();
-	crear_log();
-	inicializarFS();
+	//Creo 2 archivos de bitacora dentro de la carpeta
+	t_list* lista = listaArchivosDeBitacora();
+	puts(list_get(lista,0));
+	puts(list_get(lista,1));
+	free(lista);
+
+
+	//	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
+	//	leerConfig();
+	//	crear_log();
+	//	inicializarFS();
 	//	signal(SIGUSR1, sighandler);
 	//
 	//
@@ -43,8 +50,9 @@ int main(void) {
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
 	//	fsckSuperBloque_Bloques();
 	//	fsckSuperBloque_Bitmap();
-	fsckFiles_BlockCount();
+	//	fsckFiles_BlockCount();
 	//	fsckFiles_Blocks();
+	//	fsckFiles_Size();
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
 
 
@@ -60,7 +68,7 @@ int main(void) {
 	//
 	//	}
 
-	config_destroy(config);
+	//	config_destroy(config);
 	return EXIT_SUCCESS;
 }
 
@@ -1107,14 +1115,201 @@ int fsckSuperBloque_Bitmap(){
 
 int fsckFiles_Size(){
 
-	/* ir a leer a los bloques y sacar el md5 de lo que esta ahi
-	compararlo con el md5 de la metadata,
-	si son iguales -> no hay sabotaje (para comparar los strings uso strcmp
-	si son diferentes -> tengo que comenzar a generar md5 hasta que uno coincida
-	tengo que leer hasta cant blocks * block size, desde 1
-	 */
+	char* rutaArchivoOxigeno = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
+	char* rutaArchivoComida = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
+	char* rutaArchivoBasura = string_from_format("%s/Files/Basura.ims", PUNTO_MONTAJE);
+
+	if(existeArchivo(rutaArchivoOxigeno)){
+
+		t_config* metadata = config_create(rutaArchivoOxigeno);
+
+		int blockCountBloques = 0;
+		char** arrayBlocks = config_get_array_value(metadata, "BLOCKS");
+		while(arrayBlocks[blockCountBloques] != NULL) blockCountBloques++;
+
+		char* archivoMD5metadata = config_get_string_value(metadata, "MD5");
+		int size = config_get_int_value(metadata, "SIZE");
+		char* md5oxigeno = string_repeat('O',size);
+		char* md5archivo = calcularMD5(md5oxigeno);
+
+		int totalIteraciones = blockCountBloques * BLOCK_SIZE;
+		int sizeCorregido = 0;
+
+		if (strcmp(md5archivo,archivoMD5metadata)){
+
+			log_info(logger, "No hay sabotaje del BLOCK_COUNT, todo piola rey");
+
+		}else{
+
+			char* md5archivoCalculado = calcularMD5(md5oxigeno);
+			while(sizeCorregido <= totalIteraciones && !strcmp(md5archivoCalculado,archivoMD5metadata)){
+				md5oxigeno = string_repeat('O',sizeCorregido);
+				md5archivoCalculado = calcularMD5(md5oxigeno);
+				sizeCorregido++;
+			}
+
+			log_info(logger, "Sabotaje en el SIZE, corrijo %s a %s", size, sizeCorregido);
+			config_set_value(metadata,"SIZE", string_itoa(sizeCorregido));
+			free(md5oxigeno);
+			free(md5archivoCalculado);
+
+		}
+
+		char* metadataFiles = string_new();
+		string_append(&metadataFiles,"SIZE=");
+		string_append(&metadataFiles, config_get_string_value(metadata, "SIZE"));
+		string_append(&metadataFiles,"\nBLOCK_COUNT=");
+		string_append(&metadataFiles, config_get_string_value(metadata, "BLOCK_COUNT"));
+		string_append(&metadataFiles,"\nBLOCKS=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "BLOCKS"));
+		string_append(&metadataFiles,"\nCARACTER_LLENADO=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "CARACTER_LLENADO"));
+		string_append(&metadataFiles,"\nMD5_ARCHIVO=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "MD5_ARCHIVO"));
+
+		FILE* fp = fopen(rutaArchivoOxigeno, "w+");
+		txt_write_in_file(fp, metadataFiles);
+		txt_close_file(fp);
+
+
+		for(int i=0;i<blockCountBloques;i++){
+			free(arrayBlocks[i]);
+		}
+		free(arrayBlocks);
+		free(metadataFiles);
+		free(archivoMD5metadata);
+		free(md5archivo);
+
+		config_destroy(metadata);
+
+	}
+
+	if(existeArchivo(rutaArchivoComida)){
+
+		t_config* metadata = config_create(rutaArchivoBasura);
+
+		int blockCountBloques = 0;
+		char** arrayBlocks = config_get_array_value(metadata, "BLOCKS");
+		while(arrayBlocks[blockCountBloques] != NULL) blockCountBloques++;
+
+		char* archivoMD5metadata = config_get_string_value(metadata, "MD5");
+		int size = config_get_int_value(metadata, "SIZE");
+		char* md5comida = string_repeat('C',size);
+
+		int totalIteraciones = blockCountBloques * BLOCK_SIZE;
+		int sizeCorregido = 0;
+
+		if (strcmp(md5comida,archivoMD5metadata)){
+
+			log_info(logger, "No hay sabotaje del BLOCK_COUNT, todo piola rey");
+
+		}else{
+
+			while(sizeCorregido <= totalIteraciones && !strcmp(md5comida,archivoMD5metadata)){
+				md5comida = string_repeat('C',sizeCorregido);
+				sizeCorregido++;
+			}
+
+			log_info(logger, "Sabotaje en el SIZE, corrijo %s a %s", size, sizeCorregido);
+			config_set_value(metadata,"SIZE", string_itoa(sizeCorregido));
+			free(md5comida);
+
+		}
+
+		char* metadataFiles = string_new();
+		string_append(&metadataFiles,"SIZE=");
+		string_append(&metadataFiles, config_get_string_value(metadata, "SIZE"));
+		string_append(&metadataFiles,"\nBLOCK_COUNT=");
+		string_append(&metadataFiles, config_get_string_value(metadata, "BLOCK_COUNT"));
+		string_append(&metadataFiles,"\nBLOCKS=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "BLOCKS"));
+		string_append(&metadataFiles,"\nCARACTER_LLENADO=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "CARACTER_LLENADO"));
+		string_append(&metadataFiles,"\nMD5_ARCHIVO=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "MD5_ARCHIVO"));
+
+		FILE* fp = fopen(rutaArchivoOxigeno, "w+");
+		txt_write_in_file(fp, metadataFiles);
+		txt_close_file(fp);
+
+
+		for(int i=0;i<blockCountBloques;i++){
+			free(arrayBlocks[i]);
+		}
+		free(arrayBlocks);
+		free(metadataFiles);
+		free(archivoMD5metadata);
+
+		config_destroy(metadata);
+
+	}
+
+	if(existeArchivo(rutaArchivoBasura)){
+
+		t_config* metadata = config_create(rutaArchivoBasura);
+
+		int blockCountBloques = 0;
+		char** arrayBlocks = config_get_array_value(metadata, "BLOCKS");
+		while(arrayBlocks[blockCountBloques] != NULL) blockCountBloques++;
+
+		char* archivoMD5metadata = config_get_string_value(metadata, "MD5");
+		int size = config_get_int_value(metadata, "SIZE");
+		char* md5basura = string_repeat('B',size);
+
+		int totalIteraciones = blockCountBloques * BLOCK_SIZE;
+		int sizeCorregido = 0;
+
+		if (strcmp(md5basura,archivoMD5metadata)){
+
+			log_info(logger, "No hay sabotaje del BLOCK_COUNT, todo piola rey");
+
+		}else{
+
+			while((sizeCorregido <= totalIteraciones) && !strcmp(md5basura,archivoMD5metadata)){
+				md5basura = string_repeat('B',sizeCorregido);
+				sizeCorregido++;
+			}
+
+			log_info(logger, "Sabotaje en el SIZE, corrijo %s a %s", size, sizeCorregido);
+			config_set_value(metadata,"SIZE", string_itoa(sizeCorregido));
+			free(md5basura);
+
+		}
+
+		char* metadataFiles = string_new();
+		string_append(&metadataFiles,"SIZE=");
+		string_append(&metadataFiles, config_get_string_value(metadata, "SIZE"));
+		string_append(&metadataFiles,"\nBLOCK_COUNT=");
+		string_append(&metadataFiles, config_get_string_value(metadata, "BLOCK_COUNT"));
+		string_append(&metadataFiles,"\nBLOCKS=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "BLOCKS"));
+		string_append(&metadataFiles,"\nCARACTER_LLENADO=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "CARACTER_LLENADO"));
+		string_append(&metadataFiles,"\nMD5_ARCHIVO=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "MD5_ARCHIVO"));
+
+		FILE* fp = fopen(rutaArchivoOxigeno, "w+");
+		txt_write_in_file(fp, metadataFiles);
+		txt_close_file(fp);
+
+
+		for(int i=0;i<blockCountBloques;i++){
+			free(arrayBlocks[i]);
+		}
+		free(arrayBlocks);
+		free(metadataFiles);
+		free(archivoMD5metadata);
+
+		config_destroy(metadata);
+
+	}
+
+	free(rutaArchivoOxigeno);
+	free(rutaArchivoComida);
+	free(rutaArchivoBasura);
 
 	return EXIT_SUCCESS;
+
 }
 
 int fsckFiles_BlockCount(){
@@ -1162,7 +1357,8 @@ int fsckFiles_Blocks(){
 		char** blocks = config_get_array_value(metadata, "BLOCKS");
 		uint32_t size = config_get_int_value(metadata, "SIZE");
 
-		int j,i = 0;
+		int j = 0;
+		int i = 0;
 		while(blocks[j]!=NULL){
 
 			if(atoi(blocks[j]) > BLOCKS){
@@ -1196,7 +1392,8 @@ int fsckFiles_Blocks(){
 		char** blocks = config_get_array_value(metadata, "BLOCKS");
 		uint32_t size = config_get_int_value(metadata, "SIZE");
 
-		int j,i = 0;
+		int j = 0;
+		int i = 0;
 		while(blocks[j]!=NULL){
 
 			if(atoi(blocks[j]) > BLOCKS){
@@ -1230,7 +1427,8 @@ int fsckFiles_Blocks(){
 		char** blocks = config_get_array_value(metadata, "BLOCKS");
 		uint32_t size = config_get_int_value(metadata, "SIZE");
 
-		int j,i = 0;
+		int j = 0;
+		int i = 0;
 		while(blocks[j]!=NULL){
 
 			if(atoi(blocks[j]) > BLOCKS){
@@ -1338,5 +1536,46 @@ void haySabotajeCountEnElArchivo(char* directorio){
 	free(metadataFiles);
 
 	config_destroy(metadata);
+
+}
+
+t_list* listaArchivosDeBitacora() {
+
+	DIR *d;
+	t_list* listaArchivos = list_create();
+	struct dirent *dir;
+	d = opendir("/home/utnso/polus/Files/Bitacoras");
+	if (d) {
+		while ((dir = readdir(d)) != NULL) {
+			if( strcmp( dir->d_name, "." ) != 0 &&
+					strcmp( dir->d_name, ".." ) != 0 ){
+
+				char* cadena = arrayToChar(dir->d_name);
+				list_add(listaArchivos,cadena);
+
+			}
+		}
+		closedir(d);
+	}
+
+	return listaArchivos;
+
+}
+
+char* arrayToChar(char cadena[]){
+
+	char* a = string_new();
+	for(int i=0; cadena[i]!='\0';i++){
+
+		if(cadena[i]!='\0'){
+		char caracter = cadena[i];
+		char* aux = malloc(1);
+		memcpy(aux,&caracter,1);
+		string_append(&a,aux);
+		free(aux);
+		}
+	}
+
+	return a;
 
 }
