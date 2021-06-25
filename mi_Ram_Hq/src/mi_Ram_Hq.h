@@ -169,6 +169,7 @@ void inicializar_segmentacion();
 
 void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status);
 void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool* status);
+void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status);
 
 void compactar_memoria(); //sin implementar
 
