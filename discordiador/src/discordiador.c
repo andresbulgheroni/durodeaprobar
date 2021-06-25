@@ -568,7 +568,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 		case INICIAR_PLANIFICACION: { //Con este comando se dará inicio a la planificación (es un semaforo sem init)
 
 			if(list_is_empty(listaReady) && list_is_empty(listaEjecutando) &&list_is_empty(listaBloqueados) && list_is_empty(listaBloqueadosPorSabotaje) ){
-				puts("asegurese de que el discordiador tenga tripulantes en ready. Pruebe de nuevo");			//TODO
+				puts("asegurese de que el discordiador tenga tripulantes para planificar . Pruebe de nuevo");			//TODO
 			}
 
 			if(!list_is_empty(listaReady) || !list_is_empty(listaEjecutando) || !list_is_empty(listaBloqueados)){
