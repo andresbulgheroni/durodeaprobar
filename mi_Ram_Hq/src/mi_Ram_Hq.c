@@ -123,7 +123,7 @@ void recibir_mensaje(int32_t* conexion){
 				bool completo_tareas = false;
 				char* tarea;
 				switch(ESQUEMA_MEMORIA){
-					case SEGMENTACION_PURA: break;
+					case SEGMENTACION_PURA: tarea = siguiente_tarea_segmentacion(mensaje, &completo_tareas, NULL);break;
 					case PAGINACION_VIRTUAL: tarea = siguiente_tarea_paginacion(mensaje, &completo_tareas, NULL);break;
 				}
 
@@ -146,7 +146,7 @@ void recibir_mensaje(int32_t* conexion){
 				expulsar_tripulante_msg* mensaje = deserializar_paquete(paquete);
 
 				switch(ESQUEMA_MEMORIA){
-					case SEGMENTACION_PURA: break;
+					case SEGMENTACION_PURA: expulsar_tripulante_segmentacion(mensaje, NULL);break;
 					case PAGINACION_VIRTUAL: expulsar_tripulante_paginacion(mensaje, NULL);break;
 				}
 
@@ -1355,7 +1355,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool* status){
 
 	void* buffer = malloc(sizeof(t_tcb));
-	uint32_t offset = encontrar_tripulante(mensaje->idTripulante, mensaje->idPatota);
+	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
 
 	//traigo de memoria el tcb con el offset encontrado
 	memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
@@ -1370,10 +1370,11 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 
 }
 
+/* modifica el estado de un tripulante en memoria */
 void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 
 	void* buffer = malloc(sizeof(t_tcb));
-	uint32_t offset = encontrar_tripulante(mensaje->idTripulante, mensaje->idPatota);
+	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
 
 	char estado = get_status(mensaje->estado);
 
@@ -1387,8 +1388,65 @@ void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 	memcpy(memoria_principal + offset, buffer, sizeof(t_tcb));
 }
 
+/* SIN TERMINAR*/
+char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status){
 
-uint32_t encontrar_tripulante(uint32_t id_tripulante, uint32_t id_patota){
+	char* tarea = "";
+	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
+	uint32_t direccion_tareas;
+
+	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
+
+
+	return tarea;
+}
+
+/* saca el segmento de la tabla de segmentos y agrega el segmento libre a la lista de libres */
+void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* status){
+
+	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
+	segmento* seg_tripulante = malloc(sizeof(segmento));
+	seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
+	uint32_t index = seg_tripulante->numero_segmento;
+
+	void liberar_seg(segmento* seg){
+		free(seg);
+	}
+	// saco el segmento de la tabla de segmentos de la patota
+	list_remove_and_destroy_element(tabla_patota, index, liberar_seg);
+
+	// agrego el segmento liberado a la lista de segmentos libres
+	liberar_segmento(seg_tripulante);
+
+}
+
+segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota){
+	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
+	segmento* seg_tripulante = malloc(sizeof(segmento));
+
+	uint32_t cant_tripulantes_patota = list_size(tabla_patota) - 2;
+	uint32_t contador = 2;
+	uint32_t tid;
+
+	uint32_t encontrado = 0;
+	uint32_t offset;
+	void* buffer = malloc(sizeof(t_tcb));
+
+	while(!encontrado){
+		seg_tripulante = list_get(tabla_patota, contador);
+		offset = seg_tripulante->inicio;
+		memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
+		memcpy(&tid, buffer, sizeof(tid));
+		if(tid == id_tripulante){
+				encontrado = 1;
+		}
+		contador++;
+	}
+
+	return seg_tripulante;
+}
+
+uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
 	segmento* seg_tripulante = malloc(sizeof(segmento));
 

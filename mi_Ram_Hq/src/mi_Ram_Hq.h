@@ -170,6 +170,8 @@ void inicializar_segmentacion();
 void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status);
 void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool* status);
 void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status);
+char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status);
+void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* status);
 
 uint32_t encontrar_tripulante(uint32_t id_tripulante, uint32_t id_patota);
 
