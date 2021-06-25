@@ -199,6 +199,7 @@ void agregarTripulanteAListaReadyYAvisar(t_tripulante*);
 void agregarTripulanteAListaExecYAvisar(t_tripulante*);
 void agregarTripulanteAListaBloqueadosYAvisar(t_tripulante*);
 void agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(t_tripulante*);
+void agregarTripulanteAListaFinishedYAvisar(t_tripulante*);
 int getIndexTripulanteEnLista(t_list* , t_tripulante* );
 void log_movimiento_tripulante(uint32_t, uint32_t, uint32_t);
 void log_tripulante_cambio_de_cola_planificacion(uint32_t, char*, char*);

@@ -531,8 +531,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			int id=atoi(mensaje[1]);
 
 			expulsar_tripulante_msg* mensajeExpulsar=malloc(sizeof(expulsar_tripulante_msg));
-			mensajeExpulsar->idTripulante=id;
-			enviar_paquete(mensajeExpulsar,EXPULSAR_TRIPULANTE_MSG,socketExpulsar);
+
 
 			bool tieneMismoNombre(void*elemento){
 				t_tripulante*tripulante= (t_tripulante*) elemento;
@@ -540,6 +539,10 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			}
 
 			t_tripulante*tripulanteExpulsado = list_find(tripulantes,tieneMismoNombre);
+
+			mensajeExpulsar->idTripulante= tripulanteExpulsado->idTripulante;
+			mensajeExpulsar->idPatota= tripulanteExpulsado->idPatota;
+			enviar_paquete(mensajeExpulsar,EXPULSAR_TRIPULANTE_MSG,socketExpulsar);
 
 			//LO SACO DE TODAS LAS LISTAS Y LO SACO DEL WHILE DEL HILO
 			tripulanteExpulsado->fueExpulsado=1;		//ESTO ES UN FLAG.
@@ -602,7 +605,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 		}
 		case PAUSAR_PLANIFICACION: { //Este comando lo que busca es detener la planificación en cualquier momento(semaforo)
 
-			//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+			//INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
 
 			estaPlanificando=0;
 
@@ -780,6 +783,26 @@ void agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(t_tripulante* tripulant
 	mensaje->estado=tripulante->estado;
 	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
 	log_info(logger,"cambio De Estado A BloqueadoPorSabotaje:%d\n",tripulante->idTripulante);
+	free(mensaje);
+
+}
+
+void agregarTripulanteAListaFinishedYAvisar(t_tripulante* tripulante){
+
+	tripulante->estado=FINISHED;
+
+	pthread_mutex_lock(&mutex_listaFinalizados);
+	list_add(listaFinalizados,tripulante);
+	pthread_mutex_unlock(&mutex_listaFinalizados);
+
+	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
+	mensaje->idPatota=tripulante->idPatota;
+	mensaje->idTripulante=tripulante->idTripulante;
+	mensaje->estado=tripulante->estado;
+
+	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
+	log_info(logger,"cambio De Estado A Finished:%d\n",tripulante->idTripulante);
+
 	free(mensaje);
 
 }
@@ -1142,7 +1165,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 		if(stringACodigoAlgoritmo(ALGORITMO)==FIFO){
 
 
-			if(!llegoATarea(tripulante)){
+			if(!llegoATarea(tripulante) && tripulante->fueExpulsado != 1){
 				int distancia;
 				distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
 				log_info(logger,"se esta moviendo a la tarea la tarea el tripulante %d",tripulante->idTripulante);
@@ -1158,7 +1181,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 					distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
 
-					if(llegoATarea(tripulante) && tripulante->fueExpulsado != 1 && haySabotaje != 1){
+					if(llegoATarea(tripulante) && tripulante->fueExpulsado != 1){
 
 						log_info(logger,"llego a la tarea el tripulante %d",tripulante->idTripulante);
 
@@ -1174,32 +1197,17 @@ void ejecutarTripulante(t_tripulante* tripulante){
 							//							enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
 
 						}
-						if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU ){			//TODO  //si no mand la tarea y hay sabotaje esta mal
-																										//&& tripulante->fueExpulsado != 1 && haySabotaje != 1
-							if(estaPlanificando==0){
-								sem_wait(tripulante->semaforoCiclo);
-							}
 
-							log_info(logger,"se realiza un ciclo de CPU para enviar tarea del tripulante %d",tripulante->idTripulante);
-							sleep(RETARDO_CICLO_CPU);
-
-
-							//ENVIAR MENSAJE A IMONGO	enviar_paquete(mensaje, codigo, socketCliente)
-							//							inicio_tarea_msg* mandarTareaIO=malloc(sizeof(inicio_tarea_msg));
-							//							mandarTareaIO->idTripulante = tripulante->idTripulante;
-							//							mandarTareaIO->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
-							//							mandarTareaIO->parametros = tripulante->tareaAsignada->parametros;
-							//
-							//							enviar_paquete(mandarTareaIO, INICIO_TAREA,tripulante->socketTripulanteImongo);
-							log_info(logger,"el mensaje a imongo ha sido enviado exitosamentedel tripulante %d",tripulante->idTripulante);
-
-
-						}
 
 					}
 				}
 
 			}
+			if(tripulante->fueExpulsado == 1 && !llegoATarea(tripulante)){
+							sem_post(&sem_planificarMultitarea);
+							tripulante->estado = FINISHED;
+							log_info(logger,"me expulsaron y no me dejaron terminar la tarea soy el tripulante con ID: %d",tripulante->idTripulante);
+						}
 
 
 			if(llegoATarea(tripulante)){
@@ -1212,7 +1220,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 			}
 
-			if(tripulante->tareaAsignada==NULL){
+			if(tripulante->tareaAsignada==NULL && tripulante->fueExpulsado !=1){
 				//log_info(logger,"acaba de solicitar otra tarea el tripulante %d",tripulante->idTripulante);
 
 				//mandarTarea()
@@ -1273,7 +1281,9 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 
 
-
+				if(haySabotaje==1){
+					log_info(logger, "Llego un sabotaje, toca hacer huelga soy el tripulante con ID: %d",tripulante->idTripulante);
+				}
 
 
 			}
@@ -1290,10 +1300,13 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 
 	}
-	log_info(logger,"completo todas sus tareas el tripulante con ID:%d\n",tripulante->idTripulante);
-
-
+	log_info(logger,"completo todas sus tareas el tripulante con ID:%d\n",tripulante->idTripulante);	//esto no iria aca
 	printf("adios al tripulante con ID:%d\n",tripulante->idTripulante);
+
+	if(tripulante->fueExpulsado ==1){
+		log_info(logger,"Fui expulsado yo era el tripulante con ID: %d, el impostor es el 4", tripulante->idTripulante);
+	}
+
 }
 
 
@@ -1326,14 +1339,36 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 			sem_post(tripulante->semaforoDelTripulante);
 
 		}
-		if(tripulante->fueExpulsado == 1 || haySabotaje == 1){		//TODO
-			sem_post(&sem_planificarMultitarea);
-		}
+
+		if(tripulante->fueExpulsado == 1){		//TODO
+				sem_post(&sem_planificarMultitarea);
+				tripulante->estado = FINISHED;
+				log_info(logger,"me expulsaron soy el tripulante con ID: %d",tripulante->idTripulante);
+			}
 
 	}
-	else if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU ){		//aca no agrego si hay sabotaje dejo que entre a bloqueados y salga
+	else if( (string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU) ){		//aca no agrego si hay sabotaje dejo que entre a bloqueados y salga
+
+		if(tripulante->fueExpulsado !=1){																				//&& tripulante->fueExpulsado != 1 && haySabotaje != 1
+							if(estaPlanificando==0){
+								sem_wait(tripulante->semaforoCiclo);
+							}
+
+							log_info(logger,"se realiza un ciclo de CPU para enviar tarea del tripulante %d",tripulante->idTripulante);
+							sleep(RETARDO_CICLO_CPU);
 
 
+							//ENVIAR MENSAJE A IMONGO	enviar_paquete(mensaje, codigo, socketCliente)
+							//							inicio_tarea_msg* mandarTareaIO=malloc(sizeof(inicio_tarea_msg));
+							//							mandarTareaIO->idTripulante = tripulante->idTripulante;
+							//							mandarTareaIO->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
+							//							mandarTareaIO->parametros = tripulante->tareaAsignada->parametros;
+							//
+							//							enviar_paquete(mandarTareaIO, INICIO_TAREA,tripulante->socketTripulanteImongo);
+							log_info(logger,"el mensaje a imongo ha sido enviado exitosamentedel tripulante %d",tripulante->idTripulante);
+		}
+
+		if(tripulante->fueExpulsado !=1){
 
 		list_remove(listaEjecutando, getIndexTripulanteEnLista(listaEjecutando,tripulante));
 		agregarTripulanteAListaBloqueadosYAvisar(tripulante);
@@ -1348,30 +1383,22 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 
 		printf("TIRO EL WAIT DEL SEMAFORO el tripulante %d \n",tripulante->idTripulante);
 
-		printf("llego al finalel tripulante con ID %d\n",tripulante->idTripulante);
+		printf("llego al final el tripulante con ID %d\n",tripulante->idTripulante);
 
 
-		tripulante->estado=FINISHED;
+		tripulante->estado=FINISHED;								//esto no iria
 		if(tripulante->fueExpulsado !=1){
 		/*	solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
 		mensajeTarea->idTripulante=tripulante->idTripulante;
 		enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
 		printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
-
 			 	//recibirMensaje()				TODO
-
 				t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
-
 				switch(paqueteTareaRta->codigo){
-
 				case SOLICITAR_SIGUIENTE_TAREA_RTA:{
-
 				solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
-
 				char** nombreTarea = string_split(mensajeTareaRta->tarea->nombre_parametros->string, " ");
-
 				if(nombreTarea[1] ==NULL){
-
 					tripulante->tareaAsignada->nombreTarea=nombreTarea[0];
 					tripulante->tareaAsignada->coordenadas=mensajeTareaRta->tarea->coordenadas;
 					tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
@@ -1382,24 +1409,23 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 					tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 					tripulante->tareaAsignada->parametros=nombreTarea[1];
 				}
-
 					agregarTripulanteAListaReadyYAvisar(tripulante);
 				break;
-
 					} case COMPLETO_TAREAS:{
-
 						tripulante->estado = FINISHED;
 						sem_post(&sem_planificarMultitarea);
-
 						break;
 				 }
 				}
-
 	*/
 		}
+	}else if(tripulante->fueExpulsado == 1){
+		sem_post(&sem_planificarMultitarea);
+		tripulante->estado = FINISHED;
+		log_info(logger,"fui expulsado soy el tripulante con ID: %d",tripulante->idTripulante);
 	}
 
-
+	}
 }
 
 
@@ -1419,7 +1445,7 @@ void planificarBloqueo(){
 
 		int r=1;
 
-		while(tripulante->tareaAsignada->duracion>=r && tripulante->fueExpulsado != 1){		// DURACION DE LA TAREA BLOQUEADA
+		while(tripulante->tareaAsignada->duracion>=r && tripulante->fueExpulsado != 1){		// DURACION DE LA TAREA BLOQUEADA	si fue expulsado que salga y si hay sabotaje que entre en el wait
 
 			if(estaPlanificando==0){
 				sem_wait(tripulante->semaforoCiclo);
