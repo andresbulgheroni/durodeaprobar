@@ -2,13 +2,6 @@
 
 int main(void) {
 
-	//Creo 2 archivos de bitacora dentro de la carpeta
-	t_list* lista = listaArchivosDeBitacora();
-	puts(list_get(lista,0));
-	puts(list_get(lista,1));
-	free(lista);
-
-
 	//	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
 	//	leerConfig();
 	//	crear_log();
@@ -49,7 +42,7 @@ int main(void) {
 
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
 	//	fsckSuperBloque_Bloques();
-	//	fsckSuperBloque_Bitmap();
+		fsckSuperBloque_Bitmap();
 	//	fsckFiles_BlockCount();
 	//	fsckFiles_Blocks();
 	//	fsckFiles_Size();
@@ -1084,6 +1077,22 @@ int fsckSuperBloque_Bitmap(){
 	char* rutaArchivoOxigeno = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
 	char* rutaArchivoComida = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
 	char* rutaArchivoBasura = string_from_format("%s/Files/Basura.ims", PUNTO_MONTAJE);
+	char* rutaArchivosBitacora = string_from_format("%s/Files/Bitacoras/", PUNTO_MONTAJE);
+
+	t_list* lista = listaArchivosDeBitacora();
+	int count = 0;
+
+	while(count< list_size(lista)){
+
+		char* rutaArchivo = string_new();
+		string_append(&rutaArchivo,rutaArchivosBitacora);
+		string_append(&rutaArchivo,list_get(lista,count));
+		string_append(&rutaArchivo, ".ims");
+		haySabotajeBitmapEnElArchivo(rutaArchivoBasura);
+		free(rutaArchivo);
+		count++;
+
+	}
 
 	if(existeArchivo(rutaArchivoOxigeno)){
 
@@ -1103,9 +1112,11 @@ int fsckSuperBloque_Bitmap(){
 
 	}
 
+	free(lista);
 	free(rutaArchivoOxigeno);
 	free(rutaArchivoComida);
 	free(rutaArchivoBasura);
+	free(rutaArchivosBitacora);
 
 	return EXIT_SUCCESS;
 
@@ -1464,9 +1475,9 @@ int fsckFiles_Blocks(){
 
 }
 
-void haySabotajeBitmapEnElArchivo(char* directorio){
+void haySabotajeBitmapEnElArchivo(char* rutaArchivo){
 
-	t_config* metadata = config_create(directorio);
+	t_config* metadata = config_create(rutaArchivo);
 	char** blocks = config_get_array_value(metadata, "BLOCKS");
 
 	int j = 0;
@@ -1568,11 +1579,11 @@ char* arrayToChar(char cadena[]){
 	for(int i=0; cadena[i]!='\0';i++){
 
 		if(cadena[i]!='\0'){
-		char caracter = cadena[i];
-		char* aux = malloc(1);
-		memcpy(aux,&caracter,1);
-		string_append(&a,aux);
-		free(aux);
+			char caracter = cadena[i];
+			char* aux = malloc(1);
+			memcpy(aux,&caracter,1);
+			string_append(&a,aux);
+			free(aux);
 		}
 	}
 
