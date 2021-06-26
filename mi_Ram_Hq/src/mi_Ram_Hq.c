@@ -1467,7 +1467,7 @@ void inicializar_segmentacion(){
 	memoria_vacia->inicio = 0;
 	memoria_vacia->tamanio = TAMANIO_MEMORIA;
 	list_add(segmentos_libres, memoria_vacia);
-	tablas_seg_patota = dictionary_create(); //esto??
+	tablas_seg_patota = dictionary_create();
 }
 
 // guarda la patota en memoria, crea la tabla de segmentos y la guarda en el dictionary
@@ -1597,7 +1597,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 		} else {
 
-			status = 0; //asi? falopa
+			status = false;
 		}
 	}
 }
@@ -1656,8 +1656,7 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 	memcpy(buffer_tcb, memoria_principal + offset, sizeof(t_tcb));
 	//traigo de alguna manera el numero de la siguiente instruccion
 
-	segmento* seg_tareas = malloc(sizeof(segmento)); //CHEQUEAR SI HACE FALTA EL MALLOC
-	seg_tareas = list_get(tabla_patota, 1);
+	segmento* seg_tareas = list_get(tabla_patota, 1);
 	uint32_t direccion_tareas = seg_tareas->inicio;
 
 	void* buffer_tareas = malloc(sizeof(seg_tareas->tamanio)); //el tamanio esta bien?
@@ -1675,7 +1674,7 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 	return tarea;
 }
 
- //saca el segmento de la tabla de segmentos y agrega el segmento libre a la lista de libres
+//saca el segmento de la tabla de segmentos y agrega el segmento libre a la lista de libres
 void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* status){
 
 	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
@@ -1694,10 +1693,9 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 
 }
 
- //REVISAR FREE
 segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
-	segmento* seg_tripulante = malloc(sizeof(segmento));
+	segmento* seg_tripulante;
 
 	uint32_t cant_tripulantes_patota = list_size(tabla_patota) - 2;
 	uint32_t contador = 2;
@@ -1719,15 +1717,13 @@ segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota)
 	}
 
 	free(buffer);
-	//libero tabla_patota tambien?
 
 	return seg_tripulante;
 }
 
-// REVISAR FREE
 uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
+
 	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
-	segmento* seg_tripulante = malloc(sizeof(segmento));
 
 	uint32_t cant_tripulantes_patota = list_size(tabla_patota) - 2;
 	uint32_t contador = 2;
@@ -1738,19 +1734,18 @@ uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 	void* buffer = malloc(sizeof(t_tcb));
 
 	while(!encontrado){
-		seg_tripulante = list_get(tabla_patota, contador);
+		segmento* seg_tripulante = list_get(tabla_patota, contador);
 		offset = seg_tripulante->inicio;
 		memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
 		memcpy(&tid, buffer, sizeof(tid));
 		if(tid == id_tripulante){
-				encontrado = 1;
+			encontrado = 1;
 		}
 		contador++;
 	}
 
 	//libero memoria
-	free(seg_tripulante);
-	//libero la lista?
+	free(buffer);
 
 	return offset;
 }
@@ -1766,7 +1761,7 @@ void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 		return seg->inicio == inicio_seg_nuevo && limite_segmento >= limite_seg_nuevo;
 	}
 
-	segmento* seg_a_modificar = malloc(sizeof(segmento));
+	segmento* seg_a_modificar;
 	seg_a_modificar = list_get(list_filter(segmentos_libres, se_encuentra_contenido), 0);
 	//ESTO ESTA BIEN PARA OBTENER EL SEGMENTO?
 
@@ -1870,7 +1865,6 @@ void liberar_segmento(segmento* seg){
 	remove_by_condition(segmentos_en_memoria, es_el_segmento);
 }
 
-//FALTA COPIAR LA MEMORIA LPM
 //junta todos los segmentos en la parte superior de la memoria y crea un segmento libre con el restante
 void compactar(){
 
@@ -1927,8 +1921,8 @@ void compactar(){
 	list_clean(segmentos_libres);
 	list_add(segmentos_libres, segmento_libre);
 
-	memoria_principal = buffer;
-	free(buffer); //ta mal esto?
+	memcpy(memoria_principal, buffer, sizeof(TAMANIO_MEMORIA));
+	free(buffer);
 }
 
 
