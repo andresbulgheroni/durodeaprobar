@@ -691,6 +691,7 @@ expulsar_tripulante_msg* desserializar_expulsar_tripulante_msg(void* stream){
 
 	uint32_t offset = 0;
 
+	deserializar_variable(stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 
 	return mensaje;
@@ -726,6 +727,7 @@ solicitar_siguiente_tarea_msg* desserializar_solicitar_siguiente_tarea_msg(void*
 
 	uint32_t offset = 0;
 
+	deserializar_variable(stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 
 	return mensaje;
@@ -764,6 +766,7 @@ cambio_estado_msg* desserializar_cambio_estado_msg(void* stream){
 
 	uint32_t offset = 0;
 
+	deserializar_variable(stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 	deserializar_variable(stream, &(mensaje->estado), sizeof(mensaje->estado), &offset);
 
