@@ -347,6 +347,7 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 		char* posicion = list_get(posicionesTripulantes,i);
 		tripulante->coordenadas = get_coordenadas(posicion);
 		tripulante->idTripulante = id_tripulante;
+		tripulante->fueExpulsado = 0;
 		id_tripulante++;
 		tripulante->idPatota = id_patota;
 		tripulante->misCiclosDeCPU = 0;
@@ -356,7 +357,7 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 
 		sem_t* semaforoParaBloquearCicloTripulante = malloc(sizeof(sem_t));
 		sem_init(semaforoParaBloquearCicloTripulante, 0, 0);
-		tripulante->semaforoBloqueadoTripulante=semaforoParaBloquearCicloTripulante;
+		tripulante->semaforoBloqueadoTripulante=semaforoParaBloquearCicloTripulante;		//primero sem_destroy y luego el free
 
 
 		sem_t* semaforoParaCortarCicloTripulante = malloc(sizeof(sem_t));
@@ -477,10 +478,6 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 					id_tripulante_para_enviar++;
 
-					//						free(tripulanteConCoordenadas->coordenadas);
-					//						free(tripulanteConCoordenadas);
-
-
 				}
 				mensajePatota->tripulantes=posicionesTripulantesParaRam;
 
@@ -488,12 +485,20 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 
 
+
 				inicializarAtributosATripulante(posicionesTripulantes);
 
 
 				fclose(fileTarea);
+				void funcion(void*elemento){
+									tripulante_data_msg*tripulanteConCoordenadas =(tripulante_data_msg*) elemento;
+									free(tripulanteConCoordenadas->coordenadas);
+									free(tripulanteConCoordenadas);
+								}
+				list_destroy_and_destroy_elements(mensajePatota->tripulantes,funcion);
+
 				list_destroy(posicionesTripulantes);
-				//list_destroy(posicionesTripulantesParaRam);
+
 
 				//free(mensajePatota->tareas);
 
@@ -1528,12 +1533,12 @@ void planificarSegun(){			//TODO
 
 void ejecucionRR(t_tripulante*tripulante){
 
-	if(!llegoATarea(tripulante)){
+	if(!llegoATarea(tripulante) && tripulante->fueExpulsado!=1){
 		int distancia;
 		distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
 		log_info(logger,"se esta moviendo a la tarea la tarea el tripulante %d",tripulante->idTripulante);
 
-		while (distancia != 0 && distancia != -1 && (tripulante->quantumDisponible)>0) {
+		while (distancia != 0 && distancia != -1 && (tripulante->quantumDisponible)>0 && tripulante->fueExpulsado!=1) {
 
 			if(estaPlanificando==0){
 				sem_wait(tripulante->semaforoCiclo);
@@ -1560,7 +1565,7 @@ void ejecucionRR(t_tripulante*tripulante){
 	}
 
 
-	if(llegoATarea(tripulante) && (tripulante->quantumDisponible > 0) ){
+	if(llegoATarea(tripulante) && (tripulante->quantumDisponible > 0 && tripulante->fueExpulsado!=1) ){
 
 
 		log_info(logger,"va a ejecutar la tarea el tripulante %d",tripulante->idTripulante);
@@ -1570,7 +1575,7 @@ void ejecucionRR(t_tripulante*tripulante){
 	}
 
 
-	if((tripulante->quantumDisponible)==0){
+	if((tripulante->quantumDisponible)==0 && tripulante->fueExpulsado!=1){
 		tripulante->quantumDisponible = QUANTUM;
 		log_info(logger,"no termino la tarea y se quedo sin quantum el tripulante con ID: %d\n",tripulante->idTripulante);
 		pthread_mutex_lock(&mutex_listaEjecutando);
@@ -1597,7 +1602,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 
 
-		while(tripulante->misCiclosDeCPU<tripulante->tareaAsignada->duracion && (tripulante->quantumDisponible)>0){
+		while(tripulante->misCiclosDeCPU<tripulante->tareaAsignada->duracion && (tripulante->quantumDisponible)>0 && tripulante->fueExpulsado!=1){
 
 			if(estaPlanificando==0){
 				sem_wait(tripulante->semaforoCiclo);
@@ -1612,7 +1617,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 		}
 
 
-		if(tripulante->misCiclosDeCPU==tripulante->tareaAsignada->duracion && tripulante->quantumDisponible > 0){	//SI LLEGO Y EL QUANTUM NO ES 0 SIGUE EJECUTANDO OTRA TAREA
+		if(tripulante->misCiclosDeCPU==tripulante->tareaAsignada->duracion && tripulante->quantumDisponible > 0 && tripulante->fueExpulsado!=1){	//SI LLEGO Y EL QUANTUM NO ES 0 SIGUE EJECUTANDO OTRA TAREA
 			tripulante->tareaAsignada=NULL;
 			tripulante->misCiclosDeCPU=0;
 
@@ -1678,7 +1683,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 		}
 
-		if(tripulante->misCiclosDeCPU == tripulante->tareaAsignada->duracion && tripulante->quantumDisponible == 0){	//SI EL QUANTUM ES 0 OSEA HIZO SU ULTIMA RAFAGA Y TAMBIEN TERMINO LA TAREA
+		if(tripulante->misCiclosDeCPU == tripulante->tareaAsignada->duracion && tripulante->quantumDisponible == 0 && tripulante->fueExpulsado!=1){	//SI EL QUANTUM ES 0 OSEA HIZO SU ULTIMA RAFAGA Y TAMBIEN TERMINO LA TAREA
 
 			tripulante->tareaAsignada=NULL;
 			tripulante->misCiclosDeCPU=0;		//LE SETEO EL VALOR AL CICLO
@@ -1757,7 +1762,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 		}
 
-		if((tripulante->quantumDisponible)==0 && tripulante->misCiclosDeCPU != tripulante->tareaAsignada->duracion){ //en este caso no termino la tarea
+		if((tripulante->quantumDisponible)==0 && tripulante->misCiclosDeCPU != tripulante->tareaAsignada->duracion && tripulante->fueExpulsado!=1){ //en este caso no termino la tarea
 
 			tripulante->quantumDisponible = QUANTUM;	//solo seteo el quantum sin setear los ciclos
 			log_info(logger,"no termino la tarea y se quedo sin quantum el tripulante con ID: %d\n",tripulante->idTripulante);
@@ -1775,7 +1780,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 	}
 	else if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU){
 
-		if((tripulante->quantumDisponible)>0){		//SI EL QUANTUM ES 0 NO PUEDE MANDAR EL MENSAJE.
+		if((tripulante->quantumDisponible)>0 && tripulante->fueExpulsado!=1){		//SI EL QUANTUM ES 0 NO PUEDE MANDAR EL MENSAJE.
 
 			if(estaPlanificando==0){
 				sem_wait(tripulante->semaforoCiclo);
@@ -1796,8 +1801,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 			tripulante->quantumDisponible--;
 
-
-
+			if(tripulante->fueExpulsado != 1){
 			list_remove(listaEjecutando, getIndexTripulanteEnLista(listaEjecutando,tripulante));
 			agregarTripulanteAListaBloqueadosYAvisar(tripulante);
 			log_tripulante_cambio_de_cola_planificacion(tripulante->idTripulante, "ES UNA TAREA DE IO", "BLOCKED"); //PONER EN LISTA DE BLOQUEADOS
@@ -1813,8 +1817,13 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 			//agregarTripulanteAListaReadyYAvisar(tripulante);						//NO DEBERIA IR ACA, DEBERIA IR CUANDO ME DEN LA TAREA
 			tripulante->estado=FINISHED;
-
+			}
+		} else if(tripulante->fueExpulsado == 1){
+			sem_post(&sem_planificarMultitarea);
+			agregarTripulanteAListaFinishedYAvisar(tripulante);
+			log_info(logger,"fui expulsado soy el tripulante con ID: %d",tripulante->idTripulante);
 		}
+
 		if((tripulante->quantumDisponible)==0){
 			tripulante->quantumDisponible = QUANTUM;
 		}

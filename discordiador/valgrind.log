@@ -1,0 +1,192 @@
+==3566== Memcheck, a memory error detector
+==3566== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==3566== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==3566== Command: ./Debug/discordiador
+==3566== Parent PID: 3023
+==3566== 
+==3566== Thread 4:
+==3566== Conditional jump or move depends on uninitialised value(s)
+==3566==    at 0x804C11B: ejecucionRR (discordiador.c:1531)
+==3566==    by 0x804BA6B: ejecutarTripulante (discordiador.c:1303)
+==3566==    by 0x4057294: start_thread (pthread_create.c:333)
+==3566==    by 0x41A31AD: clone (clone.S:114)
+==3566== 
+==3566== Conditional jump or move depends on uninitialised value(s)
+==3566==    at 0x804C1F3: ejecucionRR (discordiador.c:1536)
+==3566==    by 0x804BA6B: ejecutarTripulante (discordiador.c:1303)
+==3566==    by 0x4057294: start_thread (pthread_create.c:333)
+==3566==    by 0x41A31AD: clone (clone.S:114)
+==3566== 
+==3566== Conditional jump or move depends on uninitialised value(s)
+==3566==    at 0x804C238: ejecucionRR (discordiador.c:1563)
+==3566==    by 0x804BA6B: ejecutarTripulante (discordiador.c:1303)
+==3566==    by 0x4057294: start_thread (pthread_create.c:333)
+==3566==    by 0x41A31AD: clone (clone.S:114)
+==3566== 
+==3566== Conditional jump or move depends on uninitialised value(s)
+==3566==    at 0x804C3F2: ejecucionDeTareaTripulanteRR (discordiador.c:1600)
+==3566==    by 0x804C260: ejecucionRR (discordiador.c:1568)
+==3566==    by 0x804BA6B: ejecutarTripulante (discordiador.c:1303)
+==3566==    by 0x4057294: start_thread (pthread_create.c:333)
+==3566==    by 0x41A31AD: clone (clone.S:114)
+==3566== 
+==3566== Conditional jump or move depends on uninitialised value(s)
+==3566==    at 0x804C66D: ejecucionDeTareaTripulanteRR (discordiador.c:1760)
+==3566==    by 0x804C260: ejecucionRR (discordiador.c:1568)
+==3566==    by 0x804BA6B: ejecutarTripulante (discordiador.c:1303)
+==3566==    by 0x4057294: start_thread (pthread_create.c:333)
+==3566==    by 0x41A31AD: clone (clone.S:114)
+==3566== 
+==3566== Thread 5:
+==3566== Conditional jump or move depends on uninitialised value(s)
+==3566==    at 0x804C514: ejecucionDeTareaTripulanteRR (discordiador.c:1681)
+==3566==    by 0x804C260: ejecucionRR (discordiador.c:1568)
+==3566==    by 0x804BA6B: ejecutarTripulante (discordiador.c:1303)
+==3566==    by 0x4057294: start_thread (pthread_create.c:333)
+==3566==    by 0x41A31AD: clone (clone.S:114)
+==3566== 
+==3566== Thread 4:
+==3566== Conditional jump or move depends on uninitialised value(s)
+==3566==    at 0x804C426: ejecucionDeTareaTripulanteRR (discordiador.c:1615)
+==3566==    by 0x804C260: ejecucionRR (discordiador.c:1568)
+==3566==    by 0x804BA6B: ejecutarTripulante (discordiador.c:1303)
+==3566==    by 0x4057294: start_thread (pthread_create.c:333)
+==3566==    by 0x41A31AD: clone (clone.S:114)
+==3566== 
+==3566== Conditional jump or move depends on uninitialised value(s)
+==3566==    at 0x804C27B: ejecucionRR (discordiador.c:1573)
+==3566==    by 0x804BA6B: ejecutarTripulante (discordiador.c:1303)
+==3566==    by 0x4057294: start_thread (pthread_create.c:333)
+==3566==    by 0x41A31AD: clone (clone.S:114)
+==3566== 
+==3566== Conditional jump or move depends on uninitialised value(s)
+==3566==    at 0x804C73B: ejecucionDeTareaTripulanteRR (discordiador.c:1778)
+==3566==    by 0x804C260: ejecucionRR (discordiador.c:1568)
+==3566==    by 0x804BA6B: ejecutarTripulante (discordiador.c:1303)
+==3566==    by 0x4057294: start_thread (pthread_create.c:333)
+==3566==    by 0x41A31AD: clone (clone.S:114)
+==3566== 
+==3566== Conditional jump or move depends on uninitialised value(s)
+==3566==    at 0x804C7BD: ejecucionDeTareaTripulanteRR (discordiador.c:1799)
+==3566==    by 0x804C260: ejecucionRR (discordiador.c:1568)
+==3566==    by 0x804BA6B: ejecutarTripulante (discordiador.c:1303)
+==3566==    by 0x4057294: start_thread (pthread_create.c:333)
+==3566==    by 0x41A31AD: clone (clone.S:114)
+==3566== 
+==3566== Thread 3:
+==3566== Conditional jump or move depends on uninitialised value(s)
+==3566==    at 0x804BF2D: planificarBloqueo (discordiador.c:1455)
+==3566==    by 0x4057294: start_thread (pthread_create.c:333)
+==3566==    by 0x41A31AD: clone (clone.S:114)
+==3566== 
+==3566== Thread 4:
+==3566== Conditional jump or move depends on uninitialised value(s)
+==3566==    at 0x804BA87: ejecutarTripulante (discordiador.c:1160)
+==3566==    by 0x4057294: start_thread (pthread_create.c:333)
+==3566==    by 0x41A31AD: clone (clone.S:114)
+==3566== 
+==3566== 
+==3566== HEAP SUMMARY:
+==3566==     in use at exit: 66,253 bytes in 286 blocks
+==3566==   total heap usage: 1,737 allocs, 1,451 frees, 141,798 bytes allocated
+==3566== 
+==3566== Thread 1:
+==3566== 16 bytes in 2 blocks are definitely lost in loss record 35 of 89
+==3566==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==3566==    by 0x804A42B: leer_consola (discordiador.c:471)
+==3566==    by 0x804936A: main (discordiador.c:38)
+==3566== 
+==3566== 16 bytes in 2 blocks are definitely lost in loss record 36 of 89
+==3566==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==3566==    by 0x8049E60: inicializarAtributosATripulante (discordiador.c:346)
+==3566==    by 0x804A4DA: leer_consola (discordiador.c:491)
+==3566==    by 0x804936A: main (discordiador.c:38)
+==3566== 
+==3566== 32 (24 direct, 8 indirect) bytes in 2 blocks are definitely lost in loss record 44 of 89
+==3566==    at 0x402E2CC: realloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==3566==    by 0x40B5BC4: _string_split (in /usr/lib/libcommons.so)
+==3566==    by 0x40B55F3: string_split (in /usr/lib/libcommons.so)
+==3566==    by 0x804C8DF: get_coordenadas (utils.c:7)
+==3566==    by 0x804A459: leer_consola (discordiador.c:472)
+==3566==    by 0x804936A: main (discordiador.c:38)
+==3566== 
+==3566== 32 (24 direct, 8 indirect) bytes in 2 blocks are definitely lost in loss record 45 of 89
+==3566==    at 0x402E2CC: realloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==3566==    by 0x40B5BC4: _string_split (in /usr/lib/libcommons.so)
+==3566==    by 0x40B55F3: string_split (in /usr/lib/libcommons.so)
+==3566==    by 0x804C8DF: get_coordenadas (utils.c:7)
+==3566==    by 0x8049E8A: inicializarAtributosATripulante (discordiador.c:348)
+==3566==    by 0x804A4DA: leer_consola (discordiador.c:491)
+==3566==    by 0x804936A: main (discordiador.c:38)
+==3566== 
+==3566== 56 (8 direct, 48 indirect) bytes in 1 blocks are definitely lost in loss record 49 of 89
+==3566==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==3566==    by 0x40B5E01: list_create (in /usr/lib/libcommons.so)
+==3566==    by 0x804A1B2: leer_consola (discordiador.c:416)
+==3566==    by 0x804936A: main (discordiador.c:38)
+==3566== 
+==3566== 61 (8 direct, 53 indirect) bytes in 1 blocks are definitely lost in loss record 50 of 89
+==3566==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==3566==    by 0x804C93E: get_t_string (utils.c:19)
+==3566==    by 0x804A2C0: leer_consola (discordiador.c:438)
+==3566==    by 0x804936A: main (discordiador.c:38)
+==3566== 
+==3566== 62 bytes in 1 blocks are definitely lost in loss record 51 of 89
+==3566==    at 0x402E2CC: realloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==3566==    by 0x40B50E7: string_append (in /usr/lib/libcommons.so)
+==3566==    by 0x804A1DE: leer_consola (discordiador.c:419)
+==3566==    by 0x804936A: main (discordiador.c:38)
+==3566== 
+==3566== 136 bytes in 1 blocks are possibly lost in loss record 59 of 89
+==3566==    at 0x402E0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==3566==    by 0x4011726: allocate_dtv (dl-tls.c:322)
+==3566==    by 0x401214B: _dl_allocate_tls (dl-tls.c:539)
+==3566==    by 0x4057CC3: allocate_stack (allocatestack.c:588)
+==3566==    by 0x4057CC3: pthread_create@@GLIBC_2.1 (pthread_create.c:539)
+==3566==    by 0x80493BB: crearHiloPlanificador (discordiador.c:53)
+==3566==    by 0x804934B: main (discordiador.c:33)
+==3566== 
+==3566== 136 bytes in 1 blocks are possibly lost in loss record 60 of 89
+==3566==    at 0x402E0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==3566==    by 0x4011726: allocate_dtv (dl-tls.c:322)
+==3566==    by 0x401214B: _dl_allocate_tls (dl-tls.c:539)
+==3566==    by 0x4057CC3: allocate_stack (allocatestack.c:588)
+==3566==    by 0x4057CC3: pthread_create@@GLIBC_2.1 (pthread_create.c:539)
+==3566==    by 0x804BFCA: inicioHiloPlanificarBloqueo (discordiador.c:1486)
+==3566==    by 0x8049350: main (discordiador.c:34)
+==3566== 
+==3566== 141 (32 direct, 109 indirect) bytes in 2 blocks are definitely lost in loss record 62 of 89
+==3566==    at 0x402E2CC: realloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==3566==    by 0x40B5BC4: _string_split (in /usr/lib/libcommons.so)
+==3566==    by 0x40B55F3: string_split (in /usr/lib/libcommons.so)
+==3566==    by 0x804A142: leer_consola (discordiador.c:403)
+==3566==    by 0x804936A: main (discordiador.c:38)
+==3566== 
+==3566== 272 bytes in 2 blocks are possibly lost in loss record 67 of 89
+==3566==    at 0x402E0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==3566==    by 0x4011726: allocate_dtv (dl-tls.c:322)
+==3566==    by 0x401214B: _dl_allocate_tls (dl-tls.c:539)
+==3566==    by 0x4057CC3: allocate_stack (allocatestack.c:588)
+==3566==    by 0x4057CC3: pthread_create@@GLIBC_2.1 (pthread_create.c:539)
+==3566==    by 0x8049FB4: inicializarAtributosATripulante (discordiador.c:378)
+==3566==    by 0x804A4DA: leer_consola (discordiador.c:491)
+==3566==    by 0x804936A: main (discordiador.c:38)
+==3566== 
+==3566== 461 (8 direct, 453 indirect) bytes in 1 blocks are definitely lost in loss record 68 of 89
+==3566==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==3566==    by 0x40B7393: config_create (in /usr/lib/libcommons.so)
+==3566==    by 0x804947F: inicializarConfig (discordiador.c:82)
+==3566==    by 0x8049339: main (discordiador.c:28)
+==3566== 
+==3566== LEAK SUMMARY:
+==3566==    definitely lost: 198 bytes in 14 blocks
+==3566==    indirectly lost: 679 bytes in 46 blocks
+==3566==      possibly lost: 544 bytes in 4 blocks
+==3566==    still reachable: 64,832 bytes in 222 blocks
+==3566==         suppressed: 0 bytes in 0 blocks
+==3566== Reachable blocks (those to which a pointer was found) are not shown.
+==3566== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==3566== 
+==3566== For counts of detected and suppressed errors, rerun with: -v
+==3566== Use --track-origins=yes to see where uninitialised values come from
+==3566== ERROR SUMMARY: 60 errors from 24 contexts (suppressed: 0 from 0)
