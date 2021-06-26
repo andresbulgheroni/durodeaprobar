@@ -20,6 +20,7 @@
 #include <curses.h>
 #include <commons/collections/list.h>
 #include <commons/collections/dictionary.h>
+#include <commons/temporal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -103,6 +104,15 @@ typedef struct {
 
 } t_tcb;
 
+typedef struct{
+
+	uint32_t marco;
+	char* estado;
+	char* proceso;
+	char* pagina;
+
+} t_dump_pag;
+
 void init ();
 void iniciarMapa();
 void terminar ();
@@ -112,6 +122,7 @@ void recibir_mensaje(int32_t* conexion);
 char get_status(t_status_code codigo);
 void hilo_servidor();
 void sig_handler(int n);
+char* get_timestamp();
 
 //Paginacion
 void configurar_paginacion();
@@ -142,7 +153,7 @@ void liberar_memoria_virtual(t_pagina_patota* pagina);
 int32_t paginas_necesarias(uint32_t offset, uint32_t size);
 void pasar_de_swap_a_principal(t_pagina_patota* pagina);
 void modificar_en_memoria_principal(t_pagina_patota* pagina, void* datos);
-void dump_paginacion();
+void dump_paginacion(FILE* dump);
 
 /* Segmentacion */
 
