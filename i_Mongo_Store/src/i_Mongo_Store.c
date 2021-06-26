@@ -3,20 +3,22 @@
 int main(void) {
 
 	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
+	pthread_mutex_init(&mutex_blocks, NULL);
 	leerConfig();
 	crear_log();
 	inicializarFS();
-	//	signal(SIGUSR1, sighandler);
+	signal(SIGUSR1, sighandler);
+
 	//
 	//
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
-	//				estadoSuperBloque();
-	//
-	//				generarRecurso(10,'O');
-	//				estadoSuperBloque();
-	//				consumirRecurso(100, 'O');
-	//
-	//				estadoSuperBloque();
+	estadoSuperBloque();
+
+	generarRecurso(10,'O');
+	estadoSuperBloque();
+	consumirRecurso(5, 'O');
+
+	estadoSuperBloque();
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 	//
 	//	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
@@ -45,7 +47,7 @@ int main(void) {
 	//		fsckSuperBloque_Bitmap();
 	//	fsckFiles_BlockCount();
 	//	fsckFiles_Blocks();
-	fsckFiles_Size();
+	//	fsckFiles_Size();
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
 
 
@@ -574,10 +576,11 @@ int writeBlock(char* string, int bloque){
 	}
 	setBitmap(1, bloque);
 
+	pthread_mutex_lock(&mutex_blocks);
 	memcpy(blocksMap + ((bloque - 1) * BLOCK_SIZE),
 			string,
 			strlen(string) * sizeof(char));
-
+	pthread_mutex_unlock(&mutex_blocks);
 	return bloque;
 }
 
@@ -647,9 +650,11 @@ int generarRecurso(int32_t cantidad, char recurso){
 
 			char* porcionAGrabar = string_substring(archivo, cantidadVieja, BLOCK_SIZE - caracteresEnUltimoBloque);
 
+			pthread_mutex_lock(&mutex_blocks);
 			memcpy(	blocksMap +	(ultimoBloque-1) * BLOCK_SIZE +		caracteresEnUltimoBloque,
 					porcionAGrabar,
 					BLOCK_SIZE - caracteresEnUltimoBloque * sizeof(char));
+			pthread_mutex_unlock(&mutex_blocks);
 
 			cantidad -= (BLOCK_SIZE - caracteresEnUltimoBloque);
 
@@ -911,9 +916,12 @@ int writeBitacora(int32_t tripulante, char* string){
 
 			char* porcionAGrabar = string_substring(string, 0, BLOCK_SIZE - caracteresEnUltimoBloque);
 
+
+			pthread_mutex_lock(&mutex_blocks);
 			memcpy(	blocksMap +	(ultimoBloque-1) * BLOCK_SIZE +		caracteresEnUltimoBloque,
 					porcionAGrabar,
 					BLOCK_SIZE - caracteresEnUltimoBloque * sizeof(char));
+			pthread_mutex_unlock(&mutex_blocks);
 
 			cantidad -= (BLOCK_SIZE - caracteresEnUltimoBloque);
 
@@ -1009,13 +1017,17 @@ char* readBitacora(int32_t tripulante){
 		int contador = 0;
 
 		while((unsigned)size >= BLOCK_SIZE){
+			pthread_mutex_lock(&mutex_blocks);
 			memcpy(bitacora + (BLOCK_SIZE * contador), blocksMap + (BLOCK_SIZE * (atoi(blocksArray[contador]) - 1)), BLOCK_SIZE);
+			pthread_mutex_unlock(&mutex_blocks);
 			size -= BLOCK_SIZE;
 			contador++;
 		}
 
 		if(size > 0){
+			pthread_mutex_lock(&mutex_blocks);
 			memcpy(bitacora + (BLOCK_SIZE * contador), blocksMap + (BLOCK_SIZE * (atoi(blocksArray[contador]) - 1)), size);
+			pthread_mutex_unlock(&mutex_blocks);
 		}
 
 		for(int i=0;i<blockCount;i++){

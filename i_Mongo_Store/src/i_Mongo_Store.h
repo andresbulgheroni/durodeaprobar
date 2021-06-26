@@ -19,6 +19,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <semaphore.h>
 
 #define MAX_BUFFER 1024
 
@@ -36,6 +37,7 @@ t_config* config;
 int tamanioBlocks;
 int tamanioSuperBloque;
 t_bitarray* bitmap;
+pthread_mutex_t mutex_blocks;
 
 typedef enum{
 	GENERAR_OXIGENO = 0,
