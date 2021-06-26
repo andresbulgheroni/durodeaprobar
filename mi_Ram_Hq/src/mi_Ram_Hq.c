@@ -1645,19 +1645,37 @@ void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 }
 
 // SIN TERMINAR
-char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status){
+char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status){
 
 	char* tarea = "";
 	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
-	uint32_t direccion_tareas;
-
 	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
+	uint32_t proxima_instruccion;
 
+	void* buffer_tcb = malloc(sizeof(t_tcb));
+	memcpy(buffer_tcb, memoria_principal + offset, sizeof(t_tcb));
+	//traigo de alguna manera el numero de la siguiente instruccion
+
+	segmento* seg_tareas = malloc(sizeof(segmento)); //CHEQUEAR SI HACE FALTA EL MALLOC
+	seg_tareas = list_get(tabla_patota, 1);
+	uint32_t direccion_tareas = seg_tareas->inicio;
+
+	void* buffer_tareas = malloc(sizeof(seg_tareas->tamanio)); //el tamanio esta bien?
+	memcpy(buffer_tareas, memoria_principal + seg_tareas->inicio, sizeof(seg_tareas->tamanio));
+
+	//copiar la instruccion en tarea, si prox_instruccion es 0 la primera, y asi sucesivamente
+
+	uint32_t offset_tcb = 0; //no
+
+	//le sumo uno en memoria a la proxima instruccion
+	proxima_instruccion += 1;
+	memcpy(buffer_tcb + offset_tcb, proxima_instruccion, sizeof(uint32_t));
+	memcpy(memoria_principal + offset, buffer_tcb, sizeof(t_tcb));
 
 	return tarea;
 }
 
- //REVISAR COMENTARIO saca el segmento de la tabla de segmentos y agrega el segmento libre a la lista de libres
+ //saca el segmento de la tabla de segmentos y agrega el segmento libre a la lista de libres
 void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* status){
 
 	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
@@ -1668,7 +1686,7 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 	void liberar_seg(segmento* seg){
 		free(seg);
 	}
-	// saco el segmento de la tabla de segmentos de la patota asi no lo estaria cambiando en la tabla auxiliar?
+	// saco el segmento de la tabla de segmentos de la patota
 	list_remove_and_destroy_element(tabla_patota, index, liberar_seg);
 
 	// agrego el segmento liberado a la lista de segmentos libres
@@ -1699,7 +1717,7 @@ segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota)
 		}
 		contador++;
 	}
-	//libero memoria? hace falta?
+
 	free(buffer);
 	//libero tabla_patota tambien?
 
@@ -1741,11 +1759,11 @@ uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 
 	uint32_t inicio_seg_nuevo = segmento_nuevo->inicio;
-	uint32_t dir_fisica_seg_nuevo = obtener_direccion_fisica(segmento_nuevo);
+	uint32_t limite_seg_nuevo = obtener_limite(segmento_nuevo);
 
 	bool se_encuentra_contenido(segmento* seg){
-		uint32_t dir_fisica_segmento = obtener_direccion_fisica(seg);
-		return seg->inicio == inicio_seg_nuevo && dir_fisica_segmento >= dir_fisica_seg_nuevo;
+		uint32_t limite_segmento = obtener_limite(seg);
+		return seg->inicio == inicio_seg_nuevo && limite_segmento >= limite_seg_nuevo;
 	}
 
 	segmento* seg_a_modificar = malloc(sizeof(segmento));
@@ -1758,11 +1776,11 @@ void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 
 	list_remove_by_condition(segmentos_libres, es_el_segmento);
 
-	uint32_t dir_fisica_seg_libre = obtener_direccion_fisica(seg_a_modificar);
+	uint32_t limite_seg_libre = obtener_limite(seg_a_modificar);
 
-	if(dir_fisica_seg_libre != dir_fisica_seg_nuevo){
+	if(limite_seg_libre != limite_seg_nuevo){
 
-		seg_a_modificar->inicio = dir_fisica_seg_nuevo; //el segmento libre nuevo arranca donde termina el otro
+		seg_a_modificar->inicio = limite_seg_nuevo; //el segmento libre nuevo arranca donde termina el otro
 		list_add(segmentos_libres, seg_a_modificar);
 
 		ordenar_lista_segmentos_libres();
@@ -1778,7 +1796,7 @@ void ordenar_lista_segmentos_libres(){
 	list_sort(segmentos_libres, ordenar_segmentos);
 }
 
-uint32_t obtener_direccion_fisica(segmento* seg){
+uint32_t obtener_limite(segmento* seg){
 	return seg->inicio + seg->tamanio;
 }
 
@@ -1852,31 +1870,46 @@ void liberar_segmento(segmento* seg){
 	remove_by_condition(segmentos_en_memoria, es_el_segmento);
 }
 
+//FALTA COPIAR LA MEMORIA LPM
 //junta todos los segmentos en la parte superior de la memoria y crea un segmento libre con el restante
 void compactar(){
 
 	bool ordenar_segmentos(segmento* seg1, segmento* seg2){
 		return seg1->inicio < seg2->inicio;
 	}
-
 	list_sort(segmentos_en_memoria, ordenar_segmentos());
+
+	void* buffer = malloc(sizeof(TAMANIO_MEMORIA));
+	uint32_t offset = 0;
 
 	segmento* seg_anterior = malloc(sizeof(segmento));
 	seg_anterior = list_get(segmentos_en_memoria, 0);
-	uint32_t direc_fisica_seg_anterior = obtener_direccion_fisica(seg_anterior);
+	uint32_t limite_seg_anterior;
+
+	//copio en el buffer el primer segmento al principio (en 0)
+	memcpy(buffer, memoria_principal + seg_anterior->inicio, sizeof(seg_anterior->tamanio));
 
 	if(seg_anterior->inicio != 0){
 		seg_anterior->inicio = 0;
-		direc_fisica_seg_anterior = obtener_direccion_fisica(seg_anterior);
-
+		limite_seg_anterior = obtener_limite(seg_anterior);
 	}
 
+	offset = limite_seg_anterior;
+
 	void modificar_inicio(segmento *seg){
-		if(direc_fisica_seg_anterior != seg->inicio){
-			seg->inicio = direc_fisica_seg_anterior;
+		if(seg->inicio != 0){
+
+			//transcribo el segmento al buffer
+			memcpy(buffer + offset, memoria_principal + seg->inicio, sizeof(seg->tamanio));
+
+			if(limite_seg_anterior != seg->inicio){
+				seg->inicio = limite_seg_anterior;
+			}
+
+			seg_anterior = seg;
+			limite_seg_anterior = obtener_limite(seg);
+			offset = limite_seg_anterior;
 		}
-		seg_anterior = seg;
-		direc_fisica_seg_anterior = obtener_direccion_fisica(seg);
 	}
 
 	list_iterate(segmentos_en_memoria, modificar_inicio());
@@ -1885,7 +1918,7 @@ void compactar(){
 	segmento* ult_seg = malloc(sizeof(segmento));
 	ult_seg = list_get(segmentos_en_memoria, cant_segmentos - 1);
 
-	uint32_t tamanio_ocupado_en_memoria = obtener_direccion_fisica(ult_seg);
+	uint32_t tamanio_ocupado_en_memoria = obtener_limite(ult_seg);
 
 	segmento* segmento_libre = malloc(sizeof(segmento));
 	segmento_libre->inicio = tamanio_ocupado_en_memoria;
@@ -1894,6 +1927,8 @@ void compactar(){
 	list_clean(segmentos_libres);
 	list_add(segmentos_libres, segmento_libre);
 
+	memoria_principal = buffer;
+	free(buffer); //ta mal esto?
 }
 
 
