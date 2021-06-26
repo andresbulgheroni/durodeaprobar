@@ -1584,8 +1584,6 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 		}
 		list_destroy_and_destroy_elements(tcbs, liberar_tcbs);
 
-		//los segmentos no deberia liberarlos no? porque estan siendo referenciados por las listas
-
 		if(!error_guardado){
 
 			//Guardo tabla de paginas
@@ -1659,7 +1657,7 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 	segmento* seg_tareas = list_get(tabla_patota, 1);
 	uint32_t direccion_tareas = seg_tareas->inicio;
 
-	void* buffer_tareas = malloc(sizeof(seg_tareas->tamanio)); //el tamanio esta bien?
+	void* buffer_tareas = malloc(sizeof(seg_tareas->tamanio));
 	memcpy(buffer_tareas, memoria_principal + seg_tareas->inicio, sizeof(seg_tareas->tamanio));
 
 	//copiar la instruccion en tarea, si prox_instruccion es 0 la primera, y asi sucesivamente
@@ -1678,8 +1676,7 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* status){
 
 	t_list* tabla_patota = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
-	segmento* seg_tripulante = malloc(sizeof(segmento));
-	seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
+	segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
 	uint32_t index = seg_tripulante->numero_segmento;
 
 	void liberar_seg(segmento* seg){
