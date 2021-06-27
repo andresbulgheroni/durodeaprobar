@@ -23,6 +23,7 @@ pthread_mutex_t  m_LISTA_REEMPLAZO = PTHREAD_MUTEX_INITIALIZER;
 //SEGMENTACION
 pthread_mutex_t  m_SEGMENTOS_LIBRES = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_SEG_EN_MEMORIA = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t  m_TABLAS_SEGMENTOS = PTHREAD_MUTEX_INITIALIZER;
 
 
 NIVEL* mapa;
@@ -388,7 +389,7 @@ void init (){
 	switch(ESQUEMA_MEMORIA){
 		case SEGMENTACION_PURA:{
 
-		//	inicializar_segmentacion();
+			inicializar_segmentacion();
 
 			break;
 		}
@@ -1474,253 +1475,67 @@ void inicializar_segmentacion(){
 	tablas_seg_patota = dictionary_create();
 }
 
-// guarda la patota en memoria, crea la tabla de segmentos y la guarda en el dictionary
-void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
+uint32_t obtener_limite(segmento* seg){
+	return seg->inicio + seg->tamanio;
+}
 
-	if(!dictionary_has_key(tablas_seg_patota, string_itoa(mensaje->idPatota))){
+//le paso el tamanio de un segmento, devuelve 1 si hay espacio y 0 si no hay espacio
+bool hay_espacio_libre(uint32_t size){
 
-		//creo la estructura de la tabla de segmentos
-		tabla_segmentos* tabla_seg = malloc(sizeof(tabla_segmentos));
-		tabla_seg->segmentos = list_create();
-		//tabla_seg->m_TABLA = PTHREAD_MUTEX_INITIALIZER;
+	bool entra_en_el_segmento(segmento* seg){
+		return seg->tamanio > size;
+	}
 
-		t_list* tabla_patota = list_create();
+	return list_any_satisfy(segmentos_libres, entra_en_el_segmento);
+}
 
-		uint32_t size_tareas = mensaje->tareas->length;
+//devuelve un offset de donde arrancar a guardar un segmento en memoria
+int32_t get_espacio_libre(uint32_t size){
 
-		//Creo los segmentos para la tabla de segmentos
+	t_list* lista_auxiliar = list_create();
 
-		segmento* seg_pcb = malloc(sizeof(segmento));
-		seg_pcb->numero_segmento = 0;
-		seg_pcb->tamanio = sizeof(t_pcb);
-		//MUTEX TABLA
-		list_add(tabla_seg->segmentos, seg_pcb);
-		//MUTEX TABLA
+	bool entra_en_el_segmento(segmento* seg){
+		return seg->tamanio > size;
+	}
 
-		segmento* seg_tareas = malloc(sizeof(segmento));
-		seg_tareas->numero_segmento = 1;
-		seg_tareas->tamanio = size_tareas;
-		//MUTEX TABLA
-		list_add(tabla_seg->segmentos, seg_tareas);
-		//MUTEX TABLA
+	//ERROR ACA :(
+	//list_add_all(lista_auxiliar, filter(segmentos_libres, entra_en_el_segmento));
 
-		segmento* seg_tcb[mensaje->cant_tripulantes];
-		for(int j = 0; j < mensaje->cant_tripulantes; j++){
-			seg_tcb[j] = malloc(sizeof(segmento));
-			seg_tcb[j]->numero_segmento = j+2;
-			seg_tcb[j]->tamanio = sizeof(t_pcb);
-			//MUTEX TABLA
-			list_add(tabla_seg->segmentos, seg_tcb[j]);
-			//MUTEX TABLA
-		}
+	segmento* primer_seg_libre = malloc(sizeof(segmento));
+	primer_seg_libre = list_get(lista_auxiliar, 0);
 
-		//Cargo datos para copiarlos a memoria
+	if(list_size(lista_auxiliar) == 1){
 
-		//pcb
-		t_pcb* pcb = malloc(sizeof(t_pcb));
-		pcb->pid = mensaje->idPatota;
+		free(lista_auxiliar);
+		return primer_seg_libre->inicio;
 
-		//tcb
-		t_list* tcbs = list_create();
-		void cargar_tcb(tripulante_data_msg* tripulante){
+	} else {
+		if(CRITERIO_SELECCION == FF){
 
-			t_tcb* tcb = malloc(sizeof(t_tcb));
-			tcb->tid = tripulante->idTripulante;
-			tcb->estado = 'R';
-			tcb->posX = tripulante->coordenadas->posX;
-			tcb->posY = tripulante->coordenadas->posY;
-			tcb->proxima_instruccion = 0;
-			tcb->direccion_patota = 0;
+			free(lista_auxiliar);
+			return primer_seg_libre->inicio;
 
-			list_add(tcbs, tcb);
-
-		}
-
-		list_iterate(mensaje->tripulantes, cargar_tcb);
-
-		uint32_t offset;
-
-		uint32_t error_guardado = 0;
-
-		//guarda el pcb
-		if(hay_espacio_libre(sizeof(t_pcb))){
-			offset = get_espacio_libre(sizeof(t_pcb));
-			seg_pcb->inicio = offset;
-			memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
 		} else {
-			compactar_memoria();
-			if(hay_espacio_libre(sizeof(t_pcb))){
-				offset = get_espacio_libre(sizeof(t_pcb));
-				seg_pcb->inicio = offset;
-				memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
-			} else {
-				error_guardado = 1;
-			}
-		}
 
-		//guarda las tareas
-		if(hay_espacio_libre(size_tareas)){
-			offset = get_espacio_libre(size_tareas);
-			seg_tareas->inicio = offset;
-			memcpy(memoria_principal + offset, mensaje->tareas->string, size_tareas);
-		} else {
-			compactar_memoria();
-			if(hay_espacio_libre(size_tareas)){
-				offset = get_espacio_libre(size_tareas);
-				seg_tareas->inicio = offset;
-				memcpy(memoria_principal + offset, mensaje->tareas->string, size_tareas);
-			} else {
-				error_guardado = 1;
-			}
-		}
+			uint32_t offset_bf;
+			uint32_t dif_tamanio_anterior = TAMANIO_MEMORIA - 1; //por ahora lo pongo asi porque no se como setear el primer anterior si no
 
-		//guarda los tcb
-		void cargarTcbDatos(t_tcb* tcb){
-			if(hay_espacio_libre(sizeof(t_tcb))){
-				offset = get_espacio_libre(sizeof(t_tcb));
-				seg_tcb->inicio = offset;
-				memcpy(memoria_principal + offset, tcb, sizeof(t_tcb));
-			} else {
-				compactar_memoria();
-				if(hay_espacio_libre(sizeof(t_tcb))){
-					offset = get_espacio_libre(sizeof(t_tcb));
-					seg_tcb->inicio = offset;
-					memcpy(memoria_principal + offset, tcb, sizeof(t_tcb));
-				} else {
-					error_guardado = 1;
+			void encontrar_best_fit(segmento* seg){
+				uint32_t dif_de_tamanio = seg->tamanio - size;
+				if(dif_de_tamanio < dif_tamanio_anterior){
+					offset_bf = seg->inicio;
 				}
 			}
-		}
+			list_iterate(lista_auxiliar, encontrar_best_fit);
+			free(lista_auxiliar);
 
-		list_iterate(tcbs, cargarTcbDatos);
-
-		//Libero las estructuras para guardar en memoria
-		free(pcb);
-
-		void liberar_tcbs(t_tcb* tcb){
-			free(tcb);
-		}
-		list_destroy_and_destroy_elements(tcbs, liberar_tcbs);
-
-		if(!error_guardado){
-
-			//Guardo tabla de paginas
-			dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_seg);
-
-			list_iterate(tabla_seg->segmentos, sacar_segmento_lista_libres);
-
-			list_add_all(segmentos_en_memoria, tabla_seg->segmentos);
-
-		} else {
-			//MUTEX TABLA
-			free(tabla_seg); //ta bien? si hubo error desecho la tabla
-			//MUTEX TABLA q onda aca? porq si hago el free desaparece el mutex jajaja
-			status = false;
+			return offset_bf;
 		}
 	}
-}
-
-// modifica las coordenadas de un tripulante en memoria
-void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool* status){
-
-	void* buffer = malloc(sizeof(t_tcb));
-	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
-
-	//traigo de memoria el tcb con el offset encontrado
-	memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
-	//reemplazo los valores
-	uint32_t offset_buffer = sizeof(uint32_t) + sizeof(char); //id y estado
-	memcpy(buffer + offset_buffer, mensaje->coordenadasDestino->posX, sizeof(uint32_t));
-	offset_buffer += sizeof(uint32_t); //posX
-	memcpy(buffer + offset_buffer, mensaje->coordenadasDestino->posY, sizeof(uint32_t));
-
-	//lo copio en memoria modificado
-	memcpy(memoria_principal + offset, buffer, sizeof(t_tcb));
-
-	//libero memoria
-	free(buffer);
-}
-
-// modifica el estado de un tripulante en memoria
-void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
-
-	void* buffer = malloc(sizeof(t_tcb));
-	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
-
-	char estado = get_status(mensaje->estado);
-
-	//traigo de memoria el tcb con el offset encontrado
-	memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
-	//reemplazo los valores
-	uint32_t offset_buffer = sizeof(uint32_t); //id
-	memcpy(buffer + offset_buffer, &estado, sizeof(char));
-
-	//lo copio en memoria modificado
-	memcpy(memoria_principal + offset, buffer, sizeof(t_tcb));
-
-	//libero memoria
-	free(buffer);
-}
-
-// SIN TERMINAR
-char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status){
-
-	char* tarea = "";
-	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
-	//MUTEX TABLA (antes no puedo porq tengo q buscarlo primero o no?
-	t_list* tabla_patota = tabla_seg->segmentos;
-	//MUTEX TABLA
-	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
-	uint32_t proxima_instruccion;
-
-	void* buffer_tcb = malloc(sizeof(t_tcb));
-	memcpy(buffer_tcb, memoria_principal + offset, sizeof(t_tcb));
-	//traigo de alguna manera el numero de la siguiente instruccion
-
-	//MUTEX TABLA
-	segmento* seg_tareas = list_get(tabla_patota, 1);
-	//MUTEX TABLA solo hasta ahi? no puede haber problemas de sincro si alguien mas accedio a ese segmento?
-	uint32_t direccion_tareas = seg_tareas->inicio;
-
-	void* buffer_tareas = malloc(sizeof(seg_tareas->tamanio));
-	memcpy(buffer_tareas, memoria_principal + seg_tareas->inicio, sizeof(seg_tareas->tamanio));
-
-	//copiar la instruccion en tarea, si prox_instruccion es 0 la primera, y asi sucesivamente
-
-	uint32_t offset_tcb = 0; //no
-
-	//le sumo uno en memoria a la proxima instruccion
-	proxima_instruccion += 1;
-	memcpy(buffer_tcb + offset_tcb, proxima_instruccion, sizeof(uint32_t));
-	memcpy(memoria_principal + offset, buffer_tcb, sizeof(t_tcb));
-
-	return tarea;
-}
-
-//saca el segmento de la tabla de segmentos y agrega el segmento libre a la lista de libres
-void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* status){
-
-	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
-	//MUTEX TABLA (antes no puedo porq tengo q buscarlo primero o no?
-	t_list* tabla_patota = tabla_seg->segmentos;
-	//MUTEX TABLA
-	segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
-	uint32_t index = seg_tripulante->numero_segmento;
-
-	void liberar_seg(segmento* seg){
-		free(seg);
-	}
-	// saco el segmento de la tabla de segmentos de la patota
-	//MUTEX TABLA
-	list_remove_and_destroy_element(tabla_patota, index, liberar_seg);
-	//MUTEX TABLA
-
-	// agrego el segmento liberado a la lista de segmentos libres
-	liberar_segmento(seg_tripulante);
-
 }
 
 segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota){
+
 	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
 	//MUTEX TABLA (antes no puedo porq tengo q buscarlo primero o no?
 	t_list* tabla_patota = tabla_seg->segmentos;
@@ -1787,6 +1602,271 @@ uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 	return offset;
 }
 
+//MENSAJES
+// guarda la patota en memoria, crea la tabla de segmentos y la guarda en el dictionary
+void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
+
+	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
+	if(!dictionary_has_key(tablas_seg_patota, string_itoa(mensaje->idPatota))){
+		pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
+
+		//creo la estructura de la tabla de segmentos
+		tabla_segmentos* tabla_seg = malloc(sizeof(tabla_segmentos));
+		tabla_seg->segmentos = list_create();
+		tabla_seg->m_TABLA = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
+		pthread_mutex_lock(&tabla_seg->m_TABLA); //esta alternativa, para q nadie pueda usarla hasta q yo termine con todoo
+
+		uint32_t size_tareas = mensaje->tareas->length;
+
+		//Creo los segmentos para la tabla de segmentos
+
+		segmento* seg_pcb = malloc(sizeof(segmento));
+		seg_pcb->numero_segmento = 0;
+		seg_pcb->tamanio = sizeof(t_pcb);
+		//MUTEX TABLA
+		list_add(tabla_seg->segmentos, seg_pcb);
+		//MUTEX TABLA
+
+		segmento* seg_tareas = malloc(sizeof(segmento));
+		seg_tareas->numero_segmento = 1;
+		seg_tareas->tamanio = size_tareas;
+		//MUTEX TABLA
+		list_add(tabla_seg->segmentos, seg_tareas);
+		//MUTEX TABLA
+
+		segmento* seg_tcb[mensaje->cant_tripulantes];
+		for(uint32_t j = 0; j < mensaje->cant_tripulantes; j++){
+			seg_tcb[j] = malloc(sizeof(segmento));
+			seg_tcb[j]->numero_segmento = j+2;
+			seg_tcb[j]->tamanio = sizeof(t_pcb);
+			//MUTEX TABLA
+			list_add(tabla_seg->segmentos, seg_tcb[j]);
+			//MUTEX TABLA
+		}
+
+		//Cargo datos para copiarlos a memoria
+
+		//pcb
+		t_pcb* pcb = malloc(sizeof(t_pcb));
+		pcb->pid = mensaje->idPatota;
+
+		//tcb
+		t_list* tcbs = list_create();
+		void cargar_tcb(tripulante_data_msg* tripulante){
+
+			t_tcb* tcb = malloc(sizeof(t_tcb));
+			tcb->tid = tripulante->idTripulante;
+			tcb->estado = 'R';
+			tcb->posX = tripulante->coordenadas->posX;
+			tcb->posY = tripulante->coordenadas->posY;
+			tcb->proxima_instruccion = 0;
+			tcb->direccion_patota = 0;
+
+			list_add(tcbs, tcb);
+
+		}
+
+		list_iterate(mensaje->tripulantes, cargar_tcb);
+
+		uint32_t offset;
+
+		uint32_t error_guardado = 0;
+
+		pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
+		pthread_mutex_lock(&m_SEG_EN_MEMORIA);
+		//guarda el pcb
+		if(hay_espacio_libre(sizeof(t_pcb))){
+			offset = get_espacio_libre(sizeof(t_pcb));
+			seg_pcb->inicio = offset;
+			memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
+		} else {
+			compactar_memoria();
+			if(hay_espacio_libre(sizeof(t_pcb))){
+				offset = get_espacio_libre(sizeof(t_pcb));
+				seg_pcb->inicio = offset;
+				memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
+			} else {
+				error_guardado = 1;
+			}
+		}
+
+		//guarda las tareas
+		if(hay_espacio_libre(size_tareas)){
+			offset = get_espacio_libre(size_tareas);
+			seg_tareas->inicio = offset;
+			memcpy(memoria_principal + offset, mensaje->tareas->string, size_tareas);
+		} else {
+			compactar_memoria();
+			if(hay_espacio_libre(size_tareas)){
+				offset = get_espacio_libre(size_tareas);
+				seg_tareas->inicio = offset;
+				memcpy(memoria_principal + offset, mensaje->tareas->string, size_tareas);
+			} else {
+				error_guardado = 1;
+			}
+		}
+
+		uint32_t orden_seg_tcb = 0;
+
+		//guarda los tcb
+		void cargarTcbDatos(t_tcb* tcb){
+			if(hay_espacio_libre(sizeof(t_tcb))){
+				offset = get_espacio_libre(sizeof(t_tcb));
+				seg_tcb[orden_seg_tcb]->inicio = offset;
+				memcpy(memoria_principal + offset, tcb, sizeof(t_tcb));
+				orden_seg_tcb ++;
+			} else {
+				compactar_memoria();
+				if(hay_espacio_libre(sizeof(t_tcb))){
+					offset = get_espacio_libre(sizeof(t_tcb));
+					seg_tcb[orden_seg_tcb]->inicio = offset;
+					memcpy(memoria_principal + offset, tcb, sizeof(t_tcb));
+					orden_seg_tcb ++;
+				} else {
+					error_guardado = 1;
+				}
+			}
+		}
+
+		list_iterate(tcbs, cargarTcbDatos);
+
+		//Libero las estructuras para guardar en memoria
+		free(pcb);
+
+		void liberar_tcbs(t_tcb* tcb){
+			free(tcb);
+		}
+		list_destroy_and_destroy_elements(tcbs, liberar_tcbs);
+
+		if(!error_guardado){
+
+			//Guardo tabla de paginas
+			dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_seg);
+
+			list_iterate(tabla_seg->segmentos, sacar_segmento_lista_libres);
+
+			list_add_all(segmentos_en_memoria, tabla_seg->segmentos);
+
+			pthread_mutex_unlock(&tabla_seg->m_TABLA); //haria falta para el else?
+			pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
+			pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
+		} else {
+			pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
+			pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
+			//MUTEX TABLA
+			free(tabla_seg); //ta bien? si hubo error desecho la tabla
+			//MUTEX TABLA q onda aca? porq si hago el free desaparece el mutex jajaja
+			status = false;
+		}
+	}
+}
+
+// modifica las coordenadas de un tripulante en memoria
+void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool* status){
+
+	void* buffer = malloc(sizeof(t_tcb));
+	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
+
+	//traigo de memoria el tcb con el offset encontrado
+	memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
+	//reemplazo los valores
+	uint32_t offset_buffer = sizeof(uint32_t) + sizeof(char); //id y estado
+	memcpy(buffer + offset_buffer, mensaje->coordenadasDestino->posX, sizeof(uint32_t));
+	offset_buffer += sizeof(uint32_t); //posX
+	memcpy(buffer + offset_buffer, mensaje->coordenadasDestino->posY, sizeof(uint32_t));
+
+	//lo copio en memoria modificado
+	memcpy(memoria_principal + offset, buffer, sizeof(t_tcb));
+
+	//libero memoria
+	free(buffer);
+}
+
+// modifica el estado de un tripulante en memoria
+void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
+
+	void* buffer = malloc(sizeof(t_tcb));
+	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
+
+	char estado = get_status(mensaje->estado);
+
+	//traigo de memoria el tcb con el offset encontrado
+	memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
+	//reemplazo los valores
+	uint32_t offset_buffer = sizeof(uint32_t); //id
+	memcpy(buffer + offset_buffer, &estado, sizeof(char));
+
+	//lo copio en memoria modificado
+	memcpy(memoria_principal + offset, buffer, sizeof(t_tcb));
+
+	//libero memoria
+	free(buffer);
+}
+
+// SIN TERMINAR
+char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status){
+
+	char* tarea = "";
+
+	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
+	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
+	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
+
+	//MUTEX TABLA (antes no puedo porq tengo q buscarlo primero o no?
+	t_list* tabla_patota = tabla_seg->segmentos;
+	//MUTEX TABLA
+	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
+	uint32_t proxima_instruccion;
+
+	void* buffer_tcb = malloc(sizeof(t_tcb));
+	memcpy(buffer_tcb, memoria_principal + offset, sizeof(t_tcb));
+	//traigo de alguna manera el numero de la siguiente instruccion
+
+	//MUTEX TABLA
+	segmento* seg_tareas = list_get(tabla_patota, 1);
+	//MUTEX TABLA solo hasta ahi? no puede haber problemas de sincro si alguien mas accedio a ese segmento?
+	uint32_t direccion_tareas = seg_tareas->inicio;
+
+	void* buffer_tareas = malloc(sizeof(seg_tareas->tamanio));
+	memcpy(buffer_tareas, memoria_principal + seg_tareas->inicio, sizeof(seg_tareas->tamanio));
+
+	//copiar la instruccion en tarea, si prox_instruccion es 0 la primera, y asi sucesivamente
+
+	uint32_t offset_tcb = 0; //no
+
+	//le sumo uno en memoria a la proxima instruccion
+	proxima_instruccion += 1;
+	memcpy(buffer_tcb + offset_tcb, proxima_instruccion, sizeof(uint32_t));
+	memcpy(memoria_principal + offset, buffer_tcb, sizeof(t_tcb));
+
+	return tarea;
+}
+
+//saca el segmento de la tabla de segmentos y agrega el segmento libre a la lista de libres
+void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* status){
+
+	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
+	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
+	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
+	//MUTEX TABLA (antes no puedo porq tengo q buscarlo primero o no?
+	t_list* tabla_patota = tabla_seg->segmentos;
+	//MUTEX TABLA
+	segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
+	uint32_t index = seg_tripulante->numero_segmento;
+
+	void liberar_seg(segmento* seg){
+		free(seg);
+	}
+	// saco el segmento de la tabla de segmentos de la patota
+	//MUTEX TABLA
+	list_remove_and_destroy_element(tabla_patota, index, liberar_seg);
+	//MUTEX TABLA
+
+	// agrego el segmento liberado a la lista de segmentos libres
+	liberar_segmento(seg_tripulante);
+
+}
+
 //saca un segmento de la lista libres, si sobraba segmento guarda el sobrante, falta revision y free
 void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 
@@ -1824,67 +1904,9 @@ void ordenar_lista_segmentos_libres(){
 	bool ordenar_segmentos(segmento* primer_segmento, segmento* segundo_segmento){
 		return primer_segmento->inicio > segundo_segmento->inicio;
 	}
-
+	pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
 	list_sort(segmentos_libres, ordenar_segmentos);
-}
-
-uint32_t obtener_limite(segmento* seg){
-	return seg->inicio + seg->tamanio;
-}
-
-//le paso el tamanio de un segmento, devuelve 1 si hay espacio y 0 si no hay espacio
-int32_t hay_espacio_libre(uint32_t size){
-
-	t_list* lista_auxiliar = list_create();
-
-	bool entra_en_el_segmento(segmento* seg){
-		return seg->tamanio > size;
-	}
-
-	list_add_all(lista_auxiliar, filter(segmentos_libres, entra_en_el_segmento));
-
-	return !list_is_empty(lista_auxiliar);
-}
-
-//devuelve un offset de donde arrancar a guardar un segmento en memoria
-int32_t get_espacio_libre(uint32_t size){
-
-	t_list* lista_auxiliar = list_create();
-
-	bool entra_en_el_segmento(segmento* seg){
-		return seg->tamanio > size;
-	}
-
-	list_add_all(lista_auxiliar, filter(segmentos_libres, entra_en_el_segmento));
-
-	segmento* primer_seg_libre = malloc(sizeof(segmento));
-	primer_seg_libre = list_get(lista_auxiliar, 0);
-
-	if(list_size(lista_auxiliar) == 1){
-
-		return primer_seg_libre->inicio;
-
-	} else {
-		if(CRITERIO_SELECCION == FF){
-
-			return primer_seg_libre->inicio;
-
-		} else {
-
-			uint32_t offset_bf;
-			uint32_t dif_tamanio_anterior = TAMANIO_MEMORIA - 1; //por ahora lo pongo asi porque no se como setear el primer anterior si no
-
-			void encontrar_best_fit(segmento* seg){
-				uint32_t dif_de_tamanio = seg->tamanio - size;
-				if(dif_de_tamanio < dif_tamanio_anterior){
-					offset_bf = seg->inicio;
-				}
-			}
-			list_iterate(lista_auxiliar, encontrar_best_fit);
-
-			return offset_bf;
-		}
-	}
+	pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 }
 
 //agrega el segmento a la lista de segmentos libres y lo saca de segmentos en memoria
@@ -1892,14 +1914,18 @@ void liberar_segmento(segmento* seg){
 	//deberia chequear si esta? antes de agregar
 
 	//agrega a la lista de segmentos libres
+	pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
 	list_add(segmentos_libres, seg);
 	ordenar_lista_segmentos_libres();
+	pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 
 	//lo saca de la lista de segmentos en memoria
 	bool es_el_segmento(segmento* seg_a_comparar){
 		return seg->inicio == seg_a_comparar->inicio && seg->tamanio == seg_a_comparar->tamanio;
 	}
+	pthread_mutex_lock(&m_SEG_EN_MEMORIA);
 	remove_by_condition(segmentos_en_memoria, es_el_segmento);
+	pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
 }
 
 //junta todos los segmentos en la parte superior de la memoria y crea un segmento libre con el restante
@@ -1909,7 +1935,8 @@ void compactar(){
 		return seg1->inicio < seg2->inicio;
 	}
 	//MUTEX SEGMENTOS EN MEMORIA (aca lo mismo, si mi agregan algun segmento me arruinan toodo)
-	list_sort(segmentos_en_memoria, ordenar_segmentos());
+	//ERROR ACA
+	//list_sort(segmentos_en_memoria, ordenar_segmentos());
 
 	void* buffer = malloc(sizeof(TAMANIO_MEMORIA));
 	uint32_t offset = 0;
@@ -1945,7 +1972,8 @@ void compactar(){
 		}
 	}
 
-	list_iterate(segmentos_en_memoria, modificar_inicio());
+	//ERROR ACA
+	//list_iterate(segmentos_en_memoria, modificar_inicio());
 
 	uint32_t cant_segmentos = list_size(segmentos_en_memoria);
 	segmento* ult_seg = malloc(sizeof(segmento));

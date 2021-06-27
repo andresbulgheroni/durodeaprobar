@@ -186,8 +186,8 @@ t_list* segmentos_libres();
 void sacar_segmento_lista_libres(segmento* segmento_nuevo);
 void ordenar_lista_segmentos_libres();
 void liberar_segmento(segmento* seg);
+bool hay_espacio_libre(uint32_t size);
 int32_t get_espacio_libre(uint32_t size);
-int32_t hay_espacio_libre(uint32_t size);
 
 void inicializar_segmentacion();
 
