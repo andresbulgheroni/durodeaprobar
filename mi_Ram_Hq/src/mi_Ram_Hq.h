@@ -164,6 +164,12 @@ typedef struct{
 
 }segmento;
 
+typedef struct{
+	t_list* segmentos;
+	pthread_mutex_t  m_TABLA;
+
+}tabla_segmentos;
+
 //agrupa todas las tablas de segmentos
 t_dictionary* tablas_seg_patota;
 
