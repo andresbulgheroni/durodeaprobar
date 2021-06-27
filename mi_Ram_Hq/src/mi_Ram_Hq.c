@@ -1498,6 +1498,8 @@ int32_t get_espacio_libre(uint32_t size){
 		return seg->tamanio > size;
 	}
 
+	uint32_t criterio_seleccion = get_criterio_seleccion();
+
 	//ERROR ACA :(
 	//list_add_all(lista_auxiliar, filter(segmentos_libres, entra_en_el_segmento));
 
@@ -1510,7 +1512,7 @@ int32_t get_espacio_libre(uint32_t size){
 		return primer_seg_libre->inicio;
 
 	} else {
-		if(CRITERIO_SELECCION == FF){
+		if(criterio_seleccion == FF){
 
 			free(lista_auxiliar);
 			return primer_seg_libre->inicio;
