@@ -25,7 +25,6 @@ typedef enum{
 	//RESPUESTA CONSOLA
 	OBTENER_BITACORA_RTA= 9, //MANDA DATA
 	//TRIPULANTE CON RAM
-	INICIAR_TRIPULANTE= 10, // MANDA DATA
 	SOLICITAR_SIGUIENTE_TAREA= 14, // MANDA DATA
 	SOLICITAR_SIGUIENTE_TAREA_RTA= 15, // MANDA DATA
 	COMPLETO_TAREAS=25,
@@ -40,7 +39,9 @@ typedef enum{
 	RESOLUCION_SABOTAJE= 20, // MANDA DATA
 	//MONGO A DISCORD
 	NOTIFICAR_SABOTAJE= 21, // MANDA DATA
-	DESCONECTADO = -1 //CUANDO recv devuelve -1
+	DESCONECTADO = -1, //CUANDO recv devuelve -1,
+	OK_MSG =  22,
+	FAIL_MSG = 23
 
 } op_code;
 
@@ -86,13 +87,23 @@ typedef struct
 
 typedef struct {
 
+	uint32_t idTripulante;
+	t_coordenadas* coordenadas;
+
+} tripulante_data_msg;
+
+typedef struct {
+
 	uint32_t idPatota;
+	uint32_t cant_tripulantes;
+	t_list* tripulantes;
 	t_string* tareas; // Pasar tal cual esta en el archivo
 
 } iniciar_patota_msg;
 
 typedef struct {
 
+	uint32_t idPatota;
 	uint32_t idTripulante;
 
 } expulsar_tripulante_msg;
@@ -111,15 +122,7 @@ typedef struct {
 
 typedef struct {
 
-	uint32_t idPatota;
-	uint32_t idTripulante;
-	t_coordenadas* coordenadas;
-
-} iniciar_tripulante_msg;
-
-typedef struct {
-
-	t_string* nombre_parametros;
+	char* nombre_parametros;
 	t_coordenadas* coordenadas;
 	uint32_t duracion;
 
@@ -127,6 +130,7 @@ typedef struct {
 
 typedef struct {
 
+	uint32_t idPatota;
 	uint32_t idTripulante;
 
 } solicitar_siguiente_tarea_msg;
@@ -139,6 +143,7 @@ typedef struct {
 
 typedef struct{
 
+	uint32_t idPatota;
 	uint32_t idTripulante;
 	uint32_t estado;
 
@@ -146,6 +151,7 @@ typedef struct{
 
 typedef struct {
 
+	uint32_t idPatota;
 	uint32_t idTripulante;
 	t_coordenadas* coordenadasDestino;
 
@@ -221,9 +227,8 @@ t_buffer* serializar_iniciar_patota_msg(iniciar_patota_msg* mensaje);
 t_buffer* serializar_expulsar_tripulante_msg(expulsar_tripulante_msg* mensaje);
 t_buffer* serializar_obtener_bitacora_msg(obtener_bitacora_msg* mensaje);
 t_buffer* serializar_obtener_bitacora_rta(obtener_bitacora_rta* mensaje);
-t_buffer* serializar_iniciar_tripulante_msg(iniciar_tripulante_msg* mensaje);
 t_buffer* serializar_solicitar_siguiente_tarea_msg(solicitar_siguiente_tarea_msg* mensaje);
-t_buffer* serializar_solicitar_siguiente_tarea_rta(solicitar_siguiente_tarea_rta* mensaje);
+t_buffer* serializar_solicitar_siguiente_tarea_rta(t_string* mensaje);
 t_buffer* serializar_cambio_estado_msg(cambio_estado_msg* mensaje);
 t_buffer* serializar_informar_movimiento_ram_msg(informar_movimiento_ram_msg* mensaje);
 t_buffer* serializar_informar_movimiento_mongo_msg(informar_movimiento_mongo_msg* mensaje);
@@ -232,6 +237,7 @@ t_buffer* serializar_fin_tarea_msg(fin_tarea_msg* mensaje);
 t_buffer* serializar_atender_sabotaje_msg(atender_sabotaje_msg* mensaje);
 t_buffer* serializar_resolucion_sabotaje_msg(resolucion_sabotaje_msg* mensaje);
 t_buffer* serializar_notificar_sabotaje_msg(notificar_sabotaje_msg* mensaje);
+t_buffer* serializar_fail_msg(t_string* mensaje);
 
 
 //DESERIALIZADO MENSAJES
@@ -240,7 +246,6 @@ iniciar_patota_msg* desserializar_iniciar_patota_msg(void* stream);
 expulsar_tripulante_msg* desserializar_expulsar_tripulante_msg(void* stream);
 obtener_bitacora_msg* desserializar_obtener_bitacora_msg(void* stream);
 obtener_bitacora_rta* desserializar_obtener_bitacora_rta(void* stream);
-iniciar_tripulante_msg* desserializar_iniciar_tripulante_msg(void* stream);
 solicitar_siguiente_tarea_msg* desserializar_solicitar_siguiente_tarea_msg(void* stream);
 solicitar_siguiente_tarea_rta* desserializar_solicitar_siguiente_tarea_rta(void* stream);
 cambio_estado_msg* desserializar_cambio_estado_msg(void* stream);
@@ -251,6 +256,7 @@ fin_tarea_msg* desserializar_fin_tarea_msg(void* stream);
 atender_sabotaje_msg* desserializar_atender_abotaje_msg(void* stream);
 resolucion_sabotaje_msg* desserializar_resolucion_sabotaje_msg(void* stream);
 notificar_sabotaje_msg* desserializar_notificar_sabotaje_msg(void* stream);
+t_string* desserializar_fail_msg(void* stream);
 
 //MISC
 
