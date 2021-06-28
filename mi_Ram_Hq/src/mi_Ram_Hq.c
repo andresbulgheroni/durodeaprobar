@@ -21,6 +21,12 @@ pthread_mutex_t  m_TABLA_LIBRES_V = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_LISTA_REEMPLAZO = PTHREAD_MUTEX_INITIALIZER;
 //pthread_mutex_t  m_LOGGER = PTHREAD_MUTEX_INITIALIZER;
 
+//SEGMENTACION
+pthread_mutex_t  m_SEGMENTOS_LIBRES = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t  m_SEG_EN_MEMORIA = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t  m_TABLAS_SEGMENTOS = PTHREAD_MUTEX_INITIALIZER;
+
+
 NIVEL* mapa;
 /*
 void prueba_msg (uint32_t codigo, void* mensaje_v){
@@ -391,7 +397,7 @@ void init (){
 	switch(ESQUEMA_MEMORIA){
 		case SEGMENTACION_PURA:{
 
-		//	inicializar_segmentacion();
+			inicializar_segmentacion();
 
 			break;
 		}
