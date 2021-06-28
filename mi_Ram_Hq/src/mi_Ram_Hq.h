@@ -51,6 +51,13 @@ typedef struct{
 } t_pagina_patota;
 
 typedef struct{
+
+	t_list* tabla_paginas;
+	pthread_mutex_t m_TABLA;
+
+} t_tabla_paginas;
+
+typedef struct{
 	uint32_t pos;
 } t_frame;
 
@@ -173,10 +180,10 @@ typedef enum{
 } criterio_seleccion;
 
 //lista con todos los segmentos en memoria
-t_list* segmentos_en_memoria();
+t_list* segmentos_en_memoria;
 
 //lista de segmentos libres
-t_list* segmentos_libres();
+t_list* segmentos_libres;
 void sacar_segmento_lista_libres(segmento* segmento_nuevo);
 void ordenar_lista_segmentos_libres();
 void liberar_segmento(segmento* seg);
@@ -190,9 +197,10 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status);
 char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status);
 void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* status);
-
+segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota);
 uint32_t encontrar_tripulante(uint32_t id_tripulante, uint32_t id_patota);
-
+uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota);
+uint32_t obtener_limite(segmento* seg);
 void compactar_memoria(); //sin implementar
 
 #endif /* MI_RAM_HQ_H_ */

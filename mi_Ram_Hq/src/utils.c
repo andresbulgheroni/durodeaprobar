@@ -26,7 +26,7 @@ t_string* get_t_string(char* string){
 
 bool leer_buffer(int32_t codigo){
 
-	return codigo != DESCONECTADO && codigo != COMPLETO_TAREAS && codigo != OK;
+	return codigo != DESCONECTADO && codigo != COMPLETO_TAREAS && codigo != OK_MSG;
 
 }
 
@@ -149,13 +149,13 @@ t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje){
 			break;
 
 		}
-		case FAIL:{
+		case FAIL_MSG:{
 
 			paquete->buffer = serializar_fail_msg(mensaje);
 
 			break;
 		}
-		case OK:
+		case OK_MSG:
 		case DESCONECTADO:
 		case COMPLETO_TAREAS:
 		default: break;
@@ -360,6 +360,12 @@ void* deserializar_paquete(t_paquete* paquete){
 			break;
 
 		}
+		case FAIL_MSG:{
+
+			mensaje = desserializar_fail_msg(paquete->buffer->stream);
+
+			break;
+		}
 		default: break;
 
 	}
@@ -398,7 +404,7 @@ t_buffer* serializar_iniciar_patota_msg(iniciar_patota_msg* mensaje){
 
 	}
 
-	list_iterate(mensaje->tareas, serializar_tripulantes);
+	list_iterate(mensaje->tripulantes, serializar_tripulantes);
 
 	serializar_string(buffer->stream, mensaje->tareas, &offset);
 
