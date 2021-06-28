@@ -282,7 +282,7 @@ void recibir_mensaje(int32_t* conexion){
 				bool status = true;
 
 				switch(ESQUEMA_MEMORIA){
-					case SEGMENTACION_PURA: crear_patota_segmentacion(mensaje, &status);break;
+					//case SEGMENTACION_PURA: crear_patota_segmentacion(mensaje, &status);break;
 					case PAGINACION_VIRTUAL: crear_patota_paginacion(mensaje, &status);break;
 				}
 
@@ -307,7 +307,7 @@ void recibir_mensaje(int32_t* conexion){
 				informar_movimiento_ram_msg* mensaje = deserializar_paquete(paquete);
 
 				switch(ESQUEMA_MEMORIA){
-					case SEGMENTACION_PURA: informar_movimiento_segmentacion(mensaje, NULL);break;
+					//case SEGMENTACION_PURA: informar_movimiento_segmentacion(mensaje, NULL);break;
 					case PAGINACION_VIRTUAL: informar_movimiento_paginacion(mensaje, NULL);break;
 				}
 
@@ -322,7 +322,7 @@ void recibir_mensaje(int32_t* conexion){
 				cambio_estado_msg* mensaje = deserializar_paquete(paquete);
 
 				switch(ESQUEMA_MEMORIA){
-					case SEGMENTACION_PURA: cambiar_estado_segmentacion(mensaje, NULL);break;
+					//case SEGMENTACION_PURA: cambiar_estado_segmentacion(mensaje, NULL);break;
 					case PAGINACION_VIRTUAL: cambiar_estado_paginacion(mensaje, NULL);break;
 				}
 
@@ -338,7 +338,7 @@ void recibir_mensaje(int32_t* conexion){
 				bool completo_tareas = false;
 				char* tarea;
 				switch(ESQUEMA_MEMORIA){
-					case SEGMENTACION_PURA: tarea = siguiente_tarea_segmentacion(mensaje, &completo_tareas, NULL);break;
+					//case SEGMENTACION_PURA: tarea = siguiente_tarea_segmentacion(mensaje, &completo_tareas, NULL);break;
 					case PAGINACION_VIRTUAL: tarea = siguiente_tarea_paginacion(mensaje, &completo_tareas, NULL);break;
 				}
 
@@ -361,7 +361,7 @@ void recibir_mensaje(int32_t* conexion){
 				expulsar_tripulante_msg* mensaje = deserializar_paquete(paquete);
 
 				switch(ESQUEMA_MEMORIA){
-					case SEGMENTACION_PURA: expulsar_tripulante_segmentacion(mensaje, NULL);break;
+					//case SEGMENTACION_PURA: expulsar_tripulante_segmentacion(mensaje, NULL);break;
 					case PAGINACION_VIRTUAL: expulsar_tripulante_paginacion(mensaje, NULL);break;
 				}
 
@@ -389,7 +389,7 @@ void init (){
 	PATH_SWAP = config_get_string_value(config, "PATH_SWAP");
 	ALGORITMO_REEMPLAZO = get_algoritmo(config_get_string_value(config, "ALGORITMO_REEMPLAZO"));;
 	IP = config_get_string_value(config, "IP");
-	CRITERIO_SELECCION = get_criterio(config_get_string_value(config, "CRITERIO_SELECCION")); // TODO CELES TE FALTA DECLAR LA FUNCION EN EL .H CREO
+	//CRITERIO_SELECCION = get_criterio(config_get_string_value(config, "CRITERIO_SELECCION")); // TODO CELES TE FALTA DECLAR LA FUNCION EN EL .H CREO
 	PUERTO = config_get_string_value(config, "PUERTO");
 
 	memoria_principal = malloc(TAMANIO_MEMORIA);
@@ -397,7 +397,7 @@ void init (){
 	switch(ESQUEMA_MEMORIA){
 		case SEGMENTACION_PURA:{
 
-			inicializar_segmentacion();
+			//inicializar_segmentacion();
 
 			break;
 		}
@@ -1519,6 +1519,7 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 	pthread_mutex_unlock(&m_TABLA_LIBRES_V);
 
 }
+/*
 
 
 // SEGMENTACION
@@ -2085,5 +2086,6 @@ void compactar(){
 
 	free(buffer);
 }
+*/
 
 
