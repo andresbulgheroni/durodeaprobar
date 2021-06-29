@@ -1618,7 +1618,6 @@ int32_t get_espacio_libre(uint32_t size){
 
 	uint32_t criterio_seleccion = CRITERIO_SELECCION;
 
-	//ERROR ACA :(
 	list_add_all(lista_auxiliar, list_filter(segmentos_libres, entra_en_el_segmento));
 
 	segmento* primer_seg_libre = malloc(sizeof(segmento));
@@ -1656,15 +1655,15 @@ int32_t get_espacio_libre(uint32_t size){
 
 segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 
+	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
 	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
-	//MUTEX TABLA (antes no puedo porq tengo q buscarlo primero o no?
-	t_list* tabla_patota = tabla_seg->segmentos;
-	//MUTEX TABLA
-	segmento* seg_tripulante;
+	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
-	//MUTEX TABLA
+	pthread_mutex_lock(&m(tabla_seg->m_TABLA));
+
+	t_list* tabla_patota = tabla_seg->segmentos;
+	segmento* seg_tripulante;
 	uint32_t cant_tripulantes_patota = list_size(tabla_patota) - 2;
-	//MUTEX TABLA
 	uint32_t contador = 2;
 	uint32_t tid;
 
@@ -1675,13 +1674,16 @@ segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota)
 	while(!encontrado){
 		seg_tripulante = list_get(tabla_patota, contador);
 		offset = seg_tripulante->inicio;
+		pthread_mutex_lock(&m_MEM_PRINCIPAL);
 		memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
+		pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 		memcpy(&tid, buffer, sizeof(tid));
 		if(tid == id_tripulante){
 				encontrado = 1;
 		}
 		contador++;
 	}
+	pthread_mutex_unlock(&m(tabla_seg->m_TABLA)); //esta bien unlockear aca si retorno el tripulante?
 
 	free(buffer);
 
@@ -1690,12 +1692,12 @@ segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota)
 
 uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 
+	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
 	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
-	//MUTEX TABLA (antes no puedo porq tengo q buscarlo primero o no?
-	t_list* tabla_patota = tabla_seg->segmentos;
-	//MUTEX TABLA
+	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
-	//MUTEX TABLA
+	pthread_mutex_lock(&(tabla_seg->m_TABLA));
+	t_list* tabla_patota = tabla_seg->segmentos;
 	uint32_t cant_tripulantes_patota = list_size(tabla_patota) - 2;
 	//MUTEX TABLA
 	uint32_t contador = 2;
@@ -1708,13 +1710,16 @@ uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 	while(!encontrado){
 		segmento* seg_tripulante = list_get(tabla_patota, contador);
 		offset = seg_tripulante->inicio;
+		pthread_mutex_lock(&m_MEM_PRINCIPAL); //asi esta bien este?
 		memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
+		pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 		memcpy(&tid, buffer, sizeof(tid));
 		if(tid == id_tripulante){
 			encontrado = 1;
 		}
 		contador++;
 	}
+	pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 
 	//libero memoria
 	free(buffer);
@@ -1742,25 +1747,19 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 		segmento* seg_pcb = malloc(sizeof(segmento));
 		seg_pcb->numero_segmento = 0;
 		seg_pcb->tamanio = sizeof(t_pcb);
-		//MUTEX TABLA
 		list_add(tabla_seg->segmentos, seg_pcb);
-		//MUTEX TABLA
 
 		segmento* seg_tareas = malloc(sizeof(segmento));
 		seg_tareas->numero_segmento = 1;
 		seg_tareas->tamanio = size_tareas;
-		//MUTEX TABLA
 		list_add(tabla_seg->segmentos, seg_tareas);
-		//MUTEX TABLA
 
 		segmento* seg_tcb[mensaje->cant_tripulantes];
 		for(uint32_t j = 0; j < mensaje->cant_tripulantes; j++){
 			seg_tcb[j] = malloc(sizeof(segmento));
 			seg_tcb[j]->numero_segmento = j+2;
 			seg_tcb[j]->tamanio = sizeof(t_pcb);
-			//MUTEX TABLA
 			list_add(tabla_seg->segmentos, seg_tcb[j]);
-			//MUTEX TABLA
 		}
 
 		//Cargo datos para copiarlos a memoria
@@ -1793,6 +1792,8 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 		pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_lock(&m_SEG_EN_MEMORIA);
+		pthread_mutex_lock(&m_MEM_PRINCIPAL);
+
 		//guarda el pcb
 		if(hay_espacio_libre(sizeof(t_pcb))){
 			offset = get_espacio_libre(sizeof(t_pcb));
@@ -1866,18 +1867,19 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 			list_add_all(segmentos_en_memoria, tabla_seg->segmentos);
 
+			pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 			pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 			pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
+
 		} else {
+			pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 			pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 			pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
-			//MUTEX TABLA
-			free(tabla_seg); //ta bien? si hubo error desecho la tabla
-			//MUTEX TABLA q onda aca? porq si hago el free desaparece el mutex jajaja
+
+			free(tabla_seg);
 			status = false;
 		}
 	}
-	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 }
 
 // modifica las coordenadas de un tripulante en memoria
@@ -1886,8 +1888,11 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 	void* buffer = malloc(sizeof(t_tcb));
 	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
 
+	pthread_mutex_lock(&m_MEM_PRINCIPAL);
+
 	//traigo de memoria el tcb con el offset encontrado
 	memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
+
 	//reemplazo los valores
 	uint32_t offset_buffer = sizeof(uint32_t) + sizeof(char); //id y estado
 	memcpy(buffer + offset_buffer, mensaje->coordenadasDestino->posX, sizeof(uint32_t));
@@ -1896,6 +1901,8 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 
 	//lo copio en memoria modificado
 	memcpy(memoria_principal + offset, buffer, sizeof(t_tcb));
+
+	pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 	//libero memoria
 	free(buffer);
@@ -1909,6 +1916,7 @@ void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 
 	char estado = get_status(mensaje->estado);
 
+	pthread_mutex_lock(&m_MEM_PRINCIPAL);
 	//traigo de memoria el tcb con el offset encontrado
 	memcpy(buffer, memoria_principal + offset, sizeof(t_tcb));
 	//reemplazo los valores
@@ -1917,6 +1925,8 @@ void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 
 	//lo copio en memoria modificado
 	memcpy(memoria_principal + offset, buffer, sizeof(t_tcb));
+
+	pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 	//libero memoria
 	free(buffer);
@@ -1931,7 +1941,7 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
 	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
-	//MUTEX TABLA (antes no puedo porq tengo q buscarlo primero o no?
+	pthread_mutex_lock(&(tabla_seg->m_TABLA));
 	t_list* tabla_patota = tabla_seg->segmentos;
 	//MUTEX TABLA
 	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
@@ -1958,6 +1968,8 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 	memcpy(buffer_tcb + offset_tcb, proxima_instruccion, sizeof(uint32_t));
 	memcpy(memoria_principal + offset, buffer_tcb, sizeof(t_tcb));
 
+	pthread_mutex_unlock(&(tabla_seg->m_TABLA));
+
 	return tarea;
 }
 
@@ -1966,10 +1978,13 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
 	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
-	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
-	//MUTEX TABLA (antes no puedo porq tengo q buscarlo primero o no?
+
 	t_list* tabla_patota = tabla_seg->segmentos;
-	//MUTEX TABLA
+	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
+
+	//MUTEX TABLA (antes no puedo porq tengo q buscarlo primero o no?
+	pthread_mutex_lock(&(tabla_seg->m_TABLA));
+
 	segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
 	uint32_t index = seg_tripulante->numero_segmento;
 
@@ -1977,9 +1992,9 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		free(seg);
 	}
 	// saco el segmento de la tabla de segmentos de la patota
-	//MUTEX TABLA
 	list_remove_and_destroy_element(tabla_patota, index, liberar_seg);
-	//MUTEX TABLA
+
+	pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 
 	pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
 	pthread_mutex_lock(&m_SEG_EN_MEMORIA);
@@ -2001,9 +2016,7 @@ void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 		return seg->inicio == inicio_seg_nuevo && limite_segmento >= limite_seg_nuevo;
 	}
 
-	segmento* seg_a_modificar;
-	seg_a_modificar = list_get(list_filter(segmentos_libres, se_encuentra_contenido), 0);
-	//ESTO ESTA BIEN PARA OBTENER EL SEGMENTO?
+	segmento* seg_a_modificar = list_get(list_filter(segmentos_libres, se_encuentra_contenido), 0);
 
 	bool es_el_segmento(segmento* seg){
 		return seg->inicio == seg_a_modificar->inicio && seg->tamanio == seg_a_modificar->tamanio;
@@ -2020,17 +2033,17 @@ void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 
 		ordenar_lista_segmentos_libres();
 	}
-}
+} //no lleva semaforos, porque donde la llamo ya estan los semaforos
 
 void ordenar_lista_segmentos_libres(){
 
 	bool ordenar_segmentos(segmento* primer_segmento, segmento* segundo_segmento){
 		return primer_segmento->inicio > segundo_segmento->inicio;
 	}
-	pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
+
 	list_sort(segmentos_libres, ordenar_segmentos);
-	pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
-}
+
+} //no lleva semaforos, porque donde la llamo ya estan los semaforos
 
 //agrega el segmento a la lista de segmentos libres y lo saca de segmentos en memoria
 void liberar_segmento(segmento* seg){
@@ -2051,7 +2064,7 @@ void liberar_segmento(segmento* seg){
 
 		list_remove_by_condition(segmentos_en_memoria, es_el_segmento);
 	}
-}
+}//no lleva semaforos, porque donde la llamo ya estan los semaforos
 
 //junta todos los segmentos en la parte superior de la memoria y crea un segmento libre con el restante
 void compactar_memoria(){
@@ -2063,11 +2076,6 @@ void compactar_memoria(){
 	void* buffer = malloc(sizeof(TAMANIO_MEMORIA));
 	uint32_t offset = 0;
 
-	//MUTEX SEGMENTOS EN MEMORIA (aca lo mismo, si mi agregan algun segmento me arruinan toodo)
-	pthread_mutex_lock(&m_SEG_EN_MEMORIA);
-	pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
-	pthread_mutex_lock(&m_MEM_PRINCIPAL);
-
 	list_sort(segmentos_en_memoria, ordenar_segmentos);
 
 	segmento* seg_anterior = malloc(sizeof(segmento));
@@ -2075,7 +2083,6 @@ void compactar_memoria(){
 	uint32_t limite_seg_anterior;
 
 	//copio en el buffer el primer segmento al principio (en 0)
-	//MUTEX MEMORIA PRINCIPAL(pensaba ponerlo desde aca hasta al final, xq si bien no lo estoy usando activamente, necesito q no lo modifiquen
 	memcpy(buffer, memoria_principal + seg_anterior->inicio, sizeof(seg_anterior->tamanio));
 
 	if(seg_anterior->inicio != 0){
@@ -2106,27 +2113,18 @@ void compactar_memoria(){
 	uint32_t cant_segmentos = list_size(segmentos_en_memoria);
 	segmento* ult_seg = malloc(sizeof(segmento));
 	ult_seg = list_get(segmentos_en_memoria, cant_segmentos - 1);
-	//MUTEX SEGMENTOS EN MEMORIA
 	uint32_t tamanio_ocupado_en_memoria = obtener_limite(ult_seg);
-	//MUTEX SEGMENTOS EN MEMORIA (aca o arriba?)
 
 	segmento* segmento_libre = malloc(sizeof(segmento));
 	segmento_libre->inicio = tamanio_ocupado_en_memoria;
 	segmento_libre->tamanio = TAMANIO_MEMORIA - tamanio_ocupado_en_memoria;
 
-	//MUTEX SEGMENTOS LIBRES
 	list_clean(segmentos_libres);
 	list_add(segmentos_libres, segmento_libre);
-	//MUTEX SEGMENTOS LIBRES
 
 	memcpy(memoria_principal, buffer, sizeof(TAMANIO_MEMORIA));
-	//MUTEX MEMORIA PRINCIPAL
-
-	pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
-	pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
-	pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 	free(buffer);
-}
+} //no lleva semaforos porq tiene en el llamado a la funcion
 
 
