@@ -807,12 +807,12 @@ void agregarTripulanteAListaFinishedYAvisar(t_tripulante* tripulante){
 	list_add(listaFinalizados,tripulante);
 	pthread_mutex_unlock(&mutex_listaFinalizados);
 
-	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
+	expulsar_tripulante_msg*mensaje=malloc(sizeof(cambio_estado_msg));
 	mensaje->idPatota=tripulante->idPatota;
 	mensaje->idTripulante=tripulante->idTripulante;
-	mensaje->estado=tripulante->estado;
 
-	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
+
+	enviar_paquete(mensaje,EXPULSAR_TRIPULANTE,tripulante->socketTripulanteRam);
 	log_info(logger,"cambio De Estado A Finished:%d\n",tripulante->idTripulante);
 
 	free(mensaje);
@@ -855,11 +855,16 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 	mensajeMovimientoSabotaje->idPatota = tripulante->idPatota;
 	mensajeMovimientoSabotaje->idTripulante = tripulante->idTripulante;
 
+	mensajeMovimientoSabotaje->coordenadasDestino = malloc(sizeof(t_coordenadas));
+
+
 	//	informar_movimiento_mongo_msg* mensajeMovimientoSabotajeMongo=malloc(sizeof(informar_movimiento_mongo_msg));
+	//		mensajeMovimientoSabotajeMongo->coordenadasOrigen = malloc(sizeof(t_coordenadas));
+		//		mensajeMovimientoSabotajeMongo->coordenadasDestino = malloc(sizeof(t_coordenadas));
+
 	//	mensajeMovimientoSabotajeMongo->idTripulante = tripulante->idTripulante;
-	//	mensajeMovimientoSabotajeMongo->coordenadasOrigen=tripulante->coordenadas;
-
-
+	//		mensajeMovimientoSabotajeMongo->coordenadasOrigen->posX = tripulante->coordenadas->posX;
+	//		mensajeMovimientoSabotajeMongo->coordenadasOrigen->posY = tripulante->coordenadas->posY;
 
 	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
 	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
@@ -887,13 +892,18 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 
 	}
 
-	mensajeMovimientoSabotaje->coordenadasDestino=tripulante->coordenadas;
+	mensajeMovimientoSabotaje->coordenadasDestino->posX = tripulante->coordenadas->posX;
+	mensajeMovimientoSabotaje->coordenadasDestino->posY = tripulante->coordenadas->posY;
 
-	//mensajeMovimientoSabotajeMongo->coordenadasDestino=tripulante->coordenadas;
+	//mensajeMovimientoSabotajeMongo->coordenadasDestino->posX =tripulante->coordenadas->posX ;
+	//mensajeMovimientoSabotajeMongo->coordenadasDestino->posY =tripulante->coordenadas->posY ;
 
 	enviar_paquete(mensajeMovimientoSabotaje,INFORMAR_MOVIMIENTO_RAM,tripulante->socketTripulanteRam);
 
 	//enviar_paquete(mensajeMovimientoSabotajeMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
+
+	free(mensajeMovimientoSabotaje->coordenadasDestino);
+	free(mensajeMovimientoSabotaje);
 
 
 }
@@ -969,8 +979,6 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 	//enviar_paquete(mensajeMovimientoMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
 
 	free(mensajeMovimientoTarea->coordenadasDestino);
-
-
 	free(mensajeMovimientoTarea);
 
 	//	free(mensajeMovimientoMongo->coordenadasDestino);
