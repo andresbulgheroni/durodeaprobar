@@ -1610,7 +1610,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 
 
-		while(tripulante->misCiclosDeCPU<tripulante->tareaAsignada->duracion && (tripulante->quantumDisponible)>0 && tripulante->fueExpulsado!=1){
+		while(tripulante->misCiclosDeCPU<tripulante->tareaAsignada->duracion && (tripulante->quantumDisponible)>0 && tripulante->fueExpulsado!=1 && haySabotaje !=1){
 
 			if(estaPlanificando==0){
 				sem_wait(tripulante->semaforoCiclo);
@@ -1691,7 +1691,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 		}
 
-		if(tripulante->misCiclosDeCPU == tripulante->tareaAsignada->duracion && tripulante->quantumDisponible == 0 && tripulante->fueExpulsado!=1){	//SI EL QUANTUM ES 0 OSEA HIZO SU ULTIMA RAFAGA Y TAMBIEN TERMINO LA TAREA
+		if(tripulante->misCiclosDeCPU == tripulante->tareaAsignada->duracion && tripulante->quantumDisponible == 0 && tripulante->fueExpulsado!=1 && haySabotaje!=1){	//SI EL QUANTUM ES 0 OSEA HIZO SU ULTIMA RAFAGA Y TAMBIEN TERMINO LA TAREA
 
 			tripulante->tareaAsignada=NULL;
 			tripulante->misCiclosDeCPU=0;		//LE SETEO EL VALOR AL CICLO
@@ -1770,7 +1770,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 		}
 
-		if((tripulante->quantumDisponible)==0 && tripulante->misCiclosDeCPU != tripulante->tareaAsignada->duracion && tripulante->fueExpulsado!=1){ //en este caso no termino la tarea
+		if((tripulante->quantumDisponible)==0 && tripulante->misCiclosDeCPU != tripulante->tareaAsignada->duracion && tripulante->fueExpulsado!=1 && haySabotaje!=1){ //en este caso no termino la tarea
 
 			tripulante->quantumDisponible = QUANTUM;	//solo seteo el quantum sin setear los ciclos
 			log_info(logger,"no termino la tarea y se quedo sin quantum el tripulante con ID: %d\n",tripulante->idTripulante);
@@ -1788,7 +1788,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 	}
 	else if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)!=TAREA_CPU){
 
-		if((tripulante->quantumDisponible)>0 && tripulante->fueExpulsado!=1){		//SI EL QUANTUM ES 0 NO PUEDE MANDAR EL MENSAJE.
+		if((tripulante->quantumDisponible)>0 && tripulante->fueExpulsado!=1 && haySabotaje!=1){		//SI EL QUANTUM ES 0 NO PUEDE MANDAR EL MENSAJE.
 
 			if(estaPlanificando==0){
 				sem_wait(tripulante->semaforoCiclo);
