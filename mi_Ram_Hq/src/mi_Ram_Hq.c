@@ -1569,7 +1569,7 @@ int32_t get_espacio_libre(uint32_t size){
 		return seg->tamanio > size;
 	}
 
-	uint32_t criterio_seleccion = get_criterio_seleccion();
+	uint32_t criterio_seleccion = CRITERIO_SELECCION;
 
 	//ERROR ACA :(
 	list_add_all(lista_auxiliar, list_filter(segmentos_libres, entra_en_el_segmento));
@@ -2002,12 +2002,12 @@ void liberar_segmento(segmento* seg){
 			return seg->inicio == seg_a_comparar->inicio && seg->tamanio == seg_a_comparar->tamanio;
 		}
 
-		remove_by_condition(segmentos_en_memoria, es_el_segmento);
+		list_remove_by_condition(segmentos_en_memoria, es_el_segmento);
 	}
 }
 
 //junta todos los segmentos en la parte superior de la memoria y crea un segmento libre con el restante
-void compactar(){
+void compactar_memoria(){
 
 	bool ordenar_segmentos(segmento* seg1, segmento* seg2){
 		return seg1->inicio < seg2->inicio;
