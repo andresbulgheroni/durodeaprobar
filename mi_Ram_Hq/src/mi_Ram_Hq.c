@@ -21,6 +21,10 @@ pthread_mutex_t  m_TABLA_LIBRES_V = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_LISTA_REEMPLAZO = PTHREAD_MUTEX_INITIALIZER;
 //pthread_mutex_t  m_LOGGER = PTHREAD_MUTEX_INITIALIZER;
 
+pthread_mutex_t  m_SEGMENTOS_LIBRES = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t  m_SEG_EN_MEMORIA = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t  m_TABLAS_SEGMENTOS = PTHREAD_MUTEX_INITIALIZER;
+
 NIVEL* mapa;
 /*
 void prueba_msg (uint32_t codigo, void* mensaje_v){
@@ -1568,7 +1572,7 @@ int32_t get_espacio_libre(uint32_t size){
 	uint32_t criterio_seleccion = get_criterio_seleccion();
 
 	//ERROR ACA :(
-	//list_add_all(lista_auxiliar, filter(segmentos_libres, entra_en_el_segmento));
+	list_add_all(lista_auxiliar, list_filter(segmentos_libres, entra_en_el_segmento));
 
 	segmento* primer_seg_libre = malloc(sizeof(segmento));
 	primer_seg_libre = list_get(lista_auxiliar, 0);
@@ -1677,13 +1681,12 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
 	if(!dictionary_has_key(tablas_seg_patota, string_itoa(mensaje->idPatota))){
-		pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
 		//creo la estructura de la tabla de segmentos
 		tabla_segmentos* tabla_seg = malloc(sizeof(tabla_segmentos));
 		tabla_seg->segmentos = list_create();
 		tabla_seg->m_TABLA = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
-		pthread_mutex_lock(&tabla_seg->m_TABLA); //esta alternativa, para q nadie pueda usarla hasta q yo termine con todoo
+
 
 		uint32_t size_tareas = mensaje->tareas->length;
 
@@ -1816,7 +1819,6 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 			list_add_all(segmentos_en_memoria, tabla_seg->segmentos);
 
-			pthread_mutex_unlock(&tabla_seg->m_TABLA); //haria falta para el else?
 			pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 			pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
 		} else {
@@ -1828,6 +1830,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 			status = false;
 		}
 	}
+	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 }
 
 // modifica las coordenadas de un tripulante en memoria
@@ -2017,8 +2020,8 @@ void compactar(){
 	pthread_mutex_lock(&m_SEG_EN_MEMORIA);
 	pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
 	pthread_mutex_lock(&m_MEM_PRINCIPAL);
-	//ERROR ACA
-	//list_sort(segmentos_en_memoria, ordenar_segmentos());
+
+	list_sort(segmentos_en_memoria, ordenar_segmentos);
 
 	segmento* seg_anterior = malloc(sizeof(segmento));
 	seg_anterior = list_get(segmentos_en_memoria, 0);
@@ -2051,8 +2054,7 @@ void compactar(){
 		}
 	}
 
-	//ERROR ACA
-	//list_iterate(segmentos_en_memoria, modificar_inicio());
+	list_iterate(segmentos_en_memoria, modificar_inicio);
 
 	uint32_t cant_segmentos = list_size(segmentos_en_memoria);
 	segmento* ult_seg = malloc(sizeof(segmento));

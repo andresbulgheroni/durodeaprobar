@@ -190,6 +190,8 @@ t_list* segmentos_en_memoria;
 
 //lista de segmentos libres
 t_list* segmentos_libres;
+
+int32_t get_criterio(char* cofig);
 void sacar_segmento_lista_libres(segmento* segmento_nuevo);
 void ordenar_lista_segmentos_libres();
 void liberar_segmento(segmento* seg);
