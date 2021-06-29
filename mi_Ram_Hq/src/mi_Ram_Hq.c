@@ -1727,6 +1727,14 @@ uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 	return offset;
 }
 
+void eliminar_patota(t_list* tabla){
+
+	void liberar_segmentos(segmento* seg){
+		free(seg);
+	}
+	list_destroy_and_destroy_elements(tabla, liberar_segmentos);
+}
+
 //MENSAJES
 // guarda la patota en memoria, crea la tabla de segmentos y la guarda en el dictionary
 void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
@@ -1978,31 +1986,47 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
 	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
-
-	t_list* tabla_patota = tabla_seg->segmentos;
 	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
-	//MUTEX TABLA (antes no puedo porq tengo q buscarlo primero o no?
 	pthread_mutex_lock(&(tabla_seg->m_TABLA));
+	t_list* tabla_patota = tabla_seg->segmentos;
 
-	segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
-	uint32_t index = seg_tripulante->numero_segmento;
+	if(list_size(tabla_patota) == 3){ //osea, es el ultimo tripulante
 
-	void liberar_seg(segmento* seg){
-		free(seg);
+		pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
+		pthread_mutex_lock(&m_SEG_EN_MEMORIA);
+
+		list_iterate(tabla_patota, liberar_segmento);
+
+		pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
+		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
+
+		eliminar_tabla_patota(tabla_patota);
+		pthread_mutex_unlock(&(tabla_seg->m_TABLA));
+
+		free(tabla_seg); //alcanza con el free o tengo q sacarlo del dictionary?
+
+	} else {
+		segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
+		uint32_t index = seg_tripulante->numero_segmento;
+
+		void liberar_seg(segmento* seg){
+			free(seg);
+		}
+		// saco el segmento de la tabla de segmentos de la patota
+		list_remove_and_destroy_element(tabla_patota, index, liberar_seg);
+
+		pthread_mutex_unlock(&(tabla_seg->m_TABLA));
+
+		pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
+		pthread_mutex_lock(&m_SEG_EN_MEMORIA);
+
+		liberar_segmento(seg_tripulante);
+
+		pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
+		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
+
 	}
-	// saco el segmento de la tabla de segmentos de la patota
-	list_remove_and_destroy_element(tabla_patota, index, liberar_seg);
-
-	pthread_mutex_unlock(&(tabla_seg->m_TABLA));
-
-	pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
-	pthread_mutex_lock(&m_SEG_EN_MEMORIA);
-
-	liberar_segmento(seg_tripulante);
-
-	pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
-	pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
 }
 
 //saca un segmento de la lista libres, si sobraba segmento guarda el sobrante, falta revision y free
