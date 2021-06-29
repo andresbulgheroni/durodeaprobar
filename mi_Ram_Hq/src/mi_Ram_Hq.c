@@ -141,7 +141,7 @@ void sig_handler(int n){
 
 			switch(ESQUEMA_MEMORIA){
 				case PAGINACION_VIRTUAL: dump_paginacion(dump); break;
-				case SEGMENTACION_PURA: break;
+				case SEGMENTACION_PURA: dump_segmentacion(dump); break;
 			}
 
 			fclose(dump);
@@ -1544,6 +1544,53 @@ void inicializar_segmentacion(){
 	memoria_vacia->tamanio = TAMANIO_MEMORIA;
 	list_add(segmentos_libres, memoria_vacia);
 	tablas_seg_patota = dictionary_create();
+}
+
+void dump_segmentacion(FILE* dump){
+
+	char* titulos = string_from_format("PROCESO\t\tSEGMENTO \t\tINICIO\t\TAMANIO\n");
+	fputs(titulos, dump);
+	free(titulos);
+
+	t_list* tabla_dump = list_create();
+
+	void leer_tablas_segmentos(char* key, tabla_segmentos* tabla){
+
+		t_list* segmentos = tabla->segmentos;
+
+		void copiar_segmentos(segmento* seg){
+
+			segmento_dump* seg_dump = malloc(sizeof(segmento_dump));
+
+			strcpy(seg_dump->pid, key);
+			seg_dump->inicio = seg->inicio;
+			seg_dump->numero_segmento = seg->numero_segmento;
+			seg_dump->tamanio = seg->tamanio;
+
+			list_add(tabla_dump, seg_dump);
+		}
+	}
+	dictionary_iterator(tablas_seg_patota, leer_tablas_segmentos);
+
+	bool ordenar_tabla(segmento_dump* seg1, segmento_dump* seg2){
+		return seg1->inicio < seg2->inicio;
+	}
+	list_sort(tabla_dump, ordenar_tabla);
+
+	void guardar_tabla(segmento_dump* seg){
+
+		char* fila = string_from_format("%10s\t\t%15d\t\t%20d\t\t%20d\n", seg->pid, seg->numero_segmento, seg->inicio, seg->tamanio);
+		fputs(fila, dump);
+		free(fila);
+	}
+
+	list_iterate(tabla_dump, guardar_tabla);
+
+	void vaciar_lista(segmento_dump* seg){
+		free(seg);
+	}
+	list_destroy_and_destroy_elements(tabla_dump, vaciar_lista);
+
 }
 
 uint32_t obtener_limite(segmento* seg){

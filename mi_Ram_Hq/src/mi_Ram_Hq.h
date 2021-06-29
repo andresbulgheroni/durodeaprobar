@@ -177,6 +177,14 @@ typedef struct{
 
 }tabla_segmentos;
 
+typedef struct{
+	char* pid;
+	uint32_t numero_segmento;
+	uint32_t inicio;
+	uint32_t tamanio;
+
+}segmento_dump;
+
 //agrupa todas las tablas de segmentos
 t_dictionary* tablas_seg_patota;
 
@@ -192,6 +200,7 @@ t_list* segmentos_en_memoria;
 t_list* segmentos_libres;
 
 int32_t get_criterio(char* cofig);
+void dump_segmentacion(FILE* dump);
 void sacar_segmento_lista_libres(segmento* segmento_nuevo);
 void ordenar_lista_segmentos_libres();
 void liberar_segmento(segmento* seg);
