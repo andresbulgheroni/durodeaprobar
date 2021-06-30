@@ -1541,7 +1541,7 @@ void planificarSegun(){			//TODO
 
 void ejecucionRR(t_tripulante*tripulante){
 
-	if(!llegoATarea(tripulante) && tripulante->fueExpulsado!=1){
+	if(!llegoATarea(tripulante) && tripulante->fueExpulsado!=1 && haySabotaje!=1){
 		int distancia;
 		distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
 		log_info(logger,"se esta moviendo a la tarea la tarea el tripulante %d",tripulante->idTripulante);
@@ -1573,7 +1573,7 @@ void ejecucionRR(t_tripulante*tripulante){
 	}
 
 
-	if(llegoATarea(tripulante) && (tripulante->quantumDisponible > 0 && tripulante->fueExpulsado!=1) ){
+	if(llegoATarea(tripulante) && (tripulante->quantumDisponible > 0 && tripulante->fueExpulsado!=1 && haySabotaje!=1) ){
 
 
 		log_info(logger,"va a ejecutar la tarea el tripulante %d",tripulante->idTripulante);
@@ -1583,7 +1583,7 @@ void ejecucionRR(t_tripulante*tripulante){
 	}
 
 
-	if((tripulante->quantumDisponible)==0 && tripulante->fueExpulsado!=1){
+	if((tripulante->quantumDisponible)==0 && tripulante->fueExpulsado!=1 && haySabotaje!=1){
 		tripulante->quantumDisponible = QUANTUM;
 		log_info(logger,"no termino la tarea y se quedo sin quantum el tripulante con ID: %d\n",tripulante->idTripulante);
 		pthread_mutex_lock(&mutex_listaEjecutando);
