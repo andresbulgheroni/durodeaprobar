@@ -437,7 +437,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 				iniciar_patota_msg* mensajePatota=malloc(sizeof(iniciar_patota_msg));
 				mensajePatota->idPatota=id_patota;
 				mensajePatota->tareas=get_t_string(buffer);
-				//mensajePatota->cant_tripulantes = cantidadDeTripulantes;
+				mensajePatota->cant_tripulantes = cantidadDeTripulantes;
 
 
 
@@ -481,13 +481,17 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 				}
 				mensajePatota->tripulantes=posicionesTripulantesParaRam;
 
-				//				enviar_paquete(mensajePatota,INICIAR_PATOTA_MSG,socketPatota);
+				enviar_paquete(mensajePatota,INICIAR_PATOTA_MSG,socketPatota);
 
 
-
-
+				t_paquete*paquete =recibir_paquete(socketPatota);
+				if(paquete->codigo == OK_MSG){
+					log_info(logger,"mensaje a RAM exitoso, creando patotas con tripulantes");
 				inicializarAtributosATripulante(posicionesTripulantes);
-
+				}else if(paquete->codigo == FAIL_MSG){
+					id_tripulante_para_enviar= id_tripulante_para_enviar - list_size(posicionesTripulantes);
+					log_info(logger,"fallo la inicializacion de la patota");
+				}
 
 				fclose(fileTarea);
 				void funcion(void*elemento){
@@ -505,6 +509,8 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 				free(mensajePatota);
 
 				liberar_conexion(socketPatota);
+
+
 
 			}else{
 				log_info(logger, "No existe la tarea");

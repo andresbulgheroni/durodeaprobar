@@ -40,8 +40,8 @@ typedef enum{
 	//MONGO A DISCORD
 	NOTIFICAR_SABOTAJE= 21, // MANDA DATA
 	DESCONECTADO = -1, //CUANDO recv devuelve -1,
-	OK =  22,
-	FAIL = 23
+	OK_MSG =  22,
+	FAIL_MSG = 23
 
 } op_code;
 

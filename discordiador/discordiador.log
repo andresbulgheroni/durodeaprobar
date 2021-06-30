@@ -413,3 +413,94 @@
 [INFO] 17:44:20:999 discordiador/(14529:14540): finalizo la ejecucion de la tarea el tripulante 2
 [INFO] 17:44:20:999 discordiador/(14529:14540): acaba de solicitar otra tarea el tripulante 2
 [INFO] 17:44:20:999 discordiador/(14529:14540): se le asigno otra tarea al tripulante2
+[INFO] 22:06:21:424 discordiador/(6913:6913): INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt
+[INFO] 22:06:21:427 discordiador/(6913:6913): 0|0
+[INFO] 22:06:21:428 discordiador/(6913:6933): cambio De Estado A Ready:1
+
+[INFO] 22:06:21:428 discordiador/(6913:6933): el tripulante se queda esperando a ser asignado 1
+[INFO] 22:06:41:302 discordiador/(6913:6913): INICIAR_PLANIFICACION
+[INFO] 22:08:11:590 discordiador/(7016:7016): INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt
+[INFO] 22:08:11:590 discordiador/(7016:7016): 0|0
+[INFO] 22:09:17:317 discordiador/(7064:7064): INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt
+[INFO] 22:10:50:483 discordiador/(7064:7064): 0|0
+[INFO] 22:20:07:467 discordiador/(7505:7505): INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt
+[INFO] 22:20:07:468 discordiador/(7505:7505): 0|0
+[INFO] 22:20:07:468 discordiador/(7505:7515): cambio De Estado A Ready:1
+
+[INFO] 22:20:07:468 discordiador/(7505:7515): el tripulante se queda esperando a ser asignado 1
+[INFO] 22:22:32:642 discordiador/(7505:7505): INICIAR_PLANIFICACION
+[INFO] 22:22:32:643 discordiador/(7505:7511): cambio De Estado A Exec:1
+
+[INFO] 22:22:32:643 discordiador/(7505:7511): El tripulante con ID 1 cambió a la cola EXEC porque fue seleccionado para ejecutar
+[INFO] 22:22:32:643 discordiador/(7505:7515): fue seleccionado para ejecutar el tripulante 1
+[INFO] 22:22:32:643 discordiador/(7505:7515): se esta moviendo a la tarea la tarea el tripulante 1
+[INFO] 22:22:33:643 discordiador/(7505:7515): El tripulante con ID 1 se movió a la posición [1,0]
+[INFO] 22:22:34:645 discordiador/(7505:7515): El tripulante con ID 1 se movió a la posición [2,0]
+[INFO] 22:22:35:648 discordiador/(7505:7515): El tripulante con ID 1 se movió a la posición [2,1]
+[INFO] 22:22:35:648 discordiador/(7505:7515): no termino la tarea y se quedo sin quantum el tripulante con ID: 1
+
+[INFO] 22:22:35:648 discordiador/(7505:7515): cambio De Estado A Ready:1
+
+[INFO] 22:22:35:648 discordiador/(7505:7515): el tripulante se queda esperando a ser asignado 1
+[INFO] 22:22:35:648 discordiador/(7505:7511): cambio De Estado A Exec:1
+
+[INFO] 22:22:35:648 discordiador/(7505:7511): El tripulante con ID 1 cambió a la cola EXEC porque fue seleccionado para ejecutar
+[INFO] 22:22:35:649 discordiador/(7505:7515): fue seleccionado para ejecutar el tripulante 1
+[INFO] 22:22:35:649 discordiador/(7505:7515): se esta moviendo a la tarea la tarea el tripulante 1
+[INFO] 22:22:36:649 discordiador/(7505:7515): El tripulante con ID 1 se movió a la posición [2,2]
+[INFO] 22:22:36:649 discordiador/(7505:7515): va a ejecutar la tarea el tripulante 1
+[INFO] 22:22:36:649 discordiador/(7505:7515): el tripulante 1 esta realizando una tarea de CPU 
+[INFO] 22:22:37:650 discordiador/(7505:7515): El tripulante con ID 1 hizo 1 de CPU de un total de 5
+[INFO] 22:22:38:650 discordiador/(7505:7515): El tripulante con ID 1 hizo 2 de CPU de un total de 5
+[INFO] 22:22:38:650 discordiador/(7505:7515): no termino la tarea y se quedo sin quantum el tripulante con ID: 1
+
+[INFO] 22:22:38:650 discordiador/(7505:7515): cambio De Estado A Ready:1
+
+[INFO] 22:22:38:650 discordiador/(7505:7515): el tripulante se queda esperando a ser asignado 1
+[INFO] 22:22:38:650 discordiador/(7505:7511): cambio De Estado A Exec:1
+
+[INFO] 22:22:38:650 discordiador/(7505:7511): El tripulante con ID 1 cambió a la cola EXEC porque fue seleccionado para ejecutar
+[INFO] 22:22:38:650 discordiador/(7505:7515): fue seleccionado para ejecutar el tripulante 1
+[INFO] 22:22:38:650 discordiador/(7505:7515): va a ejecutar la tarea el tripulante 1
+[INFO] 22:22:38:650 discordiador/(7505:7515): el tripulante 1 esta realizando una tarea de CPU 
+[INFO] 22:22:39:651 discordiador/(7505:7515): El tripulante con ID 1 hizo 3 de CPU de un total de 5
+[INFO] 22:22:40:652 discordiador/(7505:7515): El tripulante con ID 1 hizo 4 de CPU de un total de 5
+[INFO] 22:22:41:652 discordiador/(7505:7515): El tripulante con ID 1 hizo 5 de CPU de un total de 5
+[INFO] 22:22:41:653 discordiador/(7505:7515): termino la tarea y se quedo sin quantum el tripulante con ID: 1
+
+[INFO] 22:22:41:653 discordiador/(7505:7515): se le asigno otra tarea al tripulante1
+[INFO] 22:22:41:653 discordiador/(7505:7515): cambio De Estado A Ready:1
+
+[INFO] 22:22:41:653 discordiador/(7505:7515): el tripulante se queda esperando a ser asignado 1
+[INFO] 22:22:41:653 discordiador/(7505:7511): cambio De Estado A Exec:1
+
+[INFO] 22:22:41:653 discordiador/(7505:7511): El tripulante con ID 1 cambió a la cola EXEC porque fue seleccionado para ejecutar
+[INFO] 22:22:41:653 discordiador/(7505:7515): fue seleccionado para ejecutar el tripulante 1
+[INFO] 22:22:41:653 discordiador/(7505:7515): se esta moviendo a la tarea la tarea el tripulante 1
+[INFO] 22:22:42:654 discordiador/(7505:7515): El tripulante con ID 1 se movió a la posición [3,2]
+[INFO] 22:22:43:654 discordiador/(7505:7515): El tripulante con ID 1 se movió a la posición [3,3]
+[INFO] 22:22:44:655 discordiador/(7505:7515): El tripulante con ID 1 se movió a la posición [3,4]
+[INFO] 22:22:44:655 discordiador/(7505:7515): no termino la tarea y se quedo sin quantum el tripulante con ID: 1
+
+[INFO] 22:22:44:655 discordiador/(7505:7515): cambio De Estado A Ready:1
+
+[INFO] 22:22:44:655 discordiador/(7505:7515): el tripulante se queda esperando a ser asignado 1
+[INFO] 22:22:44:655 discordiador/(7505:7511): cambio De Estado A Exec:1
+
+[INFO] 22:22:44:656 discordiador/(7505:7511): El tripulante con ID 1 cambió a la cola EXEC porque fue seleccionado para ejecutar
+[INFO] 22:22:44:656 discordiador/(7505:7515): fue seleccionado para ejecutar el tripulante 1
+[INFO] 22:22:44:656 discordiador/(7505:7515): va a ejecutar la tarea el tripulante 1
+[INFO] 22:22:44:656 discordiador/(7505:7515): se realiza un ciclo de CPU para enviar tarea del tripulante 1
+[INFO] 22:22:45:656 discordiador/(7505:7515): el mensaje a imongo ha sido enviado exitosamentedel tripulante 1
+[INFO] 22:22:45:656 discordiador/(7505:7515): cambio De Estado A Bloqueado:1
+
+[INFO] 22:22:45:656 discordiador/(7505:7515): El tripulante con ID 1 cambió a la cola BLOCKED porque ES UNA TAREA DE IO
+[INFO] 22:22:46:657 discordiador/(7505:7512): El tripulante con ID 1 hizo 1 de IO de un total de 2
+[INFO] 22:22:47:657 discordiador/(7505:7512): El tripulante con ID 1 hizo 2 de IO de un total de 2
+[INFO] 22:22:47:657 discordiador/(7505:7515): el tripulante se queda esperando a ser asignado 1
+[INFO] 23:23:00:321 discordiador/(9174:9174): INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt
+[INFO] 23:23:00:325 discordiador/(9174:9174): 0|0
+[INFO] 23:23:00:326 discordiador/(9174:9174): mensaje a RAM exitoso, creando patotas con tripulantes
+[INFO] 23:23:00:326 discordiador/(9174:9183): cambio De Estado A Ready:1
+
+[INFO] 23:23:00:326 discordiador/(9174:9183): el tripulante se queda esperando a ser asignado 1
