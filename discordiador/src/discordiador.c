@@ -489,6 +489,11 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 					log_info(logger,"mensaje a RAM exitoso, creando patotas con tripulantes");
 				inicializarAtributosATripulante(posicionesTripulantes);
 				}else if(paquete->codigo == FAIL_MSG){
+
+					t_string* mensaje = deserializar_paquete(paquete);
+
+					log_info(logger,"%s",mensaje->string);
+
 					id_tripulante_para_enviar= id_tripulante_para_enviar - list_size(posicionesTripulantes);
 					log_info(logger,"fallo la inicializacion de la patota");
 				}
