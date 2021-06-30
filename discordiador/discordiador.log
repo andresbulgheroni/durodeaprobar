@@ -504,3 +504,28 @@
 [INFO] 23:23:00:326 discordiador/(9174:9183): cambio De Estado A Ready:1
 
 [INFO] 23:23:00:326 discordiador/(9174:9183): el tripulante se queda esperando a ser asignado 1
+[INFO] 13:41:01:857 discordiador/(4564:4564): INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
+[INFO] 13:41:20:305 discordiador/(4564:4564): 1|1
+[INFO] 13:41:33:160 discordiador/(4564:4564): mensaje a RAM exitoso, creando patotas con tripulantes
+[INFO] 13:41:38:982 discordiador/(4564:4697): cambio De Estado A Ready:1
+
+[INFO] 13:49:06:890 discordiador/(4894:4894): INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
+[INFO] 13:49:06:893 discordiador/(4894:4894): 1|1
+[INFO] 13:49:06:894 discordiador/(4894:4894): mensaje a RAM exitoso, creando patotas con tripulantes
+[INFO] 13:49:06:896 discordiador/(4894:4903): cambio De Estado A Ready:1
+
+[INFO] 13:50:09:525 discordiador/(4948:4948): INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
+[INFO] 13:50:09:525 discordiador/(4948:4948): 1|1
+[INFO] 13:50:09:527 discordiador/(4948:4948): mensaje a RAM exitoso, creando patotas con tripulantes
+[INFO] 13:50:18:538 discordiador/(4948:4982): cambio De Estado A Ready:1
+
+[INFO] 14:09:14:217 discordiador/(5195:5195): INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt
+[INFO] 14:09:14:222 discordiador/(5195:5195): 0|0
+[INFO] 14:09:14:222 discordiador/(5195:5195): mensaje a RAM exitoso, creando patotas con tripulantes
+[INFO] 14:09:21:598 discordiador/(5195:5211): cambio De Estado A Ready:1
+
+[INFO] 14:20:06:476 discordiador/(5441:5441): INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
+[INFO] 14:20:06:482 discordiador/(5441:5441): 1|1
+[INFO] 14:20:06:482 discordiador/(5441:5441): mensaje a RAM exitoso, creando patotas con tripulantes
+[INFO] 14:20:06:485 discordiador/(5441:5450): cambio De Estado A Ready:1
+
