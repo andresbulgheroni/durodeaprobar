@@ -39,6 +39,8 @@ int tamanioSuperBloque;
 t_bitarray* bitmap;
 pthread_mutex_t mutex_blocks;
 
+// puedo semaforizar el acceso al bitmap.
+
 typedef enum{
 	GENERAR_OXIGENO = 0,
 	CONSUMIR_OXIGENO = 1,

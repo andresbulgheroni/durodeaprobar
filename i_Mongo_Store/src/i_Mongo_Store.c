@@ -12,13 +12,13 @@ int main(void) {
 	//
 	//
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
-	estadoSuperBloque();
+		estadoSuperBloque();
 
-	generarRecurso(10,'O');
-	estadoSuperBloque();
-	consumirRecurso(5, 'O');
+//		generarRecurso(10,'O');
+//		estadoSuperBloque();
+		consumirRecurso(5, 'O');
 
-	estadoSuperBloque();
+		estadoSuperBloque();
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 	//
 	//	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
@@ -294,12 +294,15 @@ void inicializarBlocks() {
 
 	ftruncate(fd, tamanioBlocks);
 
-	blocksMap = mmap(NULL, tamanioBlocks, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if (blocksMap == MAP_FAILED) {
+	char* blocksMapOriginal = mmap(NULL, tamanioBlocks, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	if (blocksMapOriginal == MAP_FAILED) {
 		perror("mmap");
 		close(fd);
 		exit(1);
 	}
+
+	blocksMap = malloc(tamanioBlocks);
+	blocksMap = blocksMapOriginal;
 
 	// Thread con timer para sincronizar mmap a disco, iniciarlo despues del mmap!
 	// Corre: msync(blocksMap, tamanioBlocks, MS_SYNC);
@@ -362,8 +365,13 @@ void crearSuperBloque(){
 		exit(1);
 	}
 
+	int cantidadBloques = 0;
 	int offset = 2 * sizeof(uint32_t);
-	int cantidadBloques = BLOCKS / 8;
+	if((BLOCKS % 8) == 0){ // Con 100 bloques deberia pesarme 21 el archivo de blocks
+		cantidadBloques = BLOCKS / 8;
+	} else{
+		cantidadBloques = (BLOCKS / 8) + 1;// si tiene un resto sumarle 1
+	}
 	ftruncate(fd, cantidadBloques + offset);
 
 	superBloqueMap = mmap(NULL, cantidadBloques + offset, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
@@ -1050,7 +1058,7 @@ void sighandler() {
 
 	puts("Me sabotearon");
 
-	// Avisarle al modulo de Andy
+	// Avisarle al modulo de Andy, hacer hilo para el sabotaje
 
 }
 
