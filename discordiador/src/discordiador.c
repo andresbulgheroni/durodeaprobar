@@ -730,7 +730,7 @@ void agregarTripulanteAListaReadyYAvisar(t_tripulante* tripulante){
 	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
 	mensaje->idPatota=tripulante->idPatota;
 	mensaje->idTripulante=tripulante->idTripulante;
-	mensaje->estado= (uint32_t*) tripulante->estado;
+	mensaje->estado= (uint32_t) tripulante->estado;
 
 	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
 
@@ -752,7 +752,7 @@ void agregarTripulanteAListaExecYAvisar(t_tripulante* tripulante){
 	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
 	mensaje->idPatota=tripulante->idPatota;
 	mensaje->idTripulante=tripulante->idTripulante;
-	mensaje->estado= (uint32_t*) tripulante->estado;
+	mensaje->estado= (uint32_t) tripulante->estado;
 
 	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
 
@@ -773,7 +773,7 @@ void agregarTripulanteAListaBloqueadosYAvisar(t_tripulante* tripulante){
 	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
 	mensaje->idPatota=tripulante->idPatota;
 	mensaje->idTripulante=tripulante->idTripulante;
-	mensaje->estado= (uint32_t*) tripulante->estado;
+	mensaje->estado= (uint32_t) tripulante->estado;
 
 	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
 	log_info(logger,"cambio De Estado A Bloqueado:%d\n",tripulante->idTripulante);
@@ -792,7 +792,7 @@ void agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(t_tripulante* tripulant
 	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
 	mensaje->idPatota=tripulante->idPatota;
 	mensaje->idTripulante=tripulante->idTripulante;
-	mensaje->estado= (uint32_t*) tripulante->estado;
+	mensaje->estado= (uint32_t) tripulante->estado;
 	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
 	log_info(logger,"cambio De Estado A BloqueadoPorSabotaje:%d\n",tripulante->idTripulante);
 	free(mensaje);
@@ -1047,52 +1047,7 @@ algoritmo_code stringACodigoAlgoritmo(const char* string) {
 
 
 
-void planificarSegunRR(){
-	while(true){
-		puts("hola soy RR");
 
-		sem_wait(&sem_sabotaje);
-		sem_wait(&sem_pausarPlanificacion);
-		sem_wait(&sem_planificarMultitarea);
-
-
-		//int distancia;
-
-		t_tripulante* tripulante = (t_tripulante*) list_remove(listaReady, 0);
-
-		tripulante->estado = EXEC;
-
-		/*	sem_init(&sem_tripulanteMoviendose, 0, 0);
-				sem_t* semaforoDelTripulante = (sem_t*) list_get(sem_tripulantes_ejecutar, tripulante->idTripulante);
-				sem_post(semaforoDelTripulante);
-
-				sem_wait(&sem_tripulanteMoviendose);
-				distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
-
-				tripulante->quantumDisponible -=1;
-
-				while (((distancia != 0) && (tripulante->quantumDisponible)>0) && (distancia != -1)) {
-					sem_post(semaforoDelTripulante);
-					sem_wait(&sem_tripulanteMoviendose);
-					distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
-					tripulante->quantumDisponible -= 1;
-				}
-
-				sem_destroy(&sem_tripulanteMoviendose);
-
-				if(((tripulante->quantumDisponible)==0) && ((tripulante->tareaAsignada != NULL ? !llegoATarea(tripulante) : 0))){
-					list_add(listaReady, tripulante);
-					tripulante->estado = READY;
-				//	log_tripulante_cambio_de_cola_planificacion(tripulante->idTripulante, "se le terminó el quantum", "READY");
-
-					tripulante->quantumDisponible = QUANTUM;
-		 */
-
-		sem_post(&sem_pausarPlanificacion);
-		sem_post(&sem_sabotaje);
-
-	}
-}
 
 
 

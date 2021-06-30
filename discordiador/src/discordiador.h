@@ -220,7 +220,7 @@ int llegoAlSabotaje(t_tripulante*,t_sabotaje*);
 algoritmo_code stringACodigoAlgoritmo(const char* );
 void planificarSegun();
 void planificarSegunFIFO();
-void planificarSegunRR();
+
 void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante);
 
 void ejecucionRR(t_tripulante*);
