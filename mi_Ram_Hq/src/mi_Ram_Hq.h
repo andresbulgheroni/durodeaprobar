@@ -54,6 +54,7 @@ typedef struct{
 
 	t_list* tabla_paginas;
 	pthread_mutex_t m_TABLA;
+	t_list* tabla_direcciones;
 
 } t_tabla_paginas;
 
@@ -68,6 +69,13 @@ typedef struct{
 typedef struct{
 	t_pagina_patota* pagina;
 } t_buffer_clock;
+
+typedef struct {
+
+	uint32_t tid;
+	uint32_t direccion_log;
+
+} t_direcciones_trips;
 
 uint32_t TAMANIO_MEMORIA;
 int32_t ESQUEMA_MEMORIA;

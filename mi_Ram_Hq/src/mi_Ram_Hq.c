@@ -26,101 +26,6 @@ pthread_mutex_t  m_SEG_EN_MEMORIA = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_TABLAS_SEGMENTOS = PTHREAD_MUTEX_INITIALIZER;
 
 NIVEL* mapa;
-/*
-void prueba_msg (uint32_t codigo, void* mensaje_v){
-
-	switch(codigo){
-		case INICIAR_PATOTA_MSG:{
-
-			iniciar_patota_msg* mensaje = mensaje_v;
-			bool status = true;
-
-			switch(ESQUEMA_MEMORIA){
-				//case SEGMENTACION_PURA: crear_patota_segmentacion(mensaje, &status);break;
-				case PAGINACION_VIRTUAL: crear_patota_paginacion(mensaje, &status);break;
-			}
-
-
-			if(status){
-				log_info(logger, "CREADO CORRECTAMENTE PATOTA %d", mensaje->idPatota);
-			}else{
-				log_error(logger, "Fallo la insercion de la patota");
-			}
-
-			free(mensaje->tareas);
-			free(mensaje);
-
-			break;
-
-		}
-		case INFORMAR_MOVIMIENTO_RAM:{
-
-			informar_movimiento_ram_msg* mensaje = mensaje_v;
-
-			switch(ESQUEMA_MEMORIA){
-				//case SEGMENTACION_PURA: informar_movimiento_segmentacion(mensaje, NULL);break;
-				case PAGINACION_VIRTUAL: informar_movimiento_paginacion(mensaje, NULL);break;
-			}
-
-			free(mensaje->coordenadasDestino);
-			free(mensaje);
-
-			break;
-
-		}
-		case CAMBIO_ESTADO:{
-
-			cambio_estado_msg* mensaje = mensaje_v;
-
-			switch(ESQUEMA_MEMORIA){
-				//case SEGMENTACION_PURA: cambiar_estado_segmentacion(mensaje, NULL);break;
-				case PAGINACION_VIRTUAL: cambiar_estado_paginacion(mensaje, NULL);break;
-			}
-
-			free(mensaje);
-
-			break;
-
-		}
-		case SOLICITAR_SIGUIENTE_TAREA:{
-
-			solicitar_siguiente_tarea_msg* mensaje = mensaje_v;
-
-			bool completo_tareas = false;
-			char* tarea;
-			switch(ESQUEMA_MEMORIA){
-				//case SEGMENTACION_PURA: tarea = siguiente_tarea_segmentacion(mensaje, &completo_tareas, NULL);break;
-				case PAGINACION_VIRTUAL: tarea = siguiente_tarea_paginacion(mensaje, &completo_tareas, NULL);break;
-			}
-
-			if(completo_tareas){
-
-				log_error(logger, "COMPLETO TAREAS");
-
-			}else{
-				log_info(logger, tarea);
-			}
-
-			free(mensaje);
-
-			break;
-		}
-		case EXPULSAR_TRIPULANTE_MSG:{
-
-			expulsar_tripulante_msg* mensaje = mensaje_v;
-
-			switch(ESQUEMA_MEMORIA){
-				//case SEGMENTACION_PURA: expulsar_tripulante_segmentacion(mensaje, NULL);break;
-				case PAGINACION_VIRTUAL: expulsar_tripulante_paginacion(mensaje, NULL);break;
-			}
-
-			free(mensaje);
-
-			break;
-
-		}
-	}
-}*/
 
 void sig_handler(int n){
 
@@ -500,6 +405,28 @@ void leer_pagina_de_memoria(t_pagina_patota* pagina, void* to){
 }
 
 
+uint32_t generar_direccion_logica_paginacion(uint32_t pagina, uint32_t desplazamiento){
+
+	uint32_t direccion = 0;
+
+	uint32_t bits_derecha = floor(log(TAMANIO_PAGINA) / log(2)) + 1;
+
+	direccion = (pagina << bits_derecha) | desplazamiento;
+
+	return direccion;
+
+}
+
+void obtener_direccion_logica_paginacion(uint32_t* pagina, uint32_t* desplazamiento, uint32_t direccion){
+
+	uint32_t bits_derecha = floor(log(TAMANIO_PAGINA) / log(2)) + 1;
+	uint32_t bits_izquierda = 32  - bits_derecha;
+
+	*pagina = (direccion >> bits_derecha);
+	*desplazamiento = (direccion << bits_izquierda) >> bits_izquierda;
+
+}
+
 void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 
 	pthread_mutex_lock(&m_TABLAS_PAGINAS);
@@ -542,7 +469,7 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 
 			list_iterate(mensaje->tripulantes, cargar_tcb);
 
-			pcb->direccion_tareas = direccion_tareas;//generar_direccion_logica_paginacion(direccion_tareas / TAMANIO_PAGINA, direccion_tareas % TAMANIO_PAGINA);
+			pcb->direccion_tareas = generar_direccion_logica_paginacion(direccion_tareas / TAMANIO_PAGINA, direccion_tareas % TAMANIO_PAGINA);
 
 			// Pongo los datos en un void* por conveniencia para el paso mem principal
 			void* datos = malloc(size_pcb);
@@ -1659,7 +1586,7 @@ segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota)
 	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
 	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
-	pthread_mutex_lock(&m(tabla_seg->m_TABLA));
+	pthread_mutex_lock(&(tabla_seg->m_TABLA));
 
 	t_list* tabla_patota = tabla_seg->segmentos;
 	segmento* seg_tripulante;
@@ -1683,7 +1610,7 @@ segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota)
 		}
 		contador++;
 	}
-	pthread_mutex_unlock(&m(tabla_seg->m_TABLA)); //esta bien unlockear aca si retorno el tripulante?
+	pthread_mutex_unlock(&(tabla_seg->m_TABLA)); //esta bien unlockear aca si retorno el tripulante?
 
 	free(buffer);
 
