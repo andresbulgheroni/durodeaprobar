@@ -730,7 +730,7 @@ void agregarTripulanteAListaReadyYAvisar(t_tripulante* tripulante){
 	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
 	mensaje->idPatota=tripulante->idPatota;
 	mensaje->idTripulante=tripulante->idTripulante;
-	mensaje->estado=tripulante->estado;
+	mensaje->estado= (uint32_t*) tripulante->estado;
 
 	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
 
@@ -752,7 +752,7 @@ void agregarTripulanteAListaExecYAvisar(t_tripulante* tripulante){
 	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
 	mensaje->idPatota=tripulante->idPatota;
 	mensaje->idTripulante=tripulante->idTripulante;
-	mensaje->estado=tripulante->estado;
+	mensaje->estado= (uint32_t*) tripulante->estado;
 
 	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
 
@@ -773,7 +773,7 @@ void agregarTripulanteAListaBloqueadosYAvisar(t_tripulante* tripulante){
 	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
 	mensaje->idPatota=tripulante->idPatota;
 	mensaje->idTripulante=tripulante->idTripulante;
-	mensaje->estado=tripulante->estado;
+	mensaje->estado= (uint32_t*) tripulante->estado;
 
 	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
 	log_info(logger,"cambio De Estado A Bloqueado:%d\n",tripulante->idTripulante);
@@ -792,7 +792,7 @@ void agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(t_tripulante* tripulant
 	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
 	mensaje->idPatota=tripulante->idPatota;
 	mensaje->idTripulante=tripulante->idTripulante;
-	mensaje->estado=tripulante->estado;
+	mensaje->estado= (uint32_t*) tripulante->estado;
 	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
 	log_info(logger,"cambio De Estado A BloqueadoPorSabotaje:%d\n",tripulante->idTripulante);
 	free(mensaje);
