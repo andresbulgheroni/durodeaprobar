@@ -1659,11 +1659,8 @@ segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota)
 	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
 	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
-	pthread_mutex_lock(&m(tabla_seg->m_TABLA));
-
 	t_list* tabla_patota = tabla_seg->segmentos;
 	segmento* seg_tripulante;
-	uint32_t cant_tripulantes_patota = list_size(tabla_patota) - 2;
 	uint32_t contador = 2;
 	uint32_t tid;
 
@@ -1683,7 +1680,6 @@ segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota)
 		}
 		contador++;
 	}
-	pthread_mutex_unlock(&m(tabla_seg->m_TABLA)); //esta bien unlockear aca si retorno el tripulante?
 
 	free(buffer);
 
@@ -1696,10 +1692,7 @@ uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
 	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
-	pthread_mutex_lock(&(tabla_seg->m_TABLA));
 	t_list* tabla_patota = tabla_seg->segmentos;
-	uint32_t cant_tripulantes_patota = list_size(tabla_patota) - 2;
-	//MUTEX TABLA
 	uint32_t contador = 2;
 	uint32_t tid;
 
@@ -1719,7 +1712,6 @@ uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 		}
 		contador++;
 	}
-	pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 
 	//libero memoria
 	free(buffer);
@@ -1738,6 +1730,7 @@ void eliminar_patota(t_list* tabla){
 //MENSAJES
 // guarda la patota en memoria, crea la tabla de segmentos y la guarda en el dictionary
 void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
+	//preguntar si no es medio mucho bloquear el dictionary tdo el proceso
 
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
 	if(!dictionary_has_key(tablas_seg_patota, string_itoa(mensaje->idPatota))){
@@ -1746,7 +1739,6 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 		tabla_segmentos* tabla_seg = malloc(sizeof(tabla_segmentos));
 		tabla_seg->segmentos = list_create();
 		tabla_seg->m_TABLA = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
-
 
 		uint32_t size_tareas = mensaje->tareas->length;
 
@@ -1893,8 +1885,16 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 // modifica las coordenadas de un tripulante en memoria
 void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool* status){
 
+	//no me hacia falta esto, lo ice por el lock de la tabla para buscar offset
+	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
+	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
+	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
+
 	void* buffer = malloc(sizeof(t_tcb));
+
+	pthread_mutex_lock(&(tabla_seg->m_TABLA));
 	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
+	pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 
 	pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
@@ -1919,8 +1919,16 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 // modifica el estado de un tripulante en memoria
 void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 
+	//no me hacia falta esto, lo ice por el lock de la tabla para buscar offset
+	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
+	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
+	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
+
 	void* buffer = malloc(sizeof(t_tcb));
+
+	pthread_mutex_lock(&(tabla_seg->m_TABLA));
 	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
+	pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 
 	char estado = get_status(mensaje->estado);
 
@@ -1943,7 +1951,7 @@ void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 // SIN TERMINAR
 char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status){
 
-	char* tarea = "";
+	char* tarea = string_new();
 
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
 	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
@@ -1951,34 +1959,57 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 
 	pthread_mutex_lock(&(tabla_seg->m_TABLA));
 	t_list* tabla_patota = tabla_seg->segmentos;
-	//MUTEX TABLA
 	uint32_t offset = buscar_offset_tripulante(mensaje->idTripulante, mensaje->idPatota);
 	uint32_t proxima_instruccion;
 
 	void* buffer_tcb = malloc(sizeof(t_tcb));
-	memcpy(buffer_tcb, memoria_principal + offset, sizeof(t_tcb));
-	//traigo de alguna manera el numero de la siguiente instruccion
 
-	//MUTEX TABLA
+	pthread_mutex_lock(&m_MEM_PRINCIPAL);
+	memcpy(buffer_tcb, memoria_principal + offset, sizeof(t_tcb));
+
+	//traigo el numero de la siguiente instruccion de memoria
+	uint32_t offset_tcb = 3 * sizeof(uint32_t) + sizeof(char); //id, estado, posx, posy
+	memcpy(&proxima_instruccion, buffer_tcb + offset_tcb, sizeof(uint32_t));
+
 	segmento* seg_tareas = list_get(tabla_patota, 1);
-	//MUTEX TABLA solo hasta ahi? no puede haber problemas de sincro si alguien mas accedio a ese segmento?
 	uint32_t direccion_tareas = seg_tareas->inicio;
 
 	void* buffer_tareas = malloc(sizeof(seg_tareas->tamanio));
 	memcpy(buffer_tareas, memoria_principal + seg_tareas->inicio, sizeof(seg_tareas->tamanio));
 
-	//copiar la instruccion en tarea, si prox_instruccion es 0 la primera, y asi sucesivamente
+	uint32_t contador = 0;
+	char letra;
+	uint32_t offset_tareas = 0;
 
-	uint32_t offset_tcb = 0; //no
+	while(contador < proxima_instruccion+1){
+		memcpy(&letra, buffer_tareas + offset_tareas, 1);
+		while(letra != '\n' || letra != '\0'){
+			string_append(&tarea, letra); //aca no estoy segura si va *letra
+			offset_tareas++;
+			memcpy(&letra, buffer_tareas + offset_tareas, 1);
+		}
+		contador++;
+		if(letra != '\0'){
+			contador = proxima_instruccion; //asi sale del bucle, horror jajaja
+			termino = true;
+		}
+	}
 
 	//le sumo uno en memoria a la proxima instruccion
 	proxima_instruccion += 1;
+	//copio el nuevo valor en el buffer
 	memcpy(buffer_tcb + offset_tcb, proxima_instruccion, sizeof(uint32_t));
+	//lo paso a la memoria
 	memcpy(memoria_principal + offset, buffer_tcb, sizeof(t_tcb));
 
+	pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 	pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 
+	free(buffer_tcb);
+	free(buffer_tareas);
+
 	return tarea;
+
 }
 
 //saca el segmento de la tabla de segmentos y agrega el segmento libre a la lista de libres
