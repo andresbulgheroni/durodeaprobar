@@ -1065,7 +1065,7 @@ algoritmo_code stringACodigoAlgoritmo(const char* string) {
 void ejecutarTripulante(t_tripulante* tripulante){
 	//INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
 
-
+//prueba magica
 
 	printf("hola soy:%d\n",tripulante->idTripulante);
 
