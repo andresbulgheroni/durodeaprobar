@@ -858,7 +858,7 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 		int32_t paginas_ne = paginas_necesarias(offset, sizeof(uint32_t));
 		uint32_t pagina = offset/TAMANIO_PAGINA;
 
-		for(uint32_t i = 0; i < paginas_ne; i++){
+		for(int32_t i = 0; i < paginas_ne; i++){
 
 
 			t_pagina_patota* patota = list_get(paginas, pagina + i);
@@ -910,7 +910,7 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 				pagina = offset/TAMANIO_PAGINA;
 				int32_t paginas_ne = paginas_necesarias(offset, sizeof(tarea_actual));
 
-				for(uint32_t i = 0; i < paginas_ne; i++){
+				for(int32_t i = 0; i < paginas_ne; i++){
 
 					t_pagina_patota* patota_enc = list_get(paginas, pagina + i);
 
@@ -1985,7 +1985,7 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 		memcpy(&letra, buffer_tareas + offset_tareas, 1);
 		while(letra != '\n' || letra != '\0'){
 			string_append(&tarea, letra); //aca no estoy segura si va *letra
-			offset_tareas++;
+			offset_tareas = offset_tareas + sizeof(char);
 			memcpy(&letra, buffer_tareas + offset_tareas, 1);
 		}
 		contador++;
