@@ -48,6 +48,7 @@ typedef struct{
 	bool presente;
 	bool uso;
 	bool modificado;
+	uint32_t ocupado;
 
 } t_pagina_patota;
 
