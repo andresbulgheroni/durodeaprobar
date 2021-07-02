@@ -1617,7 +1617,6 @@ segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota)
 		}
 		contador++;
 	}
-	pthread_mutex_unlock(&(tabla_seg->m_TABLA)); //esta bien unlockear aca si retorno el tripulante?
 	free(buffer);
 
 	return seg_tripulante;
