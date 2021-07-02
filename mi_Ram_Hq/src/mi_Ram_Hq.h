@@ -42,11 +42,13 @@ typedef enum{
 } algoritmo_reemplazo;
 
 typedef struct{
+	uint32_t nro_pagina;
 	int32_t nro_frame;
 	uint32_t nro_frame_mv;
 	bool presente;
 	bool uso;
 	bool modificado;
+	uint32_t ocupado;
 
 } t_pagina_patota;
 
@@ -54,6 +56,7 @@ typedef struct{
 
 	t_list* tabla_paginas;
 	pthread_mutex_t m_TABLA;
+	t_list* tabla_direcciones;
 
 } t_tabla_paginas;
 
@@ -68,6 +71,13 @@ typedef struct{
 typedef struct{
 	t_pagina_patota* pagina;
 } t_buffer_clock;
+
+typedef struct {
+
+	uint32_t tid;
+	uint32_t direccion_log;
+
+} t_direcciones_trips;
 
 uint32_t TAMANIO_MEMORIA;
 int32_t ESQUEMA_MEMORIA;
@@ -93,14 +103,14 @@ uint32_t buffer_clock_pos;
 t_config* config;
 t_log* logger;
 
-typedef struct {
+typedef struct  __attribute__((__packed__)){
 
 	uint32_t pid;
 	uint32_t direccion_tareas;
 
 } t_pcb;
 
-typedef struct {
+typedef  struct  __attribute__((__packed__)) {
 
 	uint32_t tid;
 	char estado;
@@ -161,6 +171,7 @@ int32_t paginas_necesarias(uint32_t offset, uint32_t size);
 void pasar_de_swap_a_principal(t_pagina_patota* pagina);
 void modificar_en_memoria_principal(t_pagina_patota* pagina, void* datos);
 void dump_paginacion(FILE* dump);
+void borrar_patota(t_tabla_paginas* tabla);
 
 /* Segmentacion */
 
@@ -177,6 +188,14 @@ typedef struct{
 
 }tabla_segmentos;
 
+typedef struct{
+	char* pid;
+	uint32_t numero_segmento;
+	uint32_t inicio;
+	uint32_t tamanio;
+
+}segmento_dump;
+
 //agrupa todas las tablas de segmentos
 t_dictionary* tablas_seg_patota;
 
@@ -190,6 +209,9 @@ t_list* segmentos_en_memoria;
 
 //lista de segmentos libres
 t_list* segmentos_libres;
+
+int32_t get_criterio(char* cofig);
+void dump_segmentacion(FILE* dump);
 void sacar_segmento_lista_libres(segmento* segmento_nuevo);
 void ordenar_lista_segmentos_libres();
 void liberar_segmento(segmento* seg);
