@@ -1948,7 +1948,7 @@ void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 	free(buffer);
 }
 
-// SIN TERMINAR
+// devuelve la siguiente tarea de un tripulante
 char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status){
 
 	char* tarea = string_new();
