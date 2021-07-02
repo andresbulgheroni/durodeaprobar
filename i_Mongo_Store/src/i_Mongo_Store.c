@@ -454,7 +454,7 @@ void inicializarFS(){
 		free(rutaPuntoMontaje);
 	}
 	inicializarBlocks();
-
+	ID_SABOTAJE = 0;
 }
 
 op_code_tareas string_to_op_code_tareas (char* string){
@@ -489,7 +489,8 @@ void leerConfig() {
 	IP = config_get_string_value(config, "IP");
 	PUNTO_MONTAJE = config_get_string_value(config, "PUNTO_MONTAJE");
 	TIEMPO_SINCRONIZACION = config_get_int_value(config,"TIEMPO_SINCRONIZACION");
-	POSICIONES_SABOTAJE = config_get_string_value(config, "POSICIONES_SABOTAJE"); // ver esto, es una lista en realidad
+	POSICIONES_SABOTAJE = config_get_array_value(config, "POSICIONES_SABOTAJE"); // ver esto, es una lista en realidad
+
 }
 
 void crear_log(){
@@ -1059,6 +1060,14 @@ void sighandler() {
 	puts("Me sabotearon");
 
 	// Avisarle al modulo de Andy, hacer hilo para el sabotaje
+	notificar_sabotaje_msg*sabotaje = malloc(sizeof(notificar_sabotaje_msg));
+	sabotaje->coordenadas = malloc(sizeof(t_coordenadas));
+	sabotaje->idSabotaje = ID_SABOTAJE+1;
+	sabotaje->coordenadas =get_coordenadas(POSICIONES_SABOTAJE[ID_SABOTAJE]);
+
+	//enviar_paquete(sabotaje, NOTIFICAR_SABOTAJE, );  //TODO falta socket de sabotaje
+
+
 
 }
 

@@ -23,11 +23,12 @@
 
 #define MAX_BUFFER 1024
 
+int ID_SABOTAJE;
 char* PUNTO_MONTAJE;
 char* PUERTO;
 char* IP;
 uint32_t TIEMPO_SINCRONIZACION;
-char* POSICIONES_SABOTAJE;
+char** POSICIONES_SABOTAJE;
 uint32_t BLOCK_SIZE;
 uint32_t BLOCKS;
 char* superBloqueMap;
