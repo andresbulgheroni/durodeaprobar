@@ -320,7 +320,7 @@ void init (){
 	switch(ESQUEMA_MEMORIA){
 		case SEGMENTACION_PURA:{
 
-		//	inicializar_segmentacion();
+			inicializar_segmentacion();
 
 			break;
 		}
@@ -1512,8 +1512,8 @@ int32_t get_criterio(char* algoritmo_config) {
 // crea la lista de segmentos libres
 void inicializar_segmentacion(){
 	segmento* memoria_vacia = malloc(sizeof(segmento));
-	list_create(segmentos_libres);
-	list_create(segmentos_en_memoria);
+	segmentos_libres = list_create();
+	segmentos_en_memoria = list_create();
 	memoria_vacia->inicio = 0;
 	memoria_vacia->tamanio = TAMANIO_MEMORIA;
 	list_add(segmentos_libres, memoria_vacia);
@@ -1731,7 +1731,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 		for(uint32_t j = 0; j < mensaje->cant_tripulantes; j++){
 			seg_tcb[j] = malloc(sizeof(segmento));
 			seg_tcb[j]->numero_segmento = j+2;
-			seg_tcb[j]->tamanio = sizeof(t_pcb);
+			seg_tcb[j]->tamanio = sizeof(t_tcb);
 			list_add(tabla_seg->segmentos, seg_tcb[j]);
 		}
 
@@ -1740,6 +1740,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 		//pcb
 		t_pcb* pcb = malloc(sizeof(t_pcb));
 		pcb->pid = mensaje->idPatota;
+		pcb->direccion_tareas = 1;
 
 		//tcb
 		t_list* tcbs = list_create();
