@@ -123,7 +123,7 @@ void dump_paginacion(FILE* dump){
 				pag->estado = "OCUPADO";
 				pag->proceso = malloc(strlen(key) + 1);
 				strcpy(pag->proceso, key);
-				pag->pagina = string_itoa(i);
+				pag->pagina = string_itoa(pagina->nro_pagina);
 
 				list_add(tabla_dump, pag);
 			}
