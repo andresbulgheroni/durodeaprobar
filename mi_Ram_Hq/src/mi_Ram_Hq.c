@@ -19,7 +19,7 @@ pthread_mutex_t  m_TABLAS_PAGINAS = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_TABLA_LIBRES_P = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_TABLA_LIBRES_V = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_LISTA_REEMPLAZO = PTHREAD_MUTEX_INITIALIZER;
-//pthread_mutex_t  m_LOGGER = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t  m_LOGGER = PTHREAD_MUTEX_INITIALIZER;
 
 pthread_mutex_t  m_SEGMENTOS_LIBRES = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_SEG_EN_MEMORIA = PTHREAD_MUTEX_INITIALIZER;
@@ -34,8 +34,10 @@ void sig_handler(int n){
 
 
 			char* time_stamp_text = get_timestamp();
-			char* path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
-			char* inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
+			char* path = string_new();
+			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
+			char* inicio_texto = string_new();
+			inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
 
 			FILE* dump = fopen(path, "w+");
 
@@ -43,6 +45,7 @@ void sig_handler(int n){
 
 			free(path);
 			free(inicio_texto);
+			free(time_stamp_text);
 
 			switch(ESQUEMA_MEMORIA){
 				case PAGINACION_VIRTUAL: dump_paginacion(dump); break;
@@ -80,14 +83,17 @@ char* get_timestamp(){
 
 	time_t t = time(NULL);
 	struct tm tm = *localtime(&t);
-	return string_from_format("%d/%02d/%02d %02d:%02d:%02d\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	char* timestamp = string_new();
+	timestamp = string_from_format("%d/%02d/%02d %02d:%02d:%02d\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	return timestamp;
 
 }
 
 void dump_paginacion(FILE* dump){
 	//TODO PREGUNTAR SI HACE FALTAN LOS SEMAFOROS, COMO SE TRATA DE UNA INTERRUPCION
 
-	char* titulos = string_from_format("MARCO\t\tESTADO \t\tPROCESO\t\tPAGINA\n");
+	char* titulos = string_new();
+	titulos = "MARCO\t\tESTADO \t\tPROCESO\t\tPAGINA\n";
 	fputs(titulos, dump);
 	free(titulos);
 
@@ -142,7 +148,8 @@ void dump_paginacion(FILE* dump){
 
 	void guardar_tabla(t_dump_pag* pag){
 
-		char* fila = string_from_format("%10d\t\t%15s\t\t%20s\t\t%20s\n", pag->marco, pag->estado, pag->proceso, pag->pagina);
+		char* fila = string_new();
+		fila = string_from_format("%10d\t\t%15s\t\t%20s\t\t%20s\n", pag->marco, pag->estado, pag->proceso, pag->pagina);
 		fputs(fila, dump);
 		free(fila);
 	}
@@ -192,13 +199,23 @@ void recibir_mensaje(int32_t* conexion){
 				if(status){
 					enviar_paquete(NULL, OK_MSG, *conexion);
 				}else{
-					t_string* rta_error = get_t_string("Fallo la insercion de la patota");
+					char* mensaje = string_new();
+					mensaje = "Fallo la insercion de la patota";
+
+					t_string* rta_error = get_t_string(mensaje);
 
 					enviar_paquete(rta_error, FAIL_MSG, *conexion);
 
+					free(mensaje);
+
 					free(rta_error);
+
 				}
 
+				void vaciar_trips(tripulante_data_msg* trip){
+					free(trip);
+				}
+				list_clean_and_destroy_elements(mensaje->tripulantes, vaciar_trips);
 				free(mensaje->tareas);
 				free(mensaje);
 
@@ -250,10 +267,13 @@ void recibir_mensaje(int32_t* conexion){
 					enviar_paquete(NULL, COMPLETO_TAREAS, *conexion);
 
 				}else{
+
 					t_string* tarea_msg = get_t_string(tarea);
 					enviar_paquete(tarea_msg, SOLICITAR_SIGUIENTE_TAREA_RTA, *conexion);
 					free(tarea_msg);
 				}
+
+				free(tarea); // ACORDARSE QUE CELES USE STRING_NEW CUANDO DECLARE UN CHAR*
 
 				free(mensaje);
 
@@ -765,7 +785,7 @@ void cambiar_estado_paginacion(cambio_estado_msg* mensaje, bool* status){
 
 char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status){
 
-	char* tarea = "";
+	char* tarea = string_new();
 
 	pthread_mutex_lock(&m_TABLAS_PAGINAS);
 
@@ -1230,15 +1250,18 @@ int32_t get_frame(){
 
 		}
 		pthread_mutex_unlock(&m_LISTA_REEMPLAZO);
-	/*
+
 		pthread_mutex_lock(&m_LOGGER);
+		char* mensaje = string_new();
 		if(nro_frame >= 0){
-			log_debug(logger, "Reemplazo en frame %d", nro_frame);
+			mensaje = string_from_format("Reemplazo en frame %d", nro_frame);
+			log_debug(logger, mensaje);
 		}else{
-			log_error(logger, "Fallo reemplazo en memoria principal");
+			mensaje = "Fallo reemplazo en memoria principal";
+			log_error(logger, mensaje);
 		}
+		free(mensaje);
 		pthread_mutex_unlock(&m_LOGGER);
-	*/
 	}
 
 	return nro_frame;
@@ -1406,6 +1429,13 @@ void liberar_memoria_principal_paginacion(t_pagina_patota* pagina){
 
 		pthread_mutex_unlock(&m_TABLA_LIBRES_P);
 
+		pthread_mutex_lock(&m_LOGGER);
+			char* mensaje = string_new();
+			mensaje = string_from_format("Liberado frame nro. %d. MEMORIA PRINCIPAL ", frame->pos);
+			log_debug(logger, mensaje);
+			free(mensaje);
+		pthread_mutex_unlock(&m_LOGGER);
+
 	}
 
 }
@@ -1425,6 +1455,13 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 	list_sort(frames_swap, cmp_frames_libres);
 
 	pthread_mutex_unlock(&m_TABLA_LIBRES_V);
+
+	pthread_mutex_lock(&m_LOGGER);
+		char* mensaje = string_new();
+		mensaje = string_from_format("Liberado frame nro. %d. MEMORIA VIRTUAL ", frame->pos);
+		log_debug(logger, mensaje);
+		free(mensaje);
+	pthread_mutex_unlock(&m_LOGGER);
 
 }
 
