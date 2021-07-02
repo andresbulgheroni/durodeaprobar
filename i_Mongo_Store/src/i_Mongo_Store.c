@@ -49,19 +49,21 @@ int main(void) {
 	//	fsckFiles_Blocks();
 	//	fsckFiles_Size();
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
+		//int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
+		//SOCKET_SABOTAJE_GLOBAL= esperar_cliente(socket_servidor);
 
 
+		int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 
-	//	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
-	//
-	//	while(true){
-	//
-	//		int32_t socket_cliente = esperar_cliente(socket_servidor);
-	//		pthread_t hilo_mensaje;
-	//		pthread_create(&hilo_mensaje,NULL,(void*)funcionPruebaDisc,(void*) (&socket_cliente));
-	//		pthread_detach(hilo_mensaje);
-	//
-	//	}
+		while(true){
+
+			int32_t socket_cliente = esperar_cliente(socket_servidor);
+
+			pthread_t hilo_mensaje;
+			pthread_create(&hilo_mensaje,NULL,(void*)recibirMensajeTripulante,(void*) (&socket_cliente));
+			pthread_detach(hilo_mensaje);
+
+		}
 
 	//	config_destroy(config);
 	return EXIT_SUCCESS;
@@ -122,7 +124,7 @@ void timerSincronizacion_blocksMap(){
 //
 //}
 
-void funcionPruebaTrip(int32_t* socketCliente){
+void recibirMensajeTripulante(int32_t* socketCliente){
 
 	bool terminado = false;
 	while (!terminado){
@@ -135,7 +137,10 @@ void funcionPruebaTrip(int32_t* socketCliente){
 
 			obtener_bitacora_msg* bitacoraMsg = deserializar_paquete(paquete);
 			char* bitacora = readBitacora(bitacoraMsg->idTripulante);
-			enviar_paquete(bitacora,OBTENER_BITACORA_RTA,*socketCliente);
+
+			obtener_bitacora_rta*bitacoraParaDiscordiador=malloc(sizeof(obtener_bitacora_rta));
+			bitacoraParaDiscordiador->bitacora = get_t_string(bitacora);
+			enviar_paquete(bitacoraParaDiscordiador,OBTENER_BITACORA_RTA,*socketCliente);
 			if(bitacora != NULL){
 				free(bitacora);
 			}
@@ -164,6 +169,9 @@ void funcionPruebaTrip(int32_t* socketCliente){
 		} case INICIO_TAREA:{
 
 			inicio_tarea_msg* tareaMsg = deserializar_paquete(paquete);
+			printf("recibi: %d",tareaMsg->idTripulante);
+			puts(tareaMsg->nombreTarea->string);
+			printf("recibi: %d",tareaMsg->parametros);
 			char* cadena = string_new();
 			string_append(&cadena, "Comienza ejecución de tarea ");
 			string_append(&cadena, tareaMsg->nombreTarea->string);
@@ -221,7 +229,7 @@ void funcionPruebaTrip(int32_t* socketCliente){
 
 		}
 
-		free(paquete);
+		//free(paquete);
 
 	}
 
@@ -268,7 +276,7 @@ void hacerTarea(inicio_tarea_msg* tarea) {
 
 		break;
 
-	} default:
+	} default:		//CASE TAREA_CPU: GRABAR EN BITACORA NADA MAS
 
 		log_info(logger,"codigo de operacion incorrecto");
 
@@ -1065,7 +1073,7 @@ void sighandler() {
 	sabotaje->idSabotaje = ID_SABOTAJE+1;
 	sabotaje->coordenadas =get_coordenadas(POSICIONES_SABOTAJE[ID_SABOTAJE]);
 
-	//enviar_paquete(sabotaje, NOTIFICAR_SABOTAJE, );  //TODO falta socket de sabotaje
+	//enviar_paquete(sabotaje, NOTIFICAR_SABOTAJE, );  //TODO falta socket de sabotaje SOCKET_SABOTAJE_GLOBAL?
 
 
 

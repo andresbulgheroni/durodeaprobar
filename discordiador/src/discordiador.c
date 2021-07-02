@@ -662,7 +662,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			puts("deserializo mensaje");
 
 
-			log_info(logger,"el contenido de la bitacora es:%s",mensajeBitacoraRta->bitacora->string);
+			log_info(logger,"el contenido de la bitacora del ID: %d es:\n%s",id,mensajeBitacoraRta->bitacora->string);
 
 			liberar_conexion(socketBitacora);
 
@@ -938,13 +938,13 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 	mensajeMovimientoTarea->coordenadasDestino = malloc(sizeof(t_coordenadas));
 
-	//	informar_movimiento_mongo_msg* mensajeMovimientoMongo = malloc(sizeof(informar_movimiento_mongo_msg));
-	//		mensajeMovimientoMongo->coordenadasOrigen = malloc(sizeof(t_coordenadas));
-	//		mensajeMovimientoMongo->coordenadasDestino = malloc(sizeof(t_coordenadas));					//TODO
-	//
-	//		mensajeMovimientoMongo->idTripulante = tripulante->idTripulante;
-	//		mensajeMovimientoMongo->coordenadasOrigen->posX = tripulante->coordenadas->posX;
-	//		mensajeMovimientoMongo->coordenadasOrigen->posY = tripulante->coordenadas->posY;
+		informar_movimiento_mongo_msg* mensajeMovimientoMongo = malloc(sizeof(informar_movimiento_mongo_msg));
+			mensajeMovimientoMongo->coordenadasOrigen = malloc(sizeof(t_coordenadas));
+			mensajeMovimientoMongo->coordenadasDestino = malloc(sizeof(t_coordenadas));					//TODO
+
+			mensajeMovimientoMongo->idTripulante = tripulante->idTripulante;
+			mensajeMovimientoMongo->coordenadasOrigen->posX = tripulante->coordenadas->posX;
+			mensajeMovimientoMongo->coordenadasOrigen->posY = tripulante->coordenadas->posY;
 
 
 	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
@@ -979,15 +979,15 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 	mensajeMovimientoTarea->coordenadasDestino->posX = tripulante->coordenadas->posX;
 	mensajeMovimientoTarea->coordenadasDestino->posY = tripulante->coordenadas->posY;
 
-	//mensajeMovimientoMongo->coordenadasDestino->posX = tripulante->coordenadas->posX;
-	//mensajeMovimientoMongo->coordenadasDestino->posY = tripulante->coordenadas->posY;
+	mensajeMovimientoMongo->coordenadasDestino->posX = tripulante->coordenadas->posX;
+	mensajeMovimientoMongo->coordenadasDestino->posY = tripulante->coordenadas->posY;
 
-	//printf("hacia la posicion: %d %d\n",mensajeMovimientoMongo->coordenadasDestino->posX,mensajeMovimientoMongo->coordenadasDestino->posY);
+	printf("hacia la posicion: %d %d\n",mensajeMovimientoMongo->coordenadasDestino->posX,mensajeMovimientoMongo->coordenadasDestino->posY);
 
 
 	enviar_paquete(mensajeMovimientoTarea,INFORMAR_MOVIMIENTO_RAM,tripulante->socketTripulanteRam);
 
-	//enviar_paquete(mensajeMovimientoMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
+	enviar_paquete(mensajeMovimientoMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
 
 	free(mensajeMovimientoTarea->coordenadasDestino);
 	free(mensajeMovimientoTarea);
@@ -1065,12 +1065,12 @@ algoritmo_code stringACodigoAlgoritmo(const char* string) {
 void ejecutarTripulante(t_tripulante* tripulante){
 	//INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
 
-//prueba magica
+
 
 	printf("hola soy:%d\n",tripulante->idTripulante);
 
-	//		int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);		//TODO
-	//		tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
+	int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);		//TODO
+	tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
 
 	int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
@@ -1080,64 +1080,64 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	agregarTripulanteAListaReadyYAvisar(tripulante);
 
 	//mandarTarea()
-		solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
-		mensajeTarea->idTripulante=tripulante->idTripulante;
-		enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
-		printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
+//		solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
+//		mensajeTarea->idTripulante=tripulante->idTripulante;
+//		enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
+//		printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
 
 	//recibirMensaje()				TODO
 
-			t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
+//			t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
+//
+//			switch(paqueteTareaRta->codigo){
+//
+//			case SOLICITAR_SIGUIENTE_TAREA_RTA:{
+//
+//			solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
+//
+//
+//			log_info(logger, "Duracion: %d", mensajeTareaRta->tarea->duracion);
+//			log_info(logger, "Pos: %d|%d", mensajeTareaRta->tarea->coordenadas->posX, mensajeTareaRta->tarea->coordenadas->posY);
+//			log_info(logger,mensajeTareaRta->tarea->nombre_parametros);
+//
+//			char** nombreTarea = string_split(mensajeTareaRta->tarea->nombre_parametros, " ");		//es un char*
+//
+//			if(nombreTarea[1] ==NULL){
+//
+//				tripulante->tareaAsignada->nombreTarea=nombreTarea[0];
+//				tripulante->tareaAsignada->coordenadas=mensajeTareaRta->tarea->coordenadas;
+//				tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
+//			}	else	{
+//
+//				tripulante->tareaAsignada->nombreTarea=nombreTarea[0];
+//				tripulante->tareaAsignada->coordenadas=mensajeTareaRta->tarea->coordenadas;
+//				tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
+//				tripulante->tareaAsignada->parametros=nombreTarea[1];
+//			}
+//
+//
+//
+//			break;
+//
+//				} case COMPLETO_TAREAS:{
+//
+//					tripulante->estado = FINISHED;
+//					sem_post(&sem_planificarMultitarea);
+//
+//					break;
+//			 }
+//			}
 
-			switch(paqueteTareaRta->codigo){
-
-			case SOLICITAR_SIGUIENTE_TAREA_RTA:{
-
-			solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
 
 
-			log_info(logger, "Duracion: %d", mensajeTareaRta->tarea->duracion);
-			log_info(logger, "Pos: %d|%d", mensajeTareaRta->tarea->coordenadas->posX, mensajeTareaRta->tarea->coordenadas->posY);
-			log_info(logger,mensajeTareaRta->tarea->nombre_parametros);
-
-			char** nombreTarea = string_split(mensajeTareaRta->tarea->nombre_parametros, " ");		//es un char*
-
-			if(nombreTarea[1] ==NULL){
-
-				tripulante->tareaAsignada->nombreTarea=nombreTarea[0];
-				tripulante->tareaAsignada->coordenadas=mensajeTareaRta->tarea->coordenadas;
-				tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
-			}	else	{
-
-				tripulante->tareaAsignada->nombreTarea=nombreTarea[0];
-				tripulante->tareaAsignada->coordenadas=mensajeTareaRta->tarea->coordenadas;
-				tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
-				tripulante->tareaAsignada->parametros=nombreTarea[1];
-			}
-
-
-
-			break;
-
-				} case COMPLETO_TAREAS:{
-
-					tripulante->estado = FINISHED;
-					sem_post(&sem_planificarMultitarea);
-
-					break;
-			 }
-			}
-
-
-
-//	t_tarea*tareaPrueba=malloc(sizeof(t_tarea));
-//	t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
-//	coordenadas->posX=2;
-//	coordenadas->posY=2;
-//	tareaPrueba->nombreTarea="GENERAR_OXIGENO_AHRE";
-//	tareaPrueba->coordenadas=coordenadas;
-//	tareaPrueba->duracion=5;
-//	tripulante->tareaAsignada=tareaPrueba;
+	t_tarea*tareaPrueba=malloc(sizeof(t_tarea));
+	t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
+	coordenadas->posX=2;
+	coordenadas->posY=2;
+	tareaPrueba->nombreTarea="GENERAR_OXIGENO_AHRE";
+	tareaPrueba->coordenadas=coordenadas;
+	tareaPrueba->duracion=5;
+	tripulante->tareaAsignada=tareaPrueba;
 
 	sem_post(&sem_hiloTripulante);
 
@@ -1267,6 +1267,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 				tareaPrueba->nombreTarea="GENERAR_OXIGENO";
 				tareaPrueba->coordenadas=coordenadas;
 				tareaPrueba->duracion=2;
+				tareaPrueba->parametros = 20;
 				tripulante->tareaAsignada=tareaPrueba;
 
 				log_info(logger,"se le asigno otra tarea al tripulante con ID:%d",tripulante->idTripulante);
@@ -1610,6 +1611,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 			tareaPrueba->nombreTarea="GENERAR_OXIGENO";
 			tareaPrueba->coordenadas=coordenadas;
 			tareaPrueba->duracion=2;
+			tareaPrueba->parametros = 20;
 			tripulante->tareaAsignada=tareaPrueba;
 
 
@@ -1731,6 +1733,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 				tareaPrueba->nombreTarea="GENERAR_OXIGENO";
 				tareaPrueba->coordenadas=coordenadas;
 				tareaPrueba->duracion=2;
+				tareaPrueba->parametros = 20;
 				tripulante->tareaAsignada=tareaPrueba;
 
 				log_info(logger,"se le asigno otra tarea al tripulante%d",tripulante->idTripulante);
@@ -1769,13 +1772,13 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 			log_info(logger,"se realiza un ciclo de CPU para enviar tarea del tripulante %d",tripulante->idTripulante);
 			sleep(RETARDO_CICLO_CPU);
 
-			//ENVIAR MENSAJE A IMONGO	enviar_paquete(mensaje, codigo, socketCliente)
-			//inicio_tarea_msg* mandarTareaIO=malloc(sizeof(inicio_tarea_msg));
-			//							mandarTareaIO->idTripulante = tripulante->idTripulante;
-			//							mandarTareaIO->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
-			//							mandarTareaIO->parametros = tripulante->tareaAsignada->parametros;
-			//
-			//							enviar_paquete(mandarTareaIO, INICIO_TAREA,tripulante->socketTripulanteImongo);
+
+										inicio_tarea_msg* mandarTareaIO=malloc(sizeof(inicio_tarea_msg));
+										mandarTareaIO->idTripulante = tripulante->idTripulante;
+										mandarTareaIO->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
+										mandarTareaIO->parametros = tripulante->tareaAsignada->parametros;
+
+										enviar_paquete(mandarTareaIO, INICIO_TAREA,tripulante->socketTripulanteImongo);
 
 			log_info(logger,"el mensaje a imongo ha sido enviado exitosamentedel tripulante %d",tripulante->idTripulante);
 

@@ -88,7 +88,7 @@ int menorEntre(int, int);
 op_code_tareas string_to_op_code_tareas (char*);
 void hacerTarea(inicio_tarea_msg*);
 void funcionPruebaDisc(int32_t*);
-void funcionPruebaTrip(int32_t*);
+void recibirMensajeTripulante(int32_t*);
 t_bitarray* crearBitmap(char*);
 void timerSincronizacion_blocksMap();
 void setBitmap(int, int);
