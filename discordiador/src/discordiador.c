@@ -414,7 +414,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			t_list* posicionesTripulantes = list_create();
 
-			t_list*posicionesTripulantesParaRam = list_create();
+			t_list*posicionesTripulantesParaRam = list_create();	//esto es una lista
 
 			char* rutaTarea = string_new();
 			string_append(&rutaTarea,mensaje[2]);
