@@ -14,8 +14,8 @@ int main(void) {
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 		estadoSuperBloque();
 
-//		generarRecurso(10,'O');
-//		estadoSuperBloque();
+		generarRecurso(10,'O');
+		estadoSuperBloque();
 		consumirRecurso(5, 'O');
 
 		estadoSuperBloque();
@@ -44,26 +44,26 @@ int main(void) {
 
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
 	//	fsckSuperBloque_Bloques();
-	//		fsckSuperBloque_Bitmap();
+	//	fsckSuperBloque_Bitmap();
 	//	fsckFiles_BlockCount();
 	//	fsckFiles_Blocks();
-	//	fsckFiles_Size();
+		fsckFiles_Size();
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
 		//int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 		//SOCKET_SABOTAJE_GLOBAL= esperar_cliente(socket_servidor);
 
 
-		int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
-
-		while(true){
-
-			int32_t socket_cliente = esperar_cliente(socket_servidor);
-
-			pthread_t hilo_mensaje;
-			pthread_create(&hilo_mensaje,NULL,(void*)recibirMensajeTripulante,(void*) (&socket_cliente));
-			pthread_detach(hilo_mensaje);
-
-		}
+//		int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
+//
+//		while(true){
+//
+//			int32_t socket_cliente = esperar_cliente(socket_servidor);
+//
+//			pthread_t hilo_mensaje;
+//			pthread_create(&hilo_mensaje,NULL,(void*)recibirMensajeTripulante,(void*) (&socket_cliente));
+//			pthread_detach(hilo_mensaje);
+//
+//		}
 
 	//	config_destroy(config);
 	return EXIT_SUCCESS;
@@ -100,6 +100,7 @@ int main(void) {
 void timerSincronizacion_blocksMap(){
 
 	while(1){
+		memcpy(blocksMapOriginal,blocksMap,BLOCK_SIZE*BLOCKS);
 		msync(blocksMap, tamanioBlocks, MS_SYNC);
 		log_info(logger, "Sincronizando archivo blocks...");
 		sleep(TIEMPO_SINCRONIZACION);
@@ -302,7 +303,7 @@ void inicializarBlocks() {
 
 	ftruncate(fd, tamanioBlocks);
 
-	char* blocksMapOriginal = mmap(NULL, tamanioBlocks, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	blocksMapOriginal = mmap(NULL, tamanioBlocks, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (blocksMapOriginal == MAP_FAILED) {
 		perror("mmap");
 		close(fd);
@@ -310,7 +311,7 @@ void inicializarBlocks() {
 	}
 
 	blocksMap = malloc(tamanioBlocks);
-	blocksMap = blocksMapOriginal;
+	memcpy(blocksMap,blocksMapOriginal,tamanioBlocks);
 
 	// Thread con timer para sincronizar mmap a disco, iniciarlo despues del mmap!
 	// Corre: msync(blocksMap, tamanioBlocks, MS_SYNC);

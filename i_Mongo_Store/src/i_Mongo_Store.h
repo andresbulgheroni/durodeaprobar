@@ -33,6 +33,7 @@ uint32_t BLOCK_SIZE;
 uint32_t BLOCKS;
 char* superBloqueMap;
 char* blocksMap;
+char* blocksMapOriginal;
 t_log* logger;
 t_config* config;
 int tamanioBlocks;
