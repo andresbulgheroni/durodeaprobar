@@ -343,7 +343,9 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 	for(int i=0; i<(list_size(posicionesTripulantes)) ; i++){
 
 		t_tripulante* tripulante = malloc(sizeof(t_tripulante));
-		tripulante->coordenadas = malloc(sizeof(t_coordenadas));									//TODO
+		tripulante->coordenadas = malloc(sizeof(t_coordenadas));
+		tripulante->tareaAsignada= malloc(sizeof(t_tarea));						//TODO
+		tripulante->tareaAsignada->coordenadas = malloc(sizeof(t_coordenadas));
 		char* posicion = list_get(posicionesTripulantes,i);
 		tripulante->coordenadas = get_coordenadas(posicion);
 		tripulante->idTripulante = id_tripulante;
@@ -1069,8 +1071,8 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 	printf("hola soy:%d\n",tripulante->idTripulante);
 
-//	int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);		//TODO
-//	tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
+	int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);		//TODO
+	tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
 
 	int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
@@ -1081,6 +1083,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 	//mandarTarea()
 		solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
+		mensajeTarea->idPatota=tripulante->idPatota;
 		mensajeTarea->idTripulante=tripulante->idTripulante;
 		enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
 		printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
@@ -1095,25 +1098,36 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 			solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
 
-
-			log_info(logger, "Duracion: %d", mensajeTareaRta->tarea->duracion);
-			log_info(logger, "Pos: %d|%d", mensajeTareaRta->tarea->coordenadas->posX, mensajeTareaRta->tarea->coordenadas->posY);
 			log_info(logger,mensajeTareaRta->tarea->nombre_parametros);
+			log_info(logger, "Duracion: %d", mensajeTareaRta->tarea->duracion);
+			log_info(logger, "Pos: %d|%d\n", mensajeTareaRta->tarea->coordenadas->posX, mensajeTareaRta->tarea->coordenadas->posY);
+
 
 			char** nombreTarea = string_split(mensajeTareaRta->tarea->nombre_parametros, " ");		//es un char*
 
 			if(nombreTarea[1] ==NULL){
 
-				tripulante->tareaAsignada->nombreTarea=nombreTarea[0];
-				tripulante->tareaAsignada->coordenadas=mensajeTareaRta->tarea->coordenadas;
+				log_info(logger,"solicito una tarea de CPU el tripulante con ID:%d",tripulante->idTripulante);
+
+				tripulante->tareaAsignada->nombreTarea=malloc(strlen(nombreTarea[0] ) + 1);
+				strcpy(tripulante->tareaAsignada->nombreTarea,nombreTarea[0]);
+				tripulante->tareaAsignada->coordenadas->posX=mensajeTareaRta->tarea->coordenadas->posX;
+				tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 				tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 				tripulante->tareaAsignada->parametros=0;
-			}	else	{
 
-				tripulante->tareaAsignada->nombreTarea=nombreTarea[0];
-				tripulante->tareaAsignada->coordenadas=mensajeTareaRta->tarea->coordenadas;
+			}	else   {
+
+				log_info(logger,"solicito una tarea de IO el tripulante con ID:%d",tripulante->idTripulante);
+
+				tripulante->tareaAsignada->nombreTarea = malloc(strlen(nombreTarea[0] ) + 1);
+				strcpy(tripulante->tareaAsignada->nombreTarea,nombreTarea[0]);
+				tripulante->tareaAsignada->coordenadas->posX=mensajeTareaRta->tarea->coordenadas->posX;
+				tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 				tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
-				tripulante->tareaAsignada->parametros=nombreTarea[1];
+				tripulante->tareaAsignada->parametros=atoi(nombreTarea[1]);
+
+
 			}
 
 
@@ -1121,7 +1135,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 			break;
 
 				} case COMPLETO_TAREAS:{
-
+					log_info(logger,"completo todas las tareas el tripulante con ID:%d",tripulante->idTripulante);
 					agregarTripulanteAListaFinishedYAvisar(tripulante);
 					sem_post(&sem_planificarMultitarea);
 
@@ -1151,8 +1165,6 @@ void ejecutarTripulante(t_tripulante* tripulante){
 		log_info(logger,"el tripulante se queda esperando a ser asignado %d",tripulante->idTripulante);
 
 		sem_wait(tripulante->semaforoDelTripulante);
-
-		//sem_t*semaforoParaCortarCicloTripulante = (sem_t*) list_get(sem_tripulante_ciclo , tripulante->idTripulante-1);
 
 		log_info(logger,"fue seleccionado para ejecutar el tripulante %d",tripulante->idTripulante);
 
@@ -1215,16 +1227,16 @@ void ejecutarTripulante(t_tripulante* tripulante){
 			}
 
 			if(tripulante->tareaAsignada==NULL && tripulante->fueExpulsado !=1 && haySabotaje!=1){
-				//log_info(logger,"acaba de solicitar otra tarea el tripulante %d",tripulante->idTripulante);
 
 				//mandarTarea()
-				//	solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
-				//	mensajeTarea->idTripulante=tripulante->idTripulante;
-				//	enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
-				//	printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
+						solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
+						mensajeTarea->idPatota=tripulante->idPatota;
+						mensajeTarea->idTripulante=tripulante->idTripulante;
+						enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
+						printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
 
-				//recibirMensaje()				TODO
-				/*
+					//recibirMensaje()				TODO
+
 							t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
 
 							switch(paqueteTareaRta->codigo){
@@ -1233,56 +1245,74 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 							solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
 
-							char** nombreTarea = string_split(mensajeTareaRta->tarea->nombre_parametros, " ");	//es un char*
+							log_info(logger,mensajeTareaRta->tarea->nombre_parametros);
+							log_info(logger, "Duracion: %d", mensajeTareaRta->tarea->duracion);
+							log_info(logger, "Pos: %d|%d\n", mensajeTareaRta->tarea->coordenadas->posX, mensajeTareaRta->tarea->coordenadas->posY);
+
+
+							char** nombreTarea = string_split(mensajeTareaRta->tarea->nombre_parametros, " ");		//es un char*
 
 							if(nombreTarea[1] ==NULL){
 
-								tripulante->tareaAsignada->nombreTarea=nombreTarea[0];
-								tripulante->tareaAsignada->coordenadas=mensajeTareaRta->tarea->coordenadas;
+								log_info(logger,"solicito una tarea de CPU el tripulante con ID:%d",tripulante->idTripulante);
+
+								tripulante->tareaAsignada->nombreTarea=malloc(strlen(nombreTarea[0] ) + 1);
+								strcpy(tripulante->tareaAsignada->nombreTarea,nombreTarea[0]);
+								tripulante->tareaAsignada->coordenadas->posX=mensajeTareaRta->tarea->coordenadas->posX;
+								tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 								tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 								tripulante->tareaAsignada->parametros=0;
-							}	else	{
 
-								tripulante->tareaAsignada->nombreTarea=nombreTarea[0];
-								tripulante->tareaAsignada->coordenadas=mensajeTareaRta->tarea->coordenadas;
+							}	else   {
+
+								log_info(logger,"solicito una tarea de IO el tripulante con ID:%d",tripulante->idTripulante);
+
+								tripulante->tareaAsignada->nombreTarea = malloc(strlen(nombreTarea[0] ) + 1);
+								strcpy(tripulante->tareaAsignada->nombreTarea,nombreTarea[0]);
+								tripulante->tareaAsignada->coordenadas->posX=mensajeTareaRta->tarea->coordenadas->posX;
+								tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 								tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
-								tripulante->tareaAsignada->parametros=nombreTarea[1];
+								tripulante->tareaAsignada->parametros=atoi(nombreTarea[1]);
+
+
 							}
+
+
 
 							break;
 
 								} case COMPLETO_TAREAS:{
-
-									agregarTripulanteAListaFinishedYAvisar(tripulante)
+									log_info(logger,"completo todas las tareas el tripulante con ID:%d",tripulante->idTripulante);
+									agregarTripulanteAListaFinishedYAvisar(tripulante);
 									sem_post(&sem_planificarMultitarea);
 
 									break;
 							 }
 							}
 
-				 */
 
 
-				t_tarea*tareaPrueba=malloc(sizeof(t_tarea));
-				t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
-				coordenadas->posX=3;
-				coordenadas->posY=4;
-				tareaPrueba->nombreTarea="GENERAR_OXIGENO";
-				tareaPrueba->coordenadas=coordenadas;
-				tareaPrueba->duracion=2;
-				tareaPrueba->parametros = 20;
-				tripulante->tareaAsignada=tareaPrueba;
 
-				log_info(logger,"se le asigno otra tarea al tripulante con ID:%d",tripulante->idTripulante);
+//				t_tarea*tareaPrueba=malloc(sizeof(t_tarea));
+//				t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
+//				coordenadas->posX=3;
+//				coordenadas->posY=4;
+//				tareaPrueba->nombreTarea="GENERAR_OXIGENO";
+//				tareaPrueba->coordenadas=coordenadas;
+//				tareaPrueba->duracion=2;
+//				tareaPrueba->parametros = 20;
+//				tripulante->tareaAsignada=tareaPrueba;
 
 
+
+				}
 
 				if(haySabotaje==1){
 					log_info(logger, "Llego un sabotaje, toca hacer huelga soy el tripulante con ID: %d",tripulante->idTripulante);
 				}
 
 
-			}
+
 
 
 
@@ -1394,39 +1424,71 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 				mandarFinTareaIO->nombreTarea = get_t_string(tripulante->tareaAsignada->nombreTarea);
 				enviar_paquete(mandarFinTareaIO,FIN_TAREA,tripulante->socketTripulanteImongo);
 
-				tripulante->estado=FINISHED;								//esto no iria
-				if(tripulante->fueExpulsado !=1){
-					/*	solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
-		mensajeTarea->idTripulante=tripulante->idTripulante;
-		enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
-		printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
-			 	//recibirMensaje()				TODO
-				t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
-				switch(paqueteTareaRta->codigo){
-				case SOLICITAR_SIGUIENTE_TAREA_RTA:{
-				solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
-				char** nombreTarea = string_split(mensajeTareaRta->tarea->nombre_parametros->string, " ");
-				if(nombreTarea[1] ==NULL){
-					tripulante->tareaAsignada->nombreTarea=nombreTarea[0];
-					tripulante->tareaAsignada->coordenadas=mensajeTareaRta->tarea->coordenadas;
-					tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
-					tripulante->tareaAsignada->parametros=0;
-				}	else	{
 
-					tripulante->tareaAsignada->nombreTarea=nombreTarea[0];
-					tripulante->tareaAsignada->coordenadas=mensajeTareaRta->tarea->coordenadas;
-					tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
-					tripulante->tareaAsignada->parametros=nombreTarea[1];
-				}
-					agregarTripulanteAListaReadyYAvisar(tripulante);
-				break;
-					} case COMPLETO_TAREAS:{
-						agregarTripulanteAListaFinishedYAvisar(tripulante);
-						sem_post(&sem_planificarMultitarea);
-						break;
-				 }
-				}
-					 */
+				if(tripulante->fueExpulsado !=1){
+
+					//mandarTarea()
+							solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
+							mensajeTarea->idPatota=tripulante->idPatota;
+							mensajeTarea->idTripulante=tripulante->idTripulante;
+							enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
+							printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
+
+						//recibirMensaje()				TODO
+
+								t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
+
+								switch(paqueteTareaRta->codigo){
+
+								case SOLICITAR_SIGUIENTE_TAREA_RTA:{
+
+								solicitar_siguiente_tarea_rta*mensajeTareaRta=deserializar_paquete(paqueteTareaRta);
+
+								log_info(logger,mensajeTareaRta->tarea->nombre_parametros);
+								log_info(logger, "Duracion: %d", mensajeTareaRta->tarea->duracion);
+								log_info(logger, "Pos: %d|%d\n", mensajeTareaRta->tarea->coordenadas->posX, mensajeTareaRta->tarea->coordenadas->posY);
+
+
+								char** nombreTarea = string_split(mensajeTareaRta->tarea->nombre_parametros, " ");		//es un char*
+
+								if(nombreTarea[1] ==NULL){
+
+									log_info(logger,"solicito una tarea de CPU el tripulante con ID:%d",tripulante->idTripulante);
+
+									tripulante->tareaAsignada->nombreTarea=malloc(strlen(nombreTarea[0] ) + 1);
+									strcpy(tripulante->tareaAsignada->nombreTarea,nombreTarea[0]);
+									tripulante->tareaAsignada->coordenadas->posX=mensajeTareaRta->tarea->coordenadas->posX;
+									tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
+									tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
+									tripulante->tareaAsignada->parametros=0;
+
+								}	else   {
+
+									log_info(logger,"solicito una tarea de IO el tripulante con ID:%d",tripulante->idTripulante);
+
+									tripulante->tareaAsignada->nombreTarea = malloc(strlen(nombreTarea[0] ) + 1);
+									strcpy(tripulante->tareaAsignada->nombreTarea,nombreTarea[0]);
+									tripulante->tareaAsignada->coordenadas->posX=mensajeTareaRta->tarea->coordenadas->posX;
+									tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
+									tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
+									tripulante->tareaAsignada->parametros=atoi(nombreTarea[1]);
+
+
+								}
+
+								agregarTripulanteAListaReadyYAvisar(tripulante);
+
+
+								break;
+
+									} case COMPLETO_TAREAS:{
+										log_info(logger,"completo todas las tareas el tripulante con ID:%d",tripulante->idTripulante);
+										agregarTripulanteAListaFinishedYAvisar(tripulante);
+										sem_post(&sem_planificarMultitarea);
+
+										break;
+								 }
+								}
 				}
 			}else if(tripulante->fueExpulsado == 1){
 				sem_post(&sem_planificarMultitarea);
