@@ -36,7 +36,7 @@ void sig_handler(int n){
 			char* time_stamp_text = get_timestamp();
 			char* path = string_new();
 			//path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
-			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "hola");
+			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "crear_patota_segmentacion");
 			char* inicio_texto = string_new();
 			inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
 
@@ -1603,14 +1603,27 @@ int32_t get_espacio_libre(uint32_t size){
 	segmento* primer_seg_libre = malloc(sizeof(segmento));
 	primer_seg_libre = list_get(lista_auxiliar, 0);
 
+	//void free_lista(segmento* seg){
+	//	free(seg);
+	//}
+
+	//uint32_t offset;
+
 	if(list_size(lista_auxiliar) == 1){
 
+		//list_destroy_and_destroy_elements(lista_auxiliar, free_lista);
 		free(lista_auxiliar);
 		return primer_seg_libre->inicio;
+		//free(primer_seg_libre);
+		//return offset;
 
 	} else {
 		if(criterio_seleccion == FF){
 
+			//list_destroy_and_destroy_elements(lista_auxiliar, free_lista);
+			//offset = primer_seg_libre->inicio;
+			//free(primer_seg_libre);
+			//return offset;
 			free(lista_auxiliar);
 			return primer_seg_libre->inicio;
 
@@ -1626,6 +1639,7 @@ int32_t get_espacio_libre(uint32_t size){
 				}
 			}
 			list_iterate(lista_auxiliar, encontrar_best_fit);
+			//list_destroy_and_destroy_elements(lista_auxiliar, free_lista);
 			free(lista_auxiliar);
 
 			return offset_bf;
@@ -1727,7 +1741,6 @@ bool entra_en_memoria_seg(uint32_t tamanio_necesario){
 
 // guarda la patota en memoria, crea la tabla de segmentos y la guarda en el dictionary
 void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
-	//preguntar si no es medio mucho bloquear el dictionary tdo el proceso
 
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
 	if(!dictionary_has_key(tablas_seg_patota, string_itoa(mensaje->idPatota))){
@@ -1851,6 +1864,11 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 			list_iterate(tcbs, cargarTcbDatos);
 
+			for(int i = 0; i<6; i++){
+				segmento* seg = list_get(tcbs, i);
+				uint32_t inicio = seg->inicio;
+				uint32_t tam = seg->tamanio;
+			}
 			//Libero las estructuras para guardar en memoria
 			free(pcb);
 
@@ -1867,7 +1885,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 			pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 			pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
 			pthread_mutex_unlock(&m_MEM_PRINCIPAL);
-			pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
+			pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
 		} else {
 			free(tabla_seg); //con esto libero lo de adentro tmb? (segmentos)
@@ -1914,7 +1932,7 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 // modifica el estado de un tripulante en memoria
 void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 
-	//no me hacia falta esto, lo ice por el lock de la tabla para buscar offset
+	//no me hacia falta esto, lo hice por el lock de la tabla para buscar offset
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
 	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
 	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
@@ -1946,8 +1964,6 @@ void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 // devuelve la siguiente tarea de un tripulante
 char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status){
 
-	char* tarea = string_new();
-
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
 	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
 	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
@@ -1967,33 +1983,36 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 	memcpy(&proxima_instruccion, buffer_tcb + offset_tcb, sizeof(uint32_t));
 
 	segmento* seg_tareas = list_get(tabla_patota, 1);
-	uint32_t direccion_tareas = seg_tareas->inicio;
 
-	void* buffer_tareas = malloc(sizeof(seg_tareas->tamanio));
-	memcpy(buffer_tareas, memoria_principal + seg_tareas->inicio, sizeof(seg_tareas->tamanio));
+    char* tareas = malloc(seg_tareas->tamanio);
+    memcpy(tareas, memoria_principal + seg_tareas->inicio, seg_tareas->tamanio);
+    puts(tareas);
 
-	uint32_t contador = 0;
-	char letra;
-	uint32_t offset_tareas = 0;
+    char* tarea = string_new();
 
-	while(contador < proxima_instruccion+1){
-		memcpy(&letra, buffer_tareas + offset_tareas, 1);
-		while(letra != '\n' || letra != '\0'){
-			string_append(&tarea, letra); //aca no estoy segura si va *letra
-			offset_tareas = offset_tareas + sizeof(char);
-			memcpy(&letra, buffer_tareas + offset_tareas, 1);
-		}
-		contador++;
-		if(letra != '\0'){
-			contador = proxima_instruccion; //asi sale del bucle, horror jajaja
-			termino = true;
-		}
-	}
+	char** array_tareas = string_split(tareas, "\n");
+
+	string_append(&tarea, array_tareas[proxima_instruccion]);
+	puts(tarea);
+
+    if(array_tareas[proxima_instruccion+1] == NULL){
+    	termino = true;
+    }
+
+    //free cada elemento, free array
+    uint32_t contador = 0;
+    while(array_tareas[contador] != NULL){
+        free(array_tareas[contador]);
+        contador++;
+    }
+    free(array_tareas);
+    free(tareas);
 
 	//le sumo uno en memoria a la proxima instruccion
 	proxima_instruccion += 1;
 	//copio el nuevo valor en el buffer
-	memcpy(buffer_tcb + offset_tcb, proxima_instruccion, sizeof(uint32_t));
+	//ROMPE ACA
+	memcpy(buffer_tcb + offset_tcb, &proxima_instruccion, sizeof(uint32_t));
 	//lo paso a la memoria
 	memcpy(memoria_principal + offset, buffer_tcb, sizeof(t_tcb));
 
@@ -2001,7 +2020,6 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 	pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 
 	free(buffer_tcb);
-	free(buffer_tareas);
 
 	return tarea;
 }
@@ -2048,6 +2066,18 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 
 		liberar_segmento(seg_tripulante);
 
+		//borrar despues
+		void printear(segmento* seg){
+			printf("%d\n", seg->inicio);
+			printf("%d\n", seg->tamanio);
+		}
+
+		list_iterate(segmentos_libres, printear);
+
+		compactar_memoria();
+
+		list_iterate(segmentos_libres, printear);
+
 		pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
 
@@ -2078,6 +2108,7 @@ void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 	if(limite_seg_libre != limite_seg_nuevo){
 
 		seg_a_modificar->inicio = limite_seg_nuevo; //el segmento libre nuevo arranca donde termina el otro
+		seg_a_modificar->tamanio = limite_seg_libre - limite_seg_nuevo;
 		list_add(segmentos_libres, seg_a_modificar);
 
 		ordenar_lista_segmentos_libres();
@@ -2145,7 +2176,7 @@ void compactar_memoria(){
 		if(seg->inicio != 0){
 
 			//transcribo el segmento al buffer
-			memcpy(buffer + offset, memoria_principal + seg->inicio, sizeof(seg->tamanio));
+			memcpy(buffer + offset, memoria_principal + seg->inicio, seg->tamanio);
 
 			if(limite_seg_anterior != seg->inicio){
 				seg->inicio = limite_seg_anterior;
