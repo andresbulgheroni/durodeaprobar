@@ -35,7 +35,8 @@ void sig_handler(int n){
 
 			char* time_stamp_text = get_timestamp();
 			char* path = string_new();
-			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
+			//path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
+			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "hola");
 			char* inicio_texto = string_new();
 			inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
 
@@ -53,6 +54,11 @@ void sig_handler(int n){
 			}
 
 			fclose(dump);
+			break;
+		}
+
+		case SIGUSR2:{
+			compactar_memoria(); //ponele
 			break;
 		}
 		default: break;
@@ -1572,7 +1578,7 @@ uint32_t obtener_limite(segmento* seg){
 }
 
 //le paso el tamanio de un segmento, devuelve 1 si hay espacio y 0 si no hay espacio
-bool hay_espacio_libre(uint32_t size){
+bool entra_en_un_seg_libre(uint32_t size){
 
 	bool entra_en_el_segmento(segmento* seg){
 		return seg->tamanio > size;
@@ -1700,7 +1706,25 @@ void eliminar_patota(t_list* tabla){
 	list_destroy_and_destroy_elements(tabla, liberar_segmentos);
 }
 
+bool entra_en_memoria_seg(uint32_t tamanio_necesario){
+
+	uint32_t espacio_libre_memoria = 0;
+
+	void sumar_tamanios(segmento* seg){
+		espacio_libre_memoria += seg->tamanio;
+	}
+
+	pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
+
+	list_iterate(segmentos_libres, sumar_tamanios);
+
+	pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
+
+	return espacio_libre_memoria >= tamanio_necesario;
+}
+
 //MENSAJES
+
 // guarda la patota en memoria, crea la tabla de segmentos y la guarda en el dictionary
 void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 	//preguntar si no es medio mucho bloquear el dictionary tdo el proceso
@@ -1715,142 +1739,139 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 		uint32_t size_tareas = mensaje->tareas->length;
 
-		//Creo los segmentos para la tabla de segmentos
+		uint32_t tam_tripulantes = 0;
 
-		segmento* seg_pcb = malloc(sizeof(segmento));
-		seg_pcb->numero_segmento = 0;
-		seg_pcb->tamanio = sizeof(t_pcb);
-		list_add(tabla_seg->segmentos, seg_pcb);
-
-		segmento* seg_tareas = malloc(sizeof(segmento));
-		seg_tareas->numero_segmento = 1;
-		seg_tareas->tamanio = size_tareas;
-		list_add(tabla_seg->segmentos, seg_tareas);
-
-		segmento* seg_tcb[mensaje->cant_tripulantes];
-		for(uint32_t j = 0; j < mensaje->cant_tripulantes; j++){
-			seg_tcb[j] = malloc(sizeof(segmento));
-			seg_tcb[j]->numero_segmento = j+2;
-			seg_tcb[j]->tamanio = sizeof(t_tcb);
-			list_add(tabla_seg->segmentos, seg_tcb[j]);
+		for(uint32_t i = 0; i < mensaje->cant_tripulantes; i++){
+			tam_tripulantes += sizeof(t_tcb);
 		}
 
-		//Cargo datos para copiarlos a memoria
-
-		//pcb
-		t_pcb* pcb = malloc(sizeof(t_pcb));
-		pcb->pid = mensaje->idPatota;
-		pcb->direccion_tareas = 1;
-
-		//tcb
-		t_list* tcbs = list_create();
-		void cargar_tcb(tripulante_data_msg* tripulante){
-
-			t_tcb* tcb = malloc(sizeof(t_tcb));
-			tcb->tid = tripulante->idTripulante;
-			tcb->estado = 'R';
-			tcb->posX = tripulante->coordenadas->posX;
-			tcb->posY = tripulante->coordenadas->posY;
-			tcb->proxima_instruccion = 0;
-			tcb->direccion_patota = 0;
-
-			list_add(tcbs, tcb);
-
-		}
-
-		list_iterate(mensaje->tripulantes, cargar_tcb);
-
+		uint32_t tamanio_necesario = sizeof(t_pcb) + size_tareas + tam_tripulantes;
 		uint32_t offset;
 
-		uint32_t error_guardado = 0;
+		if(entra_en_memoria_seg(tamanio_necesario)){
 
-		pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
-		pthread_mutex_lock(&m_SEG_EN_MEMORIA);
-		pthread_mutex_lock(&m_MEM_PRINCIPAL);
+			pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
+			pthread_mutex_lock(&m_SEG_EN_MEMORIA);
+			pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
-		//guarda el pcb
-		if(hay_espacio_libre(sizeof(t_pcb))){
-			offset = get_espacio_libre(sizeof(t_pcb));
-			seg_pcb->inicio = offset;
-			memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
-		} else {
-			compactar_memoria();
-			if(hay_espacio_libre(sizeof(t_pcb))){
+			//Creo los segmentos para la tabla de segmentos
+
+			segmento* seg_pcb = malloc(sizeof(segmento));
+			seg_pcb->numero_segmento = 0;
+			seg_pcb->tamanio = sizeof(t_pcb);
+			list_add(tabla_seg->segmentos, seg_pcb);
+
+			segmento* seg_tareas = malloc(sizeof(segmento));
+			seg_tareas->numero_segmento = 1;
+			seg_tareas->tamanio = size_tareas;
+			list_add(tabla_seg->segmentos, seg_tareas);
+
+			segmento* seg_tcb[mensaje->cant_tripulantes];
+			for(uint32_t j = 0; j < mensaje->cant_tripulantes; j++){
+				seg_tcb[j] = malloc(sizeof(segmento));
+				seg_tcb[j]->numero_segmento = j+2;
+				seg_tcb[j]->tamanio = sizeof(t_tcb);
+				list_add(tabla_seg->segmentos, seg_tcb[j]);
+			}
+
+			//Cargo datos para copiarlos a memoria
+
+			//pcb
+			t_pcb* pcb = malloc(sizeof(t_pcb));
+			pcb->pid = mensaje->idPatota;
+			pcb->direccion_tareas = 1;
+
+			//tcb
+			t_list* tcbs = list_create();
+			void cargar_tcb(tripulante_data_msg* tripulante){
+
+				t_tcb* tcb = malloc(sizeof(t_tcb));
+				tcb->tid = tripulante->idTripulante;
+				tcb->estado = 'R';
+				tcb->posX = tripulante->coordenadas->posX;
+				tcb->posY = tripulante->coordenadas->posY;
+				tcb->proxima_instruccion = 0;
+				tcb->direccion_patota = 0;
+
+				list_add(tcbs, tcb);
+
+			}
+
+			list_iterate(mensaje->tripulantes, cargar_tcb);
+
+			//Los copio a memoria
+
+			//pcb
+			if(entra_en_un_seg_libre(sizeof(t_pcb))){
 				offset = get_espacio_libre(sizeof(t_pcb));
 				seg_pcb->inicio = offset;
 				memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
+				sacar_segmento_lista_libres(seg_pcb);
 			} else {
-				error_guardado = 1;
+				compactar_memoria();
+				offset = get_espacio_libre(sizeof(t_pcb));
+				seg_pcb->inicio = offset;
+				memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
+				sacar_segmento_lista_libres(seg_pcb);
 			}
-		}
 
-		//guarda las tareas
-		if(hay_espacio_libre(size_tareas)){
-			offset = get_espacio_libre(size_tareas);
-			seg_tareas->inicio = offset;
-			memcpy(memoria_principal + offset, mensaje->tareas->string, size_tareas);
-		} else {
-			compactar_memoria();
-			if(hay_espacio_libre(size_tareas)){
+			//tareas
+			if(entra_en_un_seg_libre(size_tareas)){
 				offset = get_espacio_libre(size_tareas);
 				seg_tareas->inicio = offset;
 				memcpy(memoria_principal + offset, mensaje->tareas->string, size_tareas);
-			} else {
-				error_guardado = 1;
-			}
-		}
-
-		uint32_t orden_seg_tcb = 0;
-
-		//guarda los tcb
-		void cargarTcbDatos(t_tcb* tcb){
-			if(hay_espacio_libre(sizeof(t_tcb))){
-				offset = get_espacio_libre(sizeof(t_tcb));
-				seg_tcb[orden_seg_tcb]->inicio = offset;
-				memcpy(memoria_principal + offset, tcb, sizeof(t_tcb));
-				orden_seg_tcb ++;
+				sacar_segmento_lista_libres(seg_tareas);
 			} else {
 				compactar_memoria();
-				if(hay_espacio_libre(sizeof(t_tcb))){
+				offset = get_espacio_libre(size_tareas);
+				seg_tareas->inicio = offset;
+				memcpy(memoria_principal + offset, mensaje->tareas->string, size_tareas);
+				sacar_segmento_lista_libres(seg_tareas);
+			}
+
+			uint32_t orden_seg_tcb = 0;
+
+			//guarda los tcb
+			void cargarTcbDatos(t_tcb* tcb){
+				if(entra_en_un_seg_libre(sizeof(t_tcb))){
 					offset = get_espacio_libre(sizeof(t_tcb));
 					seg_tcb[orden_seg_tcb]->inicio = offset;
 					memcpy(memoria_principal + offset, tcb, sizeof(t_tcb));
+					sacar_segmento_lista_libres(seg_tcb[orden_seg_tcb]);
 					orden_seg_tcb ++;
 				} else {
-					error_guardado = 1;
+					compactar_memoria();
+					offset = get_espacio_libre(sizeof(t_tcb));
+					seg_tcb[orden_seg_tcb]->inicio = offset;
+					memcpy(memoria_principal + offset, tcb, sizeof(t_tcb));
+					sacar_segmento_lista_libres(seg_tcb[orden_seg_tcb]);
+					orden_seg_tcb ++;
 				}
 			}
-		}
 
-		list_iterate(tcbs, cargarTcbDatos);
+			list_iterate(tcbs, cargarTcbDatos);
 
-		//Libero las estructuras para guardar en memoria
-		free(pcb);
+			//Libero las estructuras para guardar en memoria
+			free(pcb);
 
-		void liberar_tcbs(t_tcb* tcb){
-			free(tcb);
-		}
-		list_destroy_and_destroy_elements(tcbs, liberar_tcbs);
+			void liberar_tcbs(t_tcb* tcb){
+				free(tcb);
+			}
+			list_destroy_and_destroy_elements(tcbs, liberar_tcbs);
 
-		if(!error_guardado){
-
-			//Guardo tabla de paginas
-			dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_seg);
-
-			list_iterate(tabla_seg->segmentos, sacar_segmento_lista_libres);
-
+			// agrego los segmentos a la lista de seg en memoria
 			list_add_all(segmentos_en_memoria, tabla_seg->segmentos);
 
-			pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
+			dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_seg);
+
 			pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 			pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
+			pthread_mutex_unlock(&m_MEM_PRINCIPAL);
+			pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
 
 		} else {
+			free(tabla_seg); //con esto libero lo de adentro tmb? (segmentos)
 			pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
-			pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
-			pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
-
-			free(tabla_seg);
 			status = false;
 		}
 	}
@@ -1983,7 +2004,6 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 	free(buffer_tareas);
 
 	return tarea;
-
 }
 
 //saca el segmento de la tabla de segmentos y agrega el segmento libre a la lista de libres
