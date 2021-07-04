@@ -35,7 +35,8 @@ void sig_handler(int n){
 
 			char* time_stamp_text = get_timestamp();
 			char* path = string_new();
-			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
+			//path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
+			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
 			char* inicio_texto = string_new();
 			inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
 
@@ -122,7 +123,7 @@ void dump_paginacion(FILE* dump){
 
 		t_list* paginas = tabla->tabla_paginas;
 
-		for(uint32_t i = 0; i < list_size(paginas); i++){
+		for(int32_t i = 0; i < list_size(paginas); i++){
 
 			t_pagina_patota* pagina = list_get(paginas, i);
 
@@ -1897,7 +1898,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 // modifica las coordenadas de un tripulante en memoria
 void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool* status){
 
-	//no me hacia falta esto, lo ice por el lock de la tabla para buscar offset
+	//no me hacia falta esto, lo hice por el lock de la tabla para buscar offset
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
 	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
 	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
@@ -2038,12 +2039,14 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_lock(&m_SEG_EN_MEMORIA);
 
-		list_iterate(tabla_patota, liberar_segmento); // TODO falta liberar las tablas
+		list_iterate(tabla_patota, liberar_segmento); // aca libera el segmento en las tablas
+
+		eliminar_patota(tabla_patota);
 
 		pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
 
-		//eliminar_tabla_patota(tabla_patota);
+		eliminar_tabla_patota(tabla_patota);
 		pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 
 		free(tabla_seg); //alcanza con el free o tengo q sacarlo del dictionary?
@@ -2057,14 +2060,6 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 
 		liberar_segmento(seg_tripulante);
 
-		//borrar despues
-		void printear(segmento* seg){
-			printf("%d\n", seg->inicio);
-			printf("%d\n", seg->tamanio);
-		}
-
-		list_iterate(segmentos_libres, printear);
-
 		void liberar_seg(segmento* seg){
 			free(seg);
 		}
@@ -2072,11 +2067,6 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		list_remove_and_destroy_element(tabla_patota, index, liberar_seg);
 
 		pthread_mutex_unlock(&(tabla_seg->m_TABLA));
-
-		//compactar_memoria();
-
-		//list_iterate(segmentos_libres, printear);
-
 		pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
 
@@ -2152,23 +2142,27 @@ void compactar_memoria(){
 		return seg1->inicio < seg2->inicio;
 	}
 
-	void* buffer = malloc(sizeof(TAMANIO_MEMORIA));
+	void* buffer = malloc(TAMANIO_MEMORIA);
 	uint32_t offset = 0;
 
 	list_sort(segmentos_en_memoria, ordenar_segmentos);
 
-	segmento* seg_anterior = malloc(sizeof(segmento));
-	seg_anterior = list_get(segmentos_en_memoria, 0);
+	for(int32_t m = 0; m<list_size(segmentos_en_memoria); m++){
+		segmento* seg = list_get(segmentos_en_memoria, m);
+		printf("\ninicio: %d", seg->inicio);
+		printf("\ntamanio: %d", seg->tamanio);
+	}
+	segmento* seg_anterior = list_get(segmentos_en_memoria, 0);
 	uint32_t limite_seg_anterior;
 
 	//copio en el buffer el primer segmento al principio (en 0)
-	memcpy(buffer, memoria_principal + seg_anterior->inicio, sizeof(seg_anterior->tamanio));
+	memcpy(buffer, memoria_principal + seg_anterior->inicio, seg_anterior->tamanio);
 
 	if(seg_anterior->inicio != 0){
 		seg_anterior->inicio = 0;
-		limite_seg_anterior = obtener_limite(seg_anterior);
 	}
 
+	limite_seg_anterior = obtener_limite(seg_anterior);
 	offset = limite_seg_anterior;
 
 	void modificar_inicio(segmento *seg){
@@ -2189,9 +2183,14 @@ void compactar_memoria(){
 
 	list_iterate(segmentos_en_memoria, modificar_inicio);
 
+	for(int32_t m = 0; m<list_size(segmentos_en_memoria); m++){
+		segmento* seg = list_get(segmentos_en_memoria, m);
+		printf("\ninicio: %d", seg->inicio);
+		printf("\ntamanio: %d", seg->tamanio);
+	}
+
 	uint32_t cant_segmentos = list_size(segmentos_en_memoria);
-	segmento* ult_seg = malloc(sizeof(segmento));
-	ult_seg = list_get(segmentos_en_memoria, cant_segmentos - 1);
+	segmento* ult_seg = list_get(segmentos_en_memoria, cant_segmentos - 1);
 	uint32_t tamanio_ocupado_en_memoria = obtener_limite(ult_seg);
 
 	segmento* segmento_libre = malloc(sizeof(segmento));
@@ -2201,7 +2200,7 @@ void compactar_memoria(){
 	list_clean(segmentos_libres);
 	list_add(segmentos_libres, segmento_libre);
 
-	memcpy(memoria_principal, buffer, sizeof(TAMANIO_MEMORIA));
+	memcpy(memoria_principal, buffer, TAMANIO_MEMORIA);
 
 	free(buffer);
 } //no lleva semaforos porq tiene en el llamado a la funcion
