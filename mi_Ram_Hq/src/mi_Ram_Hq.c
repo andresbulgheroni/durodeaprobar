@@ -1916,9 +1916,9 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 
 	//reemplazo los valores
 	uint32_t offset_buffer = sizeof(uint32_t) + sizeof(char); //id y estado
-	memcpy(buffer + offset_buffer, mensaje->coordenadasDestino->posX, sizeof(uint32_t));
+	memcpy(buffer + offset_buffer, &(mensaje->coordenadasDestino->posX), sizeof(uint32_t));
 	offset_buffer += sizeof(uint32_t); //posX
-	memcpy(buffer + offset_buffer, mensaje->coordenadasDestino->posY, sizeof(uint32_t));
+	memcpy(buffer + offset_buffer, &(mensaje->coordenadasDestino->posY), sizeof(uint32_t));
 
 	//lo copio en memoria modificado
 	memcpy(memoria_principal + offset, buffer, sizeof(t_tcb));
@@ -2045,8 +2045,6 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 
 		pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
-
-		eliminar_tabla_patota(tabla_patota);
 		pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 
 		free(tabla_seg); //alcanza con el free o tengo q sacarlo del dictionary?
