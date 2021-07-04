@@ -2038,7 +2038,7 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_lock(&m_SEG_EN_MEMORIA);
 
-		list_iterate(tabla_patota, liberar_segmento);
+		list_iterate(tabla_patota, liberar_segmento); // TODO falta liberar las tablas
 
 		pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
@@ -2052,14 +2052,6 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
 		uint32_t index = seg_tripulante->numero_segmento;
 
-		void liberar_seg(segmento* seg){
-			free(seg);
-		}
-		// saco el segmento de la tabla de segmentos de la patota
-		list_remove_and_destroy_element(tabla_patota, index, liberar_seg);
-
-		pthread_mutex_unlock(&(tabla_seg->m_TABLA));
-
 		pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_lock(&m_SEG_EN_MEMORIA);
 
@@ -2072,6 +2064,14 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		}
 
 		list_iterate(segmentos_libres, printear);
+
+		void liberar_seg(segmento* seg){
+			free(seg);
+		}
+		// saco el segmento de la tabla de segmentos de la patota
+		list_remove_and_destroy_element(tabla_patota, index, liberar_seg);
+
+		pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 
 		//compactar_memoria();
 
