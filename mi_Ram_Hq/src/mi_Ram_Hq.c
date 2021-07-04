@@ -35,8 +35,7 @@ void sig_handler(int n){
 
 			char* time_stamp_text = get_timestamp();
 			char* path = string_new();
-			//path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
-			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "crear_patota_segmentacion");
+			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
 			char* inicio_texto = string_new();
 			inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
 
@@ -1992,11 +1991,11 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 
 	char** array_tareas = string_split(tareas, "\n");
 
-	string_append(&tarea, array_tareas[proxima_instruccion]);
-	puts(tarea);
-
-    if(array_tareas[proxima_instruccion+1] == NULL){
-    	termino = true;
+    if(array_tareas[proxima_instruccion] == NULL){
+    	*termino = true;
+    } else {
+    	string_append(&tarea, array_tareas[proxima_instruccion]);
+    	puts(tarea);
     }
 
     //free cada elemento, free array
@@ -2011,7 +2010,7 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 	//le sumo uno en memoria a la proxima instruccion
 	proxima_instruccion += 1;
 	//copio el nuevo valor en el buffer
-	//ROMPE ACA
+
 	memcpy(buffer_tcb + offset_tcb, &proxima_instruccion, sizeof(uint32_t));
 	//lo paso a la memoria
 	memcpy(memoria_principal + offset, buffer_tcb, sizeof(t_tcb));
@@ -2074,9 +2073,9 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 
 		list_iterate(segmentos_libres, printear);
 
-		compactar_memoria();
+		//compactar_memoria();
 
-		list_iterate(segmentos_libres, printear);
+		//list_iterate(segmentos_libres, printear);
 
 		pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
