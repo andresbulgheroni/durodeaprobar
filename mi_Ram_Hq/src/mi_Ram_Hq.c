@@ -1528,7 +1528,8 @@ void inicializar_segmentacion(){
 
 void dump_segmentacion(FILE* dump){
 
-	char* titulos = string_from_format("PROCESO\t\tSEGMENTO \t\tINICIO\t\TAMANIO\n");
+	//char* titulos = string_from_format("PROCESO\t\tSEGMENTO \t\tINICIO\t\TAMANIO\n");
+	char* titulos = string_from_format("\t\tESTADO DE MEMORIA SEGMENTACION\n");
 	fputs(titulos, dump);
 	free(titulos);
 
@@ -1542,6 +1543,7 @@ void dump_segmentacion(FILE* dump){
 
 			segmento_dump* seg_dump = malloc(sizeof(segmento_dump));
 
+			seg_dump->pid = malloc(strlen(key) + 1); //TODO preguntar a santi porq esto
 			strcpy(seg_dump->pid, key);
 			seg_dump->inicio = seg->inicio;
 			seg_dump->numero_segmento = seg->numero_segmento;
@@ -1549,6 +1551,7 @@ void dump_segmentacion(FILE* dump){
 
 			list_add(tabla_dump, seg_dump);
 		}
+		list_iterate(segmentos, copiar_segmentos);
 	}
 	dictionary_iterator(tablas_seg_patota, leer_tablas_segmentos);
 
@@ -1559,7 +1562,8 @@ void dump_segmentacion(FILE* dump){
 
 	void guardar_tabla(segmento_dump* seg){
 
-		char* fila = string_from_format("%10s\t\t%15d\t\t%20d\t\t%20d\n", seg->pid, seg->numero_segmento, seg->inicio, seg->tamanio);
+		//char* fila = string_from_format("%10s\t\t%15d\t\t%20d\t\t%20d\n", seg->pid, seg->numero_segmento, seg->inicio, seg->tamanio);
+		char* fila = string_from_format("proceso: %s\t\t nro de segmento: %d\t\t inicio: %d\t\t tamanio: %d\n",seg->pid, seg->numero_segmento, seg->inicio, seg->tamanio);
 		fputs(fila, dump);
 		free(fila);
 	}
