@@ -1158,7 +1158,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	sem_post(&sem_hiloTripulante);
 
 
-	while(tripulante->estado != FINISHED || tripulante->fueExpulsado != 1){		//TODO
+	while(tripulante->estado != FINISHED && tripulante->fueExpulsado != 1){		//TODO
 
 
 
