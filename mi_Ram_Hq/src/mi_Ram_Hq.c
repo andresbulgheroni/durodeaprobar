@@ -1823,13 +1823,13 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 				offset = get_espacio_libre(sizeof(t_pcb));
 				seg_pcb->inicio = offset;
 				memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
-				sacar_segmento_lista_libres(seg_pcb);
+				agregar_seg_listas(seg_pcb);
 			} else {
 				compactar_memoria();
 				offset = get_espacio_libre(sizeof(t_pcb));
 				seg_pcb->inicio = offset;
 				memcpy(memoria_principal + offset, pcb, sizeof(t_pcb));
-				sacar_segmento_lista_libres(seg_pcb);
+				agregar_seg_listas(seg_pcb);
 			}
 
 			//tareas
@@ -1837,13 +1837,13 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 				offset = get_espacio_libre(size_tareas);
 				seg_tareas->inicio = offset;
 				memcpy(memoria_principal + offset, mensaje->tareas->string, size_tareas);
-				sacar_segmento_lista_libres(seg_tareas);
+				agregar_seg_listas(seg_tareas);
 			} else {
 				compactar_memoria();
 				offset = get_espacio_libre(size_tareas);
 				seg_tareas->inicio = offset;
 				memcpy(memoria_principal + offset, mensaje->tareas->string, size_tareas);
-				sacar_segmento_lista_libres(seg_tareas);
+				agregar_seg_listas(seg_tareas);
 			}
 
 			uint32_t orden_seg_tcb = 0;
@@ -1854,25 +1854,20 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 					offset = get_espacio_libre(sizeof(t_tcb));
 					seg_tcb[orden_seg_tcb]->inicio = offset;
 					memcpy(memoria_principal + offset, tcb, sizeof(t_tcb));
-					sacar_segmento_lista_libres(seg_tcb[orden_seg_tcb]);
+					agregar_seg_listas(seg_tcb[orden_seg_tcb]);
 					orden_seg_tcb ++;
 				} else {
 					compactar_memoria();
 					offset = get_espacio_libre(sizeof(t_tcb));
 					seg_tcb[orden_seg_tcb]->inicio = offset;
 					memcpy(memoria_principal + offset, tcb, sizeof(t_tcb));
-					sacar_segmento_lista_libres(seg_tcb[orden_seg_tcb]);
+					agregar_seg_listas(seg_tcb[orden_seg_tcb]);
 					orden_seg_tcb ++;
 				}
 			}
 
 			list_iterate(tcbs, cargarTcbDatos);
 
-			for(int i = 0; i<6; i++){
-				segmento* seg = list_get(tcbs, i);
-				uint32_t inicio = seg->inicio;
-				uint32_t tam = seg->tamanio;
-			}
 			//Libero las estructuras para guardar en memoria
 			free(pcb);
 
@@ -1880,9 +1875,6 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 				free(tcb);
 			}
 			list_destroy_and_destroy_elements(tcbs, liberar_tcbs);
-
-			// agrego los segmentos a la lista de seg en memoria
-			list_add_all(segmentos_en_memoria, tabla_seg->segmentos);
 
 			dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_seg);
 
@@ -1894,7 +1886,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 		} else {
 			free(tabla_seg); //con esto libero lo de adentro tmb? (segmentos)
 			pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
-			status = false;
+			*status = false;
 		}
 	}
 }
@@ -2076,7 +2068,7 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 }
 
 //saca un segmento de la lista libres, si sobraba segmento guarda el sobrante, falta revision y free
-void sacar_segmento_lista_libres(segmento* segmento_nuevo){
+void agregar_seg_listas(segmento* segmento_nuevo){
 
 	uint32_t inicio_seg_nuevo = segmento_nuevo->inicio;
 	uint32_t limite_seg_nuevo = obtener_limite(segmento_nuevo);
@@ -2104,12 +2096,14 @@ void sacar_segmento_lista_libres(segmento* segmento_nuevo){
 
 		ordenar_lista_segmentos_libres();
 	}
+
+	list_add(segmentos_en_memoria, segmento_nuevo);
 } //no lleva semaforos, porque donde la llamo ya estan los semaforos
 
 void ordenar_lista_segmentos_libres(){
 
 	bool ordenar_segmentos(segmento* primer_segmento, segmento* segundo_segmento){
-		return primer_segmento->inicio > segundo_segmento->inicio;
+		return primer_segmento->inicio < segundo_segmento->inicio;
 	}
 
 	list_sort(segmentos_libres, ordenar_segmentos);
@@ -2149,11 +2143,6 @@ void compactar_memoria(){
 
 	list_sort(segmentos_en_memoria, ordenar_segmentos);
 
-	for(int32_t m = 0; m<list_size(segmentos_en_memoria); m++){
-		segmento* seg = list_get(segmentos_en_memoria, m);
-		printf("\ninicio: %d", seg->inicio);
-		printf("\ntamanio: %d", seg->tamanio);
-	}
 	segmento* seg_anterior = list_get(segmentos_en_memoria, 0);
 	uint32_t limite_seg_anterior;
 
