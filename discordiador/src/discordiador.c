@@ -748,7 +748,7 @@ void agregarTripulanteAListaReadyYAvisar(t_tripulante* tripulante){
 	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
 
 
-	log_info(logger,"cambio De Estado A Ready:%d\n",tripulante->idTripulante);
+	log_info(logger,"cambio De Estado A Ready el tripulante con ID:%d\n",tripulante->idTripulante);
 	free(mensaje);
 
 }
@@ -769,7 +769,7 @@ void agregarTripulanteAListaExecYAvisar(t_tripulante* tripulante){
 
 	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
 
-	log_info(logger,"cambio De Estado A Exec:%d\n",tripulante->idTripulante);
+	log_info(logger,"cambio De Estado A Exec el tripulante con ID:%d\n",tripulante->idTripulante);
 	free(mensaje);
 
 }
@@ -789,7 +789,7 @@ void agregarTripulanteAListaBloqueadosYAvisar(t_tripulante* tripulante){
 	mensaje->estado= (uint32_t) tripulante->estado;
 
 	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
-	log_info(logger,"cambio De Estado A Bloqueado:%d\n",tripulante->idTripulante);
+	log_info(logger,"cambio De Estado A Bloqueado el tripulante con ID:%d\n",tripulante->idTripulante);
 
 	free(mensaje);
 
@@ -807,7 +807,7 @@ void agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(t_tripulante* tripulant
 	mensaje->idTripulante=tripulante->idTripulante;
 	mensaje->estado= (uint32_t) tripulante->estado;
 	enviar_paquete(mensaje,CAMBIO_ESTADO,tripulante->socketTripulanteRam);
-	log_info(logger,"cambio De Estado A BloqueadoPorSabotaje:%d\n",tripulante->idTripulante);
+	log_info(logger,"cambio De Estado A BloqueadoPorSabotaje el tripulante con ID:%d\n",tripulante->idTripulante);
 	free(mensaje);
 
 }
@@ -826,7 +826,7 @@ void agregarTripulanteAListaFinishedYAvisar(t_tripulante* tripulante){
 
 
 	enviar_paquete(mensaje,EXPULSAR_TRIPULANTE,tripulante->socketTripulanteRam);
-	log_info(logger,"cambio De Estado A Finished:%d\n",tripulante->idTripulante);
+	log_info(logger,"cambio De Estado A Finished el tripulante con ID :%d\n",tripulante->idTripulante);
 
 	free(mensaje);
 
