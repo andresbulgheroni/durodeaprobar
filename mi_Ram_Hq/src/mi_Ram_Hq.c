@@ -195,6 +195,7 @@ void recibir_mensaje(int32_t* conexion){
 			case INICIAR_PATOTA_MSG:{
 
 				iniciar_patota_msg* mensaje = deserializar_paquete(paquete);
+				printf("INICIO PATOTA %d\n", mensaje->idPatota);
 				bool status = true;
 
 				switch(ESQUEMA_MEMORIA){
@@ -229,7 +230,7 @@ void recibir_mensaje(int32_t* conexion){
 			case INFORMAR_MOVIMIENTO_RAM:{
 
 				informar_movimiento_ram_msg* mensaje = deserializar_paquete(paquete);
-
+				printf("MOVER TRIP %d PAT%d a %d|%d\n", mensaje->idTripulante, mensaje->idPatota, mensaje->coordenadasDestino->posX, mensaje->coordenadasDestino->posY);
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: informar_movimiento_segmentacion(mensaje, NULL);break;
 					case PAGINACION_VIRTUAL: informar_movimiento_paginacion(mensaje, NULL);break;
@@ -244,7 +245,7 @@ void recibir_mensaje(int32_t* conexion){
 			case CAMBIO_ESTADO:{
 
 				cambio_estado_msg* mensaje = deserializar_paquete(paquete);
-
+				printf("CAMBIO ESTADO TRIP %d PAT %d a %c\n", mensaje->idTripulante, mensaje->idTripulante, get_status(mensaje->estado));
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: cambiar_estado_segmentacion(mensaje, NULL);break;
 					case PAGINACION_VIRTUAL: cambiar_estado_paginacion(mensaje, NULL);break;
@@ -261,17 +262,18 @@ void recibir_mensaje(int32_t* conexion){
 
 				bool completo_tareas = false;
 				char* tarea;
+				printf("SOLICITO TAREA TRIP %d PAT %d\n", mensaje->idTripulante, mensaje->idPatota);
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: tarea = siguiente_tarea_segmentacion(mensaje, &completo_tareas, NULL);break;
 					case PAGINACION_VIRTUAL: tarea = siguiente_tarea_paginacion(mensaje, &completo_tareas, NULL);break;
 				}
 
 				if(completo_tareas){
-
+					printf("COMPLETO TAREAS TRIP %d PAT %d\n", mensaje->idTripulante, mensaje->idPatota);
 					enviar_paquete(NULL, COMPLETO_TAREAS, *conexion);
 
 				}else{
-
+					printf("%s. TRIP %d PAT %d\n", tarea, mensaje->idTripulante, mensaje->idPatota);
 					t_string* tarea_msg = get_t_string(tarea);
 					enviar_paquete(tarea_msg, SOLICITAR_SIGUIENTE_TAREA_RTA, *conexion);
 					free(tarea_msg);
@@ -286,6 +288,7 @@ void recibir_mensaje(int32_t* conexion){
 			case EXPULSAR_TRIPULANTE_MSG:{
 
 				expulsar_tripulante_msg* mensaje = deserializar_paquete(paquete);
+				printf("EXPULSAR TRIP %d PAT %d\n", mensaje->idTripulante, mensaje->idPatota);
 
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: expulsar_tripulante_segmentacion(mensaje, NULL);break;
