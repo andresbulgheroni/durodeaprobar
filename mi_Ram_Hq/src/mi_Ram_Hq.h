@@ -212,11 +212,12 @@ t_list* segmentos_libres;
 
 int32_t get_criterio(char* cofig);
 void dump_segmentacion(FILE* dump);
-void sacar_segmento_lista_libres(segmento* segmento_nuevo);
+void agregar_seg_listas(segmento* segmento_nuevo);
 void ordenar_lista_segmentos_libres();
 void liberar_segmento(segmento* seg);
-bool hay_espacio_libre(uint32_t size);
+bool entra_en_un_seg_libre(uint32_t size);
 int32_t get_espacio_libre(uint32_t size);
+bool entra_en_memoria_seg(uint32_t tamanio_necesario);
 
 void inicializar_segmentacion();
 
