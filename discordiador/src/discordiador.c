@@ -1077,9 +1077,12 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
 
+	tripulante->estado=READY;
+	pthread_mutex_lock(&mutex_listaReady);
+	list_add(listaReady,tripulante);
+	pthread_mutex_unlock(&mutex_listaReady);
+	log_info(logger,"cambio De Estado A Ready el tripulante con ID:%d\n",tripulante->idTripulante);
 
-	usleep(150);
-	agregarTripulanteAListaReadyYAvisar(tripulante);
 
 	//mandarTarea()
 		solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
@@ -1158,7 +1161,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	sem_post(&sem_hiloTripulante);
 
 
-	while(tripulante->estado != FINISHED || tripulante->fueExpulsado != 1){		//TODO
+	while(tripulante->estado != FINISHED && tripulante->fueExpulsado != 1){		//TODO
 
 
 
