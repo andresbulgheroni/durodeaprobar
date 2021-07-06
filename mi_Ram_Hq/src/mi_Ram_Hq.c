@@ -35,8 +35,8 @@ void sig_handler(int n){
 
 			char* time_stamp_text = get_timestamp();
 			char* path = string_new();
-			//path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
-			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
+			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
+			//path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
 			char* inicio_texto = string_new();
 			inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
 
@@ -205,14 +205,12 @@ void recibir_mensaje(int32_t* conexion){
 				if(status){
 					enviar_paquete(NULL, OK_MSG, *conexion);
 				}else{
-					char* mensaje = string_new();
-					mensaje = "Fallo la insercion de la patota";
+					char* mensaje_err = string_new();
+					mensaje_err = "Fallo la insercion de la patota";
 
-					t_string* rta_error = get_t_string(mensaje);
+					t_string* rta_error = get_t_string(mensaje_err);
 
 					enviar_paquete(rta_error, FAIL_MSG, *conexion);
-
-					free(mensaje);
 
 					free(rta_error);
 
@@ -470,7 +468,7 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 
 		*status = entra_en_swap(cantidad_frames);
 
-		if(status){
+		if(*status){
 
 			t_list* paginas = list_create();
 			uint32_t direccion_tareas = sizeof(t_pcb);
