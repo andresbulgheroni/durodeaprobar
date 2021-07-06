@@ -698,3 +698,103 @@
 [INFO] 16:31:31:660 MI-RAM-HQ/(15619:15619): MIRAMHQ PID: 15619 
 [INFO] 16:45:21:093 MI-RAM-HQ/(16078:16078): MIRAMHQ PID: 16078 
 [INFO] 17:08:26:136 MI-RAM-HQ/(16555:16555): MIRAMHQ PID: 16555 
+[INFO] 16:22:49:900 MI-RAM-HQ/(4953:4953): MIRAMHQ PID: 4953 
+[INFO] 16:28:33:478 MI-RAM-HQ/(5136:5136): MIRAMHQ PID: 5136 
+[INFO] 16:30:45:369 MI-RAM-HQ/(5136:5193): Se modifico el estado del tripulante 2 de R a E
+[INFO] 16:31:47:669 MI-RAM-HQ/(5136:5193): Se modifico la posicion del tripulante 5 a: 1 en X y 3 en Y
+[INFO] 16:31:52:100 MI-RAM-HQ/(5136:5193): La posicion anterior era 1 en X y 2 en Y
+[INFO] 16:35:31:512 MI-RAM-HQ/(5507:5507): MIRAMHQ PID: 5507 
+[INFO] 16:35:36:431 MI-RAM-HQ/(5507:5525): Se modifico el estado del tripulante 2 de R a E
+[INFO] 16:35:36:475 MI-RAM-HQ/(5507:5525): Se expulso al tripulante &d de la patota 3
+[INFO] 16:35:36:511 MI-RAM-HQ/(5507:5525): Se modifico la posicion del tripulante 5 a: 1 en X y 3 en Y
+[INFO] 16:35:36:511 MI-RAM-HQ/(5507:5525): La posicion anterior era 1 en X y 2 en Y
+[INFO] 16:39:21:769 MI-RAM-HQ/(5688:5688): MIRAMHQ PID: 5688 
+[INFO] 16:44:30:314 MI-RAM-HQ/(2386:2386): MIRAMHQ PID: 2386 
+[INFO] 16:47:16:485 MI-RAM-HQ/(29040:29040): MIRAMHQ PID: 29040 
+[INFO] 16:47:39:308 MI-RAM-HQ/(29040:29075): Al tripulante 1 le tocaba la tarea numero 0: CONSUMIR_COMIDA 25;4;2;5
+[INFO] 16:47:39:308 MI-RAM-HQ/(29040:29075): Al tripulante 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 12;2;3;1
+[INFO] 16:47:39:308 MI-RAM-HQ/(29040:29075): Al tripulante 1 le tocaba la tarea numero 2: GENERAR_COMIDA 10;2;4;5
+[INFO] 16:47:39:315 MI-RAM-HQ/(29040:29075): El tripulante 1 era el ultimo, se elimino toda la patota 2
+[INFO] 16:47:59:752 MI-RAM-HQ/(29040:29098): Al tripulante 3 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 16:47:59:752 MI-RAM-HQ/(29040:29098): Al tripulante 3 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 16:47:59:752 MI-RAM-HQ/(29040:29098): Se modifico el estado del tripulante 2 de R a E
+[INFO] 16:47:59:791 MI-RAM-HQ/(29040:29098): El tripulante 3 ya completo sus tareas
+[INFO] 16:47:59:795 MI-RAM-HQ/(29040:29098): Se expulso al tripulante 3 de la patota 1
+[INFO] 16:47:59:831 MI-RAM-HQ/(29040:29098): Se modifico la posicion del tripulante 5 a: 1 en X y 3 en Y
+[INFO] 16:47:59:832 MI-RAM-HQ/(29040:29098): La posicion anterior era 1 en X y 2 en Y
+[INFO] 16:54:44:977 MI-RAM-HQ/(29325:29325): MIRAMHQ PID: 29325 
+[INFO] 16:54:49:393 MI-RAM-HQ/(29325:29343): Se creo la patota 1 de tamanio 165 con 5 tripulantes y tareas "4"
+[INFO] 16:54:49:397 MI-RAM-HQ/(29325:29343): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 16:54:49:398 MI-RAM-HQ/(29325:29343): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 16:54:49:399 MI-RAM-HQ/(29325:29343): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 16:54:49:439 MI-RAM-HQ/(29325:29343): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 16:54:49:439 MI-RAM-HQ/(29325:29343): Se expulso al tripulante 3 de la patota 1
+[INFO] 16:54:49:475 MI-RAM-HQ/(29325:29343): Se modifico la posicion del tripulante 5 de la patota 1 a --> 1 en X y 3 en Y
+[INFO] 16:54:49:475 MI-RAM-HQ/(29325:29343): La posicion anterior era 1 en X y 2 en Y
+[INFO] 16:55:04:108 MI-RAM-HQ/(29325:29355): Se creo la patota 2 de tamanio 104 con 1 tripulantes y tareas "K"
+[INFO] 16:55:04:109 MI-RAM-HQ/(29325:29355): Al tripulante 1 de la patota 2 le tocaba la tarea numero 0: CONSUMIR_COMIDA 25;4;2;5
+[INFO] 16:55:04:111 MI-RAM-HQ/(29325:29355): Al tripulante 1 de la patota 2 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 12;2;3;1
+[INFO] 16:55:04:111 MI-RAM-HQ/(29325:29355): Al tripulante 1 de la patota 2 le tocaba la tarea numero 2: GENERAR_COMIDA 10;2;4;5
+[INFO] 16:55:04:113 MI-RAM-HQ/(29325:29355): El tripulante 1 era el ultimo, se elimino toda la patota 2
+[INFO] 16:58:42:100 MI-RAM-HQ/(29579:29579): MIRAMHQ PID: 29579 
+[INFO] 16:59:13:982 MI-RAM-HQ/(29579:29628): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 16:59:13:982 MI-RAM-HQ/(29579:29628): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 16:59:13:982 MI-RAM-HQ/(29579:29628): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 16:59:13:982 MI-RAM-HQ/(29579:29628): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 16:59:14:019 MI-RAM-HQ/(29579:29628): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 16:59:14:021 MI-RAM-HQ/(29579:29628): Se expulso al tripulante 3 de la patota 1
+[INFO] 16:59:19:022 MI-RAM-HQ/(29579:29628): Se modifico la posicion del tripulante 5 de la patota 1 a --> 1 en X y 3 en Y
+[INFO] 16:59:19:022 MI-RAM-HQ/(29579:29628): La posicion anterior era 1 en X y 2 en Y
+[INFO] 17:01:49:088 MI-RAM-HQ/(29579:29668): Se creo la patota 2 de tamanio 104 con 1 tripulantes
+[INFO] 17:01:49:088 MI-RAM-HQ/(29579:29668): Al tripulante 1 de la patota 2 le tocaba la tarea numero 0: CONSUMIR_COMIDA 25;4;2;5
+[INFO] 17:01:49:089 MI-RAM-HQ/(29579:29668): Al tripulante 1 de la patota 2 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 12;2;3;1
+[INFO] 17:01:49:089 MI-RAM-HQ/(29579:29668): Al tripulante 1 de la patota 2 le tocaba la tarea numero 2: GENERAR_COMIDA 10;2;4;5
+[INFO] 17:01:49:091 MI-RAM-HQ/(29579:29668): El tripulante 1 era el ultimo, se elimino toda la patota 2
+[INFO] 17:04:31:490 MI-RAM-HQ/(29974:29974): MIRAMHQ PID: 29974 
+[INFO] 17:06:06:336 MI-RAM-HQ/(29974:30021): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 17:06:12:399 MI-RAM-HQ/(29974:30021): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 17:06:29:209 MI-RAM-HQ/(29974:30021): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 17:06:34:088 MI-RAM-HQ/(29974:30021): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 17:06:47:598 MI-RAM-HQ/(29974:30021): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 17:06:51:317 MI-RAM-HQ/(29974:30021): Se expulso al tripulante 3 de la patota 1
+[INFO] 17:06:53:529 MI-RAM-HQ/(29974:30021): Se modifico la posicion del tripulante 5 de la patota 1 a --> 1 en X y 3 en Y
+[INFO] 17:06:53:529 MI-RAM-HQ/(29974:30021): La posicion anterior era 1 en X y 2 en Y
+[INFO] 17:07:15:796 MI-RAM-HQ/(30233:30233): MIRAMHQ PID: 30233 
+[INFO] 17:07:25:016 MI-RAM-HQ/(30233:30252): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 17:07:26:957 MI-RAM-HQ/(30233:30252): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 17:07:45:028 MI-RAM-HQ/(30233:30252): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 17:07:46:474 MI-RAM-HQ/(30233:30252): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 17:07:47:759 MI-RAM-HQ/(30233:30252): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 17:07:58:231 MI-RAM-HQ/(30233:30252): Se expulso al tripulante 3 de la patota 1
+[INFO] 17:13:35:255 MI-RAM-HQ/(30547:30547): MIRAMHQ PID: 30547 
+[INFO] 17:13:53:445 MI-RAM-HQ/(30580:30580): MIRAMHQ PID: 30580 
+[INFO] 17:18:05:254 MI-RAM-HQ/(962:962): MIRAMHQ PID: 962 
+[INFO] 17:18:20:133 MI-RAM-HQ/(983:983): MIRAMHQ PID: 983 
+[INFO] 17:18:21:340 MI-RAM-HQ/(983:26862): Se creo la patota 0 de tamanio 8 con 0 tripulantes
+[INFO] 17:23:35:627 MI-RAM-HQ/(26004:26004): MIRAMHQ PID: 26004 
+[INFO] 17:23:52:026 MI-RAM-HQ/(26004:26049): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 17:23:53:251 MI-RAM-HQ/(26004:26049): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 17:23:59:866 MI-RAM-HQ/(26004:26049): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 17:24:00:898 MI-RAM-HQ/(26004:26049): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 17:24:02:010 MI-RAM-HQ/(26004:26049): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 17:24:02:961 MI-RAM-HQ/(26004:26049): Se expulso al tripulante 3 de la patota 1
+[INFO] 17:27:35:547 MI-RAM-HQ/(26225:26225): MIRAMHQ PID: 26225 
+[INFO] 17:35:32:605 MI-RAM-HQ/(26540:26540): MIRAMHQ PID: 26540 
+[INFO] 17:38:15:256 MI-RAM-HQ/(26540:26585): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 17:38:27:181 MI-RAM-HQ/(26540:26585): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 17:38:43:338 MI-RAM-HQ/(26540:26585): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 17:38:44:973 MI-RAM-HQ/(26540:26585): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 17:38:48:381 MI-RAM-HQ/(26540:26585): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 17:40:02:192 MI-RAM-HQ/(26540:26585): Se expulso al tripulante 3 de la patota 1
+[INFO] 17:45:19:579 MI-RAM-HQ/(27114:27114): MIRAMHQ PID: 27114 
+[INFO] 17:45:33:195 MI-RAM-HQ/(27114:27152): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 17:45:36:160 MI-RAM-HQ/(27114:27152): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 17:45:47:284 MI-RAM-HQ/(27114:27152): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 17:45:48:704 MI-RAM-HQ/(27114:27152): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 17:45:50:049 MI-RAM-HQ/(27114:27152): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 17:45:53:674 MI-RAM-HQ/(27114:27152): Se expulso al tripulante 3 de la patota 1
+[INFO] 17:46:44:664 MI-RAM-HQ/(27114:27152): Se modifico la posicion del tripulante 5 de la patota 1 a --> 1 en X y 3 en Y
+[INFO] 17:46:44:664 MI-RAM-HQ/(27114:27152): La posicion anterior era 1 en X y 2 en Y
+[INFO] 17:46:48:648 MI-RAM-HQ/(27114:27152): Se compacta memoria
+[INFO] 17:46:48:648 MI-RAM-HQ/(27114:27152): Se creo la patota 2 de tamanio 104 con 1 tripulantes
+[INFO] 17:48:15:140 MI-RAM-HQ/(27114:27246): Al tripulante 1 de la patota 2 le tocaba la tarea numero 0: CONSUMIR_COMIDA 25;4;2;5
