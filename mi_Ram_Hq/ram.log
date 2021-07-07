@@ -805,3 +805,85 @@
 [INFO] 18:40:43:441 MI-RAM-HQ/(5062:5062): MIRAMHQ PID: 5062 
 [INFO] 18:42:23:210 MI-RAM-HQ/(5201:5201): MIRAMHQ PID: 5201 
 
+[INFO] 22:27:34:859 MI-RAM-HQ/(31872:31872): MIRAMHQ PID: 31872 
+[INFO] 22:28:04:523 MI-RAM-HQ/(31941:31941): MIRAMHQ PID: 31941 
+[INFO] 22:30:14:381 MI-RAM-HQ/(31941:32133): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 22:30:14:415 MI-RAM-HQ/(31941:32133): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 22:30:17:423 MI-RAM-HQ/(31941:32133): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 22:30:17:423 MI-RAM-HQ/(31941:32133): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 22:30:17:464 MI-RAM-HQ/(31941:32133): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 22:30:25:032 MI-RAM-HQ/(31941:32133): Se expulso al tripulante 3 de la patota 1
+[INFO] 22:30:25:071 MI-RAM-HQ/(31941:32133): Se expulso al tripulante 1 de la patota 1
+[INFO] 22:32:21:343 MI-RAM-HQ/(32242:32242): MIRAMHQ PID: 32242 
+[INFO] 22:32:48:967 MI-RAM-HQ/(32242:32286): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 22:32:48:967 MI-RAM-HQ/(32242:32286): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 22:32:51:714 MI-RAM-HQ/(32242:32286): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 22:32:51:714 MI-RAM-HQ/(32242:32286): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 22:32:51:752 MI-RAM-HQ/(32242:32286): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 22:33:02:411 MI-RAM-HQ/(32242:32286): Se expulso al tripulante 3 de la patota 1
+[INFO] 22:33:02:447 MI-RAM-HQ/(32242:32286): Se expulso al tripulante 1 de la patota 1
+[INFO] 22:35:43:259 MI-RAM-HQ/(32454:32454): MIRAMHQ PID: 32454 
+[INFO] 22:36:29:114 MI-RAM-HQ/(32454:32495): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 22:36:29:114 MI-RAM-HQ/(32454:32495): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 22:36:34:116 MI-RAM-HQ/(32454:32495): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 22:36:34:116 MI-RAM-HQ/(32454:32495): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 22:36:34:156 MI-RAM-HQ/(32454:32495): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 22:37:28:446 MI-RAM-HQ/(32454:32495): Se expulso al tripulante 3 de la patota 1
+[INFO] 22:38:46:453 MI-RAM-HQ/(32454:32495): Se expulso al tripulante 1 de la patota 1
+[INFO] 22:40:32:958 MI-RAM-HQ/(32725:32725): MIRAMHQ PID: 32725 
+[INFO] 22:40:49:215 MI-RAM-HQ/(32725:302): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 22:40:49:215 MI-RAM-HQ/(32725:302): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 22:40:53:236 MI-RAM-HQ/(32725:302): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 22:40:53:236 MI-RAM-HQ/(32725:302): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 22:40:53:275 MI-RAM-HQ/(32725:302): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 22:41:46:449 MI-RAM-HQ/(32725:302): Se expulso al tripulante 3 de la patota 1
+[INFO] 22:42:21:412 MI-RAM-HQ/(32725:302): Se expulso al tripulante 1 de la patota 1
+[INFO] 22:45:44:385 MI-RAM-HQ/(542:542): MIRAMHQ PID: 542 
+[INFO] 22:45:55:934 MI-RAM-HQ/(542:583): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 22:45:55:934 MI-RAM-HQ/(542:583): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 22:46:05:452 MI-RAM-HQ/(542:583): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 22:46:05:452 MI-RAM-HQ/(542:583): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 22:46:05:491 MI-RAM-HQ/(542:583): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 22:46:18:020 MI-RAM-HQ/(542:583): Se expulso al tripulante 3 de la patota 1
+[INFO] 22:46:20:147 MI-RAM-HQ/(542:583): Se expulso al tripulante 1 de la patota 1
+[INFO] 22:52:36:679 MI-RAM-HQ/(906:906): MIRAMHQ PID: 906 
+[INFO] 22:52:49:941 MI-RAM-HQ/(906:954): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 22:52:49:942 MI-RAM-HQ/(906:954): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 22:52:57:947 MI-RAM-HQ/(906:954): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 22:52:57:948 MI-RAM-HQ/(906:954): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 22:52:57:987 MI-RAM-HQ/(906:954): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 22:53:15:635 MI-RAM-HQ/(906:954): Se expulso al tripulante 3 de la patota 1
+[INFO] 22:53:17:065 MI-RAM-HQ/(906:954): Se expulso al tripulante 1 de la patota 1
+[INFO] 22:54:21:345 MI-RAM-HQ/(906:954): Se expulso al tripulante 4 de la patota 1
+[INFO] 22:54:49:402 MI-RAM-HQ/(906:1059): Se compacta memoria
+[INFO] 22:54:49:402 MI-RAM-HQ/(906:1059): Se creo la patota 2 de tamanio 104 con 1 tripulantes
+[INFO] 22:54:49:494 MI-RAM-HQ/(906:1059): Al tripulante 1 de la patota 2 le tocaba la tarea numero 0: CONSUMIR_COMIDA 25;4;2;5
+[INFO] 22:54:49:495 MI-RAM-HQ/(906:1059): Al tripulante 1 de la patota 2 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 12;2;3;1
+[INFO] 22:54:49:495 MI-RAM-HQ/(906:1059): Al tripulante 1 de la patota 2 le tocaba la tarea numero 2: GENERAR_COMIDA 10;2;4;5
+[INFO] 22:55:25:507 MI-RAM-HQ/(906:1059): El tripulante 1 era el ultimo, se elimino toda la patota 2
+[INFO] 22:56:28:643 MI-RAM-HQ/(1164:1164): MIRAMHQ PID: 1164 
+[INFO] 22:56:43:220 MI-RAM-HQ/(1164:1217): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 22:56:43:221 MI-RAM-HQ/(1164:1217): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 22:56:45:448 MI-RAM-HQ/(1164:1217): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 22:56:45:448 MI-RAM-HQ/(1164:1217): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 22:56:45:487 MI-RAM-HQ/(1164:1217): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 22:57:03:326 MI-RAM-HQ/(1164:1217): Se expulso al tripulante 3 de la patota 1
+[INFO] 22:57:18:935 MI-RAM-HQ/(1164:1276): Se compacta memoria
+[INFO] 22:57:18:935 MI-RAM-HQ/(1164:1276): Se creo la patota 2 de tamanio 104 con 1 tripulantes
+[INFO] 22:57:18:935 MI-RAM-HQ/(1164:1276): Al tripulante 1 de la patota 2 le tocaba la tarea numero 0: CONSUMIR_COMIDA 25;4;2;5
+[INFO] 22:57:18:935 MI-RAM-HQ/(1164:1276): Al tripulante 1 de la patota 2 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 12;2;3;1
+[INFO] 22:57:18:935 MI-RAM-HQ/(1164:1276): Al tripulante 1 de la patota 2 le tocaba la tarea numero 2: GENERAR_COMIDA 10;2;4;5
+[INFO] 22:58:17:893 MI-RAM-HQ/(1164:1217): Se expulso al tripulante 1 de la patota 1
+[INFO] 23:01:33:630 MI-RAM-HQ/(1391:1391): MIRAMHQ PID: 1391 
+[INFO] 23:02:00:719 MI-RAM-HQ/(1391:1453): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 23:02:00:719 MI-RAM-HQ/(1391:1453): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 23:02:00:719 MI-RAM-HQ/(1391:1453): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 23:02:00:719 MI-RAM-HQ/(1391:1453): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 23:02:00:759 MI-RAM-HQ/(1391:1453): El tripulante 3 de la patota 1 ya completo sus tareas
+[INFO] 23:02:11:958 MI-RAM-HQ/(1391:1453): Se expulso al tripulante 3 de la patota 1
+[INFO] 23:02:27:747 MI-RAM-HQ/(1391:1498): Se compacta memoria
+[INFO] 23:02:27:747 MI-RAM-HQ/(1391:1498): Se creo la patota 2 de tamanio 104 con 1 tripulantes
+[INFO] 23:02:27:747 MI-RAM-HQ/(1391:1498): Al tripulante 1 de la patota 2 le tocaba la tarea numero 0: CONSUMIR_COMIDA 25;4;2;5
+[INFO] 23:02:27:747 MI-RAM-HQ/(1391:1498): Al tripulante 1 de la patota 2 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 12;2;3;1
+[INFO] 23:02:27:747 MI-RAM-HQ/(1391:1498): Al tripulante 1 de la patota 2 le tocaba la tarea numero 2: GENERAR_COMIDA 10;2;4;5
+[INFO] 23:03:25:316 MI-RAM-HQ/(1391:1453): Se expulso al tripulante 1 de la patota 1

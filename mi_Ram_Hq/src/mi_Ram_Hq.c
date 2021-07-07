@@ -35,8 +35,8 @@ void sig_handler(int n){
 
 			char* time_stamp_text = get_timestamp();
 			char* path = string_new();
-			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
-			//path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
+			//path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
+			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
 			char* inicio_texto = string_new();
 			inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
 
@@ -2063,7 +2063,18 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 
 	} else {
 		segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
-		uint32_t index = seg_tripulante->numero_segmento;
+
+		uint32_t index; // = seg_tripulante->numero_segmento;
+		uint32_t contador = 0;
+
+		void index_del_segmento(segmento* seg){
+			if(seg->inicio == seg_tripulante->inicio){
+				index = contador;
+			}
+			contador++;
+		}
+
+		list_iterate(tabla_patota, index_del_segmento);
 
 		pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_lock(&m_SEG_EN_MEMORIA);
@@ -2113,11 +2124,6 @@ void agregar_seg_listas(segmento* segmento_nuevo){
 
 		ordenar_lista_segmentos_libres();
 
-		for(int32_t i = 0; i<list_size(segmentos_libres); i++){ //todo sacar
-			segmento* seg = list_get(segmentos_libres, i);
-			printf("inicio: %d\n", seg->inicio);
-			printf("tamanio: %d\n", seg->tamanio);
-		}
 	}
 
 	list_add(segmentos_en_memoria, segmento_nuevo);
@@ -2153,10 +2159,6 @@ void liberar_segmento(segmento* seg){
 
 		list_remove_by_condition(segmentos_en_memoria, es_el_segmento);
 	}
-	for(int32_t i = 0; i<list_size(segmentos_libres); i++){ //todo sacar
-			segmento* seg = list_get(segmentos_libres, i);
-			printf("inicio: %d\n", seg->inicio);
-			printf("tamanio: %d\n", seg->tamanio);}
 }//no lleva semaforos, porque donde la llamo ya estan los semaforos
 
 //junta todos los segmentos en la parte superior de la memoria y crea un segmento libre con el restante
@@ -2201,12 +2203,6 @@ void compactar_memoria(){
 	}
 
 	list_iterate(segmentos_en_memoria, modificar_inicio);
-
-	for(int32_t m = 0; m<list_size(segmentos_en_memoria); m++){
-		segmento* seg = list_get(segmentos_en_memoria, m);
-		printf("\ninicio: %d", seg->inicio);
-		printf("\ntamanio: %d", seg->tamanio);
-	}
 
 	uint32_t cant_segmentos = list_size(segmentos_en_memoria);
 	segmento* ult_seg = list_get(segmentos_en_memoria, cant_segmentos - 1);
