@@ -994,9 +994,9 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 	free(mensajeMovimientoTarea->coordenadasDestino);
 	free(mensajeMovimientoTarea);
 
-	//	free(mensajeMovimientoMongo->coordenadasDestino);
-	//	free(mensajeMovimientoMongo->coordenadasOrigen);
-	//	free(mensajeMovimientoMongo);
+		free(mensajeMovimientoMongo->coordenadasDestino);
+		free(mensajeMovimientoMongo->coordenadasOrigen);
+		free(mensajeMovimientoMongo);
 
 
 }
@@ -1065,7 +1065,7 @@ algoritmo_code stringACodigoAlgoritmo(const char* string) {
 
 
 void ejecutarTripulante(t_tripulante* tripulante){
-	//INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
+	//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
 
 
 
@@ -1091,6 +1091,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 		enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
 		printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
 
+		free(mensajeTarea);
 	//recibirMensaje()				TODO
 
 			t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
@@ -1402,6 +1403,7 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 										mandarTareaIO->parametros = tripulante->tareaAsignada->parametros;
 										enviar_paquete(mandarTareaIO, INICIO_TAREA,tripulante->socketTripulanteImongo);
 
+										free(mandarTareaIO);
 			log_info(logger,"el mensaje a imongo ha sido enviado exitosamentedel tripulante %d",tripulante->idTripulante);
 
 
@@ -1427,6 +1429,7 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 				mandarFinTareaIO->nombreTarea = get_t_string(tripulante->tareaAsignada->nombreTarea);
 				enviar_paquete(mandarFinTareaIO,FIN_TAREA,tripulante->socketTripulanteImongo);
 
+				free(mandarFinTareaIO);
 
 				if(tripulante->fueExpulsado !=1){
 
@@ -1437,6 +1440,7 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 							enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
 							printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
 
+							free(mensajeTarea);
 						//recibirMensaje()				TODO
 
 								t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
