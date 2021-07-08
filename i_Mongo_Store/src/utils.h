@@ -1,3 +1,4 @@
+
 #ifndef UTILS_H_
 #define UTILS_H_
 
@@ -38,7 +39,9 @@ typedef enum{
 	RESOLUCION_SABOTAJE= 20, // MANDA DATA
 	//MONGO A DISCORD
 	NOTIFICAR_SABOTAJE= 21, // MANDA DATA
-	DESCONECTADO = -1 //CUANDO recv devuelve -1
+	DESCONECTADO = -1, //CUANDO recv devuelve -1,
+	OK_MSG =  22,
+	FAIL_MSG = 23
 
 } op_code;
 
@@ -234,6 +237,7 @@ t_buffer* serializar_fin_tarea_msg(fin_tarea_msg* mensaje);
 t_buffer* serializar_atender_sabotaje_msg(atender_sabotaje_msg* mensaje);
 t_buffer* serializar_resolucion_sabotaje_msg(resolucion_sabotaje_msg* mensaje);
 t_buffer* serializar_notificar_sabotaje_msg(notificar_sabotaje_msg* mensaje);
+t_buffer* serializar_fail_msg(t_string* mensaje);
 
 
 //DESERIALIZADO MENSAJES
@@ -252,6 +256,7 @@ fin_tarea_msg* desserializar_fin_tarea_msg(void* stream);
 atender_sabotaje_msg* desserializar_atender_abotaje_msg(void* stream);
 resolucion_sabotaje_msg* desserializar_resolucion_sabotaje_msg(void* stream);
 notificar_sabotaje_msg* desserializar_notificar_sabotaje_msg(void* stream);
+t_string* desserializar_fail_msg(void* stream);
 
 //MISC
 

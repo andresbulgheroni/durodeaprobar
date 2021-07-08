@@ -26,7 +26,7 @@ t_string* get_t_string(char* string){
 
 bool leer_buffer(int32_t codigo){
 
-	return codigo != DESCONECTADO && codigo != COMPLETO_TAREAS;
+	return codigo != DESCONECTADO && codigo != COMPLETO_TAREAS && codigo != OK_MSG;
 
 }
 
@@ -149,6 +149,13 @@ t_paquete* crear_paquete_a_serializar(op_code codigo, void* mensaje){
 			break;
 
 		}
+		case FAIL_MSG:{
+
+			paquete->buffer = serializar_fail_msg(mensaje);
+
+			break;
+		}
+		case OK_MSG:
 		case DESCONECTADO:
 		case COMPLETO_TAREAS:
 		default: break;
@@ -353,6 +360,12 @@ void* deserializar_paquete(t_paquete* paquete){
 			break;
 
 		}
+		case FAIL_MSG:{
+
+			mensaje = desserializar_fail_msg(paquete->buffer->stream);
+
+			break;
+		}
 		default: break;
 
 	}
@@ -391,7 +404,7 @@ t_buffer* serializar_iniciar_patota_msg(iniciar_patota_msg* mensaje){
 
 	}
 
-	list_iterate(mensaje->tareas, serializar_tripulantes);
+	list_iterate(mensaje->tripulantes, serializar_tripulantes);
 
 	serializar_string(buffer->stream, mensaje->tareas, &offset);
 
@@ -633,6 +646,22 @@ t_buffer* serializar_notificar_sabotaje_msg(notificar_sabotaje_msg* mensaje){
 
 }
 
+t_buffer* serializar_fail_msg(t_string* mensaje){
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+
+	buffer->size = sizeof(mensaje->length) + mensaje->length;
+
+	buffer->stream = malloc(buffer->size);
+
+	uint32_t offset = 0;
+
+	serializar_string(buffer->stream,  mensaje, &offset);
+
+	return buffer;
+
+}
+
 //DESERIALIZDO MENSAJES
 
 iniciar_patota_msg* desserializar_iniciar_patota_msg(void* stream){
@@ -668,6 +697,7 @@ expulsar_tripulante_msg* desserializar_expulsar_tripulante_msg(void* stream){
 
 	uint32_t offset = 0;
 
+	deserializar_variable(stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 
 	return mensaje;
@@ -703,6 +733,7 @@ solicitar_siguiente_tarea_msg* desserializar_solicitar_siguiente_tarea_msg(void*
 
 	uint32_t offset = 0;
 
+	deserializar_variable(stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 
 	return mensaje;
@@ -741,6 +772,7 @@ cambio_estado_msg* desserializar_cambio_estado_msg(void* stream){
 
 	uint32_t offset = 0;
 
+	deserializar_variable(stream, &(mensaje->idPatota), sizeof(mensaje->idPatota), &offset);
 	deserializar_variable(stream, &(mensaje->idTripulante), sizeof(mensaje->idTripulante), &offset);
 	deserializar_variable(stream, &(mensaje->estado), sizeof(mensaje->estado), &offset);
 
@@ -854,6 +886,15 @@ notificar_sabotaje_msg* desserializar_notificar_sabotaje_msg(void* stream){
 
 }
 
+t_string* desserializar_fail_msg(void* stream){
+
+	uint32_t offset = 0;
+	t_string* mensaje = deserializar_string(stream, &offset);
+
+	return mensaje;
+
+}
+
 
 //CONEXION
 
@@ -936,3 +977,4 @@ void liberar_conexion(uint32_t socketCliente){
 	close(socketCliente);
 
 }
+
