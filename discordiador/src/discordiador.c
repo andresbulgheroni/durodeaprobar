@@ -1057,14 +1057,8 @@ algoritmo_code stringACodigoAlgoritmo(const char* string) {
 
 
 
-
-
-
-
 void ejecutarTripulante(t_tripulante* tripulante){
 	//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
-
-
 
 	printf("hola soy:%d\n",tripulante->idTripulante);
 
@@ -1143,18 +1137,6 @@ void ejecutarTripulante(t_tripulante* tripulante){
 					break;
 			 }
 			}
-
-
-
-//	t_tarea*tareaPrueba=malloc(sizeof(t_tarea));
-//	t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
-//	coordenadas->posX=2;
-//	coordenadas->posY=2;
-//	tareaPrueba->nombreTarea="GENERAR_OXIGENO_AHRE";
-//	tareaPrueba->coordenadas=coordenadas;
-//	tareaPrueba->duracion=5;
-//	tareaPrueba->parametros=0;
-//	tripulante->tareaAsignada=tareaPrueba;
 
 	sem_post(&sem_hiloTripulante);
 
@@ -1290,22 +1272,6 @@ void ejecutarTripulante(t_tripulante* tripulante){
 									break;
 							 }
 							}
-
-
-
-
-//				t_tarea*tareaPrueba=malloc(sizeof(t_tarea));
-//				t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
-//				coordenadas->posX=3;
-//				coordenadas->posY=4;
-//				tareaPrueba->nombreTarea="GENERAR_OXIGENO";
-//				tareaPrueba->coordenadas=coordenadas;
-//				tareaPrueba->duracion=2;
-//				tareaPrueba->parametros = 20;
-//				tripulante->tareaAsignada=tareaPrueba;
-
-
-
 				}
 
 				if(haySabotaje==1){
@@ -1619,13 +1585,13 @@ void ejecucionRR(t_tripulante*tripulante){
 		}
 		if(distancia == 0 && (string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)==TAREA_CPU)){
 
-			//inicio_tarea_msg* mandarTareaCpu=malloc(sizeof(inicio_tarea_msg));
-			//							mandarTareaCpu->idTripulante = tripulante->idTripulante;
-			//							mandarTareaCpu->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
-			//							mandarTareaCpu->parametros =0;
-			//
-			//							enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
-			//free(mandarTareaCpu);
+			inicio_tarea_msg* mandarTareaCpu=malloc(sizeof(inicio_tarea_msg));
+										mandarTareaCpu->idTripulante = tripulante->idTripulante;
+										mandarTareaCpu->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
+										mandarTareaCpu->parametros =0;
+
+										enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
+			free(mandarTareaCpu);
 
 		}
 
@@ -1690,15 +1656,6 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 			log_info(logger,"se termino la tarea y de quantum le queda %d del tripulante con ID: %d\n",tripulante->quantumDisponible,tripulante->idTripulante);
 
-//			t_tarea*tareaPrueba=malloc(sizeof(t_tarea));
-//			t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
-//			coordenadas->posX=3;
-//			coordenadas->posY=4;
-//			tareaPrueba->nombreTarea="GENERAR_OXIGENO";
-//			tareaPrueba->coordenadas=coordenadas;
-//			tareaPrueba->duracion=2;
-//			tareaPrueba->parametros = 20;
-//			tripulante->tareaAsignada=tareaPrueba;
 
 			//mandarTarea()
 					solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
@@ -1848,20 +1805,6 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 							 }
 							}
 
-
-//				t_tarea*tareaPrueba=malloc(sizeof(t_tarea));
-//				t_coordenadas*coordenadas=malloc(sizeof(t_coordenadas));
-//				coordenadas->posX=3;
-//				coordenadas->posY=4;
-//				tareaPrueba->nombreTarea="GENERAR_OXIGENO";
-//				tareaPrueba->coordenadas=coordenadas;
-//				tareaPrueba->duracion=2;
-//				tareaPrueba->parametros = 20;
-//				tripulante->tareaAsignada=tareaPrueba;
-
-//				log_info(logger,"se le asigno otra tarea al tripulante%d",tripulante->idTripulante);
-
-
 				sem_post(&sem_planificarMultitarea);
 
 			}
@@ -1896,14 +1839,14 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 			sleep(RETARDO_CICLO_CPU);
 
 
-										inicio_tarea_msg* mandarTareaIO=malloc(sizeof(inicio_tarea_msg));
-										mandarTareaIO->idTripulante = tripulante->idTripulante;
-										mandarTareaIO->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
-										mandarTareaIO->parametros = tripulante->tareaAsignada->parametros;
+			inicio_tarea_msg* mandarTareaIO=malloc(sizeof(inicio_tarea_msg));
+			mandarTareaIO->idTripulante = tripulante->idTripulante;
+			mandarTareaIO->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
+			mandarTareaIO->parametros = tripulante->tareaAsignada->parametros;
 
-										enviar_paquete(mandarTareaIO, INICIO_TAREA,tripulante->socketTripulanteImongo);
+			enviar_paquete(mandarTareaIO, INICIO_TAREA,tripulante->socketTripulanteImongo);
 
-										free(mandarTareaIO);
+			free(mandarTareaIO);
 
 			log_info(logger,"el mensaje a imongo ha sido enviado exitosamentedel tripulante %d",tripulante->idTripulante);
 
