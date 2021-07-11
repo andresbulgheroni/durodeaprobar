@@ -851,9 +851,6 @@ int llegoAlSabotaje(t_tripulante* tripulante,t_sabotaje*sabotaje){
 	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
 	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
 
-	//	uint32_t posicionXsabotaje = tripulante->sabotaje->coordenadas->posX;
-	//	uint32_t posicionYsabotaje = tripulante->sabotaje->coordenadas->posY;
-
 	uint32_t posicionXsabotaje = sabotaje->coordenadas->posX;
 	uint32_t posicionYsabotaje = sabotaje->coordenadas->posY;
 
@@ -871,13 +868,13 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 	mensajeMovimientoSabotaje->coordenadasDestino = malloc(sizeof(t_coordenadas));
 
 
-	//	informar_movimiento_mongo_msg* mensajeMovimientoSabotajeMongo=malloc(sizeof(informar_movimiento_mongo_msg));
-	//		mensajeMovimientoSabotajeMongo->coordenadasOrigen = malloc(sizeof(t_coordenadas));
-		//		mensajeMovimientoSabotajeMongo->coordenadasDestino = malloc(sizeof(t_coordenadas));
+		informar_movimiento_mongo_msg* mensajeMovimientoSabotajeMongo=malloc(sizeof(informar_movimiento_mongo_msg));
+			mensajeMovimientoSabotajeMongo->coordenadasOrigen = malloc(sizeof(t_coordenadas));
+				mensajeMovimientoSabotajeMongo->coordenadasDestino = malloc(sizeof(t_coordenadas));
 
-	//	mensajeMovimientoSabotajeMongo->idTripulante = tripulante->idTripulante;
-	//		mensajeMovimientoSabotajeMongo->coordenadasOrigen->posX = tripulante->coordenadas->posX;
-	//		mensajeMovimientoSabotajeMongo->coordenadasOrigen->posY = tripulante->coordenadas->posY;
+		mensajeMovimientoSabotajeMongo->idTripulante = tripulante->idTripulante;
+			mensajeMovimientoSabotajeMongo->coordenadasOrigen->posX = tripulante->coordenadas->posX;
+			mensajeMovimientoSabotajeMongo->coordenadasOrigen->posY = tripulante->coordenadas->posY;
 
 	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
 	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
@@ -908,12 +905,12 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 	mensajeMovimientoSabotaje->coordenadasDestino->posX = tripulante->coordenadas->posX;
 	mensajeMovimientoSabotaje->coordenadasDestino->posY = tripulante->coordenadas->posY;
 
-	//mensajeMovimientoSabotajeMongo->coordenadasDestino->posX =tripulante->coordenadas->posX ;
-	//mensajeMovimientoSabotajeMongo->coordenadasDestino->posY =tripulante->coordenadas->posY ;
+	mensajeMovimientoSabotajeMongo->coordenadasDestino->posX =tripulante->coordenadas->posX ;
+	mensajeMovimientoSabotajeMongo->coordenadasDestino->posY =tripulante->coordenadas->posY ;
 
 	enviar_paquete(mensajeMovimientoSabotaje,INFORMAR_MOVIMIENTO_RAM,tripulante->socketTripulanteRam);
 
-	//enviar_paquete(mensajeMovimientoSabotajeMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
+	enviar_paquete(mensajeMovimientoSabotajeMongo,INFORMAR_MOVIMIENTO_MONGO,tripulante->socketTripulanteImongo);
 
 	free(mensajeMovimientoSabotaje->coordenadasDestino);
 	free(mensajeMovimientoSabotaje);
@@ -1340,6 +1337,9 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	sem_destroy(tripulante->semaforoDelSabotaje);
 	sem_destroy(tripulante->semaforoDelTripulante);
 	sem_destroy(tripulante->semaforoCiclo);
+	close(tripulante->socketTripulanteImongo);
+	close(tripulante->socketTripulanteRam);
+
 
 }
 
@@ -1625,6 +1625,7 @@ void ejecucionRR(t_tripulante*tripulante){
 			//							mandarTareaCpu->parametros =0;
 			//
 			//							enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
+			//free(mandarTareaCpu);
 
 		}
 
@@ -1706,6 +1707,8 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 					enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
 					printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
 
+					free(mensajeTarea);
+
 				//recibirMensaje()				TODO
 
 						t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
@@ -1749,6 +1752,9 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 						}
 
 
+						log_info(logger,"se le asigno otra tarea al tripulante%d",tripulante->idTripulante);
+
+						sem_post(tripulante->semaforoDelTripulante);		//es el post al semaforo del tripulante para que no salga
 
 						break;
 
@@ -1762,9 +1768,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 						}
 
 
-			log_info(logger,"se le asigno otra tarea al tripulante%d",tripulante->idTripulante);
 
-			sem_post(tripulante->semaforoDelTripulante);		//es el post al semaforo del tripulante para que no salga
 
 		}
 
@@ -1898,6 +1902,8 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 										mandarTareaIO->parametros = tripulante->tareaAsignada->parametros;
 
 										enviar_paquete(mandarTareaIO, INICIO_TAREA,tripulante->socketTripulanteImongo);
+
+										free(mandarTareaIO);
 
 			log_info(logger,"el mensaje a imongo ha sido enviado exitosamentedel tripulante %d",tripulante->idTripulante);
 
