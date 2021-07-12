@@ -1,6 +1,8 @@
 #ifndef DISCORDIADOR_H_
 #define DISCORDIADOR_H_
 
+#include "utils.h"
+
 #include<stdio.h>
 #include<stdint.h>
 #include<stdlib.h>
@@ -17,20 +19,37 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-extern pthread_mutex_t mutex_id_tripulantes;
+#include <sys/stat.h>
+
 extern pthread_mutex_t mutex_tripulantes;
+extern pthread_mutex_t mutex_sockets;
 
 extern pthread_mutex_t mutex_listaNuevos;
 extern pthread_mutex_t mutex_listaReady;
 extern pthread_mutex_t mutex_listaBloqueados;
+extern pthread_mutex_t mutex_listaBloqueadosPorSabotaje;
 extern pthread_mutex_t mutex_listaEjecutando;
 extern pthread_mutex_t mutex_listaFinalizados;
 
+typedef enum{
 
+	//CONSOLA
+	INICIAR_PATOTA= 1, // MANDA DATA
+	LISTAR_TRIPULANTES= 2,
+	EXPULSAR_TRIPULANTE = 3, //MANDA DATA
+	INICIAR_PLANIFICACION = 4,
+	PAUSAR_PLANIFICACION = 5,
+	OBTENER_BITACORA=6, // MANDA DATA
+	ERROR_CODIGO_CONSOLA=7
 
-t_log* log;
+} op_code_consola;
+
+t_log* logger;
 
 t_config*config;
+
+int estaPlanificando;
+int haySabotaje;
 
 char*IP_MI_RAM_HQ;
 char*PUERTO_MI_RAM_HQ;
@@ -42,100 +61,185 @@ int QUANTUM;
 int DURACION_SABOTAJE;
 int RETARDO_CICLO_CPU;
 
-sem_t sem_planificar;
+sem_t sem_planificarMultitarea;
+sem_t sem_pausarPlanificacion;
+sem_t sem_sabotaje;
 
-uint32_t ID_TRIPULANTES;
-
-t_list*tareas;
-t_list*posicionesTripulantes;
-
-t_list*tripulantes;
-t_list*hilosTripulantes;
+sem_t semaforoInicioCicloBloqueado;
 
 
+
+
+
+
+sem_t sem_hiloTripulante;
+t_list* tripulantes;
+int numeroHiloTripulante;
+t_list* hilosTripulantes;
+t_list*sem_tripulante_ciclo;
 
 t_list* listaNuevos;
 t_list* listaReady;
 t_list* listaBloqueados;
-//t_list* listaEjecutando;
+t_list*listaBloqueadosPorSabotaje;
 t_list* listaFinalizados;
+t_list* sem_tripulantes_ejecutar;
+t_list*listaEjecutando;
 
+
+sem_t sem_buscartripulanteMasCercano;
+//sem_t sem_tripulanteMoviendose;
+
+sem_t semaforoInicioCicloCPU; //= malloc(sizeof(sem_t));
+sem_t semaforoFinCicloCPU;
 
 typedef enum{
 
-	INICIAR_PATOTA= 1,
-	LISTAR_TRIPULANTES= 2,
-	EXPULSAR_TRIPULANTE = 3,
-	INICIAR_PLANIFICACION = 4,
-	PAUSAR_PLANIFICACION = 5,
-	OBTENER_BITACORA=6,
-	ERROR_CODIGO=7
+    FIFO = 1,
+    RR = 2,
+	ERROR_CODIGO_ALGORITMO = 3
 
-}opCode;
+}algoritmo_code;
+
+typedef enum{
+	GENERAR_OXIGENO = 22,
+	CONSUMIR_OXIGENO = 23,
+	GENERAR_COMIDA = 24,
+	CONSUMIR_COMIDA = 25,
+	GENERAR_BASURA = 26,
+	DESCARTAR_BASURA = 27,
+	TAREA_CPU=28
+}op_code_tareas;
+
+const static struct {
+
+	algoritmo_code codigo_algoritmo;
+	const char* str;
+}conversionAlgoritmo[] = {
+		{FIFO, "FIFO"},
+		{RR, "RR"},
+
+};
 
 typedef struct{
+	int cantPatota;
+	int idPatota;
+	t_list* tripulantes;
+	char* tareas;		//TODO
 
-	int  cantPatota;
-	int numeroPatota;
-	t_list*tripulantes;
-	char*tareas;		//TODO
-
-} t_iniciarPatotaMsg;
-
-typedef struct
-{
-	uint32_t posX;
-	uint32_t posY;
-} t_coordenadas;
-
+} t_patota;
 
 typedef struct
 {
-	uint32_t id_sabotaje;		//TODO
+	int id_sabotaje;		//TODO
 	t_coordenadas* coordenadas;
 
 } t_sabotaje;
 
-typedef enum{
-
-    NEW = 1,
-    READY = 2,
-    BLOCKED = 3,
-    EXEC = 4,
-    FINISHED = 5
-
-}t_status_code;
-
 typedef struct
 {
-	uint32_t nombreTarea;		//TODO
+	char* nombreTarea;		//TODO
 	t_coordenadas* coordenadas;
-	uint32_t duracion;
+	int duracion;
+	int parametros;
 
 } t_tarea;
 
-
-
 typedef struct
 {
-	uint32_t idTripulante;
-	uint32_t idPatota;
+	int idTripulante;
+	int idPatota;
 	t_coordenadas* coordenadas;
 	t_status_code estado;
 	t_sabotaje* sabotaje;		//TODO
-	uint32_t misCiclosDeCPU;
-	t_tarea*tareaAsignada;
+	int misCiclosDeCPU;
+	t_tarea* tareaAsignada;
+	int quantumDisponible;
+	int socketTripulanteRam;
+	int socketTripulanteImongo;
+
+	int fueExpulsado; //1 o 0
+
+	sem_t*semaforoCiclo;
+	sem_t*semaforoBloqueadoTripulante;
+	sem_t*semaforoDelTripulante;
+	sem_t*semaforoDelSabotaje;
 
 } t_tripulante;
 
 
-
-
-
+//Inicializacion
+void iniciarLog();
+void inicializarListasGlobales();
 void inicializarConfig(t_config*);
 void inicializarSemaforoPlanificador();
-void leer_consola(uint32_t*);
-opCode string_a_op_code (char*);
+void crearHiloPlanificador();
 
+//Consola
+void leer_consola();
+//void pausarPlanificacion();
+op_code_consola string_to_op_code_consola (char* );
+op_code_tareas string_to_op_code_tareas (char*);
+
+
+
+
+//TRIPULANTES
+void liberarArray(char**);
+int cantidadElementosArray(char**);
+
+void sacarTripulanteDeLista(t_tripulante* , t_list* );
+
+char* convertirEnumAString (t_status_code);
+void inicializarAtributosATripulante(t_list*);
+void crearHilosTripulantes();
+void ejecutarTripulante(t_tripulante*);
+void enviarMensajeDeInicioDeTripulante(t_tripulante*);
+void agregarTripulanteAListaReadyYAvisar(t_tripulante*);
+void agregarTripulanteAListaExecYAvisar(t_tripulante*);
+void agregarTripulanteAListaBloqueadosYAvisar(t_tripulante*);
+void agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(t_tripulante*);
+void agregarTripulanteAListaFinishedYAvisar(t_tripulante*);
+int getIndexTripulanteEnLista(t_list* , t_tripulante* );
+void log_movimiento_tripulante(int, int, int);
+void log_tripulante_cambio_de_cola_planificacion(int, char*, char*);
+void planificarBloqueo();
+void inicioHiloPlanificarBloqueo();
+
+
+void moverAlTripulanteHastaLaTarea(t_tripulante*);
+int llegoATarea(t_tripulante*);
+int distanciaA(t_coordenadas*, t_coordenadas*);
+
+//SABOTAJE
+t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje*);
+void moverAlTripulanteHastaElSabotaje(t_tripulante*,t_sabotaje*);
+int llegoAlSabotaje(t_tripulante*,t_sabotaje*);
+
+//PLANIFICACION
+algoritmo_code stringACodigoAlgoritmo(const char* );
+void planificarSegun();
+void planificarSegunFIFO();
+
+void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante);
+
+void ejecucionRR(t_tripulante*);
+void ejecucionDeTareaTripulanteRR(t_tripulante*);
+
+
+
+//SABOTAJE
+
+bool ordenarTripulantesDeMenorIdAMayor(void* ,void*);
+void pasarATodosLosTripulantesAListaBloqueado();
+void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*,t_tripulante*);
+void pasarTripulantesAListaReady();
+void iniciarHiloSabotaje();
+void planificarSabotaje();
+
+
+//COSAS QUE NOSE SI VAN
+void iniciarHiloRETARDO_CICLO_CPU();
+void sincronizarRETARDO_CICLO_CPU();
 
 #endif /* DISCORDIADOR_H_ */
