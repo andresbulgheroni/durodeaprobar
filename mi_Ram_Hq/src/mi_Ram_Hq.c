@@ -175,9 +175,10 @@ void hilo_servidor(){
 
 	while(true){
 
-		int32_t socket_cliente = esperar_cliente(socket_servidor);
+		int32_t* socket_cliente = malloc(sizeof(int32_t));
+		*socket_cliente = esperar_cliente(socket_servidor);
 		pthread_t hilo_mensaje;
-		pthread_create(&hilo_mensaje,NULL,(void*)recibir_mensaje, (void*) (&socket_cliente));
+		pthread_create(&hilo_mensaje,NULL,(void*)recibir_mensaje, (void*) (socket_cliente));
 		pthread_detach(hilo_mensaje);
 
 	}
@@ -301,10 +302,12 @@ void recibir_mensaje(int32_t* conexion){
 				break;
 
 			}
+			DESCONECTADO:
 			default: terminado = true; break;
 		}
 	}
-
+	close(*conexion);
+	free(conexion);
 	pthread_exit(NULL);
 }
 
@@ -469,6 +472,7 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 		uint32_t cantidad_frames = 1 + (size / TAMANIO_PAGINA);
 		uint32_t size_pcb = cantidad_frames * TAMANIO_PAGINA;
 
+		// MODIFICAR SWAPEO DE PAGINAS. INTERCAMBIAN ENTRE REELPLAZO Y REEMPLAZADO
 		*status = entra_en_swap(cantidad_frames);
 
 		if(*status){
