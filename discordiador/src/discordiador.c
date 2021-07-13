@@ -119,7 +119,7 @@ void inicializarSemaforoPlanificador(){			//Maneja el multiprocesamiento
 
 	sem_init(&sem_pausarPlanificacion,0,0);
 
-	sem_init(&sem_sabotaje,0,1);
+	sem_init(&sem_sabotaje,0,0);
 
 	sem_init(&semaforoInicioCicloBloqueado,0,0);
 
@@ -178,25 +178,52 @@ void iniciarHiloSabotaje(){
 	pthread_detach(hiloSabotaje);
 }
 void planificarSabotaje(){
-	uint32_t socketSabotaje = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
+	uint32_t*socketSabotaje = malloc(sizeof(int));
+	*socketSabotaje = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
 	while(true){
 
-		t_paquete*paqueteSabotaje=recibir_paquete(socketSabotaje);
-		notificar_sabotaje_msg*mensajeDeSabotaje=deserializar_paquete(paqueteSabotaje);
+//		t_paquete*paqueteSabotaje=recibir_paquete(socketSabotaje);
+//		notificar_sabotaje_msg*mensajeDeSabotaje=deserializar_paquete(paqueteSabotaje);
 
-		//sem_wait(&sem_sabotaje);
-		t_sabotaje*sabotajeActivo;
-		sabotajeActivo->coordenadas = mensajeDeSabotaje->coordenadas;
-		sabotajeActivo->id_sabotaje = mensajeDeSabotaje->idSabotaje;
+//		t_paquete*paquete =recibir_paquete(*socketSabotaje);
+
+
+
+		t_sabotaje*sabotajeActivo=malloc(sizeof(t_sabotaje));
+		sabotajeActivo->coordenadas=malloc(sizeof(t_coordenadas));
+
+		//PRUEBAS TODO
+		sleep(7);
+		sabotajeActivo->coordenadas->posX = 2;
+		sabotajeActivo->coordenadas->posX = 3;
+		sabotajeActivo->id_sabotaje = 1;
+
+
+//		sabotajeActivo->coordenadas = get_coordenadas(mensajeDeSabotaje->coordenadas);
+//		sabotajeActivo->id_sabotaje = mensajeDeSabotaje->idSabotaje;
+		log_info(logger,"llego el sabotaje con ID: %d",sabotajeActivo->id_sabotaje);
+
 		haySabotaje=1;
 
 		pasarATodosLosTripulantesAListaBloqueado();
 
-		t_tripulante* tripulanteMasCercano=tripulanteMasCercanoDelSabotaje(sabotajeActivo);
+		log_info(logger,"el tamaño de la lista es:%d\n",list_size(listaBloqueadosPorSabotaje));
+
+		t_tripulante* tripulanteMasCercano;
+		tripulanteMasCercano->coordenadas=malloc(sizeof(t_coordenadas));
+		tripulanteMasCercano = tripulanteMasCercanoDelSabotaje(sabotajeActivo);
+
+		pthread_mutex_lock(&mutex_listaBloqueadosPorSabotaje);
+		sacarTripulanteDeLista(tripulanteMasCercano, listaBloqueadosPorSabotaje);
+		pthread_mutex_unlock(&mutex_listaBloqueadosPorSabotaje);
 
 		pasarAEjecutarAlTripulanteMasCercano(sabotajeActivo,tripulanteMasCercano);
 
 		pasarTripulantesAListaReady();
+
+		pthread_mutex_lock(&mutex_listaEjecutando);
+		sacarTripulanteDeLista(tripulanteMasCercano, listaEjecutando);
+		pthread_mutex_unlock(&mutex_listaEjecutando);
 
 		agregarTripulanteAListaReadyYAvisar(tripulanteMasCercano);		//aca va al final de la lista de ready
 
@@ -209,7 +236,7 @@ void planificarSabotaje(){
 
 		haySabotaje=0;
 		sem_post(&sem_sabotaje);
-		//liberar_conexion(socketSabotaje);
+
 	}
 }
 
@@ -224,31 +251,39 @@ bool ordenarTripulantesDeMenorIdAMayor(void* elemento1,void*elemento2){
 
 void pasarATodosLosTripulantesAListaBloqueado(){
 
+	if(!list_is_empty(listaEjecutando)){
 	if(list_size(listaEjecutando) > 1){
 		list_sort(listaEjecutando, (void*) ordenarTripulantesDeMenorIdAMayor);
 	}
 
-	for(uint32_t i=0; i > list_size(listaEjecutando);i++){
+	for(int i=0; i < list_size(listaEjecutando);i++){
 
 		pthread_mutex_lock(&mutex_listaEjecutando);
 		t_tripulante* tripulanteSacadoDeEjecutar= (t_tripulante*) list_remove(listaEjecutando,0);
 		pthread_mutex_unlock(&mutex_listaEjecutando);
 
+		log_info(logger,"se fue a lista Bloqueados por Sabotaje el tripulante con ID:%d\n",tripulanteSacadoDeEjecutar->idTripulante);
 		agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(tripulanteSacadoDeEjecutar);
 	}
-
-
+	}
+	log_info(logger,"el tamaño de la lista ready es:%d:",list_size(listaReady));
+	if(!list_is_empty(listaReady)){
 	if(list_size(listaReady) > 1){
 		list_sort(listaReady,ordenarTripulantesDeMenorIdAMayor);
 	}
+	log_info(logger,"el tamaño de la lista ready luego del sort es:%d:",list_size(listaReady));
 
-	for(uint32_t i=0; i > list_size(listaReady);i++){
+	int sizeLista = list_size(listaReady);
+	for(int i=0; i < sizeLista ;i++){
 
 		pthread_mutex_lock(&mutex_listaReady);
 		t_tripulante* tripulanteSacadoDeReady= (t_tripulante*) list_remove(listaReady,0);
 		pthread_mutex_unlock(&mutex_listaReady);
 
+		log_info(logger,"se fue a lista Bloqueados por Sabotaje el tripulante con ID:%d\n",tripulanteSacadoDeReady->idTripulante);
+
 		agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(tripulanteSacadoDeReady);
+	}
 	}
 
 	//faltaria la parte de bloqueados que iria dentro del tripulante
@@ -256,7 +291,9 @@ void pasarATodosLosTripulantesAListaBloqueado(){
 }
 
 void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*sabotaje,t_tripulante* tripulanteMasCercano){
-
+	log_info(logger,"el tripulante se tiene que mover %d\n",tripulanteMasCercano->idTripulante);
+	log_info(logger,"el tripulante se tiene que mover desde %d|%d hasta la posicion del sabotaje en %d|%d",tripulanteMasCercano->coordenadas->posX,tripulanteMasCercano->coordenadas->posY,sabotaje->coordenadas->posX,sabotaje->coordenadas->posY);
+	agregarTripulanteAListaExecYAvisar(tripulanteMasCercano);
 
 	while(!llegoAlSabotaje(tripulanteMasCercano,sabotaje)){
 
@@ -630,6 +667,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 					list_iterate(listaBloqueados,(void*) iterador);
 
 				}
+
 			}
 
 			break;
@@ -805,7 +843,7 @@ void agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(t_tripulante* tripulant
 
 	pthread_mutex_lock(&mutex_listaBloqueadosPorSabotaje);
 	list_add(listaBloqueadosPorSabotaje,tripulante);
-	pthread_mutex_lock(&mutex_listaBloqueadosPorSabotaje);
+	pthread_mutex_unlock(&mutex_listaBloqueadosPorSabotaje);
 
 	cambio_estado_msg*mensaje=malloc(sizeof(cambio_estado_msg));
 	mensaje->idPatota=tripulante->idPatota;
@@ -1005,8 +1043,10 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 
 t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
-	t_tripulante* tripulanteMasCercanoSabotaje;
-	t_tripulante* tripulanteTemporal;
+	t_tripulante* tripulanteMasCercanoSabotaje = malloc(sizeof(t_tripulante));
+	t_tripulante* tripulanteTemporal = malloc(sizeof(t_tripulante));;
+	tripulanteMasCercanoSabotaje->coordenadas =malloc(sizeof(t_coordenadas));
+	tripulanteTemporal->coordenadas =malloc(sizeof(t_coordenadas));
 
 	uint32_t distanciaTemporal;
 	uint32_t menorDistanciaSabotaje = 1000;
@@ -1019,6 +1059,8 @@ t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
 	if(!list_is_empty(tripulantesBloqueadosSabotaje)){
 		tripulanteMasCercanoSabotaje = list_get(tripulantesBloqueadosSabotaje, 0);
 		menorDistanciaSabotaje = distanciaA(tripulanteMasCercanoSabotaje->coordenadas, sabotaje->coordenadas);
+
+		log_info(logger,"el valor de la menor distancia es:%d",menorDistanciaSabotaje);
 
 
 		for(uint32_t i = 1; i < tripulantesBloqueadosSabotaje->elements_count; i++){
@@ -1044,6 +1086,8 @@ t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
 	pthread_mutex_lock(&mutex_listaBloqueadosPorSabotaje);
 	sacarTripulanteDeLista(tripulanteMasCercanoSabotaje, listaBloqueadosPorSabotaje);
 	pthread_mutex_unlock(&mutex_listaBloqueadosPorSabotaje);
+
+	printf("quien sos? soy %d",tripulanteMasCercanoSabotaje->idTripulante);
 
 	return tripulanteMasCercanoSabotaje;
 }
