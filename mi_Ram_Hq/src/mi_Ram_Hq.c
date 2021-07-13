@@ -75,6 +75,7 @@ int main(void) {
 	log_info(logger,"MIRAMHQ PID: %d ", getpid());
 
 	signal(SIGUSR1, sig_handler);
+	signal(SIGUSR2, sig_handler);
 
 	pthread_t hilo_server;
 	pthread_create(&hilo_server,NULL,(void*)hilo_servidor, NULL);
@@ -196,7 +197,7 @@ void recibir_mensaje(int32_t* conexion){
 			case INICIAR_PATOTA_MSG:{
 
 				iniciar_patota_msg* mensaje = deserializar_paquete(paquete);
-				printf("INICIO PATOTA %d\n", mensaje->idPatota);
+				//printf("INICIO PATOTA %d\n", mensaje->idPatota);
 				bool status = true;
 
 				switch(ESQUEMA_MEMORIA){
@@ -231,7 +232,7 @@ void recibir_mensaje(int32_t* conexion){
 			case INFORMAR_MOVIMIENTO_RAM:{
 
 				informar_movimiento_ram_msg* mensaje = deserializar_paquete(paquete);
-				printf("MOVER TRIP %d PAT%d a %d|%d\n", mensaje->idTripulante, mensaje->idPatota, mensaje->coordenadasDestino->posX, mensaje->coordenadasDestino->posY);
+				//printf("MOVER TRIP %d PAT%d a %d|%d\n", mensaje->idTripulante, mensaje->idPatota, mensaje->coordenadasDestino->posX, mensaje->coordenadasDestino->posY);
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: informar_movimiento_segmentacion(mensaje, NULL);break;
 					case PAGINACION_VIRTUAL: informar_movimiento_paginacion(mensaje, NULL);break;
@@ -246,7 +247,7 @@ void recibir_mensaje(int32_t* conexion){
 			case CAMBIO_ESTADO:{
 
 				cambio_estado_msg* mensaje = deserializar_paquete(paquete);
-				printf("CAMBIO ESTADO TRIP %d PAT %d a %c\n", mensaje->idTripulante, mensaje->idTripulante, get_status(mensaje->estado));
+				//printf("CAMBIO ESTADO TRIP %d PAT %d a %c\n", mensaje->idTripulante, mensaje->idTripulante, get_status(mensaje->estado));
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: cambiar_estado_segmentacion(mensaje, NULL);break;
 					case PAGINACION_VIRTUAL: cambiar_estado_paginacion(mensaje, NULL);break;
@@ -263,19 +264,19 @@ void recibir_mensaje(int32_t* conexion){
 
 				bool completo_tareas = false;
 				char* tarea;
-				printf("SOLICITO TAREA TRIP %d PAT %d\n", mensaje->idTripulante, mensaje->idPatota);
+				//printf("SOLICITO TAREA TRIP %d PAT %d\n", mensaje->idTripulante, mensaje->idPatota);
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: tarea = siguiente_tarea_segmentacion(mensaje, &completo_tareas, NULL);break;
 					case PAGINACION_VIRTUAL: tarea = siguiente_tarea_paginacion(mensaje, &completo_tareas, NULL);break;
 				}
 
 				if(completo_tareas){
-					printf("COMPLETO TAREAS TRIP %d PAT %d\n", mensaje->idTripulante, mensaje->idPatota);
+					//printf("COMPLETO TAREAS TRIP %d PAT %d\n", mensaje->idTripulante, mensaje->idPatota);
 					enviar_paquete(NULL, COMPLETO_TAREAS, *conexion);
 					log_info(logger, "El tripulante %d de la patota %d ya completo sus tareas", mensaje->idTripulante, mensaje->idPatota);
 
 				}else{
-					printf("%s. TRIP %d PAT %d\n", tarea, mensaje->idTripulante, mensaje->idPatota);
+					//printf("%s. TRIP %d PAT %d\n", tarea, mensaje->idTripulante, mensaje->idPatota);
 					t_string* tarea_msg = get_t_string(tarea);
 					enviar_paquete(tarea_msg, SOLICITAR_SIGUIENTE_TAREA_RTA, *conexion);
 					free(tarea_msg);
@@ -290,7 +291,7 @@ void recibir_mensaje(int32_t* conexion){
 			case EXPULSAR_TRIPULANTE_MSG:{
 
 				expulsar_tripulante_msg* mensaje = deserializar_paquete(paquete);
-				printf("EXPULSAR TRIP %d PAT %d\n", mensaje->idTripulante, mensaje->idPatota);
+				//printf("EXPULSAR TRIP %d PAT %d\n", mensaje->idTripulante, mensaje->idPatota);
 
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: expulsar_tripulante_segmentacion(mensaje, NULL);break;
@@ -1570,7 +1571,7 @@ void dump_segmentacion(FILE* dump){
 	void guardar_tabla(segmento_dump* seg){
 
 		//char* fila = string_from_format("%10s\t\t%15d\t\t%20d\t\t%20d\n", seg->pid, seg->numero_segmento, seg->inicio, seg->tamanio);
-		char* fila = string_from_format("proceso: %s\t\t nro de segmento: %d\t\t inicio: %d\t\t tamanio: %d\n",seg->pid, seg->numero_segmento, seg->inicio, seg->tamanio);
+		char* fila = string_from_format("proceso: %s\t\t nro de segmento: %d\t\t inicio: %x\t\t tamanio: %x\n",seg->pid, seg->numero_segmento, seg->inicio, seg->tamanio);
 		fputs(fila, dump);
 		free(fila);
 	}
@@ -1608,12 +1609,6 @@ int32_t get_espacio_libre(uint32_t size){
 	}
 
 	uint32_t criterio_seleccion = CRITERIO_SELECCION;
-
-	for(int32_t i = 0; i<list_size(segmentos_libres); i++){
-		segmento* seg = list_get(segmentos_libres, i);
-		printf("inicio: %d\n", seg->inicio);
-		printf("tamanio: %d\n", seg->tamanio);
-	}
 
 	list_add_all(lista_auxiliar, list_filter(segmentos_libres, entra_en_el_segmento));
 
@@ -2067,7 +2062,8 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 
 		log_info(logger, "El tripulante %d era el ultimo, se elimino toda la patota %d", mensaje->idTripulante, mensaje->idPatota);
 
-		free(tabla_seg); //alcanza con el free o tengo q sacarlo del dictionary?
+		dictionary_remove(tablas_seg_patota, string_itoa(mensaje->idPatota));
+		free(tabla_seg); //TODO tengo q borrar el mutex?
 
 	} else {
 		segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
