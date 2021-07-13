@@ -12,13 +12,13 @@ int main(void) {
 	//
 	//
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
-		estadoSuperBloque();
-
-		generarRecurso(10,'O');
-		estadoSuperBloque();
-		consumirRecurso(5, 'O');
-
-		estadoSuperBloque();
+//		estadoSuperBloque();
+//
+//		generarRecurso(10,'O');
+//		estadoSuperBloque();
+//		consumirRecurso(5, 'O');
+//
+//		estadoSuperBloque();
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 	//
 	//	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
@@ -53,17 +53,18 @@ int main(void) {
 		//SOCKET_SABOTAJE_GLOBAL= esperar_cliente(socket_servidor);
 
 
-//		int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
-//
-//		while(true){
-//
-//			int32_t socket_cliente = esperar_cliente(socket_servidor);
-//
-//			pthread_t hilo_mensaje;
-//			pthread_create(&hilo_mensaje,NULL,(void*)recibirMensajeTripulante,(void*) (&socket_cliente));
-//			pthread_detach(hilo_mensaje);
-//
-//		}
+		int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
+
+		while(true){
+
+			int32_t*socket_cliente =  malloc(sizeof(int32_t));
+			*socket_cliente = esperar_cliente(socket_servidor);
+
+			pthread_t hilo_mensaje;
+			pthread_create(&hilo_mensaje,NULL,(void*)recibirMensajeTripulante,(void*) (socket_cliente));
+			pthread_detach(hilo_mensaje);
+
+		}
 
 	//	config_destroy(config);
 	return EXIT_SUCCESS;
@@ -221,19 +222,16 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 
 			break;
 
-		} default:
-
-			terminado = true;
-			log_error(logger, "Codigo de op invalido");
-
-			break;
-
-		}
-
-		//free(paquete);
-
+		} DESCONECTADO:
+		default: terminado = true;
+		puts("finalizo la tarea");
+		break;
 	}
 
+
+	}
+	close(*socketCliente);
+	free(socketCliente);
 	pthread_exit(NULL);
 }
 
