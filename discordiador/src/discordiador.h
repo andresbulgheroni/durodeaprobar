@@ -48,18 +48,18 @@ t_log* logger;
 
 t_config*config;
 
-int estaPlanificando;
-int haySabotaje;
+uint32_t estaPlanificando;
+uint32_t haySabotaje;
 
 char*IP_MI_RAM_HQ;
 char*PUERTO_MI_RAM_HQ;
 char*IP_I_MONGO_STORE;
 char*PUERTO_I_MONGO_STORE;
-int GRADO_MULTITAREA;
+uint32_t GRADO_MULTITAREA;
 char*ALGORITMO;
-int QUANTUM;
-int DURACION_SABOTAJE;
-int RETARDO_CICLO_CPU;
+uint32_t QUANTUM;
+uint32_t DURACION_SABOTAJE;
+uint32_t RETARDO_CICLO_CPU;
 
 sem_t sem_planificarMultitarea;
 sem_t sem_pausarPlanificacion;
@@ -155,8 +155,8 @@ typedef struct
 	uint32_t misCiclosDeCPU;
 	t_tarea* tareaAsignada;
 	uint32_t quantumDisponible;
-	int socketTripulanteRam;
-	int socketTripulanteImongo;
+	uint32_t socketTripulanteRam;
+	uint32_t socketTripulanteImongo;
 
 	uint32_t fueExpulsado; //1 o 0
 
@@ -186,7 +186,7 @@ op_code_tareas string_to_op_code_tareas (char*);
 
 //TRIPULANTES
 void liberarArray(char**);
-int cantidadElementosArray(char**);
+uint32_t cantidadElementosArray(char**);
 
 void sacarTripulanteDeLista(t_tripulante* , t_list* );
 
@@ -200,7 +200,7 @@ void agregarTripulanteAListaExecYAvisar(t_tripulante*);
 void agregarTripulanteAListaBloqueadosYAvisar(t_tripulante*);
 void agregarTripulanteAListaBloqueadosPorSabotajeYAvisar(t_tripulante*);
 void agregarTripulanteAListaFinishedYAvisar(t_tripulante*);
-int getIndexTripulanteEnLista(t_list* , t_tripulante* );
+uint32_t getIndexTripulanteEnLista(t_list* , t_tripulante* );
 void log_movimiento_tripulante(uint32_t, uint32_t, uint32_t);
 void log_tripulante_cambio_de_cola_planificacion(uint32_t, char*, char*);
 void planificarBloqueo();
@@ -208,13 +208,13 @@ void inicioHiloPlanificarBloqueo();
 
 
 void moverAlTripulanteHastaLaTarea(t_tripulante*);
-int llegoATarea(t_tripulante*);
-int distanciaA(t_coordenadas*, t_coordenadas*);
+uint32_t llegoATarea(t_tripulante*);
+uint32_t distanciaA(t_coordenadas*, t_coordenadas*);
 
 //SABOTAJE
 t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje*);
 void moverAlTripulanteHastaElSabotaje(t_tripulante*,t_sabotaje*);
-int llegoAlSabotaje(t_tripulante*,t_sabotaje*);
+uint32_t llegoAlSabotaje(t_tripulante*,t_sabotaje*);
 
 //PLANIFICACION
 algoritmo_code stringACodigoAlgoritmo(const char* );

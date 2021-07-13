@@ -228,7 +228,7 @@ void pasarATodosLosTripulantesAListaBloqueado(){
 		list_sort(listaEjecutando, (void*) ordenarTripulantesDeMenorIdAMayor);
 	}
 
-	for(int i=0; i > list_size(listaEjecutando);i++){
+	for(uint32_t i=0; i > list_size(listaEjecutando);i++){
 
 		pthread_mutex_lock(&mutex_listaEjecutando);
 		t_tripulante* tripulanteSacadoDeEjecutar= (t_tripulante*) list_remove(listaEjecutando,0);
@@ -242,7 +242,7 @@ void pasarATodosLosTripulantesAListaBloqueado(){
 		list_sort(listaReady,ordenarTripulantesDeMenorIdAMayor);
 	}
 
-	for(int i=0; i > list_size(listaReady);i++){
+	for(uint32_t i=0; i > list_size(listaReady);i++){
 
 		pthread_mutex_lock(&mutex_listaReady);
 		t_tripulante* tripulanteSacadoDeReady= (t_tripulante*) list_remove(listaReady,0);
@@ -267,7 +267,7 @@ void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*sabotaje,t_tripulante* trip
 		moverAlTripulanteHastaElSabotaje(tripulanteMasCercano,sabotaje);
 		sleep(RETARDO_CICLO_CPU);
 	}
-	for(int i=1; DURACION_SABOTAJE >= i; i++){
+	for(uint32_t i=1; DURACION_SABOTAJE >= i; i++){
 
 		if(estaPlanificando==0){
 			sem_wait(tripulanteMasCercano->semaforoCiclo);
@@ -280,7 +280,7 @@ void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*sabotaje,t_tripulante* trip
 }
 
 void pasarTripulantesAListaReady(){
-	for(int i=0; i > list_size(listaBloqueadosPorSabotaje);i++){
+	for(uint32_t i=0; i > list_size(listaBloqueadosPorSabotaje);i++){
 
 		pthread_mutex_lock(&mutex_listaBloqueadosPorSabotaje);
 		t_tripulante* tripulanteSacadoDeBloqueadoPorSabotaje= (t_tripulante*) list_remove(listaBloqueadosPorSabotaje,0);
@@ -292,14 +292,14 @@ void pasarTripulantesAListaReady(){
 
 
 
-int getIndexTripulanteEnLista(t_list* lista, t_tripulante* tripulante) {
+uint32_t getIndexTripulanteEnLista(t_list* lista, t_tripulante* tripulante) {
 	if (lista->head == NULL)
 		return -1;
 
 	t_link_element *element = lista->head;
 	t_tripulante* otroTripulante = (t_tripulante*) (lista->head->data);
 
-	int index = 0;
+	uint32_t index = 0;
 	while(element != NULL) {
 		if (otroTripulante->idTripulante == tripulante->idTripulante)
 			return index;
@@ -336,11 +336,11 @@ char* convertirEnumAString (t_status_code code){
 
 void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 
-	int cantidadTripulantes = list_size(posicionesTripulantes);
+	uint32_t cantidadTripulantes = list_size(posicionesTripulantes);
 	pthread_t pthread_id[cantidadTripulantes+numeroHiloTripulante];
 
 
-	for(int i=0; i<(list_size(posicionesTripulantes)) ; i++){
+	for(uint32_t i=0; i<(list_size(posicionesTripulantes)) ; i++){
 
 		t_tripulante* tripulante = malloc(sizeof(t_tripulante));
 		tripulante->coordenadas = malloc(sizeof(t_coordenadas));
@@ -396,6 +396,11 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 
 void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
+	uint32_t*socketDiscordiador = malloc(sizeof(int32_t));
+	*socketDiscordiador = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
+
+	uint32_t*socketBitacora = malloc(sizeof(int32_t));
+	*socketBitacora = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
 
 	char* leido=readline(">");
 
@@ -412,7 +417,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
 			//INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt
 
-			uint32_t socketPatota = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
+
 
 			t_list* posicionesTripulantes = list_create();
 
@@ -443,7 +448,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 
 
-				int contadorLista = 0;
+				uint32_t contadorLista = 0;
 
 				while(mensaje[3+contadorLista]!= NULL){
 					list_add(posicionesTripulantes,mensaje[3+contadorLista]);
@@ -455,19 +460,19 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 					contadorLista++;
 				}
 
-				for(int j=0; j <(3 + cantidadDeTripulantes - contadorLista); j++){
+				for(uint32_t j=0; j <(3 + cantidadDeTripulantes - contadorLista); j++){
 
 					list_add(posicionesTripulantes,"0|0");
 
 				}
 
-				for(int i = 0; i< list_size(posicionesTripulantes);i++){
+				for(uint32_t i = 0; i< list_size(posicionesTripulantes);i++){
 					char* posiciones = list_get(posicionesTripulantes, i);
 					log_info(logger,posiciones);
 				}
 
 
-				for(int i=0; i< list_size(posicionesTripulantes) ; i++){			//TODO
+				for(uint32_t i=0; i< list_size(posicionesTripulantes) ; i++){			//TODO
 
 
 					tripulante_data_msg*tripulanteConCoordenadas=malloc(sizeof(tripulante_data_msg));
@@ -483,10 +488,10 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 				}
 				mensajePatota->tripulantes=posicionesTripulantesParaRam;
 
-				enviar_paquete(mensajePatota,INICIAR_PATOTA_MSG,socketPatota);
+				enviar_paquete(mensajePatota,INICIAR_PATOTA_MSG,*socketDiscordiador);
 
 
-				t_paquete*paquete =recibir_paquete(socketPatota);
+				t_paquete*paquete =recibir_paquete(*socketDiscordiador);
 				if(paquete->codigo == OK_MSG){
 					log_info(logger,"mensaje a RAM exitoso, creando patotas con tripulantes");
 				inicializarAtributosATripulante(posicionesTripulantes);
@@ -515,7 +520,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 				free(mensajePatota);
 
-				liberar_conexion(socketPatota);
+
 
 
 
@@ -534,7 +539,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			strftime(output,128,"%d/%m/%y %H:%M:%S",tlocal);
 			printf("\nEstado de la Nave: %s",output);
 			log_info(logger,"Estado de la Nave: %s",output);
-			int i = 0;
+			uint32_t i = 0;
 
 			for(i=0; i<list_size(tripulantes);i++){
 				t_tripulante* tripulante = list_get(tripulantes, i);
@@ -554,8 +559,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 
 			//ENVIO MENSAJE
-			uint32_t socketExpulsar = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
-			int id=atoi(mensaje[1]);
+			uint32_t id=atoi(mensaje[1]);
 
 			expulsar_tripulante_msg* mensajeExpulsar=malloc(sizeof(expulsar_tripulante_msg));
 
@@ -569,7 +573,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			mensajeExpulsar->idTripulante= tripulanteExpulsado->idTripulante;
 			mensajeExpulsar->idPatota= tripulanteExpulsado->idPatota;
-			enviar_paquete(mensajeExpulsar,EXPULSAR_TRIPULANTE_MSG,socketExpulsar);
+			enviar_paquete(mensajeExpulsar,EXPULSAR_TRIPULANTE_MSG,*socketDiscordiador);
 
 			//LO SACO DE TODAS LAS LISTAS Y LO SACO DEL WHILE DEL HILO
 			tripulanteExpulsado->fueExpulsado=1;		//ESTO ES UN FLAG.
@@ -588,7 +592,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			printf("fui expulsado mi id era:%d",tripulanteExpulsado->idTripulante);
 
 			free(mensajeExpulsar);
-			liberar_conexion(socketExpulsar);
+
 
 			break;
 		}
@@ -604,7 +608,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 				estaPlanificando=1;
 
-				//			for(int i=0; i<list_size(sem_tripulante_ciclo); i++){
+				//			for(uint32_t i=0; i<list_size(sem_tripulante_ciclo); i++){
 				//				sem_t* semaforoDelTripulanteCiclo = (sem_t*) list_get(sem_tripulante_ciclo,i);
 				//				sem_post(semaforoDelTripulanteCiclo);
 				//			}
@@ -642,22 +646,22 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 		case OBTENER_BITACORA: { //Este comando obtendrá la bitácora del tripulante pasado por parámetro a través de una consulta a i-Mongo-Store.
 
 			//enviarMensaje();
-			int socketBitacora = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
-			int id=atoi(mensaje[1]);
+
+			uint32_t id=atoi(mensaje[1]);
 
 			obtener_bitacora_msg*mensajeBitacora=malloc(sizeof(obtener_bitacora_msg));
 			mensajeBitacora->idTripulante=id;
 
 			printf("solicito la bitacora el ID: %d:",id);
-			enviar_paquete(mensajeBitacora,OBTENER_BITACORA_MSG,socketBitacora);
+			enviar_paquete(mensajeBitacora,OBTENER_BITACORA_MSG,*socketBitacora);
 
 			puts("se mando el mensaje correctamente");
 
 			free(mensajeBitacora);
 
 			//recibirMensaje()
-			t_paquete*paqueteBitacora = recibir_paquete(socketBitacora);
-			printf("el valor del socket es:%d",socketBitacora);
+			t_paquete*paqueteBitacora = recibir_paquete(*socketBitacora);
+			printf("el valor del socket es:%d",*socketBitacora);
 
 			obtener_bitacora_rta*mensajeBitacoraRta = deserializar_paquete(paqueteBitacora);
 
@@ -666,7 +670,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			log_info(logger,"el contenido de la bitacora del ID: %d es:\n%s",id,mensajeBitacoraRta->bitacora->string);
 
-			liberar_conexion(socketBitacora);
+
 
 
 			break;
@@ -685,7 +689,8 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 	}
 
 	free(leido);
-
+	close(*socketDiscordiador);
+	free(socketDiscordiador);
 }
 
 ///////////////////////////////////////FUNCIONES GENERALES///////////////
@@ -701,9 +706,9 @@ void log_tripulante_cambio_de_cola_planificacion(uint32_t id, char* razon, char*
 	log_info(logger,log_msg, id, cola, razon);
 }
 
-int cantidadElementosArray(char** array)
+uint32_t cantidadElementosArray(char** array)
 {
-	int i = 0;
+	uint32_t i = 0;
 	while(array[i])
 	{
 		i++;
@@ -713,15 +718,15 @@ int cantidadElementosArray(char** array)
 
 void liberarArray(char** array)
 {
-	for(int i = 0; i < cantidadElementosArray(array); i++)
+	for(uint32_t i = 0; i < cantidadElementosArray(array); i++)
 		free(array[i]);
 	free(array);
 }
 
 void sacarTripulanteDeLista(t_tripulante* tripulante, t_list* lista){
 
-	int a = list_size(lista);
-	for(int i=0; i<a ; i++){
+	uint32_t a = list_size(lista);
+	for(uint32_t i=0; i<a ; i++){
 		t_tripulante* tripulanteDeLista = list_get(lista, i);
 		if(tripulante->idTripulante == tripulanteDeLista->idTripulante){
 			list_remove(lista, i);
@@ -833,20 +838,20 @@ void agregarTripulanteAListaFinishedYAvisar(t_tripulante* tripulante){
 }
 
 
-int distanciaA(t_coordenadas* desde, t_coordenadas* hasta){
+uint32_t distanciaA(t_coordenadas* desde, t_coordenadas* hasta){
 
 	if (desde == NULL || hasta == NULL) {
 		return -1;
 	}
 
-	int distanciaX = abs(desde->posX - hasta->posX);
-	int distanciaY = abs(desde->posY - hasta->posY);
+	uint32_t distanciaX = abs(desde->posX - hasta->posX);
+	uint32_t distanciaY = abs(desde->posY - hasta->posY);
 
 	return distanciaX + distanciaY;
 
 }
 
-int llegoAlSabotaje(t_tripulante* tripulante,t_sabotaje*sabotaje){
+uint32_t llegoAlSabotaje(t_tripulante* tripulante,t_sabotaje*sabotaje){
 
 	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
 	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
@@ -884,7 +889,7 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 
 	if (posicionXtripulante != posicionXsabotaje) {
 
-		int diferenciaEnX = posicionXsabotaje - posicionXtripulante;
+		uint32_t diferenciaEnX = posicionXsabotaje - posicionXtripulante;
 		if (diferenciaEnX > 0) {
 			tripulante->coordenadas->posX = posicionXtripulante + 1;
 		} else if (diferenciaEnX < 0) {
@@ -893,7 +898,7 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 
 	} else if (posicionYtripulante != posicionYsabotaje) {
 
-		int diferenciaEnY = posicionYsabotaje - posicionYtripulante;
+		uint32_t diferenciaEnY = posicionYsabotaje - posicionYtripulante;
 		if (diferenciaEnY > 0) {
 			tripulante->coordenadas->posY = posicionYtripulante + 1;
 		} else if (diferenciaEnY < 0) {
@@ -918,7 +923,7 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 
 }
 
-int llegoATarea(t_tripulante* tripulante){
+uint32_t llegoATarea(t_tripulante* tripulante){
 
 	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
 	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
@@ -954,7 +959,7 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 	if (posicionXtripulante != posicionXtarea) {
 
-		int diferenciaEnX = posicionXtarea - posicionXtripulante;
+		uint32_t diferenciaEnX = posicionXtarea - posicionXtripulante;
 		if (diferenciaEnX > 0) {
 			tripulante->coordenadas->posX = posicionXtripulante + 1;
 		} else if (diferenciaEnX < 0) {
@@ -963,7 +968,7 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 	} else if (posicionYtripulante != posicionYtarea) {
 
-		int diferenciaEnY = posicionYtarea - posicionYtripulante;
+		uint32_t diferenciaEnY = posicionYtarea - posicionYtripulante;
 		if (diferenciaEnY > 0) {
 			tripulante->coordenadas->posY = posicionYtripulante + 1;
 		} else if (diferenciaEnY < 0) {
@@ -1003,8 +1008,8 @@ t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
 	t_tripulante* tripulanteMasCercanoSabotaje;
 	t_tripulante* tripulanteTemporal;
 
-	int distanciaTemporal;
-	int menorDistanciaSabotaje = 1000;
+	uint32_t distanciaTemporal;
+	uint32_t menorDistanciaSabotaje = 1000;
 
 
 	pthread_mutex_lock(&mutex_listaNuevos);
@@ -1016,7 +1021,7 @@ t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
 		menorDistanciaSabotaje = distanciaA(tripulanteMasCercanoSabotaje->coordenadas, sabotaje->coordenadas);
 
 
-		for(int i = 1; i < tripulantesBloqueadosSabotaje->elements_count; i++){
+		for(uint32_t i = 1; i < tripulantesBloqueadosSabotaje->elements_count; i++){
 
 			if(menorDistanciaSabotaje == 0){
 				break;
@@ -1045,7 +1050,7 @@ t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
 
 
 algoritmo_code stringACodigoAlgoritmo(const char* string) {
-	for (int i = 0;
+	for (uint32_t i = 0;
 			i < sizeof(conversionAlgoritmo) / sizeof(conversionAlgoritmo[0]);
 			i++) {
 		if (!strcmp(string, conversionAlgoritmo[i].str))
@@ -1062,10 +1067,10 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 	printf("hola soy:%d\n",tripulante->idTripulante);
 
-	int socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);		//TODO
+	uint32_t socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);		//TODO
 	tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
 
-	int socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
+	uint32_t socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
 
 	tripulante->estado=READY;
@@ -1155,7 +1160,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 
 			if(!llegoATarea(tripulante) && tripulante->fueExpulsado != 1 && haySabotaje !=1){
-				int distancia;
+				uint32_t distancia;
 				distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
 				log_info(logger,"se esta moviendo a la tarea la tarea el tripulante %d",tripulante->idTripulante);
 
@@ -1487,7 +1492,7 @@ void planificarBloqueo(){
 
 		printf("asigno al tripulante con ID: %d a planificar bloqueo\n",tripulante->idTripulante);
 
-		int r=1;
+		uint32_t r=1;
 
 		while(tripulante->tareaAsignada->duracion>=r && tripulante->fueExpulsado != 1){		// DURACION DE LA TAREA BLOQUEADA	si fue expulsado que salga y si hay sabotaje que entre en el wait
 
@@ -1566,7 +1571,7 @@ void planificarSegun(){			//TODO
 void ejecucionRR(t_tripulante*tripulante){
 
 	if(!llegoATarea(tripulante) && tripulante->fueExpulsado!=1 && haySabotaje!=1){
-		int distancia;
+		uint32_t distancia;
 		distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
 		log_info(logger,"se esta moviendo a la tarea la tarea el tripulante %d",tripulante->idTripulante);
 
