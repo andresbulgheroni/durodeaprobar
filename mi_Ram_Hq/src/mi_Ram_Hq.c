@@ -473,7 +473,7 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 		uint32_t size_pcb = cantidad_frames * TAMANIO_PAGINA;
 
 		// MODIFICAR SWAPEO DE PAGINAS. INTERCAMBIAN ENTRE REELPLAZO Y REEMPLAZADO
-		*status = entra_en_swap(cantidad_frames);
+		*status = entra_pcb(cantidad_frames);
 
 		if(*status){
 
@@ -1205,10 +1205,11 @@ void pasar_de_swap_a_principal(t_pagina_patota* pagina){
 
 }
 
-bool entra_en_swap(uint32_t cantidad){
+bool entra_pcb(uint32_t cantidad){
 	pthread_mutex_lock(&m_TABLA_LIBRES_V);
 
-	bool valor = list_size(frames_swap) >= cantidad;
+	bool valor = (list_size(frames_swap) + (TAMANIO_MEMORIA / TAMANIO_PAGINA)) >= cantidad;
+
 
 	pthread_mutex_unlock(&m_TABLA_LIBRES_V);
 

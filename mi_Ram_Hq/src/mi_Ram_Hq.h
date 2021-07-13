@@ -162,7 +162,7 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* datos);
 void guardar_en_memoria_swap(t_pagina_patota* pagina, void* datos);
 uint32_t generar_direccion_logica_paginacion(uint32_t pagina, uint32_t desplazamiento);
 void obtener_direccion_logica_paginacion(uint32_t* pagina, uint32_t* desplazamiento, uint32_t direccion);
-bool entra_en_swap(uint32_t cantidad);
+bool entra_pcb(uint32_t cantidad);
 bool entra_en_memoria(uint32_t size_pcb);
 void leer_pagina_de_memoria(t_pagina_patota* pagina, void* to);
 void liberar_memoria_principal_paginacion(t_pagina_patota* pagina);
