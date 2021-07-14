@@ -1161,6 +1161,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 				tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 				tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 				tripulante->tareaAsignada->parametros=0;
+				tripulante->tareaAsignada->finalizoTarea=false;
 
 			}	else   {
 
@@ -1172,6 +1173,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 				tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 				tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 				tripulante->tareaAsignada->parametros=atoi(nombreTarea[1]);
+				tripulante->tareaAsignada->finalizoTarea=false;
 
 
 			}
@@ -1296,6 +1298,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 								tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 								tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 								tripulante->tareaAsignada->parametros=0;
+								tripulante->tareaAsignada->finalizoTarea=false;
 
 							}	else   {
 
@@ -1307,6 +1310,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 								tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 								tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 								tripulante->tareaAsignada->parametros=atoi(nombreTarea[1]);
+								tripulante->tareaAsignada->finalizoTarea=false;
 
 							}
 
@@ -1484,6 +1488,7 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 									tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 									tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 									tripulante->tareaAsignada->parametros=0;
+									tripulante->tareaAsignada->finalizoTarea=false;
 
 								}	else   {
 
@@ -1495,6 +1500,7 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 									tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 									tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 									tripulante->tareaAsignada->parametros=atoi(nombreTarea[1]);
+									tripulante->tareaAsignada->finalizoTarea=false;
 
 
 								}
@@ -1743,6 +1749,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 							tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 							tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 							tripulante->tareaAsignada->parametros=0;
+							tripulante->tareaAsignada->finalizoTarea=false;
 
 						}	else   {
 
@@ -1754,7 +1761,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 							tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 							tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 							tripulante->tareaAsignada->parametros=atoi(nombreTarea[1]);
-
+							tripulante->tareaAsignada->finalizoTarea=false;
 
 						}
 
@@ -1827,6 +1834,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 								tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 								tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 								tripulante->tareaAsignada->parametros=0;
+								tripulante->tareaAsignada->finalizoTarea=false;
 
 							}	else   {
 
@@ -1838,7 +1846,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 								tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 								tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 								tripulante->tareaAsignada->parametros=atoi(nombreTarea[1]);
-
+								tripulante->tareaAsignada->finalizoTarea=false;
 
 							}
 
@@ -1951,7 +1959,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 							tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 							tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 							tripulante->tareaAsignada->parametros=0;
-
+							tripulante->tareaAsignada->finalizoTarea=false;
 						}	else   {
 
 							log_info(logger,"solicito una tarea de IO el tripulante con ID:%d",tripulante->idTripulante);
@@ -1962,7 +1970,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 							tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 							tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 							tripulante->tareaAsignada->parametros=atoi(nombreTarea[1]);
-
+							tripulante->tareaAsignada->finalizoTarea=false;
 
 						}
 

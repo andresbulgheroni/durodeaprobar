@@ -142,6 +142,7 @@ typedef struct
 	t_coordenadas* coordenadas;
 	uint32_t duracion;
 	uint32_t parametros;
+	bool finalizoTarea;
 
 } t_tarea;
 
@@ -159,6 +160,7 @@ typedef struct
 	uint32_t socketTripulanteImongo;
 
 	uint32_t fueExpulsado; //1 o 0
+	bool completoTodasLasTareas;
 
 	sem_t*semaforoCiclo;
 	sem_t*semaforoBloqueadoTripulante;
