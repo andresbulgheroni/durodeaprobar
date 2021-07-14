@@ -29,7 +29,7 @@ int main(void){
 
 	iniciarLog();
 	inicializarListasGlobales();
-	//iniciarHiloSabotaje();
+	iniciarHiloSabotaje();
 	crearHiloPlanificador();
 	inicioHiloPlanificarBloqueo();
 	inicializarSemaforoPlanificador();
@@ -195,7 +195,7 @@ void planificarSabotaje(){
 		//PRUEBAS TODO
 		sleep(7);
 		sabotajeActivo->coordenadas->posX = 2;
-		sabotajeActivo->coordenadas->posX = 3;
+		sabotajeActivo->coordenadas->posY = 3;
 		sabotajeActivo->id_sabotaje = 1;
 
 
@@ -255,8 +255,8 @@ void pasarATodosLosTripulantesAListaBloqueado(){
 	if(list_size(listaEjecutando) > 1){
 		list_sort(listaEjecutando, (void*) ordenarTripulantesDeMenorIdAMayor);
 	}
-
-	for(int i=0; i < list_size(listaEjecutando);i++){
+	int sizeListaEjecutando = list_size(listaEjecutando);
+	for(int i=0; i < sizeListaEjecutando;i++){
 
 		pthread_mutex_lock(&mutex_listaEjecutando);
 		t_tripulante* tripulanteSacadoDeEjecutar= (t_tripulante*) list_remove(listaEjecutando,0);
@@ -317,7 +317,8 @@ void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*sabotaje,t_tripulante* trip
 }
 
 void pasarTripulantesAListaReady(){
-	for(uint32_t i=0; i > list_size(listaBloqueadosPorSabotaje);i++){
+	int sizeListaBloqueadoSabotaje = list_size(listaBloqueadosPorSabotaje);
+	for(uint32_t i=0; sizeListaBloqueadoSabotaje  > i;i++){
 
 		pthread_mutex_lock(&mutex_listaBloqueadosPorSabotaje);
 		t_tripulante* tripulanteSacadoDeBloqueadoPorSabotaje= (t_tripulante*) list_remove(listaBloqueadosPorSabotaje,0);
