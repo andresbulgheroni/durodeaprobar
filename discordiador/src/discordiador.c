@@ -29,7 +29,7 @@ int main(void){
 
 	iniciarLog();
 	inicializarListasGlobales();
-	iniciarHiloSabotaje();
+	//iniciarHiloSabotaje();
 	crearHiloPlanificador();
 	inicioHiloPlanificarBloqueo();
 	inicializarSemaforoPlanificador();
@@ -452,6 +452,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 		switch(codigo_mensaje){
 
 		case INICIAR_PATOTA: {	//INICIAR_PATOTA 3 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
+			//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota2.txt 1|1 2|1
 			//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
 			//INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt
 
@@ -920,11 +921,11 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 			mensajeMovimientoSabotajeMongo->coordenadasOrigen->posX = tripulante->coordenadas->posX;
 			mensajeMovimientoSabotajeMongo->coordenadasOrigen->posY = tripulante->coordenadas->posY;
 
-	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
-	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
+	int posicionXtripulante = tripulante->coordenadas->posX;
+	int posicionYtripulante = tripulante->coordenadas->posY;
 
-	uint32_t posicionXsabotaje = sabotaje->coordenadas->posX;
-	uint32_t posicionYsabotaje = sabotaje->coordenadas->posY;
+	int posicionXsabotaje = sabotaje->coordenadas->posX;
+	int posicionYsabotaje = sabotaje->coordenadas->posY;
 
 	if (posicionXtripulante != posicionXsabotaje) {
 
@@ -937,7 +938,7 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 
 	} else if (posicionYtripulante != posicionYsabotaje) {
 
-		uint32_t diferenciaEnY = posicionYsabotaje - posicionYtripulante;
+		int diferenciaEnY = posicionYsabotaje - posicionYtripulante;
 		if (diferenciaEnY > 0) {
 			tripulante->coordenadas->posY = posicionYtripulante + 1;
 		} else if (diferenciaEnY < 0) {
@@ -962,13 +963,13 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 
 }
 
-uint32_t llegoATarea(t_tripulante* tripulante){
+int32_t llegoATarea(t_tripulante* tripulante){
 
-	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
-	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
+	int32_t posicionXtripulante = tripulante->coordenadas->posX;
+	int32_t posicionYtripulante = tripulante->coordenadas->posY;
 
-	uint32_t posicionXtarea = tripulante->tareaAsignada->coordenadas->posX;
-	uint32_t posicionYtarea = tripulante->tareaAsignada->coordenadas->posY;
+	int32_t posicionXtarea = tripulante->tareaAsignada->coordenadas->posX;
+	int32_t posicionYtarea = tripulante->tareaAsignada->coordenadas->posY;
 
 	return (posicionXtripulante == posicionXtarea) && (posicionYtripulante == posicionYtarea);
 }
@@ -990,15 +991,15 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 			mensajeMovimientoMongo->coordenadasOrigen->posY = tripulante->coordenadas->posY;
 
 
-	uint32_t posicionXtripulante = tripulante->coordenadas->posX;
-	uint32_t posicionYtripulante = tripulante->coordenadas->posY;
+	int32_t posicionXtripulante = tripulante->coordenadas->posX;
+	int32_t posicionYtripulante = tripulante->coordenadas->posY;
 
-	uint32_t posicionXtarea = tripulante->tareaAsignada->coordenadas->posX;
-	uint32_t posicionYtarea = tripulante->tareaAsignada->coordenadas->posY;
+	int32_t posicionXtarea = tripulante->tareaAsignada->coordenadas->posX;
+	int32_t posicionYtarea = tripulante->tareaAsignada->coordenadas->posY;
 
 	if (posicionXtripulante != posicionXtarea) {
 
-		uint32_t diferenciaEnX = posicionXtarea - posicionXtripulante;
+		int32_t diferenciaEnX = posicionXtarea - posicionXtripulante;
 		if (diferenciaEnX > 0) {
 			tripulante->coordenadas->posX = posicionXtripulante + 1;
 		} else if (diferenciaEnX < 0) {
@@ -1007,7 +1008,7 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 	} else if (posicionYtripulante != posicionYtarea) {
 
-		uint32_t diferenciaEnY = posicionYtarea - posicionYtripulante;
+		int32_t diferenciaEnY = posicionYtarea - posicionYtripulante;
 		if (diferenciaEnY > 0) {
 			tripulante->coordenadas->posY = posicionYtripulante + 1;
 		} else if (diferenciaEnY < 0) {
@@ -1175,7 +1176,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 			}
 
-
+			log_info(logger,"le asigno la primer tarea al tripulante %d\n",tripulante->idTripulante);
 
 			break;
 
@@ -1300,13 +1301,12 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 								log_info(logger,"solicito una tarea de IO el tripulante con ID:%d",tripulante->idTripulante);
 
-								tripulante->tareaAsignada->nombreTarea = malloc(strlen(nombreTarea[0] ) + 1);
+								tripulante->tareaAsignada->nombreTarea = malloc(strlen(nombreTarea[0] ) + 1);	//ACA ROMPE
 								strcpy(tripulante->tareaAsignada->nombreTarea,nombreTarea[0]);
 								tripulante->tareaAsignada->coordenadas->posX=mensajeTareaRta->tarea->coordenadas->posX;
 								tripulante->tareaAsignada->coordenadas->posY=mensajeTareaRta->tarea->coordenadas->posY;
 								tripulante->tareaAsignada->duracion=mensajeTareaRta->tarea->duracion;
 								tripulante->tareaAsignada->parametros=atoi(nombreTarea[1]);
-
 
 							}
 
