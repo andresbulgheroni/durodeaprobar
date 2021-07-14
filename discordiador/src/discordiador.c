@@ -1237,6 +1237,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 														mandarTareaCpu->parametros =tripulante->tareaAsignada->parametros;
 
 														enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
+														free(mandarTareaCpu);
 
 						}
 
@@ -1387,10 +1388,11 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 
 		if(tripulante->misCiclosDeCPU==tripulante->tareaAsignada->duracion && tripulante->fueExpulsado != 1 && haySabotaje != 1){
 
-			fin_tarea_msg* mandarTareaIO=malloc(sizeof(inicio_tarea_msg));
-					mandarTareaIO->idTripulante = tripulante->idTripulante;
-					mandarTareaIO->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);		//mando el fin de la tarea
-					enviar_paquete(mandarTareaIO, FIN_TAREA,tripulante->socketTripulanteImongo);
+			fin_tarea_msg* mandarTareaCPU=malloc(sizeof(inicio_tarea_msg));
+					mandarTareaCPU->idTripulante = tripulante->idTripulante;
+					mandarTareaCPU->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);		//mando el fin de la tarea
+					enviar_paquete(mandarTareaCPU, FIN_TAREA,tripulante->socketTripulanteImongo);
+					free(mandarTareaCPU);
 
 			tripulante->tareaAsignada->finalizoTarea=true;
 
@@ -1646,7 +1648,7 @@ void ejecucionRR(t_tripulante*tripulante){
 			distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
 
 		}
-		if(distancia == 0 && (string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)==TAREA_CPU)){
+		if(distancia == 0 && (string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)==TAREA_CPU)){			//ME ESTA FALTANDO ALGO PARA QUE NO VUELVA A ENTRAR SI YA MANDO LA TAREA 		TODO
 
 			inicio_tarea_msg* mandarTareaCpu=malloc(sizeof(inicio_tarea_msg));
 										mandarTareaCpu->idTripulante = tripulante->idTripulante;
@@ -1714,7 +1716,16 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 
 		if(tripulante->misCiclosDeCPU==tripulante->tareaAsignada->duracion && tripulante->quantumDisponible > 0 && tripulante->fueExpulsado!=1){	//SI LLEGO Y EL QUANTUM NO ES 0 SIGUE EJECUTANDO OTRA TAREA
-			tripulante->tareaAsignada=NULL;
+			tripulante->tareaAsignada->finalizoTarea=true;
+
+			//le mando el FIN tarea a MONGO  	TODO
+			fin_tarea_msg* mandarTareaCPU=malloc(sizeof(inicio_tarea_msg));
+			mandarTareaCPU->idTripulante = tripulante->idTripulante;
+			mandarTareaCPU->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);		//mando el fin de la tarea
+			enviar_paquete(mandarTareaCPU, FIN_TAREA,tripulante->socketTripulanteImongo);
+			free(mandarTareaCPU);
+
+			free(tripulante->tareaAsignada->nombreTarea);
 			tripulante->misCiclosDeCPU=0;
 
 			log_info(logger,"se termino la tarea y de quantum le queda %d del tripulante con ID: %d\n",tripulante->quantumDisponible,tripulante->idTripulante);
@@ -1795,7 +1806,17 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 		if(tripulante->misCiclosDeCPU == tripulante->tareaAsignada->duracion && tripulante->quantumDisponible == 0 && tripulante->fueExpulsado!=1 && haySabotaje!=1){	//SI EL QUANTUM ES 0 OSEA HIZO SU ULTIMA RAFAGA Y TAMBIEN TERMINO LA TAREA
 
-			tripulante->tareaAsignada=NULL;
+			tripulante->tareaAsignada->finalizoTarea=true;
+
+						//le mando el FIN tarea a MONGO
+			fin_tarea_msg* mandarTareaCPU=malloc(sizeof(inicio_tarea_msg));
+			mandarTareaCPU->idTripulante = tripulante->idTripulante;
+			mandarTareaCPU->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);		//mando el fin de la tarea
+			enviar_paquete(mandarTareaCPU, FIN_TAREA,tripulante->socketTripulanteImongo);
+			free(mandarTareaCPU);
+
+			free(tripulante->tareaAsignada->nombreTarea);
+
 			tripulante->misCiclosDeCPU=0;		//LE SETEO EL VALOR AL CICLO
 			tripulante->quantumDisponible=QUANTUM; //le vuelvo a setear el quantum
 
@@ -1930,6 +1951,17 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 			sem_wait(tripulante->semaforoBloqueadoTripulante);		//el hilo me da el post para que pueda seguir, es por tripulante para que sea en orden.
 
 			printf("TIRO EL WAIT DEL SEMAFORO el tripulante %d \n",tripulante->idTripulante);
+
+			fin_tarea_msg*mandarFinTareaIO =malloc(sizeof(fin_tarea_msg));
+			mandarFinTareaIO->idTripulante = tripulante->idTripulante;
+			mandarFinTareaIO->nombreTarea = get_t_string(tripulante->tareaAsignada->nombreTarea);
+			enviar_paquete(mandarFinTareaIO,FIN_TAREA,tripulante->socketTripulanteImongo);
+
+			free(mandarFinTareaIO);
+
+			//tripulante->tareaAsignada->finalizoTarea=true;		No es necesario ya que si es expulsado no entra en el otro y sino directamente pide otra tarea
+			free(tripulante->tareaAsignada->nombreTarea);
+
 
 			if(tripulante->fueExpulsado !=1){
 			//mandarTarea()
