@@ -1962,6 +1962,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 			//tripulante->tareaAsignada->finalizoTarea=true;		No es necesario ya que si es expulsado no entra en el otro y sino directamente pide otra tarea
 			free(tripulante->tareaAsignada->nombreTarea);
 
+			tripulante->quantumDisponible = QUANTUM;
 
 			if(tripulante->fueExpulsado !=1){
 			//mandarTarea()
