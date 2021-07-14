@@ -210,7 +210,7 @@ void inicioHiloPlanificarBloqueo();
 
 
 void moverAlTripulanteHastaLaTarea(t_tripulante*);
-int llegoATarea(t_tripulante*);
+int32_t llegoATarea(t_tripulante*);
 uint32_t distanciaA(t_coordenadas*, t_coordenadas*);
 
 //SABOTAJE

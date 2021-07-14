@@ -178,7 +178,7 @@ void iniciarHiloSabotaje(){
 	pthread_detach(hiloSabotaje);
 }
 void planificarSabotaje(){
-	uint32_t*socketSabotaje = malloc(sizeof(int));
+	uint32_t*socketSabotaje = malloc(sizeof(int32_t));
 	*socketSabotaje = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
 	while(true){
 
@@ -255,8 +255,8 @@ void pasarATodosLosTripulantesAListaBloqueado(){
 	if(list_size(listaEjecutando) > 1){
 		list_sort(listaEjecutando, (void*) ordenarTripulantesDeMenorIdAMayor);
 	}
-	int sizeListaEjecutando = list_size(listaEjecutando);
-	for(int i=0; i < sizeListaEjecutando;i++){
+	int32_t sizeListaEjecutando = list_size(listaEjecutando);
+	for(int32_t i=0; i < sizeListaEjecutando;i++){
 
 		pthread_mutex_lock(&mutex_listaEjecutando);
 		t_tripulante* tripulanteSacadoDeEjecutar= (t_tripulante*) list_remove(listaEjecutando,0);
@@ -273,8 +273,8 @@ void pasarATodosLosTripulantesAListaBloqueado(){
 	}
 	log_info(logger,"el tamaño de la lista ready luego del sort es:%d:",list_size(listaReady));
 
-	int sizeLista = list_size(listaReady);
-	for(int i=0; i < sizeLista ;i++){
+	int32_t sizeLista = list_size(listaReady);
+	for(int32_t i=0; i < sizeLista ;i++){
 
 		pthread_mutex_lock(&mutex_listaReady);
 		t_tripulante* tripulanteSacadoDeReady= (t_tripulante*) list_remove(listaReady,0);
@@ -317,7 +317,7 @@ void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*sabotaje,t_tripulante* trip
 }
 
 void pasarTripulantesAListaReady(){
-	int sizeListaBloqueadoSabotaje = list_size(listaBloqueadosPorSabotaje);
+	int32_t sizeListaBloqueadoSabotaje = list_size(listaBloqueadosPorSabotaje);
 	for(uint32_t i=0; sizeListaBloqueadoSabotaje  > i;i++){
 
 		pthread_mutex_lock(&mutex_listaBloqueadosPorSabotaje);
@@ -921,11 +921,11 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 			mensajeMovimientoSabotajeMongo->coordenadasOrigen->posX = tripulante->coordenadas->posX;
 			mensajeMovimientoSabotajeMongo->coordenadasOrigen->posY = tripulante->coordenadas->posY;
 
-	int posicionXtripulante = tripulante->coordenadas->posX;
-	int posicionYtripulante = tripulante->coordenadas->posY;
+	int32_t posicionXtripulante = tripulante->coordenadas->posX;
+	int32_t posicionYtripulante = tripulante->coordenadas->posY;
 
-	int posicionXsabotaje = sabotaje->coordenadas->posX;
-	int posicionYsabotaje = sabotaje->coordenadas->posY;
+	int32_t posicionXsabotaje = sabotaje->coordenadas->posX;
+	int32_t posicionYsabotaje = sabotaje->coordenadas->posY;
 
 	if (posicionXtripulante != posicionXsabotaje) {
 
@@ -938,7 +938,7 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 
 	} else if (posicionYtripulante != posicionYsabotaje) {
 
-		int diferenciaEnY = posicionYsabotaje - posicionYtripulante;
+		int32_t diferenciaEnY = posicionYsabotaje - posicionYtripulante;
 		if (diferenciaEnY > 0) {
 			tripulante->coordenadas->posY = posicionYtripulante + 1;
 		} else if (diferenciaEnY < 0) {
@@ -1252,7 +1252,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 			}
 
 
-			if(llegoATarea(tripulante) && haySabotaje !=1){
+			if(llegoATarea(tripulante) && haySabotaje !=1 && tripulante->estado != FINISHED){
 				log_info(logger,"va a ejecutar la tarea el tripulante con ID %d",tripulante->idTripulante);
 
 
@@ -1262,7 +1262,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 			}
 
-			if(tripulante->tareaAsignada==NULL && tripulante->fueExpulsado !=1 && haySabotaje!=1){
+			if(tripulante->tareaAsignada->finalizoTarea==true && tripulante->fueExpulsado !=1 && haySabotaje!=1 && tripulante->estado != FINISHED ){
 
 				//mandarTarea()
 						solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
@@ -1392,7 +1392,10 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 					mandarTareaIO->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);		//mando el fin de la tarea
 					enviar_paquete(mandarTareaIO, FIN_TAREA,tripulante->socketTripulanteImongo);
 
-			tripulante->tareaAsignada=NULL;
+			tripulante->tareaAsignada->finalizoTarea=true;
+
+			free(tripulante->tareaAsignada->nombreTarea);
+
 			printf("se paso la tarea a nulo del tripulante con ID: %d\n",tripulante->idTripulante);
 			tripulante->misCiclosDeCPU=0;
 			sem_post(tripulante->semaforoDelTripulante);
@@ -1450,6 +1453,9 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 				enviar_paquete(mandarFinTareaIO,FIN_TAREA,tripulante->socketTripulanteImongo);
 
 				free(mandarFinTareaIO);
+
+				//tripulante->tareaAsignada->finalizoTarea=true;		No es necesario ya que si es expulsado no entra en el otro y sino directamente pide otra tarea
+				free(tripulante->tareaAsignada->nombreTarea);
 
 				if(tripulante->fueExpulsado !=1){
 
@@ -1594,11 +1600,12 @@ void planificarSegun(){			//TODO
 
 			sem_wait(&sem_planificarMultitarea);
 
+			if(!list_is_empty(listaReady)){
+
 			pthread_mutex_lock(&mutex_listaReady);
 			t_tripulante* tripulante = (t_tripulante*) list_remove(listaReady, 0);
 			pthread_mutex_unlock(&mutex_listaReady);
 
-			if(tripulante!=NULL){
 
 				printf("PLANIFICADOR:voy a asignar al tripulante %d\n",tripulante->idTripulante);
 
