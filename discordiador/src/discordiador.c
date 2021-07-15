@@ -1379,6 +1379,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	close(tripulante->socketTripulanteImongo);
 	close(tripulante->socketTripulanteRam);
 	free(tripulante->coordenadas);
+	free(tripulante->tareaAsignada);
 
 
 }
