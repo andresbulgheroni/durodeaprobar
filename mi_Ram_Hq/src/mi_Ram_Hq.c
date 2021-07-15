@@ -10,9 +10,6 @@
 
 #include "mi_Ram_Hq.h"
 
-//TODO CASOS DE PRUEBA
-
-///AVERIGUAR SI HACE FALTA UN SEMAFORO POR TABLA O SI ESTA BIEN ASI
 pthread_mutex_t  m_MEM_PRINCIPAL = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_MEM_VIRTUAL = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_TABLAS_PAGINAS = PTHREAD_MUTEX_INITIALIZER;
@@ -1154,12 +1151,13 @@ void* traer_de_principal(t_pagina_patota* pagina){
 
 
 bool entra_pcb(uint32_t cantidad){
+	pthread_mutex_lock(&m_TABLA_LIBRES_P);
 	pthread_mutex_lock(&m_TABLA_LIBRES_V);
 
-	bool valor = (list_size(frames_swap) + (TAMANIO_MEMORIA / TAMANIO_PAGINA)) >= cantidad;
-
+	bool valor = (list_size(frames_swap) + list_size(frames_libres_principal)) >= cantidad;
 
 	pthread_mutex_unlock(&m_TABLA_LIBRES_V);
+	pthread_mutex_unlock(&m_TABLA_LIBRES_P);
 
 	return valor;
 }
