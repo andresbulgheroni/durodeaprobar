@@ -984,3 +984,213 @@
 [INFO] 23:27:05:818 MI-RAM-HQ/(13256:13281): Se expulso al tripulante 4 de la patota 1
 [INFO] 23:27:05:818 MI-RAM-HQ/(13256:13281): Se modifico la posicion del tripulante 5 de la patota 1 a --> 2 en X y 3 en Y
 [INFO] 23:27:05:818 MI-RAM-HQ/(13256:13281): La posicion anterior era 1 en X y 3 en Y
+[INFO] 00:39:44:907 MI-RAM-HQ/(8124:8124): MIRAMHQ PID: 8124 
+[INFO] 00:40:07:85 MI-RAM-HQ/(8124:8153): Se creo la patota 1 de tamanio 166 con 5 tripulantes
+[INFO] 00:40:07:86 MI-RAM-HQ/(8124:8155): Al tripulante 1 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 00:40:07:87 MI-RAM-HQ/(8124:8157): Al tripulante 2 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 00:40:07:88 MI-RAM-HQ/(8124:8159): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 00:40:07:90 MI-RAM-HQ/(8124:8161): Al tripulante 4 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 00:40:07:91 MI-RAM-HQ/(8124:8163): Al tripulante 5 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 00:41:53:7 MI-RAM-HQ/(8210:8210): MIRAMHQ PID: 8210 
+[INFO] 00:42:00:437 MI-RAM-HQ/(8228:8228): MIRAMHQ PID: 8228 
+[INFO] 00:42:46:460 MI-RAM-HQ/(8282:8282): MIRAMHQ PID: 8282 
+[INFO] 00:43:41:314 MI-RAM-HQ/(8339:8339): MIRAMHQ PID: 8339 
+[INFO] 00:44:29:198 MI-RAM-HQ/(8397:8397): MIRAMHQ PID: 8397 
+[INFO] 00:44:42:797 MI-RAM-HQ/(8476:8476): MIRAMHQ PID: 8476 
+[INFO] 00:55:02:827 MI-RAM-HQ/(9800:9800): MIRAMHQ PID: 9800 
+[DEBUG] 00:57:31:217 MI-RAM-HQ/(9800:9827): Reemplazo en frame 0
+[DEBUG] 00:57:39:190 MI-RAM-HQ/(9800:9827): Reemplazo en frame 1
+[DEBUG] 00:57:51:557 MI-RAM-HQ/(9800:10140): Reemplazo en frame 2
+[INFO] 00:58:51:81 MI-RAM-HQ/(10232:10232): MIRAMHQ PID: 10232 
+[DEBUG] 00:58:59:183 MI-RAM-HQ/(10232:10257): Reemplazo en frame 0
+[DEBUG] 00:58:59:183 MI-RAM-HQ/(10232:10257): Reemplazo en frame 1
+[INFO] 01:04:55:642 MI-RAM-HQ/(10598:10598): MIRAMHQ PID: 10598 
+[DEBUG] 01:05:09:709 MI-RAM-HQ/(10598:10643): Reemplazo en frame 0
+[DEBUG] 01:05:09:709 MI-RAM-HQ/(10598:10643): Reemplazo en frame 1
+[DEBUG] 01:05:19:398 MI-RAM-HQ/(10598:10650): Reemplazo en frame 2
+[INFO] 01:06:19:949 MI-RAM-HQ/(10750:10750): MIRAMHQ PID: 10750 
+[DEBUG] 01:06:28:991 MI-RAM-HQ/(10750:10771): Reemplazo en frame 0
+[DEBUG] 01:06:28:991 MI-RAM-HQ/(10750:10771): Reemplazo en frame 1
+[DEBUG] 01:08:40:754 MI-RAM-HQ/(10750:10774): Reemplazo en frame 2
+[INFO] 01:10:56:117 MI-RAM-HQ/(11186:11186): MIRAMHQ PID: 11186 
+[DEBUG] 01:11:04:651 MI-RAM-HQ/(11186:11222): Reemplazo en frame 0
+[DEBUG] 01:11:04:651 MI-RAM-HQ/(11186:11222): Reemplazo en frame 1
+[DEBUG] 01:11:08:275 MI-RAM-HQ/(11186:11228): Reemplazo en frame 2
+[INFO] 01:12:19:622 MI-RAM-HQ/(11355:11355): MIRAMHQ PID: 11355 
+[DEBUG] 01:12:25:447 MI-RAM-HQ/(11355:11393): Reemplazo en frame 0
+[DEBUG] 01:12:25:447 MI-RAM-HQ/(11355:11393): Reemplazo en frame 1
+[DEBUG] 01:12:28:373 MI-RAM-HQ/(11355:11399): Reemplazo en frame 2
+[INFO] 01:13:00:832 MI-RAM-HQ/(11466:11466): MIRAMHQ PID: 11466 
+[DEBUG] 01:13:11:736 MI-RAM-HQ/(11466:11506): Reemplazo en frame 0
+[DEBUG] 01:13:11:736 MI-RAM-HQ/(11466:11506): Reemplazo en frame 1
+[DEBUG] 01:13:20:832 MI-RAM-HQ/(11466:11511): Reemplazo en frame 2
+[INFO] 01:14:53:254 MI-RAM-HQ/(11603:11603): MIRAMHQ PID: 11603 
+[DEBUG] 01:15:04:614 MI-RAM-HQ/(11603:11632): Reemplazo en frame 0
+[DEBUG] 01:15:04:614 MI-RAM-HQ/(11603:11632): Reemplazo en frame 1
+[DEBUG] 01:15:04:615 MI-RAM-HQ/(11603:11634): Reemplazo en frame 2
+[DEBUG] 01:15:04:616 MI-RAM-HQ/(11603:11636): Reemplazo en frame 3
+[DEBUG] 01:15:04:617 MI-RAM-HQ/(11603:11636): Reemplazo en frame 0
+[DEBUG] 01:15:04:617 MI-RAM-HQ/(11603:11636): Reemplazo en frame 1
+[DEBUG] 01:15:04:625 MI-RAM-HQ/(11603:11638): Reemplazo en frame 2
+[DEBUG] 01:15:04:633 MI-RAM-HQ/(11603:11640): Reemplazo en frame 3
+[INFO] 01:16:26:338 MI-RAM-HQ/(11808:11808): MIRAMHQ PID: 11808 
+[DEBUG] 01:16:50:777 MI-RAM-HQ/(11808:11844): Reemplazo en frame 0
+[DEBUG] 01:16:50:777 MI-RAM-HQ/(11808:11844): Reemplazo en frame 1
+[DEBUG] 01:16:52:465 MI-RAM-HQ/(11808:11848): Reemplazo en frame 2
+[DEBUG] 01:16:55:954 MI-RAM-HQ/(11808:11860): Reemplazo en frame 3
+[DEBUG] 01:16:56:528 MI-RAM-HQ/(11808:11860): Reemplazo en frame 0
+[DEBUG] 01:16:56:528 MI-RAM-HQ/(11808:11860): Reemplazo en frame 1
+[DEBUG] 01:16:58:940 MI-RAM-HQ/(11808:11882): Reemplazo en frame 2
+[DEBUG] 01:17:07:475 MI-RAM-HQ/(11808:11902): Reemplazo en frame 3
+[INFO] 01:19:41:806 MI-RAM-HQ/(12080:12080): MIRAMHQ PID: 12080 
+[DEBUG] 01:19:46:601 MI-RAM-HQ/(12080:12100): Reemplazo en frame 0
+[DEBUG] 01:19:46:601 MI-RAM-HQ/(12080:12100): Reemplazo en frame 1
+[DEBUG] 01:19:46:603 MI-RAM-HQ/(12080:12102): Reemplazo en frame 2
+[DEBUG] 01:19:46:604 MI-RAM-HQ/(12080:12104): Reemplazo en frame 3
+[DEBUG] 01:19:46:604 MI-RAM-HQ/(12080:12104): Reemplazo en frame 0
+[DEBUG] 01:19:46:604 MI-RAM-HQ/(12080:12104): Reemplazo en frame 1
+[DEBUG] 01:19:46:609 MI-RAM-HQ/(12080:12106): Reemplazo en frame 2
+[DEBUG] 01:19:46:610 MI-RAM-HQ/(12080:12108): Reemplazo en frame 3
+[INFO] 01:21:55:767 MI-RAM-HQ/(12282:12282): MIRAMHQ PID: 12282 
+[DEBUG] 01:22:01:45 MI-RAM-HQ/(12282:12310): Reemplazo en frame 0
+[DEBUG] 01:22:01:45 MI-RAM-HQ/(12282:12310): Reemplazo en frame 1
+[DEBUG] 01:22:01:46 MI-RAM-HQ/(12282:12312): Reemplazo en frame 2
+[DEBUG] 01:22:01:48 MI-RAM-HQ/(12282:12314): Reemplazo en frame 3
+[DEBUG] 01:22:01:48 MI-RAM-HQ/(12282:12314): Reemplazo en frame 0
+[DEBUG] 01:22:01:48 MI-RAM-HQ/(12282:12314): Reemplazo en frame 1
+[DEBUG] 01:22:01:52 MI-RAM-HQ/(12282:12316): Reemplazo en frame 2
+[DEBUG] 01:22:01:53 MI-RAM-HQ/(12282:12318): Reemplazo en frame 3
+[DEBUG] 01:22:49:18 MI-RAM-HQ/(12282:12337): Reemplazo en frame 0
+[DEBUG] 01:22:49:18 MI-RAM-HQ/(12282:12337): Reemplazo en frame 1
+[DEBUG] 01:22:49:18 MI-RAM-HQ/(12282:12337): Reemplazo en frame 2
+[DEBUG] 01:22:49:18 MI-RAM-HQ/(12282:12337): Reemplazo en frame 3
+[DEBUG] 01:22:49:18 MI-RAM-HQ/(12282:12337): Reemplazo en frame 0
+[DEBUG] 01:22:49:19 MI-RAM-HQ/(12282:12337): Reemplazo en frame 1
+[DEBUG] 01:22:49:26 MI-RAM-HQ/(12282:12339): Reemplazo en frame 2
+[DEBUG] 01:22:49:27 MI-RAM-HQ/(12282:12341): Reemplazo en frame 3
+[DEBUG] 01:22:49:27 MI-RAM-HQ/(12282:12341): Reemplazo en frame 0
+[DEBUG] 01:22:49:27 MI-RAM-HQ/(12282:12341): Reemplazo en frame 1
+[DEBUG] 01:22:49:27 MI-RAM-HQ/(12282:12343): Reemplazo en frame 2
+[DEBUG] 01:22:49:28 MI-RAM-HQ/(12282:12345): Reemplazo en frame 3
+[DEBUG] 01:23:09:805 MI-RAM-HQ/(12282:12376): Reemplazo en frame 0
+[DEBUG] 01:23:09:806 MI-RAM-HQ/(12282:12376): Reemplazo en frame 1
+[DEBUG] 01:23:09:806 MI-RAM-HQ/(12282:12376): Reemplazo en frame 2
+[DEBUG] 01:23:09:806 MI-RAM-HQ/(12282:12376): Reemplazo en frame 3
+[DEBUG] 01:23:09:806 MI-RAM-HQ/(12282:12376): Reemplazo en frame 0
+[DEBUG] 01:23:09:806 MI-RAM-HQ/(12282:12376): Reemplazo en frame 1
+[DEBUG] 01:23:09:806 MI-RAM-HQ/(12282:12378): Reemplazo en frame 2
+[DEBUG] 01:23:09:808 MI-RAM-HQ/(12282:12380): Reemplazo en frame 3
+[DEBUG] 01:23:09:808 MI-RAM-HQ/(12282:12380): Reemplazo en frame 0
+[DEBUG] 01:23:09:808 MI-RAM-HQ/(12282:12380): Reemplazo en frame 1
+[DEBUG] 01:23:09:808 MI-RAM-HQ/(12282:12382): Reemplazo en frame 2
+[DEBUG] 01:23:09:809 MI-RAM-HQ/(12282:12384): Reemplazo en frame 3
+[DEBUG] 01:23:57:493 MI-RAM-HQ/(12282:12312): Reemplazo en frame 0
+[DEBUG] 01:24:01:498 MI-RAM-HQ/(12282:12314): Reemplazo en frame 1
+[DEBUG] 01:24:06:505 MI-RAM-HQ/(12282:12312): Reemplazo en frame 2
+[DEBUG] 01:24:06:505 MI-RAM-HQ/(12282:12312): Reemplazo en frame 3
+[DEBUG] 01:24:06:505 MI-RAM-HQ/(12282:12312): Reemplazo en frame 0
+[DEBUG] 01:24:06:505 MI-RAM-HQ/(12282:12312): Reemplazo en frame 1
+[DEBUG] 01:24:07:506 MI-RAM-HQ/(12282:12316): Reemplazo en frame 2
+[DEBUG] 01:24:10:512 MI-RAM-HQ/(12282:12318): Reemplazo en frame 3
+[DEBUG] 01:24:11:513 MI-RAM-HQ/(12282:12314): Reemplazo en frame 0
+[DEBUG] 01:24:11:513 MI-RAM-HQ/(12282:12314): Reemplazo en frame 1
+[DEBUG] 01:24:11:514 MI-RAM-HQ/(12282:12314): Reemplazo en frame 2
+[DEBUG] 01:24:11:514 MI-RAM-HQ/(12282:12314): Reemplazo en frame 3
+[DEBUG] 01:24:11:515 MI-RAM-HQ/(12282:12318): Reemplazo en frame 0
+[DEBUG] 01:24:16:524 MI-RAM-HQ/(12282:12316): Reemplazo en frame 1
+[DEBUG] 01:24:16:526 MI-RAM-HQ/(12282:12316): Reemplazo en frame 2
+[DEBUG] 01:24:16:526 MI-RAM-HQ/(12282:12316): Reemplazo en frame 3
+[DEBUG] 01:24:16:526 MI-RAM-HQ/(12282:12316): Reemplazo en frame 0
+[DEBUG] 01:24:16:526 MI-RAM-HQ/(12282:12316): Reemplazo en frame 1
+[DEBUG] 01:24:16:526 MI-RAM-HQ/(12282:12316): Reemplazo en frame 2
+[DEBUG] 01:24:16:526 MI-RAM-HQ/(12282:12320): Reemplazo en frame 3
+[DEBUG] 01:24:21:529 MI-RAM-HQ/(12282:12318): Reemplazo en frame 0
+[DEBUG] 01:24:21:530 MI-RAM-HQ/(12282:12318): Reemplazo en frame 1
+[DEBUG] 01:24:21:530 MI-RAM-HQ/(12282:12318): Reemplazo en frame 2
+[DEBUG] 01:24:21:531 MI-RAM-HQ/(12282:12318): Reemplazo en frame 3
+[DEBUG] 01:24:21:531 MI-RAM-HQ/(12282:12320): Reemplazo en frame 0
+[DEBUG] 01:24:22:536 MI-RAM-HQ/(12282:12339): Reemplazo en frame 1
+[DEBUG] 01:24:26:555 MI-RAM-HQ/(12282:12341): Reemplazo en frame 2
+[DEBUG] 01:24:27:555 MI-RAM-HQ/(12282:12320): Reemplazo en frame 3
+[DEBUG] 01:24:27:556 MI-RAM-HQ/(12282:12320): Reemplazo en frame 0
+[DEBUG] 01:24:27:556 MI-RAM-HQ/(12282:12320): Reemplazo en frame 1
+[DEBUG] 01:24:27:556 MI-RAM-HQ/(12282:12320): Reemplazo en frame 2
+[DEBUG] 01:24:28:558 MI-RAM-HQ/(12282:12341): Reemplazo en frame 3
+[DEBUG] 01:24:32:565 MI-RAM-HQ/(12282:12339): Reemplazo en frame 0
+[DEBUG] 01:24:32:566 MI-RAM-HQ/(12282:12339): Reemplazo en frame 1
+[DEBUG] 01:24:32:566 MI-RAM-HQ/(12282:12339): Reemplazo en frame 2
+[DEBUG] 01:24:32:566 MI-RAM-HQ/(12282:12339): Reemplazo en frame 3
+[DEBUG] 01:24:33:566 MI-RAM-HQ/(12282:12343): Reemplazo en frame 0
+[DEBUG] 01:24:35:576 MI-RAM-HQ/(12282:12345): Reemplazo en frame 1
+[DEBUG] 01:24:37:578 MI-RAM-HQ/(12282:12341): Reemplazo en frame 2
+[DEBUG] 01:24:37:579 MI-RAM-HQ/(12282:12341): Reemplazo en frame 3
+[DEBUG] 01:24:37:579 MI-RAM-HQ/(12282:12341): Reemplazo en frame 0
+[DEBUG] 01:24:37:579 MI-RAM-HQ/(12282:12341): Reemplazo en frame 1
+[DEBUG] 01:24:37:579 MI-RAM-HQ/(12282:12341): Reemplazo en frame 2
+[DEBUG] 01:24:37:580 MI-RAM-HQ/(12282:12345): Reemplazo en frame 3
+[DEBUG] 01:24:41:583 MI-RAM-HQ/(12282:12347): Reemplazo en frame 0
+[DEBUG] 01:24:42:582 MI-RAM-HQ/(12282:12343): Reemplazo en frame 1
+[DEBUG] 01:24:42:582 MI-RAM-HQ/(12282:12343): Reemplazo en frame 2
+[DEBUG] 01:24:42:582 MI-RAM-HQ/(12282:12343): Reemplazo en frame 3
+[DEBUG] 01:24:42:582 MI-RAM-HQ/(12282:12343): Reemplazo en frame 0
+[DEBUG] 01:24:42:583 MI-RAM-HQ/(12282:12343): Reemplazo en frame 1
+[DEBUG] 01:24:42:584 MI-RAM-HQ/(12282:12347): Reemplazo en frame 2
+[DEBUG] 01:24:47:586 MI-RAM-HQ/(12282:12378): Reemplazo en frame 3
+[DEBUG] 01:24:47:587 MI-RAM-HQ/(12282:12345): Reemplazo en frame 0
+[DEBUG] 01:24:47:587 MI-RAM-HQ/(12282:12345): Reemplazo en frame 1
+[DEBUG] 01:24:47:587 MI-RAM-HQ/(12282:12345): Reemplazo en frame 2
+[DEBUG] 01:24:47:587 MI-RAM-HQ/(12282:12345): Reemplazo en frame 3
+[DEBUG] 01:24:48:587 MI-RAM-HQ/(12282:12378): Reemplazo en frame 0
+[DEBUG] 01:24:51:589 MI-RAM-HQ/(12282:12380): Reemplazo en frame 1
+[DEBUG] 01:24:52:593 MI-RAM-HQ/(12282:12347): Reemplazo en frame 2
+[DEBUG] 01:24:52:593 MI-RAM-HQ/(12282:12347): Reemplazo en frame 3
+[DEBUG] 01:24:52:593 MI-RAM-HQ/(12282:12347): Reemplazo en frame 0
+[DEBUG] 01:24:52:593 MI-RAM-HQ/(12282:12347): Reemplazo en frame 1
+[DEBUG] 01:24:53:594 MI-RAM-HQ/(12282:12380): Reemplazo en frame 2
+[DEBUG] 01:24:57:606 MI-RAM-HQ/(12282:12378): Reemplazo en frame 3
+[DEBUG] 01:24:57:606 MI-RAM-HQ/(12282:12378): Reemplazo en frame 0
+[DEBUG] 01:24:57:606 MI-RAM-HQ/(12282:12378): Reemplazo en frame 1
+[DEBUG] 01:24:57:606 MI-RAM-HQ/(12282:12378): Reemplazo en frame 2
+[DEBUG] 01:24:58:607 MI-RAM-HQ/(12282:12382): Reemplazo en frame 3
+[DEBUG] 01:25:00:609 MI-RAM-HQ/(12282:12384): Reemplazo en frame 0
+[DEBUG] 01:25:02:610 MI-RAM-HQ/(12282:12380): Reemplazo en frame 1
+[DEBUG] 01:25:02:610 MI-RAM-HQ/(12282:12380): Reemplazo en frame 2
+[DEBUG] 01:25:02:610 MI-RAM-HQ/(12282:12380): Reemplazo en frame 3
+[DEBUG] 01:25:02:610 MI-RAM-HQ/(12282:12380): Reemplazo en frame 0
+[DEBUG] 01:25:02:610 MI-RAM-HQ/(12282:12380): Reemplazo en frame 1
+[DEBUG] 01:25:02:611 MI-RAM-HQ/(12282:12384): Reemplazo en frame 2
+[DEBUG] 01:25:06:618 MI-RAM-HQ/(12282:12386): Reemplazo en frame 3
+[DEBUG] 01:25:07:617 MI-RAM-HQ/(12282:12382): Reemplazo en frame 0
+[DEBUG] 01:25:07:617 MI-RAM-HQ/(12282:12382): Reemplazo en frame 1
+[DEBUG] 01:25:07:618 MI-RAM-HQ/(12282:12382): Reemplazo en frame 2
+[DEBUG] 01:25:07:618 MI-RAM-HQ/(12282:12382): Reemplazo en frame 3
+[DEBUG] 01:25:07:618 MI-RAM-HQ/(12282:12382): Reemplazo en frame 0
+[DEBUG] 01:25:07:619 MI-RAM-HQ/(12282:12386): Reemplazo en frame 1
+[DEBUG] 01:25:12:629 MI-RAM-HQ/(12282:12384): Reemplazo en frame 2
+[DEBUG] 01:25:12:629 MI-RAM-HQ/(12282:12384): Reemplazo en frame 3
+[DEBUG] 01:25:12:629 MI-RAM-HQ/(12282:12384): Reemplazo en frame 0
+[DEBUG] 01:25:12:630 MI-RAM-HQ/(12282:12384): Reemplazo en frame 1
+[DEBUG] 01:25:12:630 MI-RAM-HQ/(12282:12386): Reemplazo en frame 2
+[DEBUG] 01:25:12:630 MI-RAM-HQ/(12282:12312): Reemplazo en frame 3
+[DEBUG] 01:25:17:637 MI-RAM-HQ/(12282:12386): Reemplazo en frame 0
+[DEBUG] 01:25:17:637 MI-RAM-HQ/(12282:12386): Reemplazo en frame 1
+[DEBUG] 01:25:17:637 MI-RAM-HQ/(12282:12386): Reemplazo en frame 2
+[DEBUG] 01:25:17:637 MI-RAM-HQ/(12282:12386): Reemplazo en frame 3
+[DEBUG] 01:25:17:648 MI-RAM-HQ/(12282:12312): Reemplazo en frame 0
+[DEBUG] 01:25:18:649 MI-RAM-HQ/(12282:12314): Reemplazo en frame 1
+[DEBUG] 01:25:20:665 MI-RAM-HQ/(12282:12312): Reemplazo en frame 2
+[DEBUG] 01:25:20:665 MI-RAM-HQ/(12282:12312): Reemplazo en frame 3
+[DEBUG] 01:25:20:665 MI-RAM-HQ/(12282:12312): Reemplazo en frame 0
+[INFO] 01:25:20:666 MI-RAM-HQ/(12282:12312): El tripulante 1 de la patota 1 ya completo sus tareas
+[DEBUG] 01:25:32:801 MI-RAM-HQ/(12282:12314): Reemplazo en frame 2
+[DEBUG] 01:25:32:801 MI-RAM-HQ/(12282:12314): Reemplazo en frame 3
+[DEBUG] 01:25:32:801 MI-RAM-HQ/(12282:12314): Reemplazo en frame 0
+[INFO] 01:30:40:845 MI-RAM-HQ/(12878:12878): MIRAMHQ PID: 12878 
+[INFO] 01:31:47:411 MI-RAM-HQ/(12967:12967): MIRAMHQ PID: 12967 
+[INFO] 01:31:57:629 MI-RAM-HQ/(13010:13010): MIRAMHQ PID: 13010 
+[DEBUG] 01:34:09:596 MI-RAM-HQ/(13010:13112): Reemplazo en frame 0
+[DEBUG] 01:34:09:596 MI-RAM-HQ/(13010:13112): Reemplazo en frame 1
+[DEBUG] 01:34:09:596 MI-RAM-HQ/(13010:13112): Reemplazo en frame 2
+[DEBUG] 01:34:09:596 MI-RAM-HQ/(13010:13112): Reemplazo en frame 3
+[DEBUG] 01:35:23:82 MI-RAM-HQ/(13010:13038): Reemplazo en frame 0
+[DEBUG] 01:35:28:90 MI-RAM-HQ/(13010:13038): Reemplazo en frame 1

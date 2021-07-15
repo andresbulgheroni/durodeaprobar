@@ -1,7 +1,6 @@
-Dump: 12/07/2021 23:27:11
+Dump: 14/07/2021 01:19:59
 
-		ESTADO DE MEMORIA SEGMENTACION
-proceso: 1		 nro de segmento: 0		 inicio: 0		 tamanio: 8
-proceso: 1		 nro de segmento: 1		 inicio: 8		 tamanio: 34
-proceso: 1		 nro de segmento: 3		 inicio: 51		 tamanio: 15
-proceso: 1		 nro de segmento: 6		 inicio: 90		 tamanio: 15
+MARCO:0	ESTADO:OCUPADO/tPROCESO:1	PAGINA:3
+MARCO:1	ESTADO:OCUPADO/tPROCESO:1	PAGINA:4
+MARCO:2	ESTADO:OCUPADO/tPROCESO:1	PAGINA:2
+MARCO:3	ESTADO:OCUPADO/tPROCESO:1	PAGINA:0
