@@ -744,6 +744,8 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 	free(leido);
 	close(*socketDiscordiador);
 	free(socketDiscordiador);
+	close(*socketBitacora);
+	free(socketBitacora);
 }
 
 ///////////////////////////////////////FUNCIONES GENERALES///////////////
@@ -1376,6 +1378,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	sem_destroy(tripulante->semaforoCiclo);
 	close(tripulante->socketTripulanteImongo);
 	close(tripulante->socketTripulanteRam);
+	free(tripulante->coordenadas);
 
 
 }
