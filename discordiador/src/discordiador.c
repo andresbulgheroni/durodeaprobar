@@ -447,10 +447,10 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 
 void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
-	uint32_t*socketDiscordiador = malloc(sizeof(int32_t));
+	int32_t*socketDiscordiador = malloc(sizeof(int32_t));
 	*socketDiscordiador = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 
-	uint32_t*socketBitacora = malloc(sizeof(int32_t));
+	int32_t*socketBitacora = malloc(sizeof(int32_t));
 	*socketBitacora = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
 
 	char* leido=readline(">");
