@@ -3,22 +3,24 @@
 int main(void) {
 
 	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
-	pthread_mutex_init(&mutex_blocks, NULL);
+	pthread_mutex_init(&mutex_bitmap, NULL);
+	pthread_mutex_init(&mutex_oxigeno, NULL);
+	pthread_mutex_init(&mutex_basura, NULL);
+	pthread_mutex_init(&mutex_comida, NULL);
 	leerConfig();
 	crear_log();
 	inicializarFS();
 	signal(SIGUSR1, sighandler);
 
-	//
-	//
+
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
-//		estadoSuperBloque();
-//
-//		generarRecurso(10,'O');
-//		estadoSuperBloque();
-//		consumirRecurso(5, 'O');
-//
-//		estadoSuperBloque();
+	//			estadoSuperBloque();
+	//
+	//			generarRecurso(10,'O');
+	//		estadoSuperBloque();
+	//		consumirRecurso(5, 'O');
+	//
+	//		estadoSuperBloque();
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 	//
 	//	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
@@ -47,26 +49,35 @@ int main(void) {
 	//	fsckSuperBloque_Bitmap();
 	//	fsckFiles_BlockCount();
 	//	fsckFiles_Blocks();
-		fsckFiles_Size();
+	//	fsckFiles_Size();
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
-		//int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
-		//SOCKET_SABOTAJE_GLOBAL= esperar_cliente(socket_servidor);
+
+	while(1){
+
+	}
+
+	//int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
+	//SOCKET_SABOTAJE_GLOBAL= esperar_cliente(socket_servidor);
 
 
-		int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
+	//	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
+	//
+	//
+	//
+	//
+	//	while(true){
+	//
+	//		int32_t*socket_cliente =  malloc(sizeof(int32_t));
+	//		*socket_cliente = esperar_cliente(socket_servidor);
+	//
+	//		pthread_t hilo_mensaje;
+	//		pthread_create(&hilo_mensaje,NULL,(void*)recibirMensajeTripulante,(void*) (socket_cliente));
+	//		pthread_detach(hilo_mensaje);
+	//
+	//	}
 
-		while(true){
-
-			int32_t*socket_cliente =  malloc(sizeof(int32_t));
-			*socket_cliente = esperar_cliente(socket_servidor);
-
-			pthread_t hilo_mensaje;
-			pthread_create(&hilo_mensaje,NULL,(void*)recibirMensajeTripulante,(void*) (socket_cliente));
-			pthread_detach(hilo_mensaje);
-
-		}
-
-	//	config_destroy(config);
+	config_destroy(config);
+	//	free(blocksMap);
 	return EXIT_SUCCESS;
 }
 
@@ -102,7 +113,7 @@ void timerSincronizacion_blocksMap(){
 
 	while(1){
 		memcpy(blocksMapOriginal,blocksMap,BLOCK_SIZE*BLOCKS);
-		msync(blocksMap, tamanioBlocks, MS_SYNC);
+		msync(blocksMapOriginal, tamanioBlocks, MS_SYNC);
 		log_info(logger, "Sincronizando archivo blocks...");
 		sleep(TIEMPO_SINCRONIZACION);
 	}
@@ -222,12 +233,10 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 
 			break;
 
-		} DESCONECTADO:
+		}
 		default: terminado = true;
-		puts("finalizo la tarea");
 		break;
-	}
-
+		}
 
 	}
 	close(*socketCliente);
@@ -241,41 +250,42 @@ void hacerTarea(inicio_tarea_msg* tarea) {
 
 	case GENERAR_OXIGENO:{
 
+		pthread_mutex_lock(&mutex_oxigeno);
 		generarRecurso(tarea->parametros, 'O');
-
+		pthread_mutex_unlock(&mutex_oxigeno);
 		break;
 
 	} case CONSUMIR_OXIGENO:{
-
+		pthread_mutex_lock(&mutex_oxigeno);
 		consumirRecurso(tarea->parametros, 'O');
-
+		pthread_mutex_unlock(&mutex_oxigeno);
 		break;
 
 	} case GENERAR_COMIDA:{
-
+		pthread_mutex_lock(&mutex_comida);
 		generarRecurso(tarea->parametros, 'C');
-
+		pthread_mutex_unlock(&mutex_comida);
 		break;
 
 	} case CONSUMIR_COMIDA:{
-
+		pthread_mutex_lock(&mutex_comida);
 		consumirRecurso(tarea->parametros, 'C');
-
+		pthread_mutex_unlock(&mutex_comida);
 		break;
 
 	} case GENERAR_BASURA:{
-
+		pthread_mutex_lock(&mutex_basura);
 		generarRecurso(tarea->parametros, 'B');
-
+		pthread_mutex_unlock(&mutex_basura);
 		break;
 
 	} case DESCARTAR_BASURA:{
-
+		pthread_mutex_lock(&mutex_basura);
 		descartarBasura();
-
+		pthread_mutex_unlock(&mutex_basura);
 		break;
 
-	} default:		//CASE TAREA_CPU: GRABAR EN BITACORA NADA MAS
+	} default:
 
 		log_info(logger,"codigo de operacion incorrecto");
 
@@ -311,13 +321,9 @@ void inicializarBlocks() {
 	blocksMap = malloc(tamanioBlocks);
 	memcpy(blocksMap,blocksMapOriginal,tamanioBlocks);
 
-	// Thread con timer para sincronizar mmap a disco, iniciarlo despues del mmap!
-	// Corre: msync(blocksMap, tamanioBlocks, MS_SYNC);
-
-	// DESCOMENTAR CUANDO PRUEBE LAS CONEXIONES
-
-	//	pthread_t hilo_sincro_blocksmap;
-	//	pthread_create(&hilo_sincro_blocksmap, NULL,(void*) timerSincronizacion_blocksMap, NULL);
+	//Thread con timer para sincronizar mmap a disco, iniciarlo despues del mmap!
+	pthread_t hilo_sincro_blocksmap;
+	pthread_create(&hilo_sincro_blocksmap, NULL,(void*) timerSincronizacion_blocksMap, NULL);
 
 	close(fd);
 
@@ -342,8 +348,14 @@ void inicializarSuperBloque(){
 	fread(&BLOCKS,sizeof(uint32_t),1,fp);
 	fclose(fp);
 
+	int cantidadBloques;
 	int offset = 2 * sizeof(uint32_t);
-	int cantidadBloques = BLOCKS / 8;
+
+	if((BLOCKS % 8) == 0){ // Con 100 bloques deberia pesarme 21 el archivo de blocks
+		cantidadBloques = BLOCKS / 8;
+	} else{
+		cantidadBloques = (BLOCKS / 8) + 1;// si tiene un resto sumarle 1
+	}
 
 	superBloqueMap = mmap(NULL, cantidadBloques + offset, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (superBloqueMap == MAP_FAILED) {
@@ -372,7 +384,7 @@ void crearSuperBloque(){
 		exit(1);
 	}
 
-	int cantidadBloques = 0;
+	int cantidadBloques;
 	int offset = 2 * sizeof(uint32_t);
 	if((BLOCKS % 8) == 0){ // Con 100 bloques deberia pesarme 21 el archivo de blocks
 		cantidadBloques = BLOCKS / 8;
@@ -592,11 +604,9 @@ int writeBlock(char* string, int bloque){
 	}
 	setBitmap(1, bloque);
 
-	pthread_mutex_lock(&mutex_blocks);
 	memcpy(blocksMap + ((bloque - 1) * BLOCK_SIZE),
 			string,
 			strlen(string) * sizeof(char));
-	pthread_mutex_unlock(&mutex_blocks);
 	return bloque;
 }
 
@@ -666,11 +676,9 @@ int generarRecurso(int32_t cantidad, char recurso){
 
 			char* porcionAGrabar = string_substring(archivo, cantidadVieja, BLOCK_SIZE - caracteresEnUltimoBloque);
 
-			pthread_mutex_lock(&mutex_blocks);
 			memcpy(	blocksMap +	(ultimoBloque-1) * BLOCK_SIZE +		caracteresEnUltimoBloque,
 					porcionAGrabar,
 					BLOCK_SIZE - caracteresEnUltimoBloque * sizeof(char));
-			pthread_mutex_unlock(&mutex_blocks);
 
 			cantidad -= (BLOCK_SIZE - caracteresEnUltimoBloque);
 
@@ -933,11 +941,9 @@ int writeBitacora(int32_t tripulante, char* string){
 			char* porcionAGrabar = string_substring(string, 0, BLOCK_SIZE - caracteresEnUltimoBloque);
 
 
-			pthread_mutex_lock(&mutex_blocks);
 			memcpy(	blocksMap +	(ultimoBloque-1) * BLOCK_SIZE +		caracteresEnUltimoBloque,
 					porcionAGrabar,
 					BLOCK_SIZE - caracteresEnUltimoBloque * sizeof(char));
-			pthread_mutex_unlock(&mutex_blocks);
 
 			cantidad -= (BLOCK_SIZE - caracteresEnUltimoBloque);
 
@@ -1033,17 +1039,13 @@ char* readBitacora(int32_t tripulante){
 		int contador = 0;
 
 		while((unsigned)size >= BLOCK_SIZE){
-			pthread_mutex_lock(&mutex_blocks);
 			memcpy(bitacora + (BLOCK_SIZE * contador), blocksMap + (BLOCK_SIZE * (atoi(blocksArray[contador]) - 1)), BLOCK_SIZE);
-			pthread_mutex_unlock(&mutex_blocks);
 			size -= BLOCK_SIZE;
 			contador++;
 		}
 
 		if(size > 0){
-			pthread_mutex_lock(&mutex_blocks);
 			memcpy(bitacora + (BLOCK_SIZE * contador), blocksMap + (BLOCK_SIZE * (atoi(blocksArray[contador]) - 1)), size);
-			pthread_mutex_unlock(&mutex_blocks);
 		}
 
 		for(int i=0;i<blockCount;i++){

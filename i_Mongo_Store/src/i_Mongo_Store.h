@@ -39,7 +39,10 @@ t_config* config;
 int tamanioBlocks;
 int tamanioSuperBloque;
 t_bitarray* bitmap;
-pthread_mutex_t mutex_blocks;
+pthread_mutex_t mutex_bitmap;
+pthread_mutex_t mutex_oxigeno;
+pthread_mutex_t mutex_comida;
+pthread_mutex_t mutex_basura; // basuuuura japishhh
 
 // puedo semaforizar el acceso al bitmap.
 
@@ -52,30 +55,6 @@ typedef enum{
 	DESCARTAR_BASURA = 5,
 	ERROR=6
 }op_code_tareas;
-
-typedef struct {
-	uint32_t SIZE;
-	uint32_t BLOCK_COUNT;
-	t_list* BLOCKS;
-	char* CARACTER_LLENADO;
-	char* MD5_ARCHIVO;
-}t_recurso;
-
-//typedef struct {
-//	uint32_t SIZE;
-//	uint32_t BLOCK_COUNT;
-//	t_list* BLOCKS;
-//	char* CARACTER_LLENADO;
-//	char* MD5_ARCHIVO;
-//}t_comida;
-//
-//typedef struct {
-//	uint32_t SIZE;
-//	uint32_t BLOCK_COUNT;
-//	t_list* BLOCKS;
-//	char* CARACTER_LLENADO;
-//	char* MD5_ARCHIVO;
-//}t_basura;
 
 void crear_log();
 void leerConfig();
