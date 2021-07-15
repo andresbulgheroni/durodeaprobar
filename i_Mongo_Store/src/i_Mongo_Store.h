@@ -56,6 +56,7 @@ typedef enum{
 	ERROR=6
 }op_code_tareas;
 
+void inicializarSemaforos();
 void crear_log();
 void leerConfig();
 void crearDirectorio(char*);

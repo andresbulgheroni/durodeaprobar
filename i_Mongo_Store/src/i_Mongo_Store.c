@@ -3,10 +3,7 @@
 int main(void) {
 
 	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
-	pthread_mutex_init(&mutex_bitmap, NULL);
-	pthread_mutex_init(&mutex_oxigeno, NULL);
-	pthread_mutex_init(&mutex_basura, NULL);
-	pthread_mutex_init(&mutex_comida, NULL);
+	inicializarSemaforos();
 	leerConfig();
 	crear_log();
 	inicializarFS();
@@ -501,6 +498,15 @@ op_code_tareas string_to_op_code_tareas (char* string){
 
 }
 
+void inicializarSemaforos(){
+
+	pthread_mutex_init(&mutex_bitmap, NULL);
+	pthread_mutex_init(&mutex_oxigeno, NULL);
+	pthread_mutex_init(&mutex_basura, NULL);
+	pthread_mutex_init(&mutex_comida, NULL);
+
+}
+
 void leerConfig() {
 
 	config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/mongo.config");
@@ -555,6 +561,7 @@ int primerBloqueLibre(){
 			break;
 		}
 	}
+
 	return posicion;
 }
 
@@ -594,6 +601,7 @@ void stringToBlocks(char* string, char* blockCount, char* blocks){
 // Controlar previamente que no se pase del BLOCK_SIZE, si bloque es -1 busca el primero libre
 int writeBlock(char* string, int bloque){
 
+	pthread_mutex_lock(&mutex_bitmap);
 	if(bloque == -1){
 		bloque = primerBloqueLibre();
 	}
@@ -603,6 +611,7 @@ int writeBlock(char* string, int bloque){
 		exit(1);
 	}
 	setBitmap(1, bloque);
+	pthread_mutex_unlock(&mutex_bitmap);
 
 	memcpy(blocksMap + ((bloque - 1) * BLOCK_SIZE),
 			string,
