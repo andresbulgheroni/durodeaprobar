@@ -44,10 +44,9 @@ typedef enum{
 typedef struct{
 	uint32_t nro_pagina;
 	int32_t nro_frame;
-	uint32_t nro_frame_mv;
 	bool presente;
 	bool uso;
-	bool modificado;
+	bool nuevo;
 	uint32_t ocupado;
 
 } t_pagina_patota;
@@ -153,23 +152,22 @@ t_list* get_frames_a_ubicar(uint32_t cantidad);
 void traer_pagina_a_memoria(t_pagina_patota* pagina);
 bool memoria_llena();
 bool swap_lleno();
-int32_t get_frame();
+void get_frame(t_pagina_patota* pagina);
 t_list* swap_libres();
 int32_t get_frame_memoria_virtual();
-int32_t reemplazo_Clock();
-int32_t reemplazo_LRU();
-void guardar_en_memoria_principal(t_pagina_patota* pagina, void* datos);
+t_pagina_patota* reemplazo_LRU();
+t_pagina_patota*  reemplazo_Clock();
 void guardar_en_memoria_swap(t_pagina_patota* pagina, void* datos);
 uint32_t generar_direccion_logica_paginacion(uint32_t pagina, uint32_t desplazamiento);
 void obtener_direccion_logica_paginacion(uint32_t* pagina, uint32_t* desplazamiento, uint32_t direccion);
-bool entra_en_swap(uint32_t cantidad);
+bool entra_pcb(uint32_t cantidad);
 bool entra_en_memoria(uint32_t size_pcb);
 void leer_pagina_de_memoria(t_pagina_patota* pagina, void* to);
+void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from);
 void liberar_memoria_principal_paginacion(t_pagina_patota* pagina);
 void liberar_memoria_virtual(t_pagina_patota* pagina);
 int32_t paginas_necesarias(uint32_t offset, uint32_t size);
-void pasar_de_swap_a_principal(t_pagina_patota* pagina);
-void modificar_en_memoria_principal(t_pagina_patota* pagina, void* datos);
+void swapear_frames(t_pagina_patota* pagina);
 void dump_paginacion(FILE* dump);
 void borrar_patota(t_tabla_paginas* tabla);
 
