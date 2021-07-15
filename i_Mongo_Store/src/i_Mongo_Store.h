@@ -57,7 +57,7 @@ typedef enum{
 }op_code_tareas;
 
 void inicializarSemaforos();
-void crear_log();
+void crearLog();
 void leerConfig();
 void crearDirectorio(char*);
 void inicializarFS();

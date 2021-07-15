@@ -5,15 +5,14 @@ int main(void) {
 	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
 	inicializarSemaforos();
 	leerConfig();
-	crear_log();
+	crearLog();
 	inicializarFS();
 	signal(SIGUSR1, sighandler);
-
 
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 	//			estadoSuperBloque();
 	//
-	//			generarRecurso(10,'O');
+	//		generarRecurso(10,'O');
 	//		estadoSuperBloque();
 	//		consumirRecurso(5, 'O');
 	//
@@ -49,10 +48,6 @@ int main(void) {
 	//	fsckFiles_Size();
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
 
-	while(1){
-
-	}
-
 	//int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 	//SOCKET_SABOTAJE_GLOBAL= esperar_cliente(socket_servidor);
 
@@ -74,7 +69,6 @@ int main(void) {
 	//	}
 
 	config_destroy(config);
-	//	free(blocksMap);
 	return EXIT_SUCCESS;
 }
 
@@ -109,7 +103,7 @@ int main(void) {
 void timerSincronizacion_blocksMap(){
 
 	while(1){
-		memcpy(blocksMapOriginal,blocksMap,BLOCK_SIZE*BLOCKS);
+		memcpy(blocksMapOriginal,blocksMap, tamanioBlocks);
 		msync(blocksMapOriginal, tamanioBlocks, MS_SYNC);
 		log_info(logger, "Sincronizando archivo blocks...");
 		sleep(TIEMPO_SINCRONIZACION);
@@ -320,7 +314,7 @@ void inicializarBlocks() {
 
 	//Thread con timer para sincronizar mmap a disco, iniciarlo despues del mmap!
 	pthread_t hilo_sincro_blocksmap;
-	pthread_create(&hilo_sincro_blocksmap, NULL,(void*) timerSincronizacion_blocksMap, NULL);
+	pthread_create(&hilo_sincro_blocksmap, NULL,(void*) timerSincronizacion_blocksMap, NULL);	/// Ver advertencia valgrind
 
 	close(fd);
 
@@ -518,7 +512,7 @@ void leerConfig() {
 
 }
 
-void crear_log(){
+void crearLog(){
 
 	logger = log_create("mongo.log", "MONGO", 1, LOG_LEVEL_INFO);
 	puts("Log creado satisfactoriamente");
