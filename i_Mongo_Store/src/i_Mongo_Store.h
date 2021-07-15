@@ -44,8 +44,6 @@ pthread_mutex_t mutex_oxigeno;
 pthread_mutex_t mutex_comida;
 pthread_mutex_t mutex_basura; // basuuuura japishhh
 
-// puedo semaforizar el acceso al bitmap.
-
 typedef enum{
 	GENERAR_OXIGENO = 0,
 	CONSUMIR_OXIGENO = 1,
@@ -70,7 +68,6 @@ op_code_tareas string_to_op_code_tareas (char*);
 void hacerTarea(inicio_tarea_msg*);
 void funcionPruebaDisc(int32_t*);
 void recibirMensajeTripulante(int32_t*);
-t_bitarray* crearBitmap(char*);
 void timerSincronizacion_blocksMap();
 void setBitmap(int, int);
 int existeFS();
@@ -84,7 +81,6 @@ int consumirRecurso(int32_t, char);
 int writeBitacora(int32_t, char*);
 char* readBitacora(int32_t);
 void sighandler();
-void iniciarProtocoloFSCK();
 int fsckSuperBloque_Bloques();
 int fsckSuperBloque_Bitmap();
 int fsckFiles_Size();
@@ -92,6 +88,8 @@ int fsckFiles_BlockCount();
 int fsckFiles_Blocks();
 void haySabotajeBitmapEnElArchivo(char*);
 void haySabotajeCountEnElArchivo(char*);
+void liberarRecursos();
+void iniciarProtocoloFSCK();
 
 
 // FUNCIONES PARA TESTING:

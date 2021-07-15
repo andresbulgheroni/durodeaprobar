@@ -9,6 +9,8 @@ int main(void) {
 	inicializarFS();
 	signal(SIGUSR1, sighandler);
 
+	while(1);
+
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 	//			estadoSuperBloque();
 	//
@@ -68,7 +70,7 @@ int main(void) {
 	//
 	//	}
 
-	config_destroy(config);
+	liberarRecursos();
 	return EXIT_SUCCESS;
 }
 
@@ -315,6 +317,7 @@ void inicializarBlocks() {
 	//Thread con timer para sincronizar mmap a disco, iniciarlo despues del mmap!
 	pthread_t hilo_sincro_blocksmap;
 	pthread_create(&hilo_sincro_blocksmap, NULL,(void*) timerSincronizacion_blocksMap, NULL);	/// Ver advertencia valgrind
+	pthread_detach(hilo_sincro_blocksmap);
 
 	close(fd);
 
@@ -1079,15 +1082,7 @@ void sighandler() {
 
 	//enviar_paquete(sabotaje, NOTIFICAR_SABOTAJE, );  //TODO falta socket de sabotaje SOCKET_SABOTAJE_GLOBAL?
 
-}
 
-void iniciarProtocoloFSCK(){
-
-	fsckSuperBloque_Bloques();
-	fsckSuperBloque_Bitmap();
-	fsckFiles_Size();
-	fsckFiles_BlockCount();
-	fsckFiles_Blocks();
 
 }
 
@@ -1599,5 +1594,40 @@ void haySabotajeCountEnElArchivo(char* directorio){
 	free(metadataFiles);
 
 	config_destroy(metadata);
+
+}
+
+void liberarRecursos(){
+
+	free(blocksMap);
+	munmap(blocksMapOriginal, tamanioBlocks);
+
+	int cantidadBloques;
+	int offset = 2 * sizeof(uint32_t);
+
+	if((BLOCKS % 8) == 0){
+		cantidadBloques = BLOCKS / 8;
+	} else{
+		cantidadBloques = (BLOCKS / 8) + 1;
+	}
+
+	munmap(superBloqueMap, cantidadBloques + offset);
+
+	pthread_mutex_destroy(&mutex_bitmap);
+	pthread_mutex_destroy(&mutex_oxigeno);
+	pthread_mutex_destroy(&mutex_comida);
+	pthread_mutex_destroy(&mutex_basura);
+
+	config_destroy(config);
+
+}
+
+void iniciarProtocoloFSCK(){
+
+	fsckSuperBloque_Bloques();
+	fsckSuperBloque_Bitmap();
+	fsckFiles_Size();
+	fsckFiles_BlockCount();
+	fsckFiles_Blocks();
 
 }
