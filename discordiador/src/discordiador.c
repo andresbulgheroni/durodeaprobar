@@ -1702,6 +1702,10 @@ void ejecucionRR(t_tripulante*tripulante){
 
 	}
 
+	if(haySabotaje==1){
+		log_info(logger, "Llego un sabotaje, toca hacer huelga soy el tripulante con ID: %d",tripulante->idTripulante);
+		sem_post(&sem_planificarMultitarea);
+	}
 
 
 }
