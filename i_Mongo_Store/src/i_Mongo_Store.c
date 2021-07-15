@@ -1079,7 +1079,15 @@ void sighandler() {
 
 	//enviar_paquete(sabotaje, NOTIFICAR_SABOTAJE, );  //TODO falta socket de sabotaje SOCKET_SABOTAJE_GLOBAL?
 
+}
 
+void iniciarProtocoloFSCK(){
+
+	fsckSuperBloque_Bloques();
+	fsckSuperBloque_Bitmap();
+	fsckFiles_Size();
+	fsckFiles_BlockCount();
+	fsckFiles_Blocks();
 
 }
 

@@ -84,6 +84,7 @@ int consumirRecurso(int32_t, char);
 int writeBitacora(int32_t, char*);
 char* readBitacora(int32_t);
 void sighandler();
+void iniciarProtocoloFSCK();
 int fsckSuperBloque_Bloques();
 int fsckSuperBloque_Bitmap();
 int fsckFiles_Size();
