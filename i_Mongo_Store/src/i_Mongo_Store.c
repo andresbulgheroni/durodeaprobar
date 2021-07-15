@@ -7,9 +7,8 @@ int main(void) {
 	leerConfig();
 	crearLog();
 	inicializarFS();
-	signal(SIGUSR1, sighandler);
 
-	while(1);
+
 
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 	//			estadoSuperBloque();
@@ -51,24 +50,24 @@ int main(void) {
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
 
 	//int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
-	//SOCKET_SABOTAJE_GLOBAL= esperar_cliente(socket_servidor);
 
 
-	//	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
-	//
-	//
-	//
-	//
-	//	while(true){
-	//
-	//		int32_t*socket_cliente =  malloc(sizeof(int32_t));
-	//		*socket_cliente = esperar_cliente(socket_servidor);
-	//
-	//		pthread_t hilo_mensaje;
-	//		pthread_create(&hilo_mensaje,NULL,(void*)recibirMensajeTripulante,(void*) (socket_cliente));
-	//		pthread_detach(hilo_mensaje);
-	//
-	//	}
+
+		int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
+
+		SOCKET_SABOTAJE= esperar_cliente(socket_servidor);
+		signal(SIGUSR1, sighandler);
+
+		while(true){
+
+			int32_t*socket_cliente =  malloc(sizeof(int32_t));
+			*socket_cliente = esperar_cliente(socket_servidor);
+
+			pthread_t hilo_mensaje;
+			pthread_create(&hilo_mensaje,NULL,(void*)recibirMensajeTripulante,(void*) (socket_cliente));
+			pthread_detach(hilo_mensaje);
+
+		}
 
 	liberarRecursos();
 	return EXIT_SUCCESS;
@@ -1080,9 +1079,9 @@ void sighandler() {
 	sabotaje->idSabotaje = ID_SABOTAJE+1;
 	sabotaje->coordenadas =get_coordenadas(POSICIONES_SABOTAJE[ID_SABOTAJE]);
 
-	//enviar_paquete(sabotaje, NOTIFICAR_SABOTAJE, );  //TODO falta socket de sabotaje SOCKET_SABOTAJE_GLOBAL?
+	enviar_paquete(sabotaje, NOTIFICAR_SABOTAJE,SOCKET_SABOTAJE);  //TODO falta socket de sabotaje SOCKET_SABOTAJE_GLOBAL?
 
-
+	puts("se envio el mensaje del sabotaje correctamente");
 
 }
 

@@ -29,7 +29,7 @@ int main(void){
 
 	iniciarLog();
 	inicializarListasGlobales();
-	//iniciarHiloSabotaje();
+	iniciarHiloSabotaje();
 	crearHiloPlanificador();
 	inicioHiloPlanificarBloqueo();
 	inicializarSemaforoPlanificador();
@@ -182,25 +182,17 @@ void planificarSabotaje(){
 	*socketSabotaje = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
 	while(true){
 
-//		t_paquete*paqueteSabotaje=recibir_paquete(socketSabotaje);
-//		notificar_sabotaje_msg*mensajeDeSabotaje=deserializar_paquete(paqueteSabotaje);
+		t_paquete*paqueteSabotaje=recibir_paquete(*socketSabotaje);
+		notificar_sabotaje_msg*mensajeDeSabotaje=deserializar_paquete(paqueteSabotaje);
 
-//		t_paquete*paquete =recibir_paquete(*socketSabotaje);
-
-
+		log_info(logger,"recibi el paquete de un sabotaje");
 
 		t_sabotaje*sabotajeActivo=malloc(sizeof(t_sabotaje));
 		sabotajeActivo->coordenadas=malloc(sizeof(t_coordenadas));
 
-		//PRUEBAS TODO
-		sleep(15);
-		sabotajeActivo->coordenadas->posX = 2;
-		sabotajeActivo->coordenadas->posY = 3;
-		sabotajeActivo->id_sabotaje = 1;
-
-
-//		sabotajeActivo->coordenadas = get_coordenadas(mensajeDeSabotaje->coordenadas);
-//		sabotajeActivo->id_sabotaje = mensajeDeSabotaje->idSabotaje;
+		sabotajeActivo->coordenadas->posX = mensajeDeSabotaje->coordenadas->posX;
+		sabotajeActivo->coordenadas->posY = mensajeDeSabotaje->coordenadas->posY;
+		sabotajeActivo->id_sabotaje = mensajeDeSabotaje->idSabotaje;
 		log_info(logger,"llego el sabotaje con ID: %d",sabotajeActivo->id_sabotaje);
 
 		haySabotaje=1;
@@ -944,7 +936,7 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 
 	if (posicionXtripulante != posicionXsabotaje) {
 
-		uint32_t diferenciaEnX = posicionXsabotaje - posicionXtripulante;
+		int32_t diferenciaEnX = posicionXsabotaje - posicionXtripulante;
 		if (diferenciaEnX > 0) {
 			tripulante->coordenadas->posX = posicionXtripulante + 1;
 		} else if (diferenciaEnX < 0) {

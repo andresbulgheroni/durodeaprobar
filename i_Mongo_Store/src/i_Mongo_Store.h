@@ -38,6 +38,7 @@ t_log* logger;
 t_config* config;
 int tamanioBlocks;
 int tamanioSuperBloque;
+int32_t SOCKET_SABOTAJE;
 t_bitarray* bitmap;
 pthread_mutex_t mutex_bitmap;
 pthread_mutex_t mutex_oxigeno;
