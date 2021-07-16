@@ -51,12 +51,13 @@ int main(void) {
 
 	//int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 
-
+		signal(SIGUSR1, sighandler);
 
 		int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 
-		SOCKET_SABOTAJE= esperar_cliente(socket_servidor);
-		signal(SIGUSR1, sighandler);
+		SOCKET_SABOTAJE= malloc(sizeof(int32_t));
+		*SOCKET_SABOTAJE=esperar_cliente(socket_servidor);
+
 
 		while(true){
 
@@ -106,7 +107,7 @@ void timerSincronizacion_blocksMap(){
 	while(1){
 		memcpy(blocksMapOriginal,blocksMap, tamanioBlocks);
 		msync(blocksMapOriginal, tamanioBlocks, MS_SYNC);
-		log_info(logger, "Sincronizando archivo blocks...");
+		//log_info(logger, "Sincronizando archivo blocks...");
 		sleep(TIEMPO_SINCRONIZACION);
 	}
 
@@ -1080,11 +1081,11 @@ void sighandler() {
 	sabotaje->idSabotaje = ID_SABOTAJE+1;
 	sabotaje->coordenadas =get_coordenadas(POSICIONES_SABOTAJE[ID_SABOTAJE]);
 
-	enviar_paquete(sabotaje, NOTIFICAR_SABOTAJE,SOCKET_SABOTAJE);  //TODO falta socket de sabotaje SOCKET_SABOTAJE_GLOBAL?
-free(sabotaje->coordenadas);
+	enviar_paquete(sabotaje, NOTIFICAR_SABOTAJE,*SOCKET_SABOTAJE);  //TODO falta socket de sabotaje SOCKET_SABOTAJE_GLOBAL?
+	free(sabotaje->coordenadas);
 	free(sabotaje);
 
-
+	ID_SABOTAJE++;
 	puts("se envio el mensaje del sabotaje correctamente");
 
 }
