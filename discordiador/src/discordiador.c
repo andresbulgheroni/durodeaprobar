@@ -2088,6 +2088,11 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 void finalizar(){
 	void destruirTripulantes(void* elemento){
 			t_tripulante* tripulante = (t_tripulante*) elemento;
+
+			free(tripulante->semaforoCiclo);
+			free(tripulante->semaforoBloqueadoTripulante);
+			free(tripulante->semaforoDelTripulante);
+			free(tripulante->semaforoDelSabotaje);
 			free(tripulante);
 
 	}
