@@ -178,9 +178,13 @@ void iniciarHiloSabotaje(){
 	pthread_detach(hiloSabotaje);
 }
 void planificarSabotaje(){
-	uint32_t*socketSabotaje = malloc(sizeof(int32_t));
+	int32_t*socketSabotaje = malloc(sizeof(int32_t));
 	*socketSabotaje = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
+
+	log_info(logger,"el socket del sabotaje es: %d \n",*socketSabotaje);
 	while(true){
+
+		log_info(logger,"entro en el while");
 
 		t_paquete*paqueteSabotaje=recibir_paquete(*socketSabotaje);
 		notificar_sabotaje_msg*mensajeDeSabotaje=deserializar_paquete(paqueteSabotaje);
@@ -386,7 +390,6 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 	for(uint32_t i=0; i<(list_size(posicionesTripulantes)) ; i++){
 
 		t_tripulante* tripulante = malloc(sizeof(t_tripulante));
-		tripulante->coordenadas = malloc(sizeof(t_coordenadas));
 		tripulante->tareaAsignada= malloc(sizeof(t_tarea));						//TODO
 		tripulante->tareaAsignada->coordenadas = malloc(sizeof(t_coordenadas));
 		char* posicion = list_get(posicionesTripulantes,i);
@@ -520,7 +523,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 
 					tripulante_data_msg*tripulanteConCoordenadas=malloc(sizeof(tripulante_data_msg));
-					tripulanteConCoordenadas->coordenadas =	malloc(sizeof(t_coordenadas));
+
 					tripulanteConCoordenadas->coordenadas=  get_coordenadas(list_get(posicionesTripulantes, i));
 
 					tripulanteConCoordenadas->idTripulante = id_tripulante_para_enviar;
@@ -1052,10 +1055,9 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 
 t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
-	t_tripulante* tripulanteMasCercanoSabotaje = malloc(sizeof(t_tripulante));
-	t_tripulante* tripulanteTemporal = malloc(sizeof(t_tripulante));;
-	tripulanteMasCercanoSabotaje->coordenadas =malloc(sizeof(t_coordenadas));
-	tripulanteTemporal->coordenadas =malloc(sizeof(t_coordenadas));
+	t_tripulante* tripulanteMasCercanoSabotaje;
+	t_tripulante* tripulanteTemporal;
+
 
 	uint32_t distanciaTemporal;
 	uint32_t menorDistanciaSabotaje = 1000;
@@ -1093,12 +1095,8 @@ t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
 	sacarTripulanteDeLista(tripulanteMasCercanoSabotaje, listaBloqueadosPorSabotaje);
 	pthread_mutex_unlock(&mutex_listaBloqueadosPorSabotaje);
 
-	free(tripulanteTemporal->coordenadas);
-	free(tripulanteTemporal);
 
 	list_destroy(tripulantesBloqueadosSabotaje);
-
-	//list_destroy(tripulantesBloqueadosSabotaje);
 
 	return tripulanteMasCercanoSabotaje;
 }

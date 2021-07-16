@@ -211,6 +211,8 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 			free(sabotajeMsg);
 			free(cadena);
 
+			iniciarProtocoloFSCK();
+
 			break;
 
 		} case RESOLUCION_SABOTAJE:{
@@ -1075,11 +1077,13 @@ void sighandler() {
 
 	// Avisarle al modulo de Andy, hacer hilo para el sabotaje
 	notificar_sabotaje_msg*sabotaje = malloc(sizeof(notificar_sabotaje_msg));
-	sabotaje->coordenadas = malloc(sizeof(t_coordenadas));
 	sabotaje->idSabotaje = ID_SABOTAJE+1;
 	sabotaje->coordenadas =get_coordenadas(POSICIONES_SABOTAJE[ID_SABOTAJE]);
 
 	enviar_paquete(sabotaje, NOTIFICAR_SABOTAJE,SOCKET_SABOTAJE);  //TODO falta socket de sabotaje SOCKET_SABOTAJE_GLOBAL?
+free(sabotaje->coordenadas);
+	free(sabotaje);
+
 
 	puts("se envio el mensaje del sabotaje correctamente");
 
