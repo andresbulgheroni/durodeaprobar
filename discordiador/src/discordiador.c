@@ -1139,6 +1139,8 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	uint32_t socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
 
+	sem_post(&sem_hiloTripulante);
+	
 	if(estaPlanificando==0){
 		sem_wait(tripulante->semaforoCiclo);
 	}
@@ -1219,7 +1221,6 @@ void ejecutarTripulante(t_tripulante* tripulante){
 			 }
 			}
 
-	sem_post(&sem_hiloTripulante);
 
 
 	while(tripulante->estado != FINISHED && tripulante->fueExpulsado != 1){		//TODO
