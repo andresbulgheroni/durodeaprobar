@@ -30,6 +30,7 @@
 #include <math.h>
 #include <signal.h>
 #include <time.h>
+#include <readline/readline.h>
 
 typedef enum{
 	SEGMENTACION_PURA = 1,
@@ -129,7 +130,7 @@ typedef struct{
 
 } t_dump_pag;
 
-void init ();
+void init (char* config_elect);
 void iniciarMapa();
 void terminar ();
 int32_t get_esquema_memoria(char* esquema_config);
@@ -139,6 +140,7 @@ char get_status(t_status_code codigo);
 void hilo_servidor();
 void sig_handler(int n);
 char* get_timestamp();
+char* get_config(int opt);
 
 //Paginacion
 void configurar_paginacion();

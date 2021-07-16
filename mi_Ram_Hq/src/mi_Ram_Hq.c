@@ -67,12 +67,17 @@ int main(void) {
 
 	//TODO PREPARAR PARA USAR DISTINTOS CONFIG PARA LAS  PRUEBAS FINALES
 
-	init();
-
-	log_info(logger,"MIRAMHQ PID: %d ", getpid());
+	printf("MIRAMHQ PID: %d ", getpid());
 
 	signal(SIGUSR1, sig_handler);
 	signal(SIGUSR2, sig_handler);
+
+
+	char* option = readline("\nSeleccione la configuracion que desea utilizar:\n1-PRUEBA DISC CPU\n2-PRUEBA DISC E/S\n3-PRUEBA SEG FF\n4-PRUEBA SEG BF\n5-PRUEBA PAG LRU\n6-PRUEBA PAG CLOCK\n7-PRUEBA FS\n>");
+
+	init(option);
+
+	log_info(logger, "\n\n\nINICIA EJECUCION DE RAM");
 
 	pthread_t hilo_server;
 	pthread_create(&hilo_server,NULL,(void*)hilo_servidor, NULL);
@@ -81,6 +86,7 @@ int main(void) {
 	terminar();
 
 	return EXIT_SUCCESS;
+
 }
 
 char* get_timestamp(){
@@ -155,9 +161,7 @@ void dump_paginacion(FILE* dump){
 
 	list_iterate(tabla_dump, guardar_tabla);
 
-	void vaciar_lista(t_dump_pag* pag){
-		free(pag);
-	}
+	void vaciar_lista(t_dump_pag* pag){	}
 	list_destroy_and_destroy_elements(tabla_dump, vaciar_lista);
 }
 
@@ -189,7 +193,9 @@ void recibir_mensaje(int32_t* conexion){
 			case INICIAR_PATOTA_MSG:{
 
 				iniciar_patota_msg* mensaje = deserializar_paquete(paquete);
-				//printf("INICIO PATOTA %d\n", mensaje->idPatota);
+				pthread_mutex_lock(&m_LOGGER);
+					log_info(logger, "SOLICITUD INICIO PATOTA %d", mensaje->idPatota);
+				pthread_mutex_unlock(&m_LOGGER);
 				bool status = true;
 
 				switch(ESQUEMA_MEMORIA){
@@ -198,6 +204,9 @@ void recibir_mensaje(int32_t* conexion){
 				}
 
 				if(status){
+					pthread_mutex_lock(&m_LOGGER);
+						log_info(logger, "SE CREO LA PATOTA CON EXITO %d", mensaje->idPatota);
+					pthread_mutex_unlock(&m_LOGGER);
 					enviar_paquete(NULL, OK_MSG, *conexion);
 				}else{
 					char* mensaje_err = string_new();
@@ -209,12 +218,14 @@ void recibir_mensaje(int32_t* conexion){
 
 					free(rta_error);
 
+					pthread_mutex_lock(&m_LOGGER);
+						log_info(logger, "FALLO LA CREACION DE LA PATOTA %d", mensaje->idPatota);
+					pthread_mutex_unlock(&m_LOGGER);
+
 				}
 
-				void vaciar_trips(tripulante_data_msg* trip){
-					free(trip);
-				}
-				list_clean_and_destroy_elements(mensaje->tripulantes, vaciar_trips);
+				void vaciar_trips(tripulante_data_msg* trip){	}
+				list_destroy_and_destroy_elements(mensaje->tripulantes, vaciar_trips);
 				free(mensaje->tareas);
 				free(mensaje);
 
@@ -224,14 +235,19 @@ void recibir_mensaje(int32_t* conexion){
 			case INFORMAR_MOVIMIENTO_RAM:{
 
 				informar_movimiento_ram_msg* mensaje = deserializar_paquete(paquete);
-				//printf("MOVER TRIP %d PAT%d a %d|%d\n", mensaje->idTripulante, mensaje->idPatota, mensaje->coordenadasDestino->posX, mensaje->coordenadasDestino->posY);
+
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: informar_movimiento_segmentacion(mensaje, NULL);break;
 					case PAGINACION_VIRTUAL: informar_movimiento_paginacion(mensaje, NULL);break;
 				}
 
+				pthread_mutex_lock(&m_LOGGER);
+					log_info(logger, "SE MOVIO AL TRIPULANTE %d DE LA PATOTA %d A %d|%d", mensaje->idTripulante, mensaje->idPatota, mensaje->coordenadasDestino->posX, mensaje->coordenadasDestino->posY);
+				pthread_mutex_unlock(&m_LOGGER);
+
 				free(mensaje->coordenadasDestino);
 				free(mensaje);
+
 
 				break;
 
@@ -239,11 +255,14 @@ void recibir_mensaje(int32_t* conexion){
 			case CAMBIO_ESTADO:{
 
 				cambio_estado_msg* mensaje = deserializar_paquete(paquete);
-				//printf("CAMBIO ESTADO TRIP %d PAT %d a %c\n", mensaje->idTripulante, mensaje->idTripulante, get_status(mensaje->estado));
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: cambiar_estado_segmentacion(mensaje, NULL);break;
 					case PAGINACION_VIRTUAL: cambiar_estado_paginacion(mensaje, NULL);break;
 				}
+
+				pthread_mutex_lock(&m_LOGGER);
+					log_info(logger, "CAMBIO ESTADO TRIPULANTE %d DE LA PATOTA %d A %c", mensaje->idTripulante, mensaje->idTripulante, get_status(mensaje->estado));
+				pthread_mutex_unlock(&m_LOGGER);
 
 				free(mensaje);
 
@@ -256,7 +275,10 @@ void recibir_mensaje(int32_t* conexion){
 
 				bool completo_tareas = false;
 				char* tarea;
-				//printf("SOLICITO TAREA TRIP %d PAT %d\n", mensaje->idTripulante, mensaje->idPatota);
+				pthread_mutex_lock(&m_LOGGER);
+					log_info(logger, "SOLICITO TAREA TRIPULANTE %d DE LA PATOTA %d", mensaje->idTripulante, mensaje->idPatota);;
+				pthread_mutex_unlock(&m_LOGGER);
+
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: tarea = siguiente_tarea_segmentacion(mensaje, &completo_tareas, NULL);break;
 					case PAGINACION_VIRTUAL: tarea = siguiente_tarea_paginacion(mensaje, &completo_tareas, NULL);break;
@@ -265,10 +287,13 @@ void recibir_mensaje(int32_t* conexion){
 				if(completo_tareas){
 					//printf("COMPLETO TAREAS TRIP %d PAT %d\n", mensaje->idTripulante, mensaje->idPatota);
 					enviar_paquete(NULL, COMPLETO_TAREAS, *conexion);
-					log_info(logger, "El tripulante %d de la patota %d ya completo sus tareas", mensaje->idTripulante, mensaje->idPatota);
-
+					pthread_mutex_lock(&m_LOGGER);
+						log_info(logger, "EL TRIPULANTE %d DE LA PATOTA %d COMPLETO SUS TAREAS", mensaje->idTripulante, mensaje->idPatota);;
+					pthread_mutex_unlock(&m_LOGGER);
 				}else{
-					//printf("%s. TRIP %d PAT %d\n", tarea, mensaje->idTripulante, mensaje->idPatota);
+					pthread_mutex_lock(&m_LOGGER);
+						log_info(logger, "EL TRIPULANTE %d DE LA PATOTA %d TIENE LA TAREA %s", mensaje->idTripulante, mensaje->idPatota, tarea);;
+					pthread_mutex_unlock(&m_LOGGER);
 					t_string* tarea_msg = get_t_string(tarea);
 					enviar_paquete(tarea_msg, SOLICITAR_SIGUIENTE_TAREA_RTA, *conexion);
 					free(tarea_msg);
@@ -277,23 +302,31 @@ void recibir_mensaje(int32_t* conexion){
 
 				free(mensaje);
 
+
 				break;
 			}
 			case EXPULSAR_TRIPULANTE_MSG:{
 
 				expulsar_tripulante_msg* mensaje = deserializar_paquete(paquete);
-				//printf("EXPULSAR TRIP %d PAT %d\n", mensaje->idTripulante, mensaje->idPatota);
+				pthread_mutex_lock(&m_LOGGER);
+					log_info(logger, "SE SOLICITO EXPULSAR AL TRIPULANTE %d DE LA PATOTA %d\n", mensaje->idTripulante, mensaje->idPatota);
+				pthread_mutex_unlock(&m_LOGGER);
 
 				switch(ESQUEMA_MEMORIA){
 					case SEGMENTACION_PURA: expulsar_tripulante_segmentacion(mensaje, NULL);break;
 					case PAGINACION_VIRTUAL: expulsar_tripulante_paginacion(mensaje, NULL);break;
 				}
 
+				pthread_mutex_lock(&m_LOGGER);
+					log_info(logger, "SE EXPULSO AL TRIPULANTE %d DE LA PATOTA %d\n", mensaje->idTripulante, mensaje->idPatota);
+				pthread_mutex_unlock(&m_LOGGER);
+
 				free(mensaje);
 
 				break;
 
 			}
+
 			DESCONECTADO:
 			default: terminado = true; break;
 		}
@@ -303,10 +336,18 @@ void recibir_mensaje(int32_t* conexion){
 	pthread_exit(NULL);
 }
 
-void init (){
+void init (char* config_elect){
 
-	config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/ram.config");
-	logger = log_create("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/ram.log", "MI-RAM-HQ", true, LOG_LEVEL_DEBUG);
+	char* cfg_path = get_config(atoi(config_elect));
+
+	if(strcmp("err", cfg_path) == 0){
+		printf("LA CONFIGURACION SOLICITADA NO ES CORRECTA");
+		exit(2);
+	}
+
+	config = config_create(cfg_path);
+
+	logger = log_create("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/ram.log", "MI-RAM-HQ", false, LOG_LEVEL_INFO);
 
 	TAMANIO_MEMORIA = config_get_int_value(config, "TAMANIO_MEMORIA");
 	ESQUEMA_MEMORIA = get_esquema_memoria(config_get_string_value(config, "ESQUEMA_MEMORIA"));
@@ -315,7 +356,7 @@ void init (){
 	PATH_SWAP = config_get_string_value(config, "PATH_SWAP");
 	ALGORITMO_REEMPLAZO = get_algoritmo(config_get_string_value(config, "ALGORITMO_REEMPLAZO"));;
 	IP = config_get_string_value(config, "IP");
-	CRITERIO_SELECCION = get_criterio(config_get_string_value(config, "CRITERIO_SELECCION")); // TODO CELES TE FALTA DECLAR LA FUNCION EN EL .H CREO
+	CRITERIO_SELECCION = get_criterio(config_get_string_value(config, "CRITERIO_SELECCION"));
 	PUERTO = config_get_string_value(config, "PUERTO");
 
 	memoria_principal = malloc(TAMANIO_MEMORIA);
@@ -335,7 +376,6 @@ void init (){
 		}
 	}
 	//iniciarMapa();
-
 }
 
 void configurar_paginacion(){
@@ -441,7 +481,6 @@ void obtener_direccion_logica_paginacion(uint32_t* pagina, uint32_t* desplazamie
 
 }
 
-// TODO CORREGIR
 void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 
 	pthread_mutex_lock(&m_TABLAS_PAGINAS);
@@ -508,9 +547,7 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 
 			free(pcb);
 
-			void liberar_tcbs(t_tcb* tcb){
-				free(tcb);
-			}
+			void liberar_tcbs(t_tcb* tcb){	}
 
 			list_destroy_and_destroy_elements(tcbs, liberar_tcbs);
 
@@ -711,7 +748,6 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 }
 
-//TODO CORREGIR
 void cambiar_estado_paginacion(cambio_estado_msg* mensaje, bool* status){
 	pthread_mutex_lock(&m_TABLAS_PAGINAS);
 
@@ -900,7 +936,15 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 			if(leer_siguiente_pagina){
 
+
 				t_pagina_patota* pagina_enc = list_find(tabla->tabla_paginas, es_la_pagina);
+
+				if(pagina_enc == NULL){
+
+					tarea = "";
+					break;
+
+				}
 
 				pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
@@ -935,7 +979,9 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 				if(i < tarea_actual){
 					tarea = "";
 				}
+
 				i++;
+
 			}else{
 				tarea = string_from_format("%s%c", tarea, letra[0]);
 			}
@@ -1244,7 +1290,7 @@ void* leer_de_memoria_principal(t_pagina_patota* pagina){
 
 		}else{
 
-			t_pagina_patota* reemplazo;
+			t_pagina_patota* reemplazo = NULL;
 
 			switch(ALGORITMO_REEMPLAZO){
 
@@ -1295,7 +1341,7 @@ void* leer_de_memoria_principal(t_pagina_patota* pagina){
 			char* mensaje = string_new();
 			if(nro_frame >= 0){
 				mensaje = string_from_format("Reemplazo en frame %d", nro_frame);
-				log_debug(logger, mensaje);
+				log_info(logger, mensaje);
 			}else{
 				mensaje = "Fallo reemplazo en memoria principal";
 				log_error(logger, mensaje);
@@ -1366,7 +1412,7 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from){
 
 		}else{
 
-			t_pagina_patota* reemplazo;
+			t_pagina_patota* reemplazo = NULL;
 
 			switch(ALGORITMO_REEMPLAZO){
 
@@ -1424,7 +1470,7 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from){
 			char* mensaje = string_new();
 			if(nro_frame >= 0){
 				mensaje = string_from_format("Reemplazo en frame %d", nro_frame);
-				log_debug(logger, mensaje);
+				log_info(logger, mensaje);
 			}else{
 				mensaje = "Fallo reemplazo en memoria principal";
 				log_error(logger, mensaje);
@@ -1590,7 +1636,7 @@ void liberar_memoria_principal_paginacion(t_pagina_patota* pagina){
 		pthread_mutex_lock(&m_LOGGER);
 			char* mensaje = string_new();
 			mensaje = string_from_format("Liberado frame nro. %d. MEMORIA PRINCIPAL ", frame->pos);
-			log_debug(logger, mensaje);
+			log_info(logger, mensaje);
 			free(mensaje);
 		pthread_mutex_unlock(&m_LOGGER);
 
@@ -1617,7 +1663,7 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 	pthread_mutex_lock(&m_LOGGER);
 		char* mensaje = string_new();
 		mensaje = string_from_format("Liberado frame nro. %d. MEMORIA VIRTUAL ", frame->pos);
-		log_debug(logger, mensaje);
+		log_info(logger, mensaje);
 		free(mensaje);
 	pthread_mutex_unlock(&m_LOGGER);
 
@@ -1636,21 +1682,37 @@ void borrar_patota(t_tabla_paginas* tabla){
 		}else{
 			liberar_memoria_principal_paginacion(pagina);
 		}
-		free(pagina);
 
 	}
 
 	list_destroy_and_destroy_elements(tabla->tabla_paginas, liberar_paginas);
 
-	void liberar_direcciones(t_direcciones_trips* direccion){
-
-		free(direccion);
-
-	}
+	void liberar_direcciones(t_direcciones_trips* direccion){}
 
 	list_destroy_and_destroy_elements(tabla->tabla_direcciones, liberar_direcciones);
 
 	pthread_mutex_destroy(&(tabla->m_TABLA));
+
+}
+
+
+char* get_config(int opt){
+
+	char* config_path = string_new();
+
+	switch(opt){
+		case 1: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg1.config";break;
+		case 2: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg2.config";break;
+		case 3: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg3_1.config";break;
+		case 4: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg3_2.config";break;
+		case 5: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_pag1_1.config";break;
+		case 6: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_pag1_2.config";break;
+		case 7: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg4.config";break;
+
+		default: config_path = "err"; break;
+	}
+
+	return config_path;
 
 }
 
