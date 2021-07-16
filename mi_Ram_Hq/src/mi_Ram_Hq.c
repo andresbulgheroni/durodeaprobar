@@ -241,10 +241,6 @@ void recibir_mensaje(int32_t* conexion){
 					case PAGINACION_VIRTUAL: informar_movimiento_paginacion(mensaje, NULL);break;
 				}
 
-				pthread_mutex_lock(&m_LOGGER);
-					log_info(logger, "SE MOVIO AL TRIPULANTE %d DE LA PATOTA %d A %d|%d", mensaje->idTripulante, mensaje->idPatota, mensaje->coordenadasDestino->posX, mensaje->coordenadasDestino->posY);
-				pthread_mutex_unlock(&m_LOGGER);
-
 				free(mensaje->coordenadasDestino);
 				free(mensaje);
 
@@ -259,10 +255,6 @@ void recibir_mensaje(int32_t* conexion){
 					case SEGMENTACION_PURA: cambiar_estado_segmentacion(mensaje, NULL);break;
 					case PAGINACION_VIRTUAL: cambiar_estado_paginacion(mensaje, NULL);break;
 				}
-
-				pthread_mutex_lock(&m_LOGGER);
-					log_info(logger, "CAMBIO ESTADO TRIPULANTE %d DE LA PATOTA %d A %c", mensaje->idTripulante, mensaje->idTripulante, get_status(mensaje->estado));
-				pthread_mutex_unlock(&m_LOGGER);
 
 				free(mensaje);
 
@@ -287,9 +279,6 @@ void recibir_mensaje(int32_t* conexion){
 				if(completo_tareas){
 					//printf("COMPLETO TAREAS TRIP %d PAT %d\n", mensaje->idTripulante, mensaje->idPatota);
 					enviar_paquete(NULL, COMPLETO_TAREAS, *conexion);
-					pthread_mutex_lock(&m_LOGGER);
-						log_info(logger, "EL TRIPULANTE %d DE LA PATOTA %d COMPLETO SUS TAREAS", mensaje->idTripulante, mensaje->idPatota);;
-					pthread_mutex_unlock(&m_LOGGER);
 				}else{
 					pthread_mutex_lock(&m_LOGGER);
 						log_info(logger, "EL TRIPULANTE %d DE LA PATOTA %d TIENE LA TAREA %s", mensaje->idTripulante, mensaje->idPatota, tarea);;
@@ -316,10 +305,6 @@ void recibir_mensaje(int32_t* conexion){
 					case SEGMENTACION_PURA: expulsar_tripulante_segmentacion(mensaje, NULL);break;
 					case PAGINACION_VIRTUAL: expulsar_tripulante_paginacion(mensaje, NULL);break;
 				}
-
-				pthread_mutex_lock(&m_LOGGER);
-					log_info(logger, "SE EXPULSO AL TRIPULANTE %d DE LA PATOTA %d\n", mensaje->idTripulante, mensaje->idPatota);
-				pthread_mutex_unlock(&m_LOGGER);
 
 				free(mensaje);
 
@@ -634,6 +619,9 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 	if(dictionary_has_key(tabla_paginas_patota, string_itoa(mensaje->idPatota))){
 
+		int32_t* posx_anterior = malloc(sizeof(int32_t));
+		int32_t* posy_anterior = malloc(sizeof(int32_t));
+
 		t_tabla_paginas* tabla =  dictionary_get(tabla_paginas_patota, string_itoa(mensaje->idPatota));
 
 		pthread_mutex_unlock(&m_TABLAS_PAGINAS);
@@ -677,6 +665,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 			if(disponible < cargar){
 
+				memcpy(posx_anterior + cargado, frame + desplazamiento, disponible);
 				memcpy(frame + desplazamiento_pos, &(mensaje->coordenadasDestino->posX) + cargado, disponible);
 
 				cargado += disponible;
@@ -686,6 +675,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 			}else{
 
+				memcpy(posx_anterior + cargado, frame + desplazamiento, cargar);
 				memcpy(frame + desplazamiento_pos, &(mensaje->coordenadasDestino->posX) + cargado, cargar);
 
 			}
@@ -721,6 +711,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 			if(disponible < cargar){
 
+				memcpy(posy_anterior + cargado, frame + desplazamiento, disponible);
 				memcpy(frame + desplazamiento_pos, &(mensaje->coordenadasDestino->posY) + cargado, disponible);
 
 				cargado += disponible;
@@ -730,6 +721,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 			}else{
 
+				memcpy(posy_anterior + cargado, frame + desplazamiento, cargar);
 				memcpy(frame + desplazamiento_pos, &(mensaje->coordenadasDestino->posY) + cargado, cargar);
 
 			}
@@ -741,6 +733,14 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 		pthread_mutex_unlock(&(tabla->m_TABLA));
 
+		pthread_mutex_lock(&m_LOGGER);
+			log_info(logger, "EL TRIPULANTE %d DE LA PATOTA %d SE MOVIO DE %d|%d a %d|%d\n", mensaje->idTripulante,
+						mensaje->idPatota, mensaje->coordenadasDestino->posX, mensaje->coordenadasDestino->posY,
+						*posx_anterior, *posy_anterior);
+		pthread_mutex_unlock(&m_LOGGER);
+
+		free(posx_anterior);
+		free(posy_anterior);
 
 	}else{
 		pthread_mutex_unlock(&m_TABLAS_PAGINAS);
@@ -752,6 +752,8 @@ void cambiar_estado_paginacion(cambio_estado_msg* mensaje, bool* status){
 	pthread_mutex_lock(&m_TABLAS_PAGINAS);
 
 	if(dictionary_has_key(tabla_paginas_patota, string_itoa(mensaje->idPatota))){
+
+		char* estado_anterior = malloc(sizeof(char));
 
 		t_tabla_paginas* tabla =  dictionary_get(tabla_paginas_patota, string_itoa(mensaje->idPatota));
 
@@ -787,14 +789,26 @@ void cambiar_estado_paginacion(cambio_estado_msg* mensaje, bool* status){
 
 		pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
+		char* estado_nuevo = malloc(sizeof(char));
+
+		*estado_nuevo = get_status(mensaje->estado);
+
 		void* frame = leer_de_memoria_principal(pagina_enc);
 
-		memcpy(frame + desplazamiento_pos, &(mensaje->estado), cargar);
+		memcpy(estado_anterior, frame + desplazamiento_pos, cargar);
+		memcpy(frame + desplazamiento_pos, estado_nuevo, cargar);
 
 		pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 		pthread_mutex_unlock(&(tabla->m_TABLA));
 
+		pthread_mutex_lock(&m_LOGGER);
+			log_info(logger, "EL TRIPULANTE %d DE LA PATOTA %d PASO DEL ESTADO %c a %c\n", mensaje->idTripulante,
+						mensaje->idPatota, estado_nuevo[0], estado_anterior[0]);
+		pthread_mutex_unlock(&m_LOGGER);
+
+		free(estado_anterior);
+		free(estado_nuevo);
 
 	}else{
 		pthread_mutex_unlock(&m_TABLAS_PAGINAS);
@@ -996,6 +1010,11 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 			*termino = true;
 
+			pthread_mutex_lock(&m_LOGGER);
+				log_info(logger, "EL TRIPULANTE %d DE LA PATOTA %d FINALIZO SUS TAREAS", mensaje->idTripulante, mensaje->idPatota);
+			pthread_mutex_unlock(&m_LOGGER);
+
+
 		} else {
 
 			tarea_actual++;
@@ -1133,6 +1152,10 @@ void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* stat
 
 		list_remove_and_destroy_by_condition(tabla->tabla_direcciones, find_tid, expulsar_trip);
 
+		pthread_mutex_lock(&m_LOGGER);
+			log_info(logger, "SE EXPULSO AL TRIPULANTE %d DE LA PATOTA %d\n", mensaje->idTripulante, mensaje->idPatota);
+		pthread_mutex_unlock(&m_LOGGER);
+
 		if(list_size(tabla->tabla_direcciones) == 0){
 
 			pthread_mutex_lock(&m_TABLAS_PAGINAS);
@@ -1146,6 +1169,11 @@ void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* stat
 			dictionary_remove_and_destroy(tabla_paginas_patota, string_itoa(mensaje->idPatota), liberar_tabla);
 
 			pthread_mutex_unlock(&m_TABLAS_PAGINAS);
+
+			pthread_mutex_lock(&m_LOGGER);
+				log_info(logger, "SE ELIMINO LA PATOTA %d AL HABER SIDO EXPULSADOS TODOS SUS TRIPULANTES\n", mensaje->idPatota);
+			pthread_mutex_unlock(&m_LOGGER);
+
 
 		} else {
 
