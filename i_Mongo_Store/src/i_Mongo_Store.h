@@ -44,6 +44,8 @@ pthread_mutex_t mutex_bitmap;
 pthread_mutex_t mutex_oxigeno;
 pthread_mutex_t mutex_comida;
 pthread_mutex_t mutex_basura; // basuuuura japishhh
+pthread_t hilo_sincro_blocksmap;
+bool moduloAbierto = true;
 
 typedef enum{
 	GENERAR_OXIGENO = 0,
@@ -91,7 +93,7 @@ void haySabotajeBitmapEnElArchivo(char*);
 void haySabotajeCountEnElArchivo(char*);
 void liberarRecursos();
 void iniciarProtocoloFSCK();
-
+void cerrarModulo();
 
 // FUNCIONES PARA TESTING:
 

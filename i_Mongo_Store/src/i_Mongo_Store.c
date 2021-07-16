@@ -2,16 +2,19 @@
 
 int main(void) {
 
-	printf("\ni-Mongo-Store iniciado! PID: %d\n",getpid());
+	printf("\n--------------------------------------\n");
+	printf("i-Mongo-Store iniciado!   PID: %d\n",getpid());
+	printf("Cerrar modulo: ctrl + c\n");
+	printf("--------------------------------------\n");
 	inicializarSemaforos();
 	leerConfig();
 	crearLog();
 	inicializarFS();
-
+	signal(SIGINT, cerrarModulo);
 
 
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
-	//			estadoSuperBloque();
+	//		estadoSuperBloque();
 	//
 	//		generarRecurso(10,'O');
 	//		estadoSuperBloque();
@@ -49,26 +52,24 @@ int main(void) {
 	//	fsckFiles_Size();
 	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
 
-	//int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
+	signal(SIGUSR1, sighandler);
 
-		signal(SIGUSR1, sighandler);
+	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 
-		int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
-
-		SOCKET_SABOTAJE= malloc(sizeof(int32_t));
-		*SOCKET_SABOTAJE=esperar_cliente(socket_servidor);
+	SOCKET_SABOTAJE= malloc(sizeof(int32_t));
+	*SOCKET_SABOTAJE=esperar_cliente(socket_servidor);
 
 
-		while(true){
+	while(true){
 
-			int32_t*socket_cliente =  malloc(sizeof(int32_t));
-			*socket_cliente = esperar_cliente(socket_servidor);
+		int32_t*socket_cliente =  malloc(sizeof(int32_t));
+		*socket_cliente = esperar_cliente(socket_servidor);
 
-			pthread_t hilo_mensaje;
-			pthread_create(&hilo_mensaje,NULL,(void*)recibirMensajeTripulante,(void*) (socket_cliente));
-			pthread_detach(hilo_mensaje);
+		pthread_t hilo_mensaje;
+		pthread_create(&hilo_mensaje,NULL,(void*)recibirMensajeTripulante,(void*) (socket_cliente));
+		pthread_detach(hilo_mensaje);
 
-		}
+	}
 
 	liberarRecursos();
 	return EXIT_SUCCESS;
@@ -104,13 +105,15 @@ int main(void) {
 
 void timerSincronizacion_blocksMap(){
 
-	while(1){
+	while(moduloAbierto){
 		memcpy(blocksMapOriginal,blocksMap, tamanioBlocks);
 		msync(blocksMapOriginal, tamanioBlocks, MS_SYNC);
 		//log_info(logger, "Sincronizando archivo blocks...");
 		sleep(TIEMPO_SINCRONIZACION);
 	}
 
+	puts("\nVolcado a disco final");
+	pthread_exit(NULL);
 }
 
 //void funcionPruebaDisc(int32_t* socketCliente){
@@ -144,6 +147,8 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 			obtener_bitacora_msg* bitacoraMsg = deserializar_paquete(paquete);
 			char* bitacora = readBitacora(bitacoraMsg->idTripulante);
 
+			printf("\nMe pidieron la bitacora del tripulante ID: %d\n", bitacoraMsg->idTripulante);
+
 			obtener_bitacora_rta*bitacoraParaDiscordiador=malloc(sizeof(obtener_bitacora_rta));
 			bitacoraParaDiscordiador->bitacora = get_t_string(bitacora);
 			enviar_paquete(bitacoraParaDiscordiador,OBTENER_BITACORA_RTA,*socketCliente);
@@ -167,6 +172,9 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 			string_append(&cadena, string_itoa(movimientoMsg->coordenadasDestino->posY));
 			string_append(&cadena, "\n");
 			writeBitacora(movimientoMsg->idTripulante,cadena);
+
+			printf("\nEscribi en bitacora: %s", cadena);
+
 			free(movimientoMsg);
 			free(cadena);
 
@@ -175,9 +183,9 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 		} case INICIO_TAREA:{
 
 			inicio_tarea_msg* tareaMsg = deserializar_paquete(paquete);
-			printf("recibi: %d",tareaMsg->idTripulante);
-			puts(tareaMsg->nombreTarea->string);
-			printf("recibi: %d",tareaMsg->parametros);
+
+			printf("\nEl tripulante %d inicia tarea %s %d\n",tareaMsg->idTripulante, tareaMsg->nombreTarea->string, tareaMsg->parametros);
+
 			char* cadena = string_new();
 			string_append(&cadena, "Comienza ejecución de tarea ");
 			string_append(&cadena, tareaMsg->nombreTarea->string);
@@ -196,6 +204,8 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 			string_append(&cadena, "Se finaliza la tarea ");
 			string_append(&cadena, tareaMsg->nombreTarea->string);
 			string_append(&cadena, "\n");
+
+			printf("\n%s", cadena);
 			writeBitacora(tareaMsg->idTripulante,cadena);
 			free(tareaMsg);
 			free(cadena);
@@ -208,6 +218,8 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 			char* cadena = string_new();
 			string_append(&cadena, "Se corre en pánico hacia la ubicación del sabotaje");
 			string_append(&cadena, "\n");
+
+			printf("\n%s", cadena);
 			writeBitacora(sabotajeMsg->idTripulante,cadena);
 			free(sabotajeMsg);
 			free(cadena);
@@ -222,7 +234,9 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 			char* cadena = string_new();
 			string_append(&cadena, "Se resuelve el sabotaje");
 			string_append(&cadena, "\n");
+
 			writeBitacora(sabotajeMsg->idTripulante,cadena);
+			printf("\n%s", cadena);
 			free(sabotajeMsg);
 			free(cadena);
 
@@ -232,7 +246,7 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 		default: terminado = true;
 		break;
 		}
-
+		free(paquete);
 	}
 	close(*socketCliente);
 	free(socketCliente);
@@ -282,8 +296,6 @@ void hacerTarea(inicio_tarea_msg* tarea) {
 
 	} default:
 
-		log_info(logger,"codigo de operacion incorrecto");
-
 		break;
 
 	}
@@ -317,7 +329,6 @@ void inicializarBlocks() {
 	memcpy(blocksMap,blocksMapOriginal,tamanioBlocks);
 
 	//Thread con timer para sincronizar mmap a disco, iniciarlo despues del mmap!
-	pthread_t hilo_sincro_blocksmap;
 	pthread_create(&hilo_sincro_blocksmap, NULL,(void*) timerSincronizacion_blocksMap, NULL);	/// Ver advertencia valgrind
 	pthread_detach(hilo_sincro_blocksmap);
 
@@ -1634,4 +1645,13 @@ void iniciarProtocoloFSCK(){
 	fsckFiles_BlockCount();
 	fsckFiles_Blocks();
 
+}
+void cerrarModulo(){
+
+	log_info(logger, "SIGINT detectado, cerrando modulo...");
+	moduloAbierto = false;
+	sleep(TIEMPO_SINCRONIZACION + 1);
+	liberarRecursos();
+	puts("Saliendo...");
+	exit(2);
 }
