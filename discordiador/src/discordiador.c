@@ -425,6 +425,11 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 		tripulante->semaforoDelSabotaje=semaforoSabotaje;
 		//LE CREO UN HILO.
 
+		pthread_mutex_lock(&mutex_listaNuevos);
+		list_add(listaNuevos,tripulante);
+		pthread_mutex_unlock(&mutex_listaNuevos);
+
+
 		sem_wait(&sem_hiloTripulante);
 
 
@@ -649,16 +654,23 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 		}
 		case INICIAR_PLANIFICACION: { //Con este comando se dará inicio a la planificación (es un semaforo sem init)
 
-			if(list_is_empty(listaReady) && list_is_empty(listaEjecutando) &&list_is_empty(listaBloqueados) && list_is_empty(listaBloqueadosPorSabotaje) ){
+			if(list_is_empty(listaReady) && list_is_empty(listaEjecutando) &&list_is_empty(listaBloqueados) && list_is_empty(listaBloqueadosPorSabotaje) && list_is_empty(listaNuevos)){
 				puts("asegurese de que el discordiador tenga tripulantes para planificar . Pruebe de nuevo");			//TODO
 			}
 
-			if(!list_is_empty(listaReady) || !list_is_empty(listaEjecutando) || !list_is_empty(listaBloqueados)){
+			if(!list_is_empty(listaReady) || !list_is_empty(listaEjecutando) || !list_is_empty(listaBloqueados) || !list_is_empty(listaNuevos)){
 
 				sem_post(&sem_pausarPlanificacion);
 
 				estaPlanificando=1;
 
+				if(!list_is_empty(listaNuevos)){
+
+					void iterador(t_tripulante*tripulante){
+					sem_post(tripulante->semaforoCiclo);
+					}
+					list_iterate(listaNuevos,(void*) iterador);
+				}
 
 				if(!list_is_empty(listaEjecutando)){
 
@@ -1127,6 +1139,14 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	uint32_t socketDelTripulanteConRam = crear_conexion(IP_MI_RAM_HQ,PUERTO_MI_RAM_HQ);
 	tripulante->socketTripulanteRam = socketDelTripulanteConRam;
 
+	if(estaPlanificando==0){
+		sem_wait(tripulante->semaforoCiclo);
+	}
+
+	pthread_mutex_lock(&mutex_listaNuevos);
+	sacarTripulanteDeLista(tripulante, listaNuevos);
+	pthread_mutex_unlock(&mutex_listaNuevos);
+
 	tripulante->estado=READY;
 	pthread_mutex_lock(&mutex_listaReady);
 	list_add(listaReady,tripulante);
@@ -1280,6 +1300,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 						enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
 						printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
 
+
 					//recibirMensaje()				TODO
 
 							t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
@@ -1370,6 +1391,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 	close(tripulante->socketTripulanteImongo);
 	close(tripulante->socketTripulanteRam);
 	free(tripulante->coordenadas);
+	free(tripulante->tareaAsignada->coordenadas);
 	free(tripulante->tareaAsignada);
 
 
@@ -1850,6 +1872,8 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 						enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
 						printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
 
+						free(mensajeTarea);
+
 					//recibirMensaje()				TODO
 
 							t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
@@ -1987,6 +2011,8 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 					enviar_paquete(mensajeTarea,SOLICITAR_SIGUIENTE_TAREA,tripulante->socketTripulanteRam);
 					printf("se solicito una tarea del tripulante:%d\n",tripulante->idTripulante);
 
+					free(mensajeTarea);
+
 				//recibirMensaje()				TODO
 
 						t_paquete*paqueteTareaRta = recibir_paquete(tripulante->socketTripulanteRam);
@@ -2063,6 +2089,7 @@ void finalizar(){
 	void destruirTripulantes(void* elemento){
 			t_tripulante* tripulante = (t_tripulante*) elemento;
 			free(tripulante);
+
 	}
 	list_destroy_and_destroy_elements(tripulantes, destruirTripulantes);
 
