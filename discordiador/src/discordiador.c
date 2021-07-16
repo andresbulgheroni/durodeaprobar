@@ -29,7 +29,11 @@ int main(void){
 
 	iniciarLog();
 	inicializarListasGlobales();
-	iniciarHiloSabotaje();
+	int32_t*socketSabotaje = malloc(sizeof(int32_t));
+	*socketSabotaje = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
+
+	iniciarHiloSabotaje(socketSabotaje);
+
 	crearHiloPlanificador();
 	inicioHiloPlanificarBloqueo();
 	inicializarSemaforoPlanificador();
@@ -172,14 +176,13 @@ op_code_tareas string_to_op_code_tareas (char* string){
 	}
 }
 
-void iniciarHiloSabotaje(){
+void iniciarHiloSabotaje(int32_t*socketSabotaje){
 	pthread_t hiloSabotaje;
-	pthread_create(&hiloSabotaje, NULL, (void*) planificarSabotaje,NULL);
+	pthread_create(&hiloSabotaje, NULL, (void*) planificarSabotaje,(void*) socketSabotaje);
 	pthread_detach(hiloSabotaje);
 }
-void planificarSabotaje(){
-	uint32_t*socketSabotaje = malloc(sizeof(int32_t));
-	*socketSabotaje = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);
+void planificarSabotaje(int32_t*socketSabotaje){
+
 	while(true){
 
 		t_paquete*paqueteSabotaje=recibir_paquete(*socketSabotaje);
@@ -193,10 +196,12 @@ void planificarSabotaje(){
 		sabotajeActivo->coordenadas->posX = mensajeDeSabotaje->coordenadas->posX;
 		sabotajeActivo->coordenadas->posY = mensajeDeSabotaje->coordenadas->posY;
 		sabotajeActivo->id_sabotaje = mensajeDeSabotaje->idSabotaje;
+
 		log_info(logger,"llego el sabotaje con ID: %d",sabotajeActivo->id_sabotaje);
 
 		haySabotaje=1;
 
+		if(!list_is_empty(listaEjecutando)||!list_is_empty(listaReady)){
 		pasarATodosLosTripulantesAListaBloqueado();
 
 		log_info(logger,"el tamaño de la lista es:%d\n",list_size(listaBloqueadosPorSabotaje));
@@ -217,7 +222,9 @@ void planificarSabotaje(){
 		pthread_mutex_unlock(&mutex_listaEjecutando);
 
 		agregarTripulanteAListaReadyYAvisar(tripulanteMasCercano);		//aca va al final de la lista de ready
-
+		}else{
+			log_info(logger,"GANO EL IMPOSTOR pero gracias a cristo rey se desactivo el sabotaje...seguimos");
+		}
 		if(!list_is_empty(listaBloqueados)){
 			void iterador(t_tripulante*tripulante){
 				sem_post(tripulante->semaforoDelSabotaje);		//esto es para el tripulante que este bloqueado y justo le llega un sabotaje
@@ -227,7 +234,8 @@ void planificarSabotaje(){
 
 		haySabotaje=0;
 		sem_post(&sem_sabotaje);
-
+		free(sabotajeActivo->coordenadas);
+		free(sabotajeActivo);
 	}
 }
 
@@ -301,8 +309,9 @@ void pasarAEjecutarAlTripulanteMasCercano(t_sabotaje*sabotaje,t_tripulante* trip
 	mensajeSabotaje->idTripulante = tripulanteMasCercano->idTripulante;
 	enviar_paquete(mensajeSabotaje, ATENDER_SABOTAJE, tripulanteMasCercano->socketTripulanteImongo);
 	free(mensajeSabotaje);
+	log_info(logger,"se envio el mensaje atenderSabotaje del tripulante con ID:%d",tripulanteMasCercano->idTripulante);
 
-	for(uint32_t i=1; DURACION_SABOTAJE >= i; i++){
+	for(int32_t i=1; DURACION_SABOTAJE >= i; i++){
 
 		if(estaPlanificando==0){
 			sem_wait(tripulanteMasCercano->semaforoCiclo);
@@ -386,7 +395,6 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 	for(uint32_t i=0; i<(list_size(posicionesTripulantes)) ; i++){
 
 		t_tripulante* tripulante = malloc(sizeof(t_tripulante));
-		tripulante->coordenadas = malloc(sizeof(t_coordenadas));
 		tripulante->tareaAsignada= malloc(sizeof(t_tarea));						//TODO
 		tripulante->tareaAsignada->coordenadas = malloc(sizeof(t_coordenadas));
 		char* posicion = list_get(posicionesTripulantes,i);
@@ -414,6 +422,10 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 		sem_t* semaforoTripulante = malloc(sizeof(sem_t));
 		sem_init(semaforoTripulante, 0, 0);
 		tripulante->semaforoDelTripulante=semaforoTripulante;
+
+		sem_t* semaforoSabotaje = malloc(sizeof(sem_t));
+		sem_init(semaforoSabotaje, 0, 0);
+		tripulante->semaforoDelSabotaje=semaforoSabotaje;
 		//LE CREO UN HILO.
 
 		sem_wait(&sem_hiloTripulante);
@@ -458,6 +470,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 		case INICIAR_PATOTA: {	//INICIAR_PATOTA 3 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
 			//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota2.txt 1|1 2|1
+			//INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota2.txt 1|1
 			//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1 2|1
 			//INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt
 
@@ -520,7 +533,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 
 					tripulante_data_msg*tripulanteConCoordenadas=malloc(sizeof(tripulante_data_msg));
-					tripulanteConCoordenadas->coordenadas =	malloc(sizeof(t_coordenadas));
+
 					tripulanteConCoordenadas->coordenadas=  get_coordenadas(list_get(posicionesTripulantes, i));
 
 					tripulanteConCoordenadas->idTripulante = id_tripulante_para_enviar;
@@ -953,6 +966,7 @@ void moverAlTripulanteHastaElSabotaje(t_tripulante*tripulante,t_sabotaje*sabotaj
 		}
 
 	}
+	log_movimiento_tripulante(tripulante->idTripulante,tripulante->coordenadas->posX,tripulante->coordenadas->posY);
 
 	mensajeMovimientoSabotaje->coordenadasDestino->posX = tripulante->coordenadas->posX;
 	mensajeMovimientoSabotaje->coordenadasDestino->posY = tripulante->coordenadas->posY;
@@ -1052,10 +1066,9 @@ void moverAlTripulanteHastaLaTarea(t_tripulante*tripulante){
 
 
 t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
-	t_tripulante* tripulanteMasCercanoSabotaje = malloc(sizeof(t_tripulante));
-	t_tripulante* tripulanteTemporal = malloc(sizeof(t_tripulante));;
-	tripulanteMasCercanoSabotaje->coordenadas =malloc(sizeof(t_coordenadas));
-	tripulanteTemporal->coordenadas =malloc(sizeof(t_coordenadas));
+	t_tripulante* tripulanteMasCercanoSabotaje;
+	t_tripulante* tripulanteTemporal;
+
 
 	uint32_t distanciaTemporal;
 	uint32_t menorDistanciaSabotaje = 1000;
@@ -1093,12 +1106,8 @@ t_tripulante* tripulanteMasCercanoDelSabotaje(t_sabotaje* sabotaje){
 	sacarTripulanteDeLista(tripulanteMasCercanoSabotaje, listaBloqueadosPorSabotaje);
 	pthread_mutex_unlock(&mutex_listaBloqueadosPorSabotaje);
 
-	free(tripulanteTemporal->coordenadas);
-	free(tripulanteTemporal);
 
 	list_destroy(tripulantesBloqueadosSabotaje);
-
-	//list_destroy(tripulantesBloqueadosSabotaje);
 
 	return tripulanteMasCercanoSabotaje;
 }
