@@ -17,7 +17,7 @@ int main(void) {
 	//
 			generarRecurso(10,'O');
 	//		estadoSuperBloque();
-	//		consumirRecurso(5, 'O');
+			consumirRecurso(5, 'O');
 	//
 	//		estadoSuperBloque();
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
