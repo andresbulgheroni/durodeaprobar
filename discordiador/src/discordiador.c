@@ -43,6 +43,7 @@ int main(void){
 
 	puts("LLEGO AL FIN DEL PROGRAMA");
 
+	finalizar();
 	//config_destroy(config);
 	log_destroy(logger);
 
@@ -73,10 +74,6 @@ void inicializarListasGlobales(){
 	listaFinalizados = list_create();
 
 	tripulantes = list_create();
-
-	hilosTripulantes = list_create();
-	//sem_tripulantes_ejecutar = list_create();
-	sem_tripulante_ciclo= list_create();
 
 	sem_init(&sem_hiloTripulante,0,1);
 }
@@ -430,13 +427,10 @@ void inicializarAtributosATripulante(t_list* posicionesTripulantes){
 
 		sem_wait(&sem_hiloTripulante);
 
-		//list_add(sem_tripulantes_ejecutar, (void*) semaforoTripulante);
-		list_add(sem_tripulante_ciclo, (void*) semaforoParaCortarCicloTripulante);		//podria no ir
 
 		pthread_create(&pthread_id[numeroHiloTripulante], NULL, (void*) ejecutarTripulante, tripulante);
 		pthread_detach(pthread_id[numeroHiloTripulante]);
 
-		list_add(hilosTripulantes, &pthread_id[numeroHiloTripulante]);
 
 		numeroHiloTripulante++;
 
@@ -665,10 +659,6 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 				estaPlanificando=1;
 
-				//			for(uint32_t i=0; i<list_size(sem_tripulante_ciclo); i++){
-				//				sem_t* semaforoDelTripulanteCiclo = (sem_t*) list_get(sem_tripulante_ciclo,i);
-				//				sem_post(semaforoDelTripulanteCiclo);
-				//			}
 
 				if(!list_is_empty(listaEjecutando)){
 
@@ -2066,5 +2056,31 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 	}
 
 }
+
+
+
+void finalizar(){
+	void destruirTripulantes(void* elemento){
+			t_tripulante* tripulante = (t_tripulante*) elemento;
+			free(tripulante);
+	}
+	list_destroy_and_destroy_elements(tripulantes, destruirTripulantes);
+
+	list_destroy(listaNuevos);
+	list_destroy(listaReady);
+	list_destroy(listaBloqueados);
+	list_destroy(listaBloqueadosPorSabotaje);
+	list_destroy(listaEjecutando);
+	list_destroy(listaFinalizados);
+
+//	listaNuevos = list_create();
+//	listaReady = list_create();
+//	listaBloqueados= list_create();
+//	listaBloqueadosPorSabotaje= list_create();
+//	listaEjecutando = list_create();
+//	listaFinalizados = list_create();
+}
+
+
 
 

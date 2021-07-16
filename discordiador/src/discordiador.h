@@ -75,8 +75,7 @@ sem_t semaforoInicioCicloBloqueado;
 sem_t sem_hiloTripulante;
 t_list* tripulantes;
 uint32_t numeroHiloTripulante;
-t_list* hilosTripulantes;
-t_list*sem_tripulante_ciclo;
+
 
 t_list* listaNuevos;
 t_list* listaReady;
@@ -152,7 +151,6 @@ typedef struct
 	uint32_t idPatota;
 	t_coordenadas* coordenadas;
 	t_status_code estado;
-	t_sabotaje* sabotaje;		//TODO
 	uint32_t misCiclosDeCPU;
 	t_tarea* tareaAsignada;
 	uint32_t quantumDisponible;
@@ -160,7 +158,6 @@ typedef struct
 	uint32_t socketTripulanteImongo;
 
 	uint32_t fueExpulsado; //1 o 0
-	bool completoTodasLasTareas;
 
 	sem_t*semaforoCiclo;
 	sem_t*semaforoBloqueadoTripulante;
@@ -244,4 +241,6 @@ void planificarSabotaje();
 void iniciarHiloRETARDO_CICLO_CPU();
 void sincronizarRETARDO_CICLO_CPU();
 
+
+void finalizar();
 #endif /* DISCORDIADOR_H_ */
