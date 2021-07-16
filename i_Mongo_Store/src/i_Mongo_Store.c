@@ -136,9 +136,10 @@ void timerSincronizacion_blocksMap(){
 void recibirMensajeTripulante(int32_t* socketCliente){
 
 	bool terminado = false;
+	t_paquete* paquete;
 	while (!terminado){
 
-		t_paquete* paquete = recibir_paquete(*socketCliente);
+		paquete = recibir_paquete(*socketCliente);
 
 		switch(paquete->codigo){
 
@@ -179,6 +180,7 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 			free(cadena);
 
 			break;
+
 
 		} case INICIO_TAREA:{
 
@@ -237,6 +239,7 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 
 			writeBitacora(sabotajeMsg->idTripulante,cadena);
 			printf("\n%s", cadena);
+
 			free(sabotajeMsg);
 			free(cadena);
 
@@ -246,10 +249,12 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 		default: terminado = true;
 		break;
 		}
-		free(paquete);
+
 	}
+
 	close(*socketCliente);
 	free(socketCliente);
+	free(paquete);
 	pthread_exit(NULL);
 }
 
@@ -329,6 +334,7 @@ void inicializarBlocks() {
 	memcpy(blocksMap,blocksMapOriginal,tamanioBlocks);
 
 	//Thread con timer para sincronizar mmap a disco, iniciarlo despues del mmap!
+	pthread_t hilo_sincro_blocksmap;
 	pthread_create(&hilo_sincro_blocksmap, NULL,(void*) timerSincronizacion_blocksMap, NULL);	/// Ver advertencia valgrind
 	pthread_detach(hilo_sincro_blocksmap);
 
@@ -1085,7 +1091,7 @@ char* readBitacora(int32_t tripulante){
 
 void sighandler() {
 
-	puts("Me sabotearon");
+	puts("\nMe sabotearon");
 
 	// Avisarle al modulo de Andy, hacer hilo para el sabotaje
 	notificar_sabotaje_msg*sabotaje = malloc(sizeof(notificar_sabotaje_msg));
@@ -1097,7 +1103,7 @@ void sighandler() {
 	free(sabotaje);
 
 	ID_SABOTAJE++;
-	puts("se envio el mensaje del sabotaje correctamente");
+	puts("\nSe envio el mensaje del sabotaje correctamente");
 
 }
 
@@ -1434,7 +1440,7 @@ int fsckFiles_Blocks(){
 		int i = 0;
 		while(blocks[j]!=NULL){
 
-			if(atoi(blocks[j]) > BLOCKS){
+			if((unsigned)atoi(blocks[j]) > BLOCKS){
 				log_info(logger, "hay sabotaje del BLOCKS");
 				i=j;
 			} else {
@@ -1469,7 +1475,7 @@ int fsckFiles_Blocks(){
 		int i = 0;
 		while(blocks[j]!=NULL){
 
-			if(atoi(blocks[j]) > BLOCKS){
+			if((unsigned)atoi(blocks[j]) > BLOCKS){
 				log_info(logger, "hay sabotaje del BLOCKS");
 				i=j;
 			} else {
@@ -1504,7 +1510,7 @@ int fsckFiles_Blocks(){
 		int i = 0;
 		while(blocks[j]!=NULL){
 
-			if(atoi(blocks[j]) > BLOCKS){
+			if((unsigned)atoi(blocks[j]) > BLOCKS){
 				log_info(logger, "hay sabotaje del BLOCKS");
 				i=j;
 			} else {
@@ -1654,4 +1660,5 @@ void cerrarModulo(){
 	liberarRecursos();
 	puts("Saliendo...");
 	exit(2);
+
 }

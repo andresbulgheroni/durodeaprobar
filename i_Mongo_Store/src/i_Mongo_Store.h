@@ -44,7 +44,6 @@ pthread_mutex_t mutex_bitmap;
 pthread_mutex_t mutex_oxigeno;
 pthread_mutex_t mutex_comida;
 pthread_mutex_t mutex_basura; // basuuuura japishhh
-pthread_t hilo_sincro_blocksmap;
 bool moduloAbierto = true;
 
 typedef enum{
