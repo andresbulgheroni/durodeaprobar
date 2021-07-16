@@ -525,6 +525,8 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 				pagina->nuevo = true;
 				pagina->ocupado = TAMANIO_PAGINA;
 
+
+
 				guardar_en_memoria_principal(pagina, datos + i * TAMANIO_PAGINA);
 
 				list_add(paginas, pagina);
@@ -630,17 +632,15 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 			t_pagina_patota* pagina_enc = list_find(tabla->tabla_paginas, es_la_pagina);
 
-			void* frame = malloc(TAMANIO_PAGINA);
+			pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
-			leer_de_memoria_principal(pagina_enc, frame);
+			void* frame = leer_de_memoria_principal(pagina_enc);
 
 			uint32_t disponible = TAMANIO_PAGINA - desplazamiento_pos;
 
 			if(disponible < cargar){
 
 				memcpy(frame + desplazamiento_pos, &(mensaje->coordenadasDestino->posX) + cargado, disponible);
-
-				guardar_en_memoria_principal(pagina_enc, frame);
 
 				cargado += disponible;
 				cargar -= disponible;
@@ -651,11 +651,9 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 				memcpy(frame + desplazamiento_pos, &(mensaje->coordenadasDestino->posX) + cargado, cargar);
 
-				guardar_en_memoria_principal(pagina_enc, frame);
-
 			}
 
-			free(frame);
+			pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 		}
 
@@ -678,17 +676,15 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 			t_pagina_patota* pagina_enc = list_find(tabla->tabla_paginas, es_la_pagina);
 
-			void* frame = malloc(TAMANIO_PAGINA);
+			pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
-			leer_de_memoria_principal(pagina_enc, frame);
+			void* frame = leer_de_memoria_principal(pagina_enc);
 
 			uint32_t disponible = TAMANIO_PAGINA - desplazamiento_pos;
 
 			if(disponible < cargar){
 
 				memcpy(frame + desplazamiento_pos, &(mensaje->coordenadasDestino->posY) + cargado, disponible);
-
-				guardar_en_memoria_principal(pagina_enc, frame);
 
 				cargado += disponible;
 				cargar -= disponible;
@@ -699,11 +695,9 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 				memcpy(frame + desplazamiento_pos, &(mensaje->coordenadasDestino->posY) + cargado, cargar);
 
-				guardar_en_memoria_principal(pagina_enc, frame);
-
 			}
 
-			free(frame);
+			pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 		}
 
@@ -755,15 +749,13 @@ void cambiar_estado_paginacion(cambio_estado_msg* mensaje, bool* status){
 
 		t_pagina_patota* pagina_enc = list_find(tabla->tabla_paginas, es_la_pagina);
 
-		void* frame = malloc(TAMANIO_PAGINA);
+		pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
-		leer_de_memoria_principal(pagina_enc, frame);
+		void* frame = leer_de_memoria_principal(pagina_enc);
 
 		memcpy(frame + desplazamiento_pos, &(mensaje->estado), cargar);
 
-		guardar_en_memoria_principal(pagina_enc, frame);
-
-		free(frame);
+		pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 		pthread_mutex_unlock(&(tabla->m_TABLA));
 
@@ -808,9 +800,9 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 			t_pagina_patota* pagina_enc = list_find(tabla->tabla_paginas, es_la_pagina);
 
-			void* frame = malloc(TAMANIO_PAGINA);
+			pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
-			leer_de_memoria_principal(pagina_enc, frame);
+			void* frame = leer_de_memoria_principal(pagina_enc);
 
 			uint32_t disponible = TAMANIO_PAGINA - despl_direccion_tareas;
 
@@ -829,7 +821,7 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 			}
 
-			free(frame);
+			pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 		}
 
@@ -865,9 +857,9 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 			t_pagina_patota* pagina_enc = list_find(tabla->tabla_paginas, es_la_pagina);
 
-			void* frame = malloc(TAMANIO_PAGINA);
+			pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
-			leer_de_memoria_principal(pagina_enc, frame);
+			void* frame = leer_de_memoria_principal(pagina_enc);
 
 			uint32_t disponible = TAMANIO_PAGINA - desplazamiento_pos;
 
@@ -886,7 +878,7 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 			}
 
-			free(frame);
+			pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 		}
 
@@ -895,6 +887,7 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 		obtener_direccion_logica_paginacion(&pagina_tareas, &desp_tareas, direccion_tareas);
 
 		bool leer_siguiente_pagina = true;
+		void* frame;
 		void* frame_tareas = malloc(TAMANIO_PAGINA);
 		uint32_t i = 0;
 		do{
@@ -909,8 +902,13 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 				t_pagina_patota* pagina_enc = list_find(tabla->tabla_paginas, es_la_pagina);
 
+				pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
-				leer_de_memoria_principal(pagina_enc, frame_tareas);
+				frame = leer_de_memoria_principal(pagina_enc);
+
+				memcpy(frame_tareas, frame, TAMANIO_PAGINA);
+
+				pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 			}
 
@@ -971,17 +969,15 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 				t_pagina_patota* pagina_enc = list_find(tabla->tabla_paginas, es_la_pagina);
 
-				void* frame = malloc(TAMANIO_PAGINA);
+				pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
-				leer_de_memoria_principal(pagina_enc, frame);
+				void* frame = leer_de_memoria_principal(pagina_enc);
 
 				uint32_t disponible = TAMANIO_PAGINA - desplazamiento_pos;
 
 				if(disponible < cargar){
 
 					memcpy(frame + desplazamiento_pos, &tarea_actual + cargado, disponible);
-
-					guardar_en_memoria_principal(pagina_enc, frame);
 
 					cargado += disponible;
 					cargar -= disponible;
@@ -992,9 +988,9 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 					memcpy(frame + desplazamiento_pos, &tarea_actual  + cargado, cargar);
 
-					guardar_en_memoria_principal(pagina_enc, frame);
-
 				}
+
+				pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 			}
 
@@ -1186,20 +1182,19 @@ bool swap_lleno(){
 	return valor;
 }
 
-void leer_de_memoria_principal(t_pagina_patota* pagina, void *to){
+void* leer_de_memoria_principal(t_pagina_patota* pagina){
 
-	pthread_mutex_lock(&m_MEM_PRINCIPAL);
+	void* frame;
+
 	pthread_mutex_unlock(&m_MEM_VIRTUAL);
 	pthread_mutex_lock(&m_LISTA_REEMPLAZO);
 
 	if(pagina->presente){
 
-		memcpy(to , memoria_principal + pagina->nro_frame * TAMANIO_PAGINA, TAMANIO_PAGINA);
+		frame = memoria_principal + (pagina->nro_frame * TAMANIO_PAGINA);
 
 		pthread_mutex_unlock(&m_LISTA_REEMPLAZO);
 		pthread_mutex_unlock(&m_MEM_VIRTUAL);
-		pthread_mutex_unlock(&m_MEM_PRINCIPAL);
-
 
 	}else{
 
@@ -1231,8 +1226,7 @@ void leer_de_memoria_principal(t_pagina_patota* pagina, void *to){
 
 			free(datos_mv);
 
-			memcpy(to ,memoria_principal + pagina->nro_frame * TAMANIO_PAGINA, TAMANIO_PAGINA);
-
+			frame = memoria_principal + (pagina->nro_frame * TAMANIO_PAGINA);
 
 			switch(ALGORITMO_REEMPLAZO){
 				case LRU:{
@@ -1247,7 +1241,6 @@ void leer_de_memoria_principal(t_pagina_patota* pagina, void *to){
 			}
 			pthread_mutex_unlock(&m_LISTA_REEMPLAZO);
 			pthread_mutex_unlock(&m_MEM_VIRTUAL);
-			pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 		}else{
 
@@ -1278,7 +1271,7 @@ void leer_de_memoria_principal(t_pagina_patota* pagina, void *to){
 
 			memcpy(memoria_principal + pagina->nro_frame * TAMANIO_PAGINA, datos_swap, TAMANIO_PAGINA);
 
-			memcpy(to, memoria_principal + pagina->nro_frame * TAMANIO_PAGINA, TAMANIO_PAGINA);
+			frame = memoria_principal + (pagina->nro_frame * TAMANIO_PAGINA);
 
 			switch(ALGORITMO_REEMPLAZO){
 				case LRU:{
@@ -1294,7 +1287,6 @@ void leer_de_memoria_principal(t_pagina_patota* pagina, void *to){
 
 			pthread_mutex_unlock(&m_LISTA_REEMPLAZO);
 			pthread_mutex_unlock(&m_MEM_VIRTUAL);
-			pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 			free(datos_prin);
 			free(datos_swap);
@@ -1318,23 +1310,23 @@ void leer_de_memoria_principal(t_pagina_patota* pagina, void *to){
 	}
 
 	pagina->uso = true;
+
+	return frame;
 }
 
 void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from){
 
 	pthread_mutex_lock(&m_MEM_PRINCIPAL);
-	pthread_mutex_unlock(&m_MEM_VIRTUAL);
 	pthread_mutex_lock(&m_LISTA_REEMPLAZO);
-
+	pthread_mutex_lock(&m_MEM_VIRTUAL);
 
 	if(pagina->presente){
 
-		memcpy( memoria_principal + pagina->nro_frame * TAMANIO_PAGINA, from, TAMANIO_PAGINA);
+		memcpy( memoria_principal + (pagina->nro_frame * TAMANIO_PAGINA), from, TAMANIO_PAGINA);
 
 		pthread_mutex_unlock(&m_LISTA_REEMPLAZO);
 		pthread_mutex_unlock(&m_MEM_VIRTUAL);
 		pthread_mutex_unlock(&m_MEM_PRINCIPAL);
-
 
 	}else{
 
@@ -1354,7 +1346,7 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from){
 
 			pagina->nro_frame = nro_frame;
 
-			memcpy( memoria_principal + pagina->nro_frame * TAMANIO_PAGINA, from, TAMANIO_PAGINA);
+			memcpy( memoria_principal + (pagina->nro_frame * TAMANIO_PAGINA), from, TAMANIO_PAGINA);
 
 			switch(ALGORITMO_REEMPLAZO){
 				case LRU:{
@@ -1407,7 +1399,7 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from){
 
 			guardar_en_memoria_swap(reemplazo, datos);
 
-			memcpy( memoria_principal + pagina->nro_frame * TAMANIO_PAGINA, from, TAMANIO_PAGINA);
+			memcpy( memoria_principal + (pagina->nro_frame * TAMANIO_PAGINA), from, TAMANIO_PAGINA);
 
 			switch(ALGORITMO_REEMPLAZO){
 				case LRU:{
@@ -1424,6 +1416,7 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from){
 			pthread_mutex_unlock(&m_LISTA_REEMPLAZO);
 			pthread_mutex_unlock(&m_MEM_VIRTUAL);
 			pthread_mutex_unlock(&m_MEM_PRINCIPAL);
+
 
 			free(datos);
 
@@ -1638,8 +1631,11 @@ void borrar_patota(t_tabla_paginas* tabla){
 
 	void liberar_paginas(t_pagina_patota* pagina){
 
-		liberar_memoria_principal_paginacion(pagina);
-		liberar_memoria_virtual(pagina);
+		if(pagina->presente){
+			liberar_memoria_virtual(pagina);
+		}else{
+			liberar_memoria_principal_paginacion(pagina);
+		}
 		free(pagina);
 
 	}
