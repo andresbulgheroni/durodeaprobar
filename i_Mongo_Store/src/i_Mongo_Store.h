@@ -88,7 +88,7 @@ int fsckSuperBloque_Bitmap();
 int fsckFiles_Size();
 int fsckFiles_BlockCount();
 int fsckFiles_Blocks();
-void haySabotajeBitmapEnElArchivo(char*);
+void actualizarBitmap(char*);
 void haySabotajeCountEnElArchivo(char*);
 void liberarRecursos();
 void iniciarProtocoloFSCK();
