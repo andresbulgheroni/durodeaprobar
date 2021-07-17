@@ -2108,9 +2108,7 @@ uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 
 void eliminar_patota(t_list* tabla){
 
-	void liberar_segmentos(segmento* seg){
-		free(seg);
-	}
+	void liberar_segmentos(segmento* seg){	}
 	list_destroy_and_destroy_elements(tabla, liberar_segmentos);
 }
 
@@ -2261,9 +2259,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 			//Libero las estructuras para guardar en memoria
 			free(pcb);
 
-			void liberar_tcbs(t_tcb* tcb){
-				free(tcb);
-			}
+			void liberar_tcbs(t_tcb* tcb){	}
 			list_destroy_and_destroy_elements(tcbs, liberar_tcbs);
 
 			dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_seg);
@@ -2491,7 +2487,7 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_lock(&m_SEG_EN_MEMORIA);
 
-		list_iterate(tabla_patota, liberar_segmento); // aca libera el segmento en las tablas
+		list_iterate(tabla_patota, liberar_segmento);
 
 		pthread_mutex_lock(&m_MAPA);
 
