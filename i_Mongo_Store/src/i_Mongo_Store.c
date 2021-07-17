@@ -92,6 +92,9 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 
 			printf("\nEscribi en bitacora: %s", cadena);
 
+			free(movimientoMsg->coordenadasOrigen);
+			free(movimientoMsg->coordenadasDestino);
+
 			free(movimientoMsg);
 			free(cadena);
 
@@ -110,6 +113,8 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 			string_append(&cadena, "\n");
 			writeBitacora(tareaMsg->idTripulante,cadena);
 			hacerTarea(tareaMsg);
+
+			free(tareaMsg->nombreTarea->string);
 			free(tareaMsg);
 			free(cadena);
 
@@ -125,6 +130,8 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 
 			printf("\n%s", cadena);
 			writeBitacora(tareaMsg->idTripulante,cadena);
+
+			free(tareaMsg->nombreTarea->string);
 			free(tareaMsg);
 			free(cadena);
 
@@ -1364,106 +1371,18 @@ int fsckFiles_Blocks(){
 
 	if(existeArchivo(rutaArchivoOxigeno)){
 
-		t_config* metadata = config_create(rutaArchivoOxigeno);
-		char** blocks = config_get_array_value(metadata, "BLOCKS");
-		uint32_t size = config_get_int_value(metadata, "SIZE");
-
-		int j = 0;
-		int i = 0;
-		while(blocks[j]!=NULL){
-
-			if((unsigned)atoi(blocks[j]) > BLOCKS){
-				log_info(logger, "hay sabotaje del BLOCKS");
-				i=j;
-			} else {
-				log_info(logger, "no hay sabotaje del BLOCKS");
-			}
-
-			j++;
-		}
-
-		if(i != 0){
-			consumirRecurso(size,'O');
-			generarRecurso(size,'O');
-		}
-
-		int x = 0;
-		while(blocks[x] != NULL){
-			free(blocks[x]);
-			x++;
-		}
-		free(blocks);
-		config_destroy(metadata);
-
+		corregirSabotajeBlocks(rutaArchivoOxigeno, 'O');
 	}
 
 	if(existeArchivo(rutaArchivoComida)){
 
-		t_config* metadata = config_create(rutaArchivoComida);
-		char** blocks = config_get_array_value(metadata, "BLOCKS");
-		uint32_t size = config_get_int_value(metadata, "SIZE");
-
-		int j = 0;
-		int i = 0;
-		while(blocks[j]!=NULL){
-
-			if((unsigned)atoi(blocks[j]) > BLOCKS){
-				log_info(logger, "hay sabotaje del BLOCKS");
-				i=j;
-			} else {
-				log_info(logger, "no hay sabotaje del BLOCKS");
-			}
-
-			j++;
-		}
-
-		if(i != 0){
-			consumirRecurso(size,'C');
-			generarRecurso(size,'C');
-		}
-
-		int x = 0;
-		while(blocks[x] != NULL){
-			free(blocks[x]);
-			x++;
-		}
-		free(blocks);
-		config_destroy(metadata);
+		corregirSabotajeBlocks(rutaArchivoComida, 'C');
 
 	}
 
 	if(existeArchivo(rutaArchivoBasura)){
 
-		t_config* metadata = config_create(rutaArchivoBasura);
-		char** blocks = config_get_array_value(metadata, "BLOCKS");
-		uint32_t size = config_get_int_value(metadata, "SIZE");
-
-		int j = 0;
-		int i = 0;
-		while(blocks[j]!=NULL){
-
-			if((unsigned)atoi(blocks[j]) > BLOCKS){
-				log_info(logger, "hay sabotaje del BLOCKS");
-				i=j;
-			} else {
-				log_info(logger, "no hay sabotaje del BLOCKS");
-			}
-
-			j++;
-		}
-
-		if(i != 0){
-			descartarBasura();
-			generarRecurso(size,'B');
-		}
-
-		int x = 0;
-		while(blocks[x] != NULL){
-			free(blocks[x]);
-			x++;
-		}
-		free(blocks);
-		config_destroy(metadata);
+		corregirSabotajeBlocks(rutaArchivoBasura, 'B');
 
 	}
 
@@ -1588,5 +1507,67 @@ void cerrarModulo(){
 	liberarRecursos();
 	puts("Saliendo...");
 	exit(2);
+
+}
+
+void corregirSabotajeBlocks(char* ruta, char caracter){
+	t_config* metadata = config_create(ruta);
+	int size = config_get_int_value(metadata, "SIZE");
+	int blockCount = config_get_int_value(metadata, "BLOCK_COUNT");
+
+	char* blocks = string_new();
+	string_append(&blocks, config_get_string_value(metadata, "BLOCKS"));
+	char** blocksArray = string_get_string_as_array(blocks);
+
+	char* archivo = malloc(size * sizeof(char)+ 1);
+	archivo[size] = '\0';
+
+	int contador = 0;
+
+	while((unsigned)size >= BLOCK_SIZE){
+		memcpy(archivo + (BLOCK_SIZE * contador), blocksMap + (BLOCK_SIZE * (atoi(blocksArray[contador]) - 1)), BLOCK_SIZE);
+		size -= BLOCK_SIZE;
+		contador++;
+	}
+
+	if(size > 0){
+		memcpy(archivo + (BLOCK_SIZE * contador), blocksMap + (BLOCK_SIZE * (atoi(blocksArray[contador]) - 1)), size);
+	}
+
+
+	char* MD5Bloques = calcularMD5(archivo);
+	char* MD5Metadata = config_get_string_value(metadata, "MD5_ARCHIVO");
+
+	if (strcmp(MD5Bloques, MD5Metadata) != 0){
+
+		log_info(logger, "La lista de BLOCKS no coincide con el MD5, generando la diferencia...");
+
+		int cantidad = 0;
+		while(strcmp(MD5Bloques, MD5Metadata)){
+			free(MD5Bloques);
+			cantidad++;
+			char* stringNuevo = string_repeat(caracter, cantidad);
+			char* MD5Bloques = calcularMD5(stringNuevo);
+		}
+
+
+	generarRecurso(caracter, (unsigned)(config_get_int_value(metadata, "SIZE") - cantidad));
+
+
+
+
+	}else{
+		log_info(logger, "No hay sabotaje del blocks");
+	}
+
+
+
+	for(int i=0;i<blockCount;i++){
+		free(blocksArray[i]);
+	}
+	free(blocksArray);
+	free(ruta);
+	free(blocks);
+	config_destroy(metadata);
 
 }

@@ -93,6 +93,7 @@ void haySabotajeCountEnElArchivo(char*);
 void liberarRecursos();
 void iniciarProtocoloFSCK();
 void cerrarModulo();
+void corregirSabotajeBlocks(char* , char);
 
 // FUNCIONES PARA TESTING:
 void estadoSuperBloque(){
