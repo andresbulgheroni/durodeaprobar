@@ -378,11 +378,11 @@ void init (char* config_elect){
 	}
 
 	iniciarMapa();
-
+/*
 	pthread_t hilo_mapa;
 	pthread_create(&hilo_mapa,NULL, render_mapa, NULL);
 	pthread_detach(hilo_mapa);
-
+*/
 }
 
 void configurar_paginacion(){
@@ -446,7 +446,7 @@ void configurar_paginacion(){
 	}
 
 }
-
+/*
 void iniciarMapa(){
 
 	int columnas, filas;
@@ -457,7 +457,7 @@ void iniciarMapa(){
 
 	mapa = nivel_crear("Nave");
 
-}
+}*/
 
 void* render_mapa(){
 
@@ -672,10 +672,12 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 			void cargar_en_mapa(tripulante_data_msg* tripulante){
 
 				personaje_crear(mapa, get_tripulante_codigo(tripulante->idTripulante), tripulante->coordenadas->posX, tripulante->coordenadas->posY);
-
 			}
 
+
 			list_iterate(mensaje->tripulantes, cargar_en_mapa);
+
+			nivel_gui_dibujar(mapa);
 
 			pthread_mutex_unlock(&m_MAPA);
 
@@ -851,6 +853,8 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,1);
 			}
 		}
+
+		nivel_gui_dibujar(mapa);
 
 		pthread_mutex_unlock(&m_MAPA);
 
@@ -1319,6 +1323,7 @@ void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* stat
 
 		pthread_mutex_lock(&m_MAPA);
 			item_borrar(mapa, get_tripulante_codigo(mensaje->idTripulante));
+			nivel_gui_dibujar(mapa);
 		pthread_mutex_unlock(&m_MAPA);
 
 	}else{
@@ -2108,7 +2113,9 @@ uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 
 void eliminar_patota(t_list* tabla){
 
-	void liberar_segmentos(segmento* seg){	}
+	void liberar_segmentos(segmento* seg){
+		free(seg);
+	}
 	list_destroy_and_destroy_elements(tabla, liberar_segmentos);
 }
 
@@ -2259,7 +2266,9 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 			//Libero las estructuras para guardar en memoria
 			free(pcb);
 
-			void liberar_tcbs(t_tcb* tcb){	}
+			void liberar_tcbs(t_tcb* tcb){
+				free(tcb);
+			}
 			list_destroy_and_destroy_elements(tcbs, liberar_tcbs);
 
 			dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_seg);
@@ -2275,6 +2284,8 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 				personaje_crear(mapa, get_tripulante_codigo(tripulante->idTripulante), tripulante->coordenadas->posX, tripulante->coordenadas->posY);
 			}
 			list_iterate(mensaje->tripulantes, cargar_en_mapa);
+
+			nivel_gui_dibujar(mapa);
 
 			pthread_mutex_unlock(&m_MAPA);
 
@@ -2356,6 +2367,8 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 			item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,1);
 		}
 	}
+
+	nivel_gui_dibujar(mapa);
 
 	pthread_mutex_unlock(&m_MAPA);
 
@@ -2487,7 +2500,7 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_lock(&m_SEG_EN_MEMORIA);
 
-		list_iterate(tabla_patota, liberar_segmento);
+		list_iterate(tabla_patota, liberar_segmento); // aca libera el segmento en las tablas
 
 		pthread_mutex_lock(&m_MAPA);
 
@@ -2542,6 +2555,8 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		pthread_mutex_lock(&m_MAPA);
 
 		item_borrar(mapa, get_tripulante_codigo(mensaje->idTripulante));
+
+		nivel_gui_dibujar(mapa);
 
 		pthread_mutex_unlock(&m_MAPA);
 
