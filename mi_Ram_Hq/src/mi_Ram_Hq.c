@@ -445,7 +445,7 @@ void terminar_paginacion(){
 
 	list_destroy_and_destroy_elements(frames_swap, destroy);
 	list_destroy_and_destroy_elements(frames_libres_principal, destroy);
-	list_destroy_and_destroy_elements(lista_para_reemplazo, destroy);}
+	list_destroy_and_destroy_elements(lista_para_reemplazo, destroy);
 
 	void destroy_dict(t_tabla_paginas* elemento){
 
@@ -1544,7 +1544,7 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from){
 			free(datos);
 
 			pthread_mutex_lock(&m_LOGGER);
-			char* mensaje = string_new();
+			char* mensaje = string_new(); // TODO PONER NULL
 			if(nro_frame >= 0){
 				mensaje = string_from_format("Reemplazo en frame %d", nro_frame);
 				log_info(logger, mensaje);
@@ -1738,7 +1738,7 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 	pthread_mutex_unlock(&m_TABLA_LIBRES_V);
 
 	pthread_mutex_lock(&m_LOGGER);
-		char* mensaje = string_new();
+		char* mensaje = string_new(); // TODO PONER NULL
 		mensaje = string_from_format("Liberado frame nro. %d. MEMORIA VIRTUAL ", frame->pos);
 		log_info(logger, mensaje);
 		free(mensaje);

@@ -673,7 +673,7 @@ iniciar_patota_msg* desserializar_iniciar_patota_msg(void* stream){
 	deserializar_variable(stream, &(mensaje->cant_tripulantes), sizeof(mensaje->cant_tripulantes), &offset);
 	mensaje->tripulantes = list_create();
 
-	for(int32_t i = 0; i < mensaje->cant_tripulantes; i++){
+	for(uint32_t i = 0; i < mensaje->cant_tripulantes; i++){
 
 		tripulante_data_msg* tripulante = malloc(sizeof(tripulante_data_msg));
 		tripulante->coordenadas = malloc(sizeof(t_coordenadas));
