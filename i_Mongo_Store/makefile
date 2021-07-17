@@ -1,7 +1,7 @@
 # Include libraries here
-LIBRARIES=
+LIBRARIES=commons crypto pthread
 # Include custom library paths here
-LIBRARY_PATHS=commons crypto pthread
+LIBRARY_PATHS=
 
 # ==============================================================================================================
 
