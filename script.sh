@@ -8,12 +8,14 @@ c) echo -e "\nComenzando deploy...\n"
 echo -e "\nDescargando dependencias...\n"
 sudo apt-get install libncurses5-dev
 
+rm -rf so-commons-library
 git clone https://github.com/sisoputnfrba/so-commons-library
 cd so-commons-library
 sudo make uninstall
 sudo make install
 cd ..
 
+rm -rf so-nivel-gui-library
 git clone https://github.com/sisoputnfrba/so-nivel-gui-library/
 cd so-nivel-gui-library
 make uninstall
