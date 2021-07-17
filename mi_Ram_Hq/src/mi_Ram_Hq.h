@@ -95,15 +95,15 @@ void* memoria_principal;
 
 //Paginacion
 
-void* memoria_virtual;
-t_dictionary* tabla_paginas_patota;
-t_list* frames_libres_principal;
-t_list* frames_swap;
-t_list* lista_para_reemplazo;
-uint32_t buffer_clock_pos;
+void* memoria_virtual = NULL;
+t_dictionary* tabla_paginas_patota = NULL;
+t_list* frames_libres_principal = NULL;
+t_list* frames_swap = NULL;
+t_list* lista_para_reemplazo = NULL;
+uint32_t buffer_clock_pos = NULL;
 
-t_config* config;
-t_log* logger;
+t_config* config = NULL;
+t_log* logger = NULL;
 
 typedef struct  __attribute__((__packed__)){
 
