@@ -476,18 +476,23 @@ void* render_mapa(){
 void terminar_paginacion(){
 	void destroy(void* a){}
 
-	list_destroy_and_destroy_elements(frames_swap, destroy);
-	list_destroy_and_destroy_elements(frames_libres_principal, destroy);
-	list_destroy_and_destroy_elements(lista_para_reemplazo, destroy);
+	if(frames_swap != NULL)
+		list_destroy_and_destroy_elements(frames_swap, destroy);
+	if(frames_libres_principal != NULL)
+		list_destroy_and_destroy_elements(frames_libres_principal, destroy);
+	if(lista_para_reemplazo != NULL)
+		list_destroy_and_destroy_elements(lista_para_reemplazo, destroy);
 	void destroy_dict(t_tabla_paginas* elemento){
-
-		list_destroy_and_destroy_elements(elemento->tabla_direcciones, destroy);
-		list_destroy_and_destroy_elements(elemento->tabla_paginas, destroy);
+		if(lista_para_reemplazo != NULL)
+			list_destroy_and_destroy_elements(elemento->tabla_direcciones, destroy);
+		if(lista_para_reemplazo != NULL)
+			list_destroy_and_destroy_elements(elemento->tabla_paginas, destroy);
 		pthread_mutex_destroy(&(elemento->m_TABLA));
 
 	}
 
-	dictionary_destroy_and_destroy_elements(tabla_paginas_patota, destroy_dict);
+	if(tabla_paginas_patota != NULL)
+		dictionary_destroy_and_destroy_elements(tabla_paginas_patota, destroy_dict);
 
 	terminar();
 }
@@ -666,7 +671,7 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 
 			void cargar_en_mapa(tripulante_data_msg* tripulante){
 
-				personaje_crear(mapa, get_tripulante_codigo(tripulante->idTripulante), tripulante->coordenadas->posY, tripulante->coordenadas->posX);
+				personaje_crear(mapa, get_tripulante_codigo(tripulante->idTripulante), tripulante->coordenadas->posX, tripulante->coordenadas->posY);
 
 			}
 

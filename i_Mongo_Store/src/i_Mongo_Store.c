@@ -1067,22 +1067,27 @@ int fsckSuperBloque_Bitmap(){
 	char* rutaArchivoComida = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
 	char* rutaArchivoBasura = string_from_format("%s/Files/Basura.ims", PUNTO_MONTAJE);
 
+	// Pongo el bitmap entero en 0
+	for(int i=0; (unsigned)i<bitarray_get_max_bit(bitmap); i++){
+		setBitmap(0, i);
+	}
+
 
 	if(existeArchivo(rutaArchivoOxigeno)){
 
-		haySabotajeBitmapEnElArchivo(rutaArchivoOxigeno);
+		actualizarBitmap(rutaArchivoOxigeno);
 
 	}
 
 	if(existeArchivo(rutaArchivoComida)){
 
-		haySabotajeBitmapEnElArchivo(rutaArchivoComida);
+		actualizarBitmap(rutaArchivoComida);
 
 	}
 
 	if(existeArchivo(rutaArchivoBasura)){
 
-		haySabotajeBitmapEnElArchivo(rutaArchivoBasura);
+		actualizarBitmap(rutaArchivoBasura);
 
 	}
 
@@ -1096,13 +1101,15 @@ int fsckSuperBloque_Bitmap(){
 
 			char* rutaArchivoTripulante = string_from_format("%s/Files/Bitacoras/%s", PUNTO_MONTAJE, dir->d_name);
 
-			haySabotajeBitmapEnElArchivo(rutaArchivoTripulante);
+			actualizarBitmap(rutaArchivoTripulante);
 
 			free(rutaArchivoTripulante);
 
 		}
 		closedir(d);
 	}
+
+	log_info(logger, "Restaurado bitmap segun metadatas, anda a sabotear a otra parte");
 
 	free(rutaBitacoras);
 	free(rutaArchivoOxigeno);
@@ -1468,7 +1475,7 @@ int fsckFiles_Blocks(){
 
 }
 
-void haySabotajeBitmapEnElArchivo(char* rutaArchivo){
+void actualizarBitmap(char* rutaArchivo){
 
 	t_config* metadata = config_create(rutaArchivo);
 	char** blocks = config_get_array_value(metadata, "BLOCKS");
@@ -1476,13 +1483,8 @@ void haySabotajeBitmapEnElArchivo(char* rutaArchivo){
 	int j = 0;
 	while(blocks[j]!=NULL){
 
-		if(bitarray_test_bit(bitmap, atoi(blocks[j])-1) == 1){
-			log_info(logger, "no hay sabotaje en el Bitmap");
-		}else{
-			setBitmap(1, atoi(blocks[j]));
-			log_info(logger, "Sabotaje en superbloque corregido, seteo BLOCK = %d en 1 en el Bitmap ", atoi(blocks[j])-1);
-		}
-
+		setBitmap(1, atoi(blocks[j]));
+		log_info(logger, "Seteo BLOCK = %d en 1 en el Bitmap ", atoi(blocks[j])-1);
 		j++;
 
 	}
