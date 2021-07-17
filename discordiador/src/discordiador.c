@@ -83,7 +83,7 @@ void inicializarListasGlobales(){
 
 void iniciarLog(){
 
-	logger = log_create("discordiador.log", "discordiador", 0, LOG_LEVEL_INFO);
+	logger = log_create("/home/utnso/tp-2021-1c-DuroDeAprobar/discordiador/discordiador.log", "discordiador", 0, LOG_LEVEL_INFO);
 
 
 }
@@ -655,11 +655,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			if(list_is_empty(listaReady) && list_is_empty(listaEjecutando) &&list_is_empty(listaBloqueados) && list_is_empty(listaBloqueadosPorSabotaje) && list_is_empty(listaNuevos)){
 				puts("asegurese de que el discordiador tenga tripulantes para planificar . Pruebe de nuevo");			//TODO
-			}
-
-			if(!list_is_empty(listaReady) || !list_is_empty(listaEjecutando) || !list_is_empty(listaBloqueados) || !list_is_empty(listaNuevos)){
-
-				sem_post(&sem_pausarPlanificacion);
+			}else {
 
 				estaPlanificando=1;
 
@@ -688,6 +684,8 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 					list_iterate(listaBloqueados,(void*) iterador);
 
 				}
+
+				sem_post(&sem_pausarPlanificacion);
 
 			}
 
@@ -1554,15 +1552,14 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 									} case COMPLETO_TAREAS:{
 										log_info(logger,"completo todas las tareas el tripulante con ID:%d",tripulante->idTripulante);
 										agregarTripulanteAListaFinishedYAvisar(tripulante);
-										sem_post(&sem_planificarMultitarea);
 
 										break;
 								 }
 								}
 				}
 			}else if(tripulante->fueExpulsado == 1){
-				sem_post(&sem_planificarMultitarea);
 				agregarTripulanteAListaFinishedYAvisar(tripulante);
+				sem_post(&sem_planificarMultitarea);
 				log_info(logger,"fui expulsado soy el tripulante con ID: %d",tripulante->idTripulante);
 			}
 		}
@@ -1864,7 +1861,6 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 			pthread_mutex_unlock(&mutex_listaEjecutando);
 
 
-			if(tripulante->tareaAsignada==NULL){
 				//mandarTarea()
 						solicitar_siguiente_tarea_msg* mensajeTarea=malloc(sizeof(solicitar_siguiente_tarea_msg));
 						mensajeTarea->idPatota=tripulante->idPatota;
@@ -1924,7 +1920,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 								} case COMPLETO_TAREAS:{
 									log_info(logger,"completo todas las tareas el tripulante con ID:%d",tripulante->idTripulante);
 									agregarTripulanteAListaFinishedYAvisar(tripulante);
-									sem_post(&sem_planificarMultitarea);
+
 
 									break;
 							 }
@@ -1932,7 +1928,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 				sem_post(&sem_planificarMultitarea);
 
-			}
+
 
 		}
 
@@ -1998,7 +1994,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 			free(mandarFinTareaIO);
 
-			//tripulante->tareaAsignada->finalizoTarea=true;		No es necesario ya que si es expulsado no entra en el otro y sino directamente pide otra tarea
+			tripulante->tareaAsignada->finalizoTarea=true;
 			free(tripulante->tareaAsignada->nombreTarea);
 
 			tripulante->quantumDisponible = QUANTUM;
@@ -2062,7 +2058,6 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 							} case COMPLETO_TAREAS:{
 								log_info(logger,"completo todas las tareas el tripulante con ID:%d",tripulante->idTripulante);
 								agregarTripulanteAListaFinishedYAvisar(tripulante);
-								sem_post(&sem_planificarMultitarea);
 
 								break;
 						 }
@@ -2070,9 +2065,10 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 			}
 			}
-		} else if(tripulante->fueExpulsado == 1){
-			sem_post(&sem_planificarMultitarea);
+		} else if(tripulante->fueExpulsado == 1 && tripulante->tareaAsignada->finalizoTarea == false){
 			agregarTripulanteAListaFinishedYAvisar(tripulante);
+			sem_post(&sem_planificarMultitarea);
+
 			log_info(logger,"fui expulsado soy el tripulante con ID: %d",tripulante->idTripulante);
 		}
 
