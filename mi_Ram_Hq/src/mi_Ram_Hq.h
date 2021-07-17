@@ -9,13 +9,15 @@
 #define MI_RAM_HQ_H_
 
 #include "utils.h"
+
 #include <nivel-gui/nivel-gui.h>
 #include <nivel-gui/tad_nivel.h>
+#include <curses.h>
+#include <stdlib.h>
+
 #include <commons/config.h>
 #include <commons/log.h>
 #include <pthread.h>
-#include <curses.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <curses.h>
 #include <commons/collections/list.h>
@@ -88,7 +90,7 @@ char* PATH_SWAP;
 int32_t ALGORITMO_REEMPLAZO;
 char* IP;
 char* PUERTO;
-
+int fileDes;
 void* memoria_principal;
 
 //Paginacion
@@ -141,6 +143,9 @@ void hilo_servidor();
 void sig_handler(int n);
 char* get_timestamp();
 char* get_config(int opt);
+void* render_mapa();
+char get_tripulante_codigo(int32_t id);
+int32_t offset_movimiento(int32_t anterior, int32_t nuevo);
 
 //Paginacion
 void configurar_paginacion();
@@ -171,6 +176,7 @@ void liberar_memoria_virtual(t_pagina_patota* pagina);
 int32_t paginas_necesarias(uint32_t offset, uint32_t size);
 void dump_paginacion(FILE* dump);
 void borrar_patota(t_tabla_paginas* tabla);
+void terminar_paginacion();
 
 /* Segmentacion */
 
@@ -229,6 +235,9 @@ segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota)
 uint32_t encontrar_tripulante(uint32_t id_tripulante, uint32_t id_patota);
 uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota);
 uint32_t obtener_limite(segmento* seg);
-void compactar_memoria(); //sin implementar
+void compactar_memoria();
+
+void terminar_segmentacion();
+void print_huecos_libres();
 
 #endif /* MI_RAM_HQ_H_ */

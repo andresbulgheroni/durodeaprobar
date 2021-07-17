@@ -21,6 +21,7 @@ pthread_mutex_t  m_LOGGER = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_SEGMENTOS_LIBRES = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_SEG_EN_MEMORIA = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_TABLAS_SEGMENTOS = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t  m_MAPA = PTHREAD_MUTEX_INITIALIZER;
 
 NIVEL* mapa;
 
@@ -31,11 +32,9 @@ void sig_handler(int n){
 
 
 			char* time_stamp_text = get_timestamp();
-			char* path = string_new();
-			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
-			//path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
-			char* inicio_texto = string_new();
-			inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
+			//char* path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
+			char *path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
+			char* inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
 
 			FILE* dump = fopen(path, "w+");
 
@@ -55,7 +54,16 @@ void sig_handler(int n){
 		}
 
 		case SIGUSR2:{
-			compactar_memoria(); //ponele
+			if(ESQUEMA_MEMORIA == SEGMENTACION_PURA)
+				compactar_memoria();
+			break;
+		}
+		case SIGINT:{
+			switch(ESQUEMA_MEMORIA){
+				case PAGINACION_VIRTUAL: terminar_paginacion(); break;
+				case SEGMENTACION_PURA: terminar_segmentacion(); break;
+			}
+			exit(2);
 			break;
 		}
 		default: break;
@@ -71,10 +79,9 @@ int main(void) {
 
 	signal(SIGUSR1, sig_handler);
 	signal(SIGUSR2, sig_handler);
-
+	signal(SIGINT, sig_handler);
 
 	char* option = readline("\nSeleccione la configuracion que desea utilizar:\n1-PRUEBA DISC CPU\n2-PRUEBA DISC E/S\n3-PRUEBA SEG FF\n4-PRUEBA SEG BF\n5-PRUEBA PAG LRU\n6-PRUEBA PAG CLOCK\n7-PRUEBA FS\n>");
-
 	init(option);
 
 	log_info(logger, "\n\n\nINICIA EJECUCION DE RAM");
@@ -93,8 +100,7 @@ char* get_timestamp(){
 
 	time_t t = time(NULL);
 	struct tm tm = *localtime(&t);
-	char* timestamp = string_new();
-	timestamp = string_from_format("%d/%02d/%02d %02d:%02d:%02d\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	char* timestamp = string_from_format("%d/%02d/%02d %02d:%02d:%02d\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
 	return timestamp;
 
 }
@@ -153,8 +159,7 @@ void dump_paginacion(FILE* dump){
 
 	void guardar_tabla(t_dump_pag* pag){
 
-		char* fila = string_new();
-		fila = string_from_format("MARCO:%d\tESTADO:%s\tPROCESO:%s\tPAGINA:%s\n", pag->marco, pag->estado, pag->proceso, pag->pagina);
+		char* fila = string_from_format("MARCO:%d\tESTADO:%s\tPROCESO:%s\tPAGINA:%s\n", pag->marco, pag->estado, pag->proceso, pag->pagina);
 		fputs(fila, dump);
 		free(fila);
 	}
@@ -360,7 +365,13 @@ void init (char* config_elect){
 			break;
 		}
 	}
-	//iniciarMapa();
+
+	iniciarMapa();
+
+	pthread_t hilo_mapa;
+	pthread_create(&hilo_mapa,NULL, render_mapa, NULL);
+	pthread_detach(hilo_mapa);
+
 }
 
 void configurar_paginacion(){
@@ -370,7 +381,7 @@ void configurar_paginacion(){
 	if(TAMANIO_MEMORIA%TAMANIO_PAGINA != 0 || TAMANIO_SWAP%TAMANIO_PAGINA != 0){
 		log_error(logger, "Mal configurados tamanios de memoria y pagina");
 	}
-	int32_t fileDes = open(PATH_SWAP, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH | 0777);
+	fileDes = open(PATH_SWAP, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH | 0777);
 //	int32_t fileDes = open(PATH_SWAP, O_RDWR | O_APPEND | O_CREAT, 0777);
 
 	if(fileDes == -1){
@@ -424,14 +435,51 @@ void configurar_paginacion(){
 
 void iniciarMapa(){
 
-	//int columnas, filas;
+	int columnas, filas;
 
-	//nivel_gui_inicializar();
+	nivel_gui_inicializar();
 
-	//nivel_gui_get_area_nivel(&columnas, &filas);
+	nivel_gui_get_area_nivel(&columnas, &filas);
 
-	//mapa = nivel_crear("Nave");
+	mapa = nivel_crear("Nave");
 
+}
+
+void* render_mapa(){
+
+	while(true){
+
+		pthread_mutex_lock(&m_MAPA);
+		nivel_gui_dibujar(mapa);
+		pthread_mutex_unlock(&m_MAPA);
+
+	}
+
+	return NULL;
+}
+
+
+void terminar_paginacion(){
+	void destroy(void* a){}
+
+	list_destroy_and_destroy_elements(frames_swap, destroy);
+	list_destroy_and_destroy_elements(frames_libres_principal, destroy);
+	list_destroy_and_destroy_elements(lista_para_reemplazo, destroy);
+
+	void destroy_dict(t_tabla_paginas* elemento){
+
+		list_destroy_and_destroy_elements(elemento->tabla_direcciones, destroy);
+		list_destroy_and_destroy_elements(elemento->tabla_paginas, destroy);
+		pthread_mutex_destroy(&(elemento->m_TABLA));
+
+	}
+
+	dictionary_destroy_and_destroy_elements(tabla_paginas_patota, destroy_dict);
+
+	free(memoria_virtual);
+	close(fileDes);
+
+	terminar();
 }
 
 void terminar(){
@@ -439,8 +487,18 @@ void terminar(){
 	log_destroy(logger);
 	config_destroy(config);
 	free(memoria_principal);
-	//nivel_gui_terminar();
+	nivel_gui_terminar();
 
+	pthread_mutex_destroy(&m_LISTA_REEMPLAZO);
+	pthread_mutex_destroy(&m_LOGGER);
+	pthread_mutex_destroy(&m_MEM_PRINCIPAL);
+	pthread_mutex_destroy(&m_MEM_VIRTUAL);
+	pthread_mutex_destroy(&m_SEGMENTOS_LIBRES);
+	pthread_mutex_destroy(&m_SEG_EN_MEMORIA);
+	pthread_mutex_destroy(&m_TABLAS_PAGINAS);
+	pthread_mutex_destroy(&m_TABLAS_SEGMENTOS);
+	pthread_mutex_destroy(&m_TABLA_LIBRES_P);
+	pthread_mutex_destroy(&m_TABLA_LIBRES_V);
 }
 
 
@@ -592,11 +650,29 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 			//Guardo tabla de paginas
 			dictionary_put(tabla_paginas_patota, string_itoa(mensaje->idPatota), tabla);
 
+			pthread_mutex_lock(&m_MAPA);
+
+			void cargar_en_mapa(tripulante_data_msg* tripulante){
+
+				personaje_crear(mapa, get_tripulante_codigo(tripulante->idTripulante), tripulante->coordenadas->posY, tripulante->coordenadas->posX);
+
+			}
+
+			list_iterate(mensaje->tripulantes, cargar_en_mapa);
+
+			pthread_mutex_unlock(&m_MAPA);
+
 		}
 
 	}
 
 	pthread_mutex_unlock(&m_TABLAS_PAGINAS);
+
+}
+
+char get_tripulante_codigo(int32_t id){
+
+	return id + 64;
 
 }
 
@@ -739,12 +815,57 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 						*posx_anterior, *posy_anterior);
 		pthread_mutex_unlock(&m_LOGGER);
 
+		pthread_mutex_lock(&m_MAPA);
+			item_desplazar(mapa, get_tripulante_codigo(mensaje->idTripulante),
+					offset_movimiento(*posx_anterior, mensaje->coordenadasDestino->posX),
+					offset_movimiento(*posy_anterior, mensaje->coordenadasDestino->posY)
+			);
+		pthread_mutex_unlock(&m_MAPA);
+
 		free(posx_anterior);
 		free(posy_anterior);
+
 
 	}else{
 		pthread_mutex_unlock(&m_TABLAS_PAGINAS);
 	}
+
+}
+
+int32_t offset_movimiento(int32_t anterior, int32_t nuevo){
+	if(anterior == nuevo){
+		return 0;
+	}else if(anterior > nuevo){
+		return -1;
+	}else{
+		return 1;
+	}
+	/*
+		int32_t posicionXtripulante = tripulante->coordenadas->posX;
+		int32_t posicionYtripulante = tripulante->coordenadas->posY;
+
+		int32_t posicionXtarea = tripulante->tareaAsignada->coordenadas->posX;
+		int32_t posicionYtarea = tripulante->tareaAsignada->coordenadas->posY;
+
+		if (posicionXtripulante != posicionXtarea) {
+
+			int32_t diferenciaEnX = posicionXtarea - posicionXtripulante;
+			if (diferenciaEnX > 0) {
+				tripulante->coordenadas->posX = posicionXtripulante + 1;
+			} else if (diferenciaEnX < 0) {
+				tripulante->coordenadas->posX = posicionXtripulante - 1;
+			}
+
+		} else if (posicionYtripulante != posicionYtarea) {
+
+			int32_t diferenciaEnY = posicionYtarea - posicionYtripulante;
+			if (diferenciaEnY > 0) {
+				tripulante->coordenadas->posY = posicionYtripulante + 1;
+			} else if (diferenciaEnY < 0) {
+				tripulante->coordenadas->posY = posicionYtripulante - 1;
+			}
+
+		}*/
 
 }
 
@@ -935,6 +1056,7 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 		uint32_t pagina_tareas;
 		uint32_t desp_tareas;
 		obtener_direccion_logica_paginacion(&pagina_tareas, &desp_tareas, direccion_tareas);
+		char* letra = malloc(sizeof(char));
 
 		bool leer_siguiente_pagina = true;
 		void* frame;
@@ -955,6 +1077,9 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 				if(pagina_enc == NULL){
 
+					if(strcmp(tarea, "") != 0)
+						free(tarea);
+
 					tarea = "";
 					break;
 
@@ -969,8 +1094,6 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 				pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 			}
-
-			char* letra = malloc(sizeof(char));
 
 			memcpy(letra, frame_tareas + desp_tareas, 1);
 
@@ -991,18 +1114,27 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 			if(letra[0] == '\n' || letra[0] == '\0'){
 
 				if(i < tarea_actual){
+					if(strcmp(tarea, "") != 0)
+						free(tarea);
+
 					tarea = "";
 				}
 
 				i++;
 
 			}else{
-				tarea = string_from_format("%s%c", tarea, letra[0]);
+
+				char* string_tarea_nuevo = string_from_format("%s%c", tarea, letra[0]);
+
+				if(strcmp(tarea, "") != 0)
+					free(tarea);
+
+				tarea = string_tarea_nuevo;
 			}
 
-			free(letra);
 
 		}while(i <= tarea_actual);
+		free(letra);
 
 		free(frame_tareas);
 
@@ -1180,6 +1312,10 @@ void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* stat
 			pthread_mutex_unlock(&(tabla->m_TABLA));
 
 		}
+
+		pthread_mutex_lock(&m_MAPA);
+			item_borrar(mapa, get_tripulante_codigo(mensaje->idTripulante));
+		pthread_mutex_unlock(&m_MAPA);
 
 	}else{
 		pthread_mutex_unlock(&m_TABLAS_PAGINAS);
@@ -1495,7 +1631,7 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from){
 			free(datos);
 
 			pthread_mutex_lock(&m_LOGGER);
-			char* mensaje = string_new();
+			char* mensaje = string_new(); // TODO PONER NULL
 			if(nro_frame >= 0){
 				mensaje = string_from_format("Reemplazo en frame %d", nro_frame);
 				log_info(logger, mensaje);
@@ -1689,7 +1825,7 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 	pthread_mutex_unlock(&m_TABLA_LIBRES_V);
 
 	pthread_mutex_lock(&m_LOGGER);
-		char* mensaje = string_new();
+		char* mensaje = string_new(); // TODO PONER NULL
 		mensaje = string_from_format("Liberado frame nro. %d. MEMORIA VIRTUAL ", frame->pos);
 		log_info(logger, mensaje);
 		free(mensaje);
@@ -1771,6 +1907,24 @@ void inicializar_segmentacion(){
 	tablas_seg_patota = dictionary_create();
 }
 
+void terminar_segmentacion(){
+	void destroy(void* a){}
+
+	list_destroy_and_destroy_elements(segmentos_libres, destroy);
+	list_destroy_and_destroy_elements(segmentos_en_memoria, destroy);
+
+	void destroy_dict(tabla_segmentos* elemento){
+
+		list_destroy_and_destroy_elements(elemento->segmentos, destroy);
+		pthread_mutex_destroy(&(elemento->m_TABLA));
+
+	}
+
+	dictionary_destroy_and_destroy_elements(tablas_seg_patota, destroy_dict);
+
+	terminar();
+}
+
 void dump_segmentacion(FILE* dump){
 
 	//char* titulos = string_from_format("PROCESO\t\tSEGMENTO \t\tINICIO\t\TAMANIO\n");
@@ -1807,8 +1961,7 @@ void dump_segmentacion(FILE* dump){
 
 	void guardar_tabla(segmento_dump* seg){
 
-		//char* fila = string_from_format("%10s\t\t%15d\t\t%20d\t\t%20d\n", seg->pid, seg->numero_segmento, seg->inicio, seg->tamanio);
-		char* fila = string_from_format("proceso: %s\t\t nro de segmento: %d\t\t inicio: %x\t\t tamanio: %x\n",seg->pid, seg->numero_segmento, seg->inicio, seg->tamanio);
+		char* fila = string_from_format("proceso: %s\t\t nro de segmento: %d\t\t inicio: %d\t\t tamanio: %d\n",seg->pid, seg->numero_segmento, seg->inicio, seg->tamanio);
 		fputs(fila, dump);
 		free(fila);
 	}
@@ -1823,7 +1976,7 @@ void dump_segmentacion(FILE* dump){
 }
 
 uint32_t obtener_limite(segmento* seg){
-	return seg->inicio + seg->tamanio;
+	return seg->inicio + seg->tamanio - 1;
 }
 
 //le paso el tamanio de un segmento, devuelve 1 si hay espacio y 0 si no hay espacio
@@ -1872,6 +2025,7 @@ int32_t get_espacio_libre(uint32_t size){
 				if(dif_de_tamanio < dif_tamanio_anterior){
 					offset_bf = seg->inicio;
 				}
+				dif_tamanio_anterior = dif_de_tamanio;
 			}
 			list_iterate(lista_auxiliar, encontrar_best_fit);
 
@@ -2305,7 +2459,7 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 	} else {
 		segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
 
-		uint32_t index; // = seg_tripulante->numero_segmento;
+		uint32_t index = 0; // = seg_tripulante->numero_segmento;
 		uint32_t contador = 0;
 
 		void index_del_segmento(segmento* seg){
@@ -2344,7 +2498,7 @@ void agregar_seg_listas(segmento* segmento_nuevo){
 
 	bool se_encuentra_contenido(segmento* seg){
 		uint32_t limite_segmento = obtener_limite(seg);
-		return seg->inicio == inicio_seg_nuevo && limite_segmento >= limite_seg_nuevo;
+		return seg->inicio == inicio_seg_nuevo;
 	}
 
 	segmento* seg_a_modificar = list_get(list_filter(segmentos_libres, se_encuentra_contenido), 0);
@@ -2359,7 +2513,7 @@ void agregar_seg_listas(segmento* segmento_nuevo){
 
 	if(limite_seg_libre != limite_seg_nuevo){
 
-		seg_a_modificar->inicio = limite_seg_nuevo; //el segmento libre nuevo arranca donde termina el otro
+		seg_a_modificar->inicio = limite_seg_nuevo+1; //el segmento libre nuevo arranca donde termina el otro
 		seg_a_modificar->tamanio = limite_seg_libre - limite_seg_nuevo;
 		list_add(segmentos_libres, seg_a_modificar);
 
@@ -2382,7 +2536,7 @@ void ordenar_lista_segmentos_libres(){
 
 //agrega el segmento a la lista de segmentos libres y lo saca de segmentos en memoria
 void liberar_segmento(segmento* seg){
-	//deberia chequear si esta? antes de agregar
+
 	bool esta_el_segmento(segmento *seg_list){
 		return seg->inicio == seg_list->inicio;
 	}
@@ -2393,11 +2547,56 @@ void liberar_segmento(segmento* seg){
 		list_add(segmentos_libres, seg);
 		ordenar_lista_segmentos_libres();
 
+		uint32_t index = 0;
+		uint32_t contador = 0;
+
+		void index_segmento(segmento* segmento){
+			if(seg->inicio == segmento->inicio){
+				index = contador;
+			}
+			contador++;
+		}
+
+		//busca el index del segmento que acaba de agregar
+		list_iterate(segmentos_libres, index_segmento);
+
+		if(index != list_size(segmentos_libres)-1){
+			segmento* seg_siguiente = list_get(segmentos_libres, index+1);
+
+			//me fijo si lo puedo compactar con el hueco siguiente
+			uint32_t limite_seg = obtener_limite(seg);
+			if(seg_siguiente->inicio == limite_seg + 1){
+				list_remove(segmentos_libres, index + 1);
+				list_remove(segmentos_libres, index);
+				seg->tamanio = seg->tamanio + seg_siguiente->tamanio;
+				free(seg_siguiente);
+				list_add(segmentos_libres, seg);
+				ordenar_lista_segmentos_libres();
+			}
+		}
+
+		if(index != 0){
+			segmento* seg_anterior = list_get(segmentos_libres, index - 1);
+
+			//me fijo si lo puedo compactar con el hueco siguiente
+			uint32_t limite_seg_anterior = obtener_limite(seg_anterior);
+			if(seg->inicio == limite_seg_anterior + 1){
+				list_remove(segmentos_libres, index);
+				list_remove(segmentos_libres, index - 1);
+				seg->inicio = seg_anterior->inicio;
+				seg->tamanio = seg->tamanio + seg_anterior->tamanio;
+				free(seg_anterior);
+				list_add(segmentos_libres, seg);
+				ordenar_lista_segmentos_libres();
+			}
+		}
+
 		//lo saca de la lista de segmentos en memoria
 		bool es_el_segmento(segmento* seg_a_comparar){
 			return seg->inicio == seg_a_comparar->inicio && seg->tamanio == seg_a_comparar->tamanio;
 		}
 
+		//todo ver si cambiar esto
 		list_remove_by_condition(segmentos_en_memoria, es_el_segmento);
 	}
 }//no lleva semaforos, porque donde la llamo ya estan los semaforos
@@ -2463,4 +2662,12 @@ void compactar_memoria(){
 	free(buffer);
 } //no lleva semaforos porq tiene en el llamado a la funcion
 
+void print_huecos_libres(){
+
+	for(int32_t i = 0; i<list_size(segmentos_libres); i++){
+		segmento* seg = list_get(segmentos_libres, i);
+		printf("Inicio: %d, tamanio: %d, limite: %d\n", seg->inicio, seg->tamanio, obtener_limite(seg));
+	}
+
+}
 
