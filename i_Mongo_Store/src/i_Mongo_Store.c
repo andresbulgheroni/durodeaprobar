@@ -13,45 +13,6 @@ int main(void) {
 	inicializarFS();
 	signal(SIGINT, cerrarModulo);
 
-	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
-	//		estadoSuperBloque();
-	//
-			generarRecurso(10,'O');
-	//		estadoSuperBloque();
-			consumirRecurso(5, 'O');
-	//
-	//		estadoSuperBloque();
-	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
-	//
-	//	//////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
-	//		estadoSuperBloque();
-	//
-	//		char* bitacora = string_new();
-	//		string_append(&bitacora, "DALEE DALEEE\n");
-	//		string_append(&bitacora, "UYUYU UN MONTON\n");
-	//		string_append(&bitacora, "tucson\n");
-	//		string_append(&bitacora, "Quieren bajarme y no saben como hacer, porque este pibito no va a correr\n");
-	//		writeBitacora(4, bitacora);
-	//		free(bitacora);
-	//
-	//		char* tareas = readBitacora(4);
-	//		printf("\nBitacora:\n\n%s", tareas);
-	//
-	//		if(tareas != NULL){
-	//			free(tareas);
-	//		}
-	//
-	//		estadoSuperBloque();
-	//	////////////////////////////////////////////// Pruebas Bitacora ////////////////////////////////////////////////
-
-	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
-	//	fsckSuperBloque_Bloques();
-	//	fsckSuperBloque_Bitmap();
-	//	fsckFiles_BlockCount();
-	//	fsckFiles_Blocks();
-	//	fsckFiles_Size();
-	////////////////////////////////////////////// Pruebas Sabotajes ////////////////////////////////////////////////
-
 	signal(SIGUSR1, sighandler);
 
 	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
@@ -201,8 +162,10 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 			break;
 
 		}
-		default: terminado = true;
-		break;
+		default: {
+			terminado = true;
+			break;
+		}
 		}
 
 	}
@@ -481,12 +444,12 @@ void leerConfig(char* option) {
 	int opt = atoi(option);
 
 	switch(opt){
-		case 1: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/general.config");break;
-		case 2: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/discordiador.config");break;
-		case 3: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/memoria.config");break;
-		case 4: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/fs.config");break;
-		case 5: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/sabotaje.config");break;
-		default: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/general.config"); break;
+	case 1: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/general.config");break;
+	case 2: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/discordiador.config");break;
+	case 3: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/memoria.config");break;
+	case 4: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/fs.config");break;
+	case 5: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/sabotaje.config");break;
+	default: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/general.config"); break;
 	}
 
 	PUERTO = config_get_string_value(config, "PUERTO");

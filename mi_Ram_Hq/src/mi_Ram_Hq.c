@@ -2277,7 +2277,9 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 			pthread_mutex_unlock(&m_MAPA);
 
+			pthread_mutex_lock(&m_LOGGER);
 			log_info(logger, "Se creo la patota %d de tamanio %d con %d tripulantes", mensaje->idPatota, tamanio_necesario, mensaje->cant_tripulantes);
+			pthread_mutex_unlock(&m_LOGGER);
 
 		} else {
 			free(tabla_seg); //con esto libero lo de adentro tmb? (segmentos)
@@ -2323,8 +2325,10 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 	//lo copio en memoria modificado
 	memcpy(memoria_principal + offset, buffer, sizeof(t_tcb));
 
+	pthread_mutex_lock(&m_LOGGER);
 	log_info(logger, "Se modifico la posicion del tripulante %d de la patota %d a --> %d en X y %d en Y", mensaje->idTripulante, mensaje->idPatota, mensaje->coordenadasDestino->posX, mensaje->coordenadasDestino->posY);
 	log_info(logger, "La posicion anterior era %d en X y %d en Y", x_anterior, y_anterior);
+	pthread_mutex_unlock(&m_LOGGER);
 
 	pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
@@ -2346,9 +2350,9 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 
 		int32_t diferenciaEnY =  y_nuevo - y_anterior;
 		if (diferenciaEnY > 0) {
-			item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,1);
-		} else if (diferenciaEnY < 0) {
 			item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,-1);
+		} else if (diferenciaEnY < 0) {
+			item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,1);
 		}
 	}
 
@@ -2392,7 +2396,9 @@ void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 
 	pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
+	pthread_mutex_lock(&m_LOGGER);
 	log_info(logger, "Se modifico el estado del tripulante %d de la patota %d de %c a %c", mensaje->idTripulante, mensaje->idPatota, estado_anterior, estado);
+	pthread_mutex_unlock(&m_LOGGER);
 
 	//libero memoria
 	free(buffer);
@@ -2457,7 +2463,9 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 	free(buffer_tcb);
 
 	if(!(*termino)){
+		pthread_mutex_lock(&m_LOGGER);
 		log_info(logger, "Al tripulante %d de la patota %d le tocaba la tarea numero %d: %s", mensaje->idTripulante, mensaje->idPatota, proxima_instruccion-1, tarea);
+		pthread_mutex_unlock(&m_LOGGER);
 	}
 
 	return tarea;
@@ -2492,7 +2500,9 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
 		pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 
+		pthread_mutex_lock(&m_LOGGER);
 		log_info(logger, "El tripulante %d era el ultimo, se elimino toda la patota %d", mensaje->idTripulante, mensaje->idPatota);
+		pthread_mutex_unlock(&m_LOGGER);
 
 		dictionary_remove(tablas_seg_patota, string_itoa(mensaje->idPatota));
 		free(tabla_seg); //TODO tengo q borrar el mutex?
@@ -2533,7 +2543,9 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 
 		pthread_mutex_unlock(&m_MAPA);
 
+		pthread_mutex_lock(&m_LOGGER);
 		log_info(logger, "Se expulso al tripulante %d de la patota %d", mensaje->idTripulante, mensaje->idPatota);
+		pthread_mutex_unlock(&m_LOGGER);
 	}
 }
 
@@ -2704,7 +2716,9 @@ void compactar_memoria(){
 
 	memcpy(memoria_principal, buffer, TAMANIO_MEMORIA);
 
+	pthread_mutex_lock(&m_LOGGER);
 	log_info(logger, "Se compacta memoria");
+	pthread_mutex_unlock(&m_LOGGER);
 
 	free(buffer);
 } //no lleva semaforos porq tiene en el llamado a la funcion
