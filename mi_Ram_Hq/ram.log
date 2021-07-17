@@ -371,3 +371,392 @@ INICIA EJECUCION DE RAM
 [INFO] 02:07:49:674 MI-RAM-HQ/(24531:24586): EL TRIPULANTE 4 DE LA PATOTA 1 TIENE LA TAREA DESCARGAR_ITINERARIO;2;5;2
 [INFO] 02:07:49:674 MI-RAM-HQ/(24531:24586): EL TRIPULANTE 4 DE LA PATOTA 1 PASO DEL ESTADO R a B
 
+[INFO] 02:40:14:113 MI-RAM-HQ/(5521:5521): 
+
+
+INICIA EJECUCION DE RAM
+[INFO] 02:41:08:842 MI-RAM-HQ/(23115:23115): 
+
+
+INICIA EJECUCION DE RAM
+[INFO] 02:42:15:459 MI-RAM-HQ/(26554:26554): 
+
+
+INICIA EJECUCION DE RAM
+[INFO] 02:42:23:270 MI-RAM-HQ/(26554:26573): SOLICITUD INICIO PATOTA 1
+[INFO] 02:42:23:272 MI-RAM-HQ/(26554:26573): Se creo la patota 1 de tamanio 165 con 5 tripulantes
+[INFO] 02:42:23:272 MI-RAM-HQ/(26554:26573): SE CREO LA PATOTA CON EXITO 1
+[INFO] 02:42:23:314 MI-RAM-HQ/(26554:26573): SOLICITO TAREA TRIPULANTE 3 DE LA PATOTA 1
+[INFO] 02:42:23:314 MI-RAM-HQ/(26554:26573): Al tripulante 3 de la patota 1 le tocaba la tarea numero 0: GENERAR_OXIGENO 12;2;3;5
+[INFO] 02:42:23:314 MI-RAM-HQ/(26554:26573): EL TRIPULANTE 3 DE LA PATOTA 1 TIENE LA TAREA GENERAR_OXIGENO 12;2;3;5
+[INFO] 02:42:23:314 MI-RAM-HQ/(26554:26573): SOLICITO TAREA TRIPULANTE 3 DE LA PATOTA 1
+[INFO] 02:42:23:314 MI-RAM-HQ/(26554:26573): Al tripulante 3 de la patota 1 le tocaba la tarea numero 1: CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 02:42:23:314 MI-RAM-HQ/(26554:26573): EL TRIPULANTE 3 DE LA PATOTA 1 TIENE LA TAREA CONSUMIR_OXIGENO 120;2;3;1
+[INFO] 02:42:23:314 MI-RAM-HQ/(26554:26573): Se modifico el estado del tripulante 2 de la patota 1 de R a E
+[INFO] 02:42:23:351 MI-RAM-HQ/(26554:26573): SOLICITO TAREA TRIPULANTE 3 DE LA PATOTA 1
+[INFO] 02:42:23:355 MI-RAM-HQ/(26554:26573): SE SOLICITO EXPULSAR AL TRIPULANTE 2 DE LA PATOTA 1
+
+[INFO] 02:42:23:355 MI-RAM-HQ/(26554:26573): Se expulso al tripulante 2 de la patota 1
+[INFO] 02:42:23:395 MI-RAM-HQ/(26554:26573): SE SOLICITO EXPULSAR AL TRIPULANTE 1 DE LA PATOTA 1
+
+[INFO] 02:42:23:395 MI-RAM-HQ/(26554:26573): Se expulso al tripulante 1 de la patota 1
+[INFO] 02:42:23:395 MI-RAM-HQ/(26554:26573): Se modifico la posicion del tripulante 5 de la patota 1 a --> 1 en X y 3 en Y
+[INFO] 02:42:23:395 MI-RAM-HQ/(26554:26573): La posicion anterior era 1 en X y 2 en Y
+[INFO] 02:42:23:395 MI-RAM-HQ/(26554:26573): SE SOLICITO EXPULSAR AL TRIPULANTE 4 DE LA PATOTA 1
+
+[INFO] 02:42:23:395 MI-RAM-HQ/(26554:26573): Se expulso al tripulante 4 de la patota 1
+[INFO] 02:42:23:395 MI-RAM-HQ/(26554:26573): Se modifico la posicion del tripulante 5 de la patota 1 a --> 2 en X y 3 en Y
+[INFO] 02:42:23:395 MI-RAM-HQ/(26554:26573): La posicion anterior era 1 en X y 3 en Y
+[INFO] 03:06:06:345 MI-RAM-HQ/(27210:27210): 
+
+
+INICIA EJECUCION DE RAM
+[INFO] 03:07:27:581 MI-RAM-HQ/(27210:27258): SOLICITUD INICIO PATOTA 1
+[INFO] 03:07:27:581 MI-RAM-HQ/(27210:27258): Se creo la patota 1 de tamanio 137 con 1 tripulantes
+[INFO] 03:07:27:581 MI-RAM-HQ/(27210:27258): SE CREO LA PATOTA CON EXITO 1
+[INFO] 03:08:07:713 MI-RAM-HQ/(27210:27275): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:08:07:713 MI-RAM-HQ/(27210:27275): Al tripulante 1 de la patota 1 le tocaba la tarea numero 0: DESCARGAR_ITINERARIO;2;2;2
+[INFO] 03:08:07:713 MI-RAM-HQ/(27210:27275): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA DESCARGAR_ITINERARIO;2;2;2
+[INFO] 03:08:08:714 MI-RAM-HQ/(27210:27275): Se modifico el estado del tripulante 1 de la patota 1 de R a E
+[INFO] 03:08:09:715 MI-RAM-HQ/(27210:27275): Se modifico la posicion del tripulante 1 de la patota 1 a --> 5 en X y 6 en Y
+[INFO] 03:08:09:715 MI-RAM-HQ/(27210:27275): La posicion anterior era 6 en X y 6 en Y
+[INFO] 03:08:10:719 MI-RAM-HQ/(27210:27275): Se modifico la posicion del tripulante 1 de la patota 1 a --> 4 en X y 6 en Y
+[INFO] 03:08:10:719 MI-RAM-HQ/(27210:27275): La posicion anterior era 5 en X y 6 en Y
+[INFO] 03:08:11:722 MI-RAM-HQ/(27210:27275): Se modifico la posicion del tripulante 1 de la patota 1 a --> 3 en X y 6 en Y
+[INFO] 03:08:11:722 MI-RAM-HQ/(27210:27275): La posicion anterior era 4 en X y 6 en Y
+[INFO] 03:08:12:722 MI-RAM-HQ/(27210:27275): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 6 en Y
+[INFO] 03:08:12:722 MI-RAM-HQ/(27210:27275): La posicion anterior era 3 en X y 6 en Y
+[INFO] 03:08:13:723 MI-RAM-HQ/(27210:27275): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 5 en Y
+[INFO] 03:08:13:723 MI-RAM-HQ/(27210:27275): La posicion anterior era 2 en X y 6 en Y
+[INFO] 03:08:14:723 MI-RAM-HQ/(27210:27275): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 4 en Y
+[INFO] 03:08:14:723 MI-RAM-HQ/(27210:27275): La posicion anterior era 2 en X y 5 en Y
+[INFO] 03:08:15:723 MI-RAM-HQ/(27210:27275): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 3 en Y
+[INFO] 03:08:15:723 MI-RAM-HQ/(27210:27275): La posicion anterior era 2 en X y 4 en Y
+[INFO] 03:08:16:724 MI-RAM-HQ/(27210:27275): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 2 en Y
+[INFO] 03:08:16:724 MI-RAM-HQ/(27210:27275): La posicion anterior era 2 en X y 3 en Y
+[INFO] 03:08:18:726 MI-RAM-HQ/(27210:27275): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:08:18:726 MI-RAM-HQ/(27210:27275): Al tripulante 1 de la patota 1 le tocaba la tarea numero 1: GENERAR_OXIGENO 12;2;3;5
+[INFO] 03:08:18:726 MI-RAM-HQ/(27210:27275): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA GENERAR_OXIGENO 12;2;3;5
+[INFO] 03:08:19:727 MI-RAM-HQ/(27210:27275): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 3 en Y
+[INFO] 03:08:19:727 MI-RAM-HQ/(27210:27275): La posicion anterior era 2 en X y 2 en Y
+[INFO] 03:08:20:727 MI-RAM-HQ/(27210:27275): Se modifico el estado del tripulante 1 de la patota 1 de E a B
+[INFO] 03:08:25:730 MI-RAM-HQ/(27210:27275): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:08:25:730 MI-RAM-HQ/(27210:27275): Al tripulante 1 de la patota 1 le tocaba la tarea numero 2: DESCARGAR_ITINERARIO;2;5;2
+[INFO] 03:08:25:730 MI-RAM-HQ/(27210:27275): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA DESCARGAR_ITINERARIO;2;5;2
+[INFO] 03:08:25:730 MI-RAM-HQ/(27210:27275): Se modifico el estado del tripulante 1 de la patota 1 de B a R
+[INFO] 03:08:26:730 MI-RAM-HQ/(27210:27275): Se modifico el estado del tripulante 1 de la patota 1 de R a E
+[INFO] 03:08:27:731 MI-RAM-HQ/(27210:27275): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 4 en Y
+[INFO] 03:08:27:731 MI-RAM-HQ/(27210:27275): La posicion anterior era 2 en X y 3 en Y
+[INFO] 03:08:28:733 MI-RAM-HQ/(27210:27275): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 5 en Y
+[INFO] 03:08:28:733 MI-RAM-HQ/(27210:27275): La posicion anterior era 2 en X y 4 en Y
+[INFO] 03:08:30:734 MI-RAM-HQ/(27210:27275): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:08:30:734 MI-RAM-HQ/(27210:27275): Al tripulante 1 de la patota 1 le tocaba la tarea numero 3: CONSUMIR_OXIGENO 120;5;5;2
+[INFO] 03:08:30:734 MI-RAM-HQ/(27210:27275): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA CONSUMIR_OXIGENO 120;5;5;2
+[INFO] 03:08:31:735 MI-RAM-HQ/(27210:27275): Se modifico la posicion del tripulante 1 de la patota 1 a --> 3 en X y 5 en Y
+[INFO] 03:08:31:735 MI-RAM-HQ/(27210:27275): La posicion anterior era 2 en X y 5 en Y
+[INFO] 03:08:32:735 MI-RAM-HQ/(27210:27275): Se modifico la posicion del tripulante 1 de la patota 1 a --> 4 en X y 5 en Y
+[INFO] 03:08:32:735 MI-RAM-HQ/(27210:27275): La posicion anterior era 3 en X y 5 en Y
+[INFO] 03:08:33:737 MI-RAM-HQ/(27210:27275): Se modifico la posicion del tripulante 1 de la patota 1 a --> 5 en X y 5 en Y
+[INFO] 03:08:33:737 MI-RAM-HQ/(27210:27275): La posicion anterior era 4 en X y 5 en Y
+[INFO] 03:08:34:738 MI-RAM-HQ/(27210:27275): Se modifico el estado del tripulante 1 de la patota 1 de E a B
+[INFO] 03:08:36:740 MI-RAM-HQ/(27210:27275): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:08:36:740 MI-RAM-HQ/(27210:27275): Al tripulante 1 de la patota 1 le tocaba la tarea numero 4: 
+[INFO] 03:08:36:740 MI-RAM-HQ/(27210:27275): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA 
+[INFO] 03:09:44:772 MI-RAM-HQ/(27312:27312): 
+
+
+INICIA EJECUCION DE RAM
+[INFO] 03:10:18:904 MI-RAM-HQ/(27312:27333): SOLICITUD INICIO PATOTA 1
+[INFO] 03:10:18:904 MI-RAM-HQ/(27312:27333): Se creo la patota 1 de tamanio 137 con 1 tripulantes
+[INFO] 03:10:18:904 MI-RAM-HQ/(27312:27333): SE CREO LA PATOTA CON EXITO 1
+[INFO] 03:10:47:176 MI-RAM-HQ/(27312:27350): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:10:47:176 MI-RAM-HQ/(27312:27350): Al tripulante 1 de la patota 1 le tocaba la tarea numero 0: DESCARGAR_ITINERARIO;2;2;2
+[INFO] 03:10:47:176 MI-RAM-HQ/(27312:27350): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA DESCARGAR_ITINERARIO;2;2;2
+[INFO] 03:10:48:177 MI-RAM-HQ/(27312:27350): Se modifico el estado del tripulante 1 de la patota 1 de R a E
+[INFO] 03:10:49:179 MI-RAM-HQ/(27312:27350): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 8 en Y
+[INFO] 03:10:49:179 MI-RAM-HQ/(27312:27350): La posicion anterior era 1 en X y 8 en Y
+[INFO] 03:10:50:181 MI-RAM-HQ/(27312:27350): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 7 en Y
+[INFO] 03:10:50:181 MI-RAM-HQ/(27312:27350): La posicion anterior era 2 en X y 8 en Y
+[INFO] 03:10:51:181 MI-RAM-HQ/(27312:27350): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 6 en Y
+[INFO] 03:10:51:181 MI-RAM-HQ/(27312:27350): La posicion anterior era 2 en X y 7 en Y
+[INFO] 03:10:52:182 MI-RAM-HQ/(27312:27350): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 5 en Y
+[INFO] 03:10:52:182 MI-RAM-HQ/(27312:27350): La posicion anterior era 2 en X y 6 en Y
+[INFO] 03:10:53:184 MI-RAM-HQ/(27312:27350): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 4 en Y
+[INFO] 03:10:53:184 MI-RAM-HQ/(27312:27350): La posicion anterior era 2 en X y 5 en Y
+[INFO] 03:10:54:184 MI-RAM-HQ/(27312:27350): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 3 en Y
+[INFO] 03:10:54:185 MI-RAM-HQ/(27312:27350): La posicion anterior era 2 en X y 4 en Y
+[INFO] 03:10:55:185 MI-RAM-HQ/(27312:27350): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 2 en Y
+[INFO] 03:10:55:185 MI-RAM-HQ/(27312:27350): La posicion anterior era 2 en X y 3 en Y
+[INFO] 03:10:57:187 MI-RAM-HQ/(27312:27350): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:10:57:187 MI-RAM-HQ/(27312:27350): Al tripulante 1 de la patota 1 le tocaba la tarea numero 1: GENERAR_OXIGENO 12;2;3;5
+[INFO] 03:10:57:187 MI-RAM-HQ/(27312:27350): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA GENERAR_OXIGENO 12;2;3;5
+[INFO] 03:10:58:187 MI-RAM-HQ/(27312:27350): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 3 en Y
+[INFO] 03:10:58:187 MI-RAM-HQ/(27312:27350): La posicion anterior era 2 en X y 2 en Y
+[INFO] 03:10:59:188 MI-RAM-HQ/(27312:27350): Se modifico el estado del tripulante 1 de la patota 1 de E a B
+[INFO] 03:11:04:190 MI-RAM-HQ/(27312:27350): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:11:04:190 MI-RAM-HQ/(27312:27350): Al tripulante 1 de la patota 1 le tocaba la tarea numero 2: DESCARGAR_ITINERARIO;2;5;2
+[INFO] 03:11:04:190 MI-RAM-HQ/(27312:27350): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA DESCARGAR_ITINERARIO;2;5;2
+[INFO] 03:11:04:191 MI-RAM-HQ/(27312:27350): Se modifico el estado del tripulante 1 de la patota 1 de B a R
+[INFO] 03:11:05:192 MI-RAM-HQ/(27312:27350): Se modifico el estado del tripulante 1 de la patota 1 de R a E
+[INFO] 03:11:06:192 MI-RAM-HQ/(27312:27350): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 4 en Y
+[INFO] 03:11:06:192 MI-RAM-HQ/(27312:27350): La posicion anterior era 2 en X y 3 en Y
+[INFO] 03:11:07:193 MI-RAM-HQ/(27312:27350): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 5 en Y
+[INFO] 03:11:07:193 MI-RAM-HQ/(27312:27350): La posicion anterior era 2 en X y 4 en Y
+[INFO] 03:11:09:195 MI-RAM-HQ/(27312:27350): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:11:09:197 MI-RAM-HQ/(27312:27350): Al tripulante 1 de la patota 1 le tocaba la tarea numero 3: CONSUMIR_OXIGENO 120;5;5;2
+[INFO] 03:11:09:197 MI-RAM-HQ/(27312:27350): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA CONSUMIR_OXIGENO 120;5;5;2
+[INFO] 03:11:10:198 MI-RAM-HQ/(27312:27350): Se modifico la posicion del tripulante 1 de la patota 1 a --> 3 en X y 5 en Y
+[INFO] 03:11:10:198 MI-RAM-HQ/(27312:27350): La posicion anterior era 2 en X y 5 en Y
+[INFO] 03:11:11:200 MI-RAM-HQ/(27312:27350): Se modifico la posicion del tripulante 1 de la patota 1 a --> 4 en X y 5 en Y
+[INFO] 03:11:11:200 MI-RAM-HQ/(27312:27350): La posicion anterior era 3 en X y 5 en Y
+[INFO] 03:11:12:201 MI-RAM-HQ/(27312:27350): Se modifico la posicion del tripulante 1 de la patota 1 a --> 5 en X y 5 en Y
+[INFO] 03:11:12:202 MI-RAM-HQ/(27312:27350): La posicion anterior era 4 en X y 5 en Y
+[INFO] 03:11:13:202 MI-RAM-HQ/(27312:27350): Se modifico el estado del tripulante 1 de la patota 1 de E a B
+[INFO] 03:11:15:203 MI-RAM-HQ/(27312:27350): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:11:15:203 MI-RAM-HQ/(27312:27350): Al tripulante 1 de la patota 1 le tocaba la tarea numero 4: 
+[INFO] 03:11:15:203 MI-RAM-HQ/(27312:27350): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA 
+[INFO] 03:17:53:307 MI-RAM-HQ/(27519:27519): 
+
+
+INICIA EJECUCION DE RAM
+[INFO] 03:18:24:061 MI-RAM-HQ/(27519:27538): SOLICITUD INICIO PATOTA 1
+[INFO] 03:18:24:062 MI-RAM-HQ/(27519:27538): Se creo la patota 1 de tamanio 137 con 1 tripulantes
+[INFO] 03:18:24:062 MI-RAM-HQ/(27519:27538): SE CREO LA PATOTA CON EXITO 1
+[INFO] 03:19:02:871 MI-RAM-HQ/(27519:27542): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:19:02:871 MI-RAM-HQ/(27519:27542): Al tripulante 1 de la patota 1 le tocaba la tarea numero 0: DESCARGAR_ITINERARIO;2;2;2
+[INFO] 03:19:02:871 MI-RAM-HQ/(27519:27542): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA DESCARGAR_ITINERARIO;2;2;2
+[INFO] 03:19:03:871 MI-RAM-HQ/(27519:27542): Se modifico el estado del tripulante 1 de la patota 1 de R a E
+[INFO] 03:19:04:872 MI-RAM-HQ/(27519:27542): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 4 en Y
+[INFO] 03:19:04:872 MI-RAM-HQ/(27519:27542): La posicion anterior era 2 en X y 5 en Y
+[INFO] 03:19:05:873 MI-RAM-HQ/(27519:27542): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 3 en Y
+[INFO] 03:19:05:873 MI-RAM-HQ/(27519:27542): La posicion anterior era 2 en X y 4 en Y
+[INFO] 03:19:06:873 MI-RAM-HQ/(27519:27542): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 2 en Y
+[INFO] 03:19:06:873 MI-RAM-HQ/(27519:27542): La posicion anterior era 2 en X y 3 en Y
+[INFO] 03:19:08:876 MI-RAM-HQ/(27519:27542): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:19:08:876 MI-RAM-HQ/(27519:27542): Al tripulante 1 de la patota 1 le tocaba la tarea numero 1: GENERAR_OXIGENO 12;2;3;5
+[INFO] 03:19:08:876 MI-RAM-HQ/(27519:27542): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA GENERAR_OXIGENO 12;2;3;5
+[INFO] 03:19:09:877 MI-RAM-HQ/(27519:27542): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 3 en Y
+[INFO] 03:19:09:877 MI-RAM-HQ/(27519:27542): La posicion anterior era 2 en X y 2 en Y
+[INFO] 03:19:10:877 MI-RAM-HQ/(27519:27542): Se modifico el estado del tripulante 1 de la patota 1 de E a B
+[INFO] 03:19:15:881 MI-RAM-HQ/(27519:27542): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:19:15:881 MI-RAM-HQ/(27519:27542): Al tripulante 1 de la patota 1 le tocaba la tarea numero 2: DESCARGAR_ITINERARIO;2;5;2
+[INFO] 03:19:15:881 MI-RAM-HQ/(27519:27542): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA DESCARGAR_ITINERARIO;2;5;2
+[INFO] 03:19:15:881 MI-RAM-HQ/(27519:27542): Se modifico el estado del tripulante 1 de la patota 1 de B a R
+[INFO] 03:19:16:881 MI-RAM-HQ/(27519:27542): Se modifico el estado del tripulante 1 de la patota 1 de R a E
+[INFO] 03:19:17:882 MI-RAM-HQ/(27519:27542): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 4 en Y
+[INFO] 03:19:17:883 MI-RAM-HQ/(27519:27542): La posicion anterior era 2 en X y 3 en Y
+[INFO] 03:19:18:883 MI-RAM-HQ/(27519:27542): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 5 en Y
+[INFO] 03:19:18:883 MI-RAM-HQ/(27519:27542): La posicion anterior era 2 en X y 4 en Y
+[INFO] 03:19:20:885 MI-RAM-HQ/(27519:27542): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:19:20:885 MI-RAM-HQ/(27519:27542): Al tripulante 1 de la patota 1 le tocaba la tarea numero 3: CONSUMIR_OXIGENO 120;5;5;2
+[INFO] 03:19:20:885 MI-RAM-HQ/(27519:27542): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA CONSUMIR_OXIGENO 120;5;5;2
+[INFO] 03:19:21:887 MI-RAM-HQ/(27519:27542): Se modifico la posicion del tripulante 1 de la patota 1 a --> 3 en X y 5 en Y
+[INFO] 03:19:21:887 MI-RAM-HQ/(27519:27542): La posicion anterior era 2 en X y 5 en Y
+[INFO] 03:19:22:888 MI-RAM-HQ/(27519:27542): Se modifico la posicion del tripulante 1 de la patota 1 a --> 4 en X y 5 en Y
+[INFO] 03:19:22:888 MI-RAM-HQ/(27519:27542): La posicion anterior era 3 en X y 5 en Y
+[INFO] 03:19:23:889 MI-RAM-HQ/(27519:27542): Se modifico la posicion del tripulante 1 de la patota 1 a --> 5 en X y 5 en Y
+[INFO] 03:19:23:889 MI-RAM-HQ/(27519:27542): La posicion anterior era 4 en X y 5 en Y
+[INFO] 03:19:24:889 MI-RAM-HQ/(27519:27542): Se modifico el estado del tripulante 1 de la patota 1 de E a B
+[INFO] 03:19:26:891 MI-RAM-HQ/(27519:27542): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:19:26:891 MI-RAM-HQ/(27519:27542): Al tripulante 1 de la patota 1 le tocaba la tarea numero 4: 
+[INFO] 03:19:26:891 MI-RAM-HQ/(27519:27542): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA 
+[INFO] 03:19:47:443 MI-RAM-HQ/(27550:27550): 
+
+
+INICIA EJECUCION DE RAM
+[INFO] 03:21:12:916 MI-RAM-HQ/(27610:27610): 
+
+
+INICIA EJECUCION DE RAM
+[INFO] 03:21:39:001 MI-RAM-HQ/(27610:27627): SOLICITUD INICIO PATOTA 1
+[INFO] 03:21:39:001 MI-RAM-HQ/(27610:27627): Se creo la patota 1 de tamanio 137 con 1 tripulantes
+[INFO] 03:21:39:001 MI-RAM-HQ/(27610:27627): SE CREO LA PATOTA CON EXITO 1
+[INFO] 03:28:08:097 MI-RAM-HQ/(4420:4420): 
+
+
+INICIA EJECUCION DE RAM
+[INFO] 03:28:31:873 MI-RAM-HQ/(4420:4438): SOLICITUD INICIO PATOTA 1
+[INFO] 03:28:31:873 MI-RAM-HQ/(4420:4438): Se creo la patota 1 de tamanio 137 con 1 tripulantes
+[INFO] 03:28:31:873 MI-RAM-HQ/(4420:4438): SE CREO LA PATOTA CON EXITO 1
+[INFO] 03:29:24:911 MI-RAM-HQ/(4420:4451): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:29:24:911 MI-RAM-HQ/(4420:4451): Al tripulante 1 de la patota 1 le tocaba la tarea numero 0: DESCARGAR_ITINERARIO;2;2;2
+[INFO] 03:29:24:911 MI-RAM-HQ/(4420:4451): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA DESCARGAR_ITINERARIO;2;2;2
+[INFO] 03:29:25:912 MI-RAM-HQ/(4420:4451): Se modifico el estado del tripulante 1 de la patota 1 de R a E
+[INFO] 03:29:26:913 MI-RAM-HQ/(4420:4451): Se modifico la posicion del tripulante 1 de la patota 1 a --> 1 en X y 0 en Y
+[INFO] 03:29:26:913 MI-RAM-HQ/(4420:4451): La posicion anterior era 0 en X y 0 en Y
+[INFO] 03:29:27:918 MI-RAM-HQ/(4420:4451): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 0 en Y
+[INFO] 03:29:27:918 MI-RAM-HQ/(4420:4451): La posicion anterior era 1 en X y 0 en Y
+[INFO] 03:29:28:921 MI-RAM-HQ/(4420:4451): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 1 en Y
+[INFO] 03:29:28:921 MI-RAM-HQ/(4420:4451): La posicion anterior era 2 en X y 0 en Y
+[INFO] 03:29:29:922 MI-RAM-HQ/(4420:4451): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 2 en Y
+[INFO] 03:29:29:922 MI-RAM-HQ/(4420:4451): La posicion anterior era 2 en X y 1 en Y
+[INFO] 03:29:31:923 MI-RAM-HQ/(4420:4451): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:29:31:923 MI-RAM-HQ/(4420:4451): Al tripulante 1 de la patota 1 le tocaba la tarea numero 1: GENERAR_OXIGENO 12;2;3;5
+[INFO] 03:29:31:923 MI-RAM-HQ/(4420:4451): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA GENERAR_OXIGENO 12;2;3;5
+[INFO] 03:29:32:927 MI-RAM-HQ/(4420:4451): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 3 en Y
+[INFO] 03:29:32:927 MI-RAM-HQ/(4420:4451): La posicion anterior era 2 en X y 2 en Y
+[INFO] 03:29:33:928 MI-RAM-HQ/(4420:4451): Se modifico el estado del tripulante 1 de la patota 1 de E a B
+[INFO] 03:29:38:932 MI-RAM-HQ/(4420:4451): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:29:38:933 MI-RAM-HQ/(4420:4451): Al tripulante 1 de la patota 1 le tocaba la tarea numero 2: DESCARGAR_ITINERARIO;2;5;2
+[INFO] 03:29:38:933 MI-RAM-HQ/(4420:4451): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA DESCARGAR_ITINERARIO;2;5;2
+[INFO] 03:29:38:935 MI-RAM-HQ/(4420:4451): Se modifico el estado del tripulante 1 de la patota 1 de B a R
+[INFO] 03:29:39:934 MI-RAM-HQ/(4420:4451): Se modifico el estado del tripulante 1 de la patota 1 de R a E
+[INFO] 03:29:40:935 MI-RAM-HQ/(4420:4451): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 4 en Y
+[INFO] 03:29:40:935 MI-RAM-HQ/(4420:4451): La posicion anterior era 2 en X y 3 en Y
+[INFO] 03:29:41:935 MI-RAM-HQ/(4420:4451): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 5 en Y
+[INFO] 03:29:41:935 MI-RAM-HQ/(4420:4451): La posicion anterior era 2 en X y 4 en Y
+[INFO] 03:29:43:937 MI-RAM-HQ/(4420:4451): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:29:43:937 MI-RAM-HQ/(4420:4451): Al tripulante 1 de la patota 1 le tocaba la tarea numero 3: CONSUMIR_OXIGENO 120;5;5;2
+[INFO] 03:29:43:938 MI-RAM-HQ/(4420:4451): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA CONSUMIR_OXIGENO 120;5;5;2
+[INFO] 03:29:44:940 MI-RAM-HQ/(4420:4451): Se modifico la posicion del tripulante 1 de la patota 1 a --> 3 en X y 5 en Y
+[INFO] 03:29:44:940 MI-RAM-HQ/(4420:4451): La posicion anterior era 2 en X y 5 en Y
+[INFO] 03:29:45:941 MI-RAM-HQ/(4420:4451): Se modifico la posicion del tripulante 1 de la patota 1 a --> 4 en X y 5 en Y
+[INFO] 03:29:45:941 MI-RAM-HQ/(4420:4451): La posicion anterior era 3 en X y 5 en Y
+[INFO] 03:29:46:942 MI-RAM-HQ/(4420:4451): Se modifico la posicion del tripulante 1 de la patota 1 a --> 5 en X y 5 en Y
+[INFO] 03:29:46:942 MI-RAM-HQ/(4420:4451): La posicion anterior era 4 en X y 5 en Y
+[INFO] 03:29:47:942 MI-RAM-HQ/(4420:4451): Se modifico el estado del tripulante 1 de la patota 1 de E a B
+[INFO] 03:29:49:945 MI-RAM-HQ/(4420:4451): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:29:49:945 MI-RAM-HQ/(4420:4451): Al tripulante 1 de la patota 1 le tocaba la tarea numero 4: 
+[INFO] 03:29:49:945 MI-RAM-HQ/(4420:4451): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA 
+[INFO] 03:34:28:639 MI-RAM-HQ/(4987:4987): 
+
+
+INICIA EJECUCION DE RAM
+[INFO] 03:34:56:262 MI-RAM-HQ/(4987:5016): SOLICITUD INICIO PATOTA 1
+[INFO] 03:34:56:262 MI-RAM-HQ/(4987:5016): Se creo la patota 1 de tamanio 137 con 1 tripulantes
+[INFO] 03:34:56:262 MI-RAM-HQ/(4987:5016): SE CREO LA PATOTA CON EXITO 1
+[INFO] 03:35:25:901 MI-RAM-HQ/(4987:5034): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:35:25:901 MI-RAM-HQ/(4987:5034): Al tripulante 1 de la patota 1 le tocaba la tarea numero 0: DESCARGAR_ITINERARIO;2;2;2
+[INFO] 03:35:25:901 MI-RAM-HQ/(4987:5034): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA DESCARGAR_ITINERARIO;2;2;2
+[INFO] 03:35:26:901 MI-RAM-HQ/(4987:5034): Se modifico el estado del tripulante 1 de la patota 1 de R a E
+[INFO] 03:35:27:902 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 9 en X y 10 en Y
+[INFO] 03:35:27:902 MI-RAM-HQ/(4987:5034): La posicion anterior era 10 en X y 10 en Y
+[INFO] 03:35:28:903 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 8 en X y 10 en Y
+[INFO] 03:35:28:903 MI-RAM-HQ/(4987:5034): La posicion anterior era 9 en X y 10 en Y
+[INFO] 03:35:29:903 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 7 en X y 10 en Y
+[INFO] 03:35:29:903 MI-RAM-HQ/(4987:5034): La posicion anterior era 8 en X y 10 en Y
+[INFO] 03:35:30:904 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 6 en X y 10 en Y
+[INFO] 03:35:30:904 MI-RAM-HQ/(4987:5034): La posicion anterior era 7 en X y 10 en Y
+[INFO] 03:35:31:906 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 5 en X y 10 en Y
+[INFO] 03:35:31:906 MI-RAM-HQ/(4987:5034): La posicion anterior era 6 en X y 10 en Y
+[INFO] 03:35:32:907 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 4 en X y 10 en Y
+[INFO] 03:35:32:907 MI-RAM-HQ/(4987:5034): La posicion anterior era 5 en X y 10 en Y
+[INFO] 03:35:33:907 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 3 en X y 10 en Y
+[INFO] 03:35:33:907 MI-RAM-HQ/(4987:5034): La posicion anterior era 4 en X y 10 en Y
+[INFO] 03:35:34:908 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 10 en Y
+[INFO] 03:35:34:908 MI-RAM-HQ/(4987:5034): La posicion anterior era 3 en X y 10 en Y
+[INFO] 03:35:35:909 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 9 en Y
+[INFO] 03:35:35:909 MI-RAM-HQ/(4987:5034): La posicion anterior era 2 en X y 10 en Y
+[INFO] 03:35:36:910 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 8 en Y
+[INFO] 03:35:36:910 MI-RAM-HQ/(4987:5034): La posicion anterior era 2 en X y 9 en Y
+[INFO] 03:35:37:911 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 7 en Y
+[INFO] 03:35:37:911 MI-RAM-HQ/(4987:5034): La posicion anterior era 2 en X y 8 en Y
+[INFO] 03:35:38:911 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 6 en Y
+[INFO] 03:35:38:911 MI-RAM-HQ/(4987:5034): La posicion anterior era 2 en X y 7 en Y
+[INFO] 03:35:39:913 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 5 en Y
+[INFO] 03:35:39:913 MI-RAM-HQ/(4987:5034): La posicion anterior era 2 en X y 6 en Y
+[INFO] 03:35:40:914 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 4 en Y
+[INFO] 03:35:40:914 MI-RAM-HQ/(4987:5034): La posicion anterior era 2 en X y 5 en Y
+[INFO] 03:35:41:915 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 3 en Y
+[INFO] 03:35:41:915 MI-RAM-HQ/(4987:5034): La posicion anterior era 2 en X y 4 en Y
+[INFO] 03:35:42:917 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 2 en Y
+[INFO] 03:35:42:917 MI-RAM-HQ/(4987:5034): La posicion anterior era 2 en X y 3 en Y
+[INFO] 03:35:44:920 MI-RAM-HQ/(4987:5034): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:35:44:920 MI-RAM-HQ/(4987:5034): Al tripulante 1 de la patota 1 le tocaba la tarea numero 1: GENERAR_OXIGENO 12;2;3;5
+[INFO] 03:35:44:920 MI-RAM-HQ/(4987:5034): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA GENERAR_OXIGENO 12;2;3;5
+[INFO] 03:35:45:923 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 3 en Y
+[INFO] 03:35:45:923 MI-RAM-HQ/(4987:5034): La posicion anterior era 2 en X y 2 en Y
+[INFO] 03:35:46:925 MI-RAM-HQ/(4987:5034): Se modifico el estado del tripulante 1 de la patota 1 de E a B
+[INFO] 03:35:51:929 MI-RAM-HQ/(4987:5034): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:35:51:929 MI-RAM-HQ/(4987:5034): Al tripulante 1 de la patota 1 le tocaba la tarea numero 2: DESCARGAR_ITINERARIO;2;5;2
+[INFO] 03:35:51:929 MI-RAM-HQ/(4987:5034): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA DESCARGAR_ITINERARIO;2;5;2
+[INFO] 03:35:51:929 MI-RAM-HQ/(4987:5034): Se modifico el estado del tripulante 1 de la patota 1 de B a R
+[INFO] 03:35:52:929 MI-RAM-HQ/(4987:5034): Se modifico el estado del tripulante 1 de la patota 1 de R a E
+[INFO] 03:35:53:930 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 4 en Y
+[INFO] 03:35:53:930 MI-RAM-HQ/(4987:5034): La posicion anterior era 2 en X y 3 en Y
+[INFO] 03:35:54:930 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 5 en Y
+[INFO] 03:35:54:930 MI-RAM-HQ/(4987:5034): La posicion anterior era 2 en X y 4 en Y
+[INFO] 03:35:56:932 MI-RAM-HQ/(4987:5034): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:35:56:932 MI-RAM-HQ/(4987:5034): Al tripulante 1 de la patota 1 le tocaba la tarea numero 3: CONSUMIR_OXIGENO 120;5;5;2
+[INFO] 03:35:56:932 MI-RAM-HQ/(4987:5034): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA CONSUMIR_OXIGENO 120;5;5;2
+[INFO] 03:35:57:933 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 3 en X y 5 en Y
+[INFO] 03:35:57:933 MI-RAM-HQ/(4987:5034): La posicion anterior era 2 en X y 5 en Y
+[INFO] 03:35:58:934 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 4 en X y 5 en Y
+[INFO] 03:35:58:934 MI-RAM-HQ/(4987:5034): La posicion anterior era 3 en X y 5 en Y
+[INFO] 03:35:59:936 MI-RAM-HQ/(4987:5034): Se modifico la posicion del tripulante 1 de la patota 1 a --> 5 en X y 5 en Y
+[INFO] 03:35:59:936 MI-RAM-HQ/(4987:5034): La posicion anterior era 4 en X y 5 en Y
+[INFO] 03:36:00:937 MI-RAM-HQ/(4987:5034): Se modifico el estado del tripulante 1 de la patota 1 de E a B
+[INFO] 03:36:02:938 MI-RAM-HQ/(4987:5034): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:36:02:938 MI-RAM-HQ/(4987:5034): Al tripulante 1 de la patota 1 le tocaba la tarea numero 4: 
+[INFO] 03:36:02:938 MI-RAM-HQ/(4987:5034): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA 
+[INFO] 03:37:09:277 MI-RAM-HQ/(5073:5073): 
+
+
+INICIA EJECUCION DE RAM
+[INFO] 03:37:23:868 MI-RAM-HQ/(5073:5092): SOLICITUD INICIO PATOTA 1
+[INFO] 03:37:23:868 MI-RAM-HQ/(5073:5092): Se creo la patota 1 de tamanio 137 con 1 tripulantes
+[INFO] 03:37:23:869 MI-RAM-HQ/(5073:5092): SE CREO LA PATOTA CON EXITO 1
+[INFO] 03:37:34:501 MI-RAM-HQ/(5073:5098): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:37:34:501 MI-RAM-HQ/(5073:5098): Al tripulante 1 de la patota 1 le tocaba la tarea numero 0: DESCARGAR_ITINERARIO;2;2;2
+[INFO] 03:37:34:501 MI-RAM-HQ/(5073:5098): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA DESCARGAR_ITINERARIO;2;2;2
+[INFO] 03:37:35:502 MI-RAM-HQ/(5073:5098): Se modifico el estado del tripulante 1 de la patota 1 de R a E
+[INFO] 03:37:36:503 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 9 en X y 10 en Y
+[INFO] 03:37:36:503 MI-RAM-HQ/(5073:5098): La posicion anterior era 10 en X y 10 en Y
+[INFO] 03:37:37:504 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 8 en X y 10 en Y
+[INFO] 03:37:37:504 MI-RAM-HQ/(5073:5098): La posicion anterior era 9 en X y 10 en Y
+[INFO] 03:37:38:505 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 7 en X y 10 en Y
+[INFO] 03:37:38:505 MI-RAM-HQ/(5073:5098): La posicion anterior era 8 en X y 10 en Y
+[INFO] 03:37:39:507 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 6 en X y 10 en Y
+[INFO] 03:37:39:507 MI-RAM-HQ/(5073:5098): La posicion anterior era 7 en X y 10 en Y
+[INFO] 03:37:40:507 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 5 en X y 10 en Y
+[INFO] 03:37:40:507 MI-RAM-HQ/(5073:5098): La posicion anterior era 6 en X y 10 en Y
+[INFO] 03:37:41:509 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 4 en X y 10 en Y
+[INFO] 03:37:41:509 MI-RAM-HQ/(5073:5098): La posicion anterior era 5 en X y 10 en Y
+[INFO] 03:37:42:510 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 3 en X y 10 en Y
+[INFO] 03:37:42:510 MI-RAM-HQ/(5073:5098): La posicion anterior era 4 en X y 10 en Y
+[INFO] 03:37:43:511 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 10 en Y
+[INFO] 03:37:43:511 MI-RAM-HQ/(5073:5098): La posicion anterior era 3 en X y 10 en Y
+[INFO] 03:37:44:511 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 9 en Y
+[INFO] 03:37:44:511 MI-RAM-HQ/(5073:5098): La posicion anterior era 2 en X y 10 en Y
+[INFO] 03:37:45:513 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 8 en Y
+[INFO] 03:37:45:513 MI-RAM-HQ/(5073:5098): La posicion anterior era 2 en X y 9 en Y
+[INFO] 03:37:46:514 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 7 en Y
+[INFO] 03:37:46:514 MI-RAM-HQ/(5073:5098): La posicion anterior era 2 en X y 8 en Y
+[INFO] 03:37:47:516 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 6 en Y
+[INFO] 03:37:47:516 MI-RAM-HQ/(5073:5098): La posicion anterior era 2 en X y 7 en Y
+[INFO] 03:37:48:517 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 5 en Y
+[INFO] 03:37:48:517 MI-RAM-HQ/(5073:5098): La posicion anterior era 2 en X y 6 en Y
+[INFO] 03:37:49:518 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 4 en Y
+[INFO] 03:37:49:518 MI-RAM-HQ/(5073:5098): La posicion anterior era 2 en X y 5 en Y
+[INFO] 03:37:50:519 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 3 en Y
+[INFO] 03:37:50:519 MI-RAM-HQ/(5073:5098): La posicion anterior era 2 en X y 4 en Y
+[INFO] 03:37:51:520 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 2 en Y
+[INFO] 03:37:51:520 MI-RAM-HQ/(5073:5098): La posicion anterior era 2 en X y 3 en Y
+[INFO] 03:37:53:521 MI-RAM-HQ/(5073:5098): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:37:53:521 MI-RAM-HQ/(5073:5098): Al tripulante 1 de la patota 1 le tocaba la tarea numero 1: GENERAR_OXIGENO 12;2;3;5
+[INFO] 03:37:53:521 MI-RAM-HQ/(5073:5098): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA GENERAR_OXIGENO 12;2;3;5
+[INFO] 03:37:54:522 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 3 en Y
+[INFO] 03:37:54:522 MI-RAM-HQ/(5073:5098): La posicion anterior era 2 en X y 2 en Y
+[INFO] 03:37:55:523 MI-RAM-HQ/(5073:5098): Se modifico el estado del tripulante 1 de la patota 1 de E a B
+[INFO] 03:38:00:527 MI-RAM-HQ/(5073:5098): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:38:00:527 MI-RAM-HQ/(5073:5098): Al tripulante 1 de la patota 1 le tocaba la tarea numero 2: DESCARGAR_ITINERARIO;2;5;2
+[INFO] 03:38:00:527 MI-RAM-HQ/(5073:5098): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA DESCARGAR_ITINERARIO;2;5;2
+[INFO] 03:38:00:527 MI-RAM-HQ/(5073:5098): Se modifico el estado del tripulante 1 de la patota 1 de B a R
+[INFO] 03:38:01:526 MI-RAM-HQ/(5073:5098): Se modifico el estado del tripulante 1 de la patota 1 de R a E
+[INFO] 03:38:02:527 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 4 en Y
+[INFO] 03:38:02:527 MI-RAM-HQ/(5073:5098): La posicion anterior era 2 en X y 3 en Y
+[INFO] 03:38:03:527 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 2 en X y 5 en Y
+[INFO] 03:38:03:527 MI-RAM-HQ/(5073:5098): La posicion anterior era 2 en X y 4 en Y
+[INFO] 03:38:05:530 MI-RAM-HQ/(5073:5098): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:38:05:530 MI-RAM-HQ/(5073:5098): Al tripulante 1 de la patota 1 le tocaba la tarea numero 3: CONSUMIR_OXIGENO 120;5;5;2
+[INFO] 03:38:05:530 MI-RAM-HQ/(5073:5098): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA CONSUMIR_OXIGENO 120;5;5;2
+[INFO] 03:38:06:536 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 3 en X y 5 en Y
+[INFO] 03:38:06:536 MI-RAM-HQ/(5073:5098): La posicion anterior era 2 en X y 5 en Y
+[INFO] 03:38:07:537 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 4 en X y 5 en Y
+[INFO] 03:38:07:537 MI-RAM-HQ/(5073:5098): La posicion anterior era 3 en X y 5 en Y
+[INFO] 03:38:08:538 MI-RAM-HQ/(5073:5098): Se modifico la posicion del tripulante 1 de la patota 1 a --> 5 en X y 5 en Y
+[INFO] 03:38:08:538 MI-RAM-HQ/(5073:5098): La posicion anterior era 4 en X y 5 en Y
+[INFO] 03:38:09:538 MI-RAM-HQ/(5073:5098): Se modifico el estado del tripulante 1 de la patota 1 de E a B
+[INFO] 03:38:11:540 MI-RAM-HQ/(5073:5098): SOLICITO TAREA TRIPULANTE 1 DE LA PATOTA 1
+[INFO] 03:38:11:540 MI-RAM-HQ/(5073:5098): Al tripulante 1 de la patota 1 le tocaba la tarea numero 4: 
+[INFO] 03:38:11:540 MI-RAM-HQ/(5073:5098): EL TRIPULANTE 1 DE LA PATOTA 1 TIENE LA TAREA 
