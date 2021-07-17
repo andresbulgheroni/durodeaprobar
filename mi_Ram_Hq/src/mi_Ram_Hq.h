@@ -9,13 +9,15 @@
 #define MI_RAM_HQ_H_
 
 #include "utils.h"
+
 #include <nivel-gui/nivel-gui.h>
 #include <nivel-gui/tad_nivel.h>
+#include <curses.h>
+#include <stdlib.h>
+
 #include <commons/config.h>
 #include <commons/log.h>
 #include <pthread.h>
-#include <curses.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <curses.h>
 #include <commons/collections/list.h>
@@ -141,6 +143,7 @@ void hilo_servidor();
 void sig_handler(int n);
 char* get_timestamp();
 char* get_config(int opt);
+void* render_mapa();
 
 //Paginacion
 void configurar_paginacion();

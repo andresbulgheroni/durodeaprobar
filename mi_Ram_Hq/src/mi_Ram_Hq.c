@@ -80,8 +80,7 @@ int main(void) {
 	signal(SIGUSR2, sig_handler);
 	signal(SIGINT, sig_handler);
 
-	//char* option = readline("\nSeleccione la configuracion que desea utilizar:\n1-PRUEBA DISC CPU\n2-PRUEBA DISC E/S\n3-PRUEBA SEG FF\n4-PRUEBA SEG BF\n5-PRUEBA PAG LRU\n6-PRUEBA PAG CLOCK\n7-PRUEBA FS\n>");
-char* option = "";
+	char* option = readline("\nSeleccione la configuracion que desea utilizar:\n1-PRUEBA DISC CPU\n2-PRUEBA DISC E/S\n3-PRUEBA SEG FF\n4-PRUEBA SEG BF\n5-PRUEBA PAG LRU\n6-PRUEBA PAG CLOCK\n7-PRUEBA FS\n>");
 	init(option);
 
 	log_info(logger, "\n\n\nINICIA EJECUCION DE RAM");
@@ -328,8 +327,7 @@ void recibir_mensaje(int32_t* conexion){
 
 void init (char* config_elect){
 
-	//char* cfg_path = get_config(atoi(config_elect));
-	char* cfg_path = get_config(7);
+	char* cfg_path = get_config(atoi(config_elect));
 
 	if(strcmp("err", cfg_path) == 0){
 		printf("LA CONFIGURACION SOLICITADA NO ES CORRECTA");
@@ -367,7 +365,11 @@ void init (char* config_elect){
 		}
 	}
 
-	//iniciarMapa();
+	iniciarMapa();
+
+	pthread_t hilo_mapa;
+	pthread_create(&hilo_mapa,NULL, render_mapa, NULL);
+	pthread_join(hilo_mapa, NULL);
 }
 
 void configurar_paginacion(){
@@ -431,15 +433,26 @@ void configurar_paginacion(){
 
 void iniciarMapa(){
 
-	//int columnas, filas;
+	int columnas, filas;
 
-	//nivel_gui_inicializar();
+	nivel_gui_inicializar();
 
-	//nivel_gui_get_area_nivel(&columnas, &filas);
+	nivel_gui_get_area_nivel(&columnas, &filas);
 
-	//mapa = nivel_crear("Nave");
+	mapa = nivel_crear("Nave");
 
 }
+
+void* render_mapa(){
+
+	while(true){
+		nivel_gui_dibujar(mapa);
+	}
+
+	return NULL;
+}
+
+
 void terminar_paginacion(){
 	void destroy(void* a){}
 
@@ -468,7 +481,7 @@ void terminar(){
 	log_destroy(logger);
 	config_destroy(config);
 	free(memoria_principal);
-	//nivel_gui_terminar();
+	nivel_gui_terminar();
 
 	pthread_mutex_destroy(&m_LISTA_REEMPLAZO);
 	pthread_mutex_destroy(&m_LOGGER);
