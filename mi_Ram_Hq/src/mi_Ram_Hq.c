@@ -31,11 +31,9 @@ void sig_handler(int n){
 
 
 			char* time_stamp_text = get_timestamp();
-			char* path = string_new();
-			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
+			char* path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
 			//path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
-			char* inicio_texto = string_new();
-			inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
+			char* inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
 
 			FILE* dump = fopen(path, "w+");
 
@@ -55,7 +53,16 @@ void sig_handler(int n){
 		}
 
 		case SIGUSR2:{
-			compactar_memoria(); //ponele
+			if(ESQUEMA_MEMORIA == SEGMENTACION_PURA)
+				compactar_memoria(); //ponele
+			break;
+		}
+		case SIGINT:{
+			switch(ESQUEMA_MEMORIA){
+				case PAGINACION_VIRTUAL: terminar_paginacion(); break;
+				case SEGMENTACION_PURA: break;
+			}
+			exit(2);
 			break;
 		}
 		default: break;
@@ -71,10 +78,10 @@ int main(void) {
 
 	signal(SIGUSR1, sig_handler);
 	signal(SIGUSR2, sig_handler);
+	signal(SIGINT, sig_handler);
 
-
-	char* option = readline("\nSeleccione la configuracion que desea utilizar:\n1-PRUEBA DISC CPU\n2-PRUEBA DISC E/S\n3-PRUEBA SEG FF\n4-PRUEBA SEG BF\n5-PRUEBA PAG LRU\n6-PRUEBA PAG CLOCK\n7-PRUEBA FS\n>");
-
+	//char* option = readline("\nSeleccione la configuracion que desea utilizar:\n1-PRUEBA DISC CPU\n2-PRUEBA DISC E/S\n3-PRUEBA SEG FF\n4-PRUEBA SEG BF\n5-PRUEBA PAG LRU\n6-PRUEBA PAG CLOCK\n7-PRUEBA FS\n>");
+char* option = "";
 	init(option);
 
 	log_info(logger, "\n\n\nINICIA EJECUCION DE RAM");
@@ -93,8 +100,7 @@ char* get_timestamp(){
 
 	time_t t = time(NULL);
 	struct tm tm = *localtime(&t);
-	char* timestamp = string_new();
-	timestamp = string_from_format("%d/%02d/%02d %02d:%02d:%02d\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	char* timestamp = string_from_format("%d/%02d/%02d %02d:%02d:%02d\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
 	return timestamp;
 
 }
@@ -153,8 +159,7 @@ void dump_paginacion(FILE* dump){
 
 	void guardar_tabla(t_dump_pag* pag){
 
-		char* fila = string_new();
-		fila = string_from_format("MARCO:%d\tESTADO:%s\tPROCESO:%s\tPAGINA:%s\n", pag->marco, pag->estado, pag->proceso, pag->pagina);
+		char* fila = string_from_format("MARCO:%d\tESTADO:%s\tPROCESO:%s\tPAGINA:%s\n", pag->marco, pag->estado, pag->proceso, pag->pagina);
 		fputs(fila, dump);
 		free(fila);
 	}
@@ -323,7 +328,8 @@ void recibir_mensaje(int32_t* conexion){
 
 void init (char* config_elect){
 
-	char* cfg_path = get_config(atoi(config_elect));
+	//char* cfg_path = get_config(atoi(config_elect));
+	char* cfg_path = get_config(5);
 
 	if(strcmp("err", cfg_path) == 0){
 		printf("LA CONFIGURACION SOLICITADA NO ES CORRECTA");
@@ -360,6 +366,7 @@ void init (char* config_elect){
 			break;
 		}
 	}
+
 	//iniciarMapa();
 }
 
@@ -370,7 +377,7 @@ void configurar_paginacion(){
 	if(TAMANIO_MEMORIA%TAMANIO_PAGINA != 0 || TAMANIO_SWAP%TAMANIO_PAGINA != 0){
 		log_error(logger, "Mal configurados tamanios de memoria y pagina");
 	}
-	int32_t fileDes = open(PATH_SWAP, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH | 0777);
+	fileDes = open(PATH_SWAP, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH | 0777);
 //	int32_t fileDes = open(PATH_SWAP, O_RDWR | O_APPEND | O_CREAT, 0777);
 
 	if(fileDes == -1){
@@ -433,7 +440,28 @@ void iniciarMapa(){
 	//mapa = nivel_crear("Nave");
 
 }
+void terminar_paginacion(){
+	void destroy(void* a){}
 
+	list_destroy_and_destroy_elements(frames_swap, destroy);
+	list_destroy_and_destroy_elements(frames_libres_principal, destroy);
+	list_destroy_and_destroy_elements(lista_para_reemplazo, destroy);}
+
+	void destroy_dict(t_tabla_paginas* elemento){
+
+		list_destroy_and_destroy_elements(elemento->tabla_direcciones, destroy);
+		list_destroy_and_destroy_elements(elemento->tabla_paginas, destroy);
+		pthread_mutex_destroy(&(elemento->m_TABLA));
+
+	}
+
+	dictionary_destroy_and_destroy_elements(tabla_paginas_patota, destroy_dict);
+
+	free(memoria_virtual);
+	close(fileDes);
+
+	terminar();
+}
 void terminar(){
 
 	log_destroy(logger);
@@ -441,6 +469,16 @@ void terminar(){
 	free(memoria_principal);
 	//nivel_gui_terminar();
 
+	pthread_mutex_destroy(&m_LISTA_REEMPLAZO);
+	pthread_mutex_destroy(&m_LOGGER);
+	pthread_mutex_destroy(&m_MEM_PRINCIPAL);
+	pthread_mutex_destroy(&m_MEM_VIRTUAL);
+	pthread_mutex_destroy(&m_SEGMENTOS_LIBRES);
+	pthread_mutex_destroy(&m_SEG_EN_MEMORIA);
+	pthread_mutex_destroy(&m_TABLAS_PAGINAS);
+	pthread_mutex_destroy(&m_TABLAS_SEGMENTOS);
+	pthread_mutex_destroy(&m_TABLA_LIBRES_P);
+	pthread_mutex_destroy(&m_TABLA_LIBRES_V);
 }
 
 
@@ -935,6 +973,7 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 		uint32_t pagina_tareas;
 		uint32_t desp_tareas;
 		obtener_direccion_logica_paginacion(&pagina_tareas, &desp_tareas, direccion_tareas);
+		char* letra = malloc(sizeof(char));
 
 		bool leer_siguiente_pagina = true;
 		void* frame;
@@ -955,6 +994,9 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 				if(pagina_enc == NULL){
 
+					if(strcmp(tarea, "") != 0)
+						free(tarea);
+
 					tarea = "";
 					break;
 
@@ -969,8 +1011,6 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 				pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 			}
-
-			char* letra = malloc(sizeof(char));
 
 			memcpy(letra, frame_tareas + desp_tareas, 1);
 
@@ -991,18 +1031,27 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 			if(letra[0] == '\n' || letra[0] == '\0'){
 
 				if(i < tarea_actual){
+					if(strcmp(tarea, "") != 0)
+						free(tarea);
+
 					tarea = "";
 				}
 
 				i++;
 
 			}else{
-				tarea = string_from_format("%s%c", tarea, letra[0]);
+
+				char* string_tarea_nuevo = string_from_format("%s%c", tarea, letra[0]);
+
+				if(strcmp(tarea, "") != 0)
+					free(tarea);
+
+				tarea = string_tarea_nuevo;
 			}
 
-			free(letra);
 
 		}while(i <= tarea_actual);
+		free(letra);
 
 		free(frame_tareas);
 

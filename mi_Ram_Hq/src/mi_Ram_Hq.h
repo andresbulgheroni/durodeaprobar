@@ -88,7 +88,7 @@ char* PATH_SWAP;
 int32_t ALGORITMO_REEMPLAZO;
 char* IP;
 char* PUERTO;
-
+int fileDes;
 void* memoria_principal;
 
 //Paginacion
@@ -171,6 +171,7 @@ void liberar_memoria_virtual(t_pagina_patota* pagina);
 int32_t paginas_necesarias(uint32_t offset, uint32_t size);
 void dump_paginacion(FILE* dump);
 void borrar_patota(t_tabla_paginas* tabla);
+void terminar_paginacion();
 
 /* Segmentacion */
 
