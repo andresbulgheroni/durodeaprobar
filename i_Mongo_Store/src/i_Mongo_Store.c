@@ -15,9 +15,9 @@ int main(void) {
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 	//		estadoSuperBloque();
 	//
-			generarRecurso(10,'O');
+	generarRecurso(10,'O');
 	//		estadoSuperBloque();
-			consumirRecurso(5, 'O');
+	consumirRecurso(5, 'O');
 	//
 	//		estadoSuperBloque();
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
@@ -74,34 +74,6 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
-// Reemplazo el main por el que usó Andres para probar la conexion con su modulo, dejo la version vieja para referencia
-
-//int main(void) {
-//
-//	leerConfig();
-//	crear_log();
-//
-//	inicializarFS();
-//
-//	int32_t socket = iniciar_servidor(IP,PUERTO);
-//
-//	int32_t socketDiscordiador = esperar_cliente(socket);
-//
-//	pthread_t hiloDiscordiador;
-//	pthread_create(&hiloDiscordiador, NULL,(void *) funcionPruebaDisc,(void *) socketDiscordiador);
-//	pthread_detach(hiloDiscordiador);
-//
-//	while(1){
-//		int32_t socketTripulante = esperar_cliente(socket);
-//		pthread_t hiloTripulante;
-//		pthread_create(&hiloTripulante, NULL,(void *) funcionPruebaTrip,(void *) socketTripulante);
-//		pthread_detach(hiloTripulante);
-//	}
-//
-//	return 0;
-//
-//}
-
 void timerSincronizacion_blocksMap(){
 
 	while(moduloAbierto){
@@ -114,23 +86,6 @@ void timerSincronizacion_blocksMap(){
 	puts("\nVolcado a disco final");
 	pthread_exit(NULL);
 }
-
-//void funcionPruebaDisc(int32_t* socketCliente){
-//
-//	bool terminado = false;
-//	while (!terminado){
-//		t_paquete* paquete = recibir_paquete(*socketCliente);
-//		switch(paquete->codigo){
-//		case OBTENER_BITACORA_MSG:{
-//			puts("funciono");
-//			break;
-//		}
-//		default: terminado = true; break;
-//		}
-//	}
-//	pthread_exit(NULL);
-//
-//}
 
 void recibirMensajeTripulante(int32_t* socketCliente){
 
@@ -1649,6 +1604,7 @@ void iniciarProtocoloFSCK(){
 	fsckFiles_Blocks();
 
 }
+
 void cerrarModulo(){
 
 	log_info(logger, "SIGINT detectado, cerrando modulo...");
