@@ -31,8 +31,8 @@ void sig_handler(int n){
 
 
 			char* time_stamp_text = get_timestamp();
-			char* path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
-			//path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
+			//char* path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
+			char *path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
 			char* inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
 
 			FILE* dump = fopen(path, "w+");
@@ -329,7 +329,7 @@ void recibir_mensaje(int32_t* conexion){
 void init (char* config_elect){
 
 	//char* cfg_path = get_config(atoi(config_elect));
-	char* cfg_path = get_config(5);
+	char* cfg_path = get_config(7);
 
 	if(strcmp("err", cfg_path) == 0){
 		printf("LA CONFIGURACION SOLICITADA NO ES CORRECTA");
