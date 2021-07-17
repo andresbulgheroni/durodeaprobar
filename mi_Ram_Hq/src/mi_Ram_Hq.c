@@ -21,6 +21,7 @@ pthread_mutex_t  m_LOGGER = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_SEGMENTOS_LIBRES = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_SEG_EN_MEMORIA = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  m_TABLAS_SEGMENTOS = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t  m_MAPA = PTHREAD_MUTEX_INITIALIZER;
 
 NIVEL* mapa;
 
@@ -369,7 +370,8 @@ void init (char* config_elect){
 
 	pthread_t hilo_mapa;
 	pthread_create(&hilo_mapa,NULL, render_mapa, NULL);
-	pthread_join(hilo_mapa, NULL);
+	pthread_detach(hilo_mapa);
+
 }
 
 void configurar_paginacion(){
@@ -446,7 +448,11 @@ void iniciarMapa(){
 void* render_mapa(){
 
 	while(true){
+
+		pthread_mutex_lock(&m_MAPA);
 		nivel_gui_dibujar(mapa);
+		pthread_mutex_unlock(&m_MAPA);
+
 	}
 
 	return NULL;
@@ -644,11 +650,29 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 			//Guardo tabla de paginas
 			dictionary_put(tabla_paginas_patota, string_itoa(mensaje->idPatota), tabla);
 
+			pthread_mutex_lock(&m_MAPA);
+
+			void cargar_en_mapa(tripulante_data_msg* tripulante){
+
+				personaje_crear(mapa, get_tripulante_codigo(tripulante->idTripulante), tripulante->coordenadas->posY, tripulante->coordenadas->posX);
+
+			}
+
+			list_iterate(mensaje->tripulantes, cargar_en_mapa);
+
+			pthread_mutex_unlock(&m_MAPA);
+
 		}
 
 	}
 
 	pthread_mutex_unlock(&m_TABLAS_PAGINAS);
+
+}
+
+char get_tripulante_codigo(int32_t id){
+
+	return id + 64;
 
 }
 
@@ -791,12 +815,57 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 						*posx_anterior, *posy_anterior);
 		pthread_mutex_unlock(&m_LOGGER);
 
+		pthread_mutex_lock(&m_MAPA);
+			item_desplazar(mapa, get_tripulante_codigo(mensaje->idTripulante),
+					offset_movimiento(*posx_anterior, mensaje->coordenadasDestino->posX),
+					offset_movimiento(*posy_anterior, mensaje->coordenadasDestino->posY)
+			);
+		pthread_mutex_unlock(&m_MAPA);
+
 		free(posx_anterior);
 		free(posy_anterior);
+
 
 	}else{
 		pthread_mutex_unlock(&m_TABLAS_PAGINAS);
 	}
+
+}
+
+int32_t offset_movimiento(int32_t anterior, int32_t nuevo){
+	if(anterior == nuevo){
+		return 0;
+	}else if(anterior > nuevo){
+		return -1;
+	}else{
+		return 1;
+	}
+	/*
+		int32_t posicionXtripulante = tripulante->coordenadas->posX;
+		int32_t posicionYtripulante = tripulante->coordenadas->posY;
+
+		int32_t posicionXtarea = tripulante->tareaAsignada->coordenadas->posX;
+		int32_t posicionYtarea = tripulante->tareaAsignada->coordenadas->posY;
+
+		if (posicionXtripulante != posicionXtarea) {
+
+			int32_t diferenciaEnX = posicionXtarea - posicionXtripulante;
+			if (diferenciaEnX > 0) {
+				tripulante->coordenadas->posX = posicionXtripulante + 1;
+			} else if (diferenciaEnX < 0) {
+				tripulante->coordenadas->posX = posicionXtripulante - 1;
+			}
+
+		} else if (posicionYtripulante != posicionYtarea) {
+
+			int32_t diferenciaEnY = posicionYtarea - posicionYtripulante;
+			if (diferenciaEnY > 0) {
+				tripulante->coordenadas->posY = posicionYtripulante + 1;
+			} else if (diferenciaEnY < 0) {
+				tripulante->coordenadas->posY = posicionYtripulante - 1;
+			}
+
+		}*/
 
 }
 
@@ -1243,6 +1312,10 @@ void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* stat
 			pthread_mutex_unlock(&(tabla->m_TABLA));
 
 		}
+
+		pthread_mutex_lock(&m_MAPA);
+			item_borrar(mapa, get_tripulante_codigo(mensaje->idTripulante));
+		pthread_mutex_unlock(&m_MAPA);
 
 	}else{
 		pthread_mutex_unlock(&m_TABLAS_PAGINAS);

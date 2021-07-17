@@ -144,6 +144,8 @@ void sig_handler(int n);
 char* get_timestamp();
 char* get_config(int opt);
 void* render_mapa();
+char get_tripulante_codigo(int32_t id);
+int32_t offset_movimiento(int32_t anterior, int32_t nuevo);
 
 //Paginacion
 void configurar_paginacion();
