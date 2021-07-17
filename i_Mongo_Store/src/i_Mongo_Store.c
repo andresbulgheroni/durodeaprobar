@@ -7,9 +7,8 @@ int main(void) {
 	printf("Cerrar modulo: ctrl + c\n");
 	printf("--------------------------------------\n");
 	char* option = readline("\nSeleccione la configuracion que desea utilizar:\n1.\tGeneral\n2.\tDiscordiador\n3.\tMemoria\n4.\tFile System\n5.\tSabotaje\n");
-
 	inicializarSemaforos();
-	leerConfig();
+	leerConfig(option);
 	crearLog();
 	inicializarFS();
 	signal(SIGINT, cerrarModulo);
@@ -477,9 +476,19 @@ void inicializarSemaforos(){
 
 }
 
-void leerConfig() {
+void leerConfig(char* option) {
 
-	config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/mongo.config");
+	int opt = atoi(option);
+
+	switch(opt){
+		case 1: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/general.config");break;
+		case 2: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/discordiador.config");break;
+		case 3: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/memoria.config");break;
+		case 4: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/fs.config");break;
+		case 5: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/sabotaje.config");break;
+		default: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/i_Mongo_Store/configs/general.config"); break;
+	}
+
 	PUERTO = config_get_string_value(config, "PUERTO");
 	IP = config_get_string_value(config, "IP");
 	PUNTO_MONTAJE = config_get_string_value(config, "PUNTO_MONTAJE");
@@ -491,7 +500,6 @@ void leerConfig() {
 void crearLog(){
 
 	logger = log_create("mongo.log", "MONGO", 1, LOG_LEVEL_INFO);
-	puts("Log creado satisfactoriamente");
 
 }
 

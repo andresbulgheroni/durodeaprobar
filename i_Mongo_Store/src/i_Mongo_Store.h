@@ -58,7 +58,7 @@ typedef enum{
 
 void inicializarSemaforos();
 void crearLog();
-void leerConfig();
+void leerConfig(char*);
 void crearDirectorio(char*);
 void inicializarFS();
 void inicializarSuperBloque();
