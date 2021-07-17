@@ -666,7 +666,7 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 
 			void cargar_en_mapa(tripulante_data_msg* tripulante){
 
-				personaje_crear(mapa, get_tripulante_codigo(tripulante->idTripulante), tripulante->coordenadas->posY, tripulante->coordenadas->posX);
+				personaje_crear(mapa, get_tripulante_codigo(tripulante->idTripulante), tripulante->coordenadas->posX, tripulante->coordenadas->posY);
 
 			}
 
