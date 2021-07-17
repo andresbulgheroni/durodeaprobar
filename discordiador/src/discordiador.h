@@ -172,11 +172,12 @@ void iniciarLog();
 void inicializarListasGlobales();
 void inicializarSemaforoPlanificador();
 void crearHiloPlanificador();
+void leerConfig(char*);
 
 //Consola
 void leer_consola();
 //void pausarPlanificacion();
-op_code_consola string_to_op_code_consola (char* );
+op_code_consola string_to_op_code_consola (char*);
 op_code_tareas string_to_op_code_tareas (char*);
 
 
