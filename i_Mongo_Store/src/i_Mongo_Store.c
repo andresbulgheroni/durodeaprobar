@@ -12,13 +12,12 @@ int main(void) {
 	inicializarFS();
 	signal(SIGINT, cerrarModulo);
 
-
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
 	//		estadoSuperBloque();
 	//
-	//		generarRecurso(10,'O');
+			generarRecurso(10,'O');
 	//		estadoSuperBloque();
-	//		consumirRecurso(5, 'O');
+			consumirRecurso(5, 'O');
 	//
 	//		estadoSuperBloque();
 	//	//////////////////////////////////////////////// Pruebas Tareas ////////////////////////////////////////////////
