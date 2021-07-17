@@ -250,10 +250,8 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 		}
 
 	}
-	//free(paquete);
 	close(*socketCliente);
 	free(socketCliente);
-	free(paquete);
 	pthread_exit(NULL);
 }
 
