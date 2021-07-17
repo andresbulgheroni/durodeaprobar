@@ -2505,7 +2505,8 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		pthread_mutex_unlock(&m_LOGGER);
 
 		dictionary_remove(tablas_seg_patota, string_itoa(mensaje->idPatota));
-		free(tabla_seg); //TODO tengo q borrar el mutex?
+		pthread_mutex_destroy(&(tabla_seg->m_TABLA));
+		free(tabla_seg);
 
 	} else {
 		segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
