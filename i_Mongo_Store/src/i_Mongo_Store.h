@@ -95,7 +95,6 @@ void iniciarProtocoloFSCK();
 void cerrarModulo();
 
 // FUNCIONES PARA TESTING:
-
 void estadoSuperBloque(){
 	puts("");
 	printf("BLOCK SIZE: %d\n", BLOCK_SIZE);
