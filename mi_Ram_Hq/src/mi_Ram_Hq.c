@@ -32,8 +32,8 @@ void sig_handler(int n){
 
 			char* time_stamp_text = get_timestamp();
 			char* path = string_new();
-			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
-			//path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
+			//path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
+			path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
 			char* inicio_texto = string_new();
 			inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
 
@@ -55,7 +55,7 @@ void sig_handler(int n){
 		}
 
 		case SIGUSR2:{
-			compactar_memoria(); //ponele
+			compactar_memoria();
 			break;
 		}
 		default: break;
@@ -1807,8 +1807,7 @@ void dump_segmentacion(FILE* dump){
 
 	void guardar_tabla(segmento_dump* seg){
 
-		//char* fila = string_from_format("%10s\t\t%15d\t\t%20d\t\t%20d\n", seg->pid, seg->numero_segmento, seg->inicio, seg->tamanio);
-		char* fila = string_from_format("proceso: %s\t\t nro de segmento: %d\t\t inicio: %x\t\t tamanio: %x\n",seg->pid, seg->numero_segmento, seg->inicio, seg->tamanio);
+		char* fila = string_from_format("proceso: %s\t\t nro de segmento: %d\t\t inicio: %d\t\t tamanio: %d\n",seg->pid, seg->numero_segmento, seg->inicio, seg->tamanio);
 		fputs(fila, dump);
 		free(fila);
 	}
@@ -1823,7 +1822,7 @@ void dump_segmentacion(FILE* dump){
 }
 
 uint32_t obtener_limite(segmento* seg){
-	return seg->inicio + seg->tamanio;
+	return seg->inicio + seg->tamanio - 1;
 }
 
 //le paso el tamanio de un segmento, devuelve 1 si hay espacio y 0 si no hay espacio
@@ -1872,6 +1871,7 @@ int32_t get_espacio_libre(uint32_t size){
 				if(dif_de_tamanio < dif_tamanio_anterior){
 					offset_bf = seg->inicio;
 				}
+				dif_tamanio_anterior = dif_de_tamanio;
 			}
 			list_iterate(lista_auxiliar, encontrar_best_fit);
 
@@ -2305,7 +2305,7 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 	} else {
 		segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
 
-		uint32_t index; // = seg_tripulante->numero_segmento;
+		uint32_t index = 0; // = seg_tripulante->numero_segmento;
 		uint32_t contador = 0;
 
 		void index_del_segmento(segmento* seg){
@@ -2344,7 +2344,7 @@ void agregar_seg_listas(segmento* segmento_nuevo){
 
 	bool se_encuentra_contenido(segmento* seg){
 		uint32_t limite_segmento = obtener_limite(seg);
-		return seg->inicio == inicio_seg_nuevo && limite_segmento >= limite_seg_nuevo;
+		return seg->inicio == inicio_seg_nuevo;
 	}
 
 	segmento* seg_a_modificar = list_get(list_filter(segmentos_libres, se_encuentra_contenido), 0);
@@ -2359,7 +2359,7 @@ void agregar_seg_listas(segmento* segmento_nuevo){
 
 	if(limite_seg_libre != limite_seg_nuevo){
 
-		seg_a_modificar->inicio = limite_seg_nuevo; //el segmento libre nuevo arranca donde termina el otro
+		seg_a_modificar->inicio = limite_seg_nuevo+1; //el segmento libre nuevo arranca donde termina el otro
 		seg_a_modificar->tamanio = limite_seg_libre - limite_seg_nuevo;
 		list_add(segmentos_libres, seg_a_modificar);
 
@@ -2382,7 +2382,7 @@ void ordenar_lista_segmentos_libres(){
 
 //agrega el segmento a la lista de segmentos libres y lo saca de segmentos en memoria
 void liberar_segmento(segmento* seg){
-	//deberia chequear si esta? antes de agregar
+
 	bool esta_el_segmento(segmento *seg_list){
 		return seg->inicio == seg_list->inicio;
 	}
@@ -2393,11 +2393,56 @@ void liberar_segmento(segmento* seg){
 		list_add(segmentos_libres, seg);
 		ordenar_lista_segmentos_libres();
 
+		uint32_t index = 0;
+		uint32_t contador = 0;
+
+		bool index_segmento(segmento* segmento){
+			if(seg->inicio == segmento->inicio){
+				index = contador;
+			}
+			contador++;
+		}
+
+		//busca el index del segmento que acaba de agregar
+		list_iterate(segmentos_libres, index_segmento);
+
+		if(index != list_size(segmentos_libres)-1){
+			segmento* seg_siguiente = list_get(segmentos_libres, index+1);
+
+			//me fijo si lo puedo compactar con el hueco siguiente
+			uint32_t limite_seg = obtener_limite(seg);
+			if(seg_siguiente->inicio == limite_seg + 1){
+				list_remove(segmentos_libres, index + 1);
+				list_remove(segmentos_libres, index);
+				seg->tamanio = seg->tamanio + seg_siguiente->tamanio;
+				free(seg_siguiente);
+				list_add(segmentos_libres, seg);
+				ordenar_lista_segmentos_libres();
+			}
+		}
+
+		if(index != 0){
+			segmento* seg_anterior = list_get(segmentos_libres, index - 1);
+
+			//me fijo si lo puedo compactar con el hueco siguiente
+			uint32_t limite_seg_anterior = obtener_limite(seg_anterior);
+			if(seg->inicio == limite_seg_anterior + 1){
+				list_remove(segmentos_libres, index);
+				list_remove(segmentos_libres, index - 1);
+				seg->inicio = seg_anterior->inicio;
+				seg->tamanio = seg->tamanio + seg_anterior->tamanio;
+				free(seg_anterior);
+				list_add(segmentos_libres, seg);
+				ordenar_lista_segmentos_libres();
+			}
+		}
+
 		//lo saca de la lista de segmentos en memoria
 		bool es_el_segmento(segmento* seg_a_comparar){
 			return seg->inicio == seg_a_comparar->inicio && seg->tamanio == seg_a_comparar->tamanio;
 		}
 
+		//todo ver si cambiar esto
 		list_remove_by_condition(segmentos_en_memoria, es_el_segmento);
 	}
 }//no lleva semaforos, porque donde la llamo ya estan los semaforos
@@ -2463,4 +2508,12 @@ void compactar_memoria(){
 	free(buffer);
 } //no lleva semaforos porq tiene en el llamado a la funcion
 
+void print_huecos_libres(){
+
+	for(int32_t i = 0; i<list_size(segmentos_libres); i++){
+		segmento* seg = list_get(segmentos_libres, i);
+		printf("Inicio: %d, tamanio: %d, limite: %d\n", seg->inicio, seg->tamanio, obtener_limite(seg));
+	}
+
+}
 

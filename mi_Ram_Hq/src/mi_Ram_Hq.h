@@ -229,6 +229,8 @@ segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota)
 uint32_t encontrar_tripulante(uint32_t id_tripulante, uint32_t id_patota);
 uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota);
 uint32_t obtener_limite(segmento* seg);
-void compactar_memoria(); //sin implementar
+void compactar_memoria();
+
+void print_huecos_libres();
 
 #endif /* MI_RAM_HQ_H_ */
