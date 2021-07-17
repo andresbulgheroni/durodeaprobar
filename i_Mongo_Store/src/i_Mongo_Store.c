@@ -164,8 +164,6 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 		}
 		default: {
 			terminado = true;
-			resolucion_sabotaje_msg* sabotajeMsg = deserializar_paquete(paquete);
-			free(sabotajeMsg);
 			break;
 		}
 		}
