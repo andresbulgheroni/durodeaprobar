@@ -488,7 +488,7 @@ void terminar_paginacion(){
 	}
 
 	dictionary_destroy_and_destroy_elements(tabla_paginas_patota, destroy_dict);
-	close(fileDes);
+
 	terminar();
 }
 
@@ -753,7 +753,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 			if(disponible < cargar){
 
-				memcpy(posx_anterior + cargado, frame + desplazamiento, disponible);
+				memcpy(posx_anterior + cargado, frame + desplazamiento_pos, disponible);
 				memcpy(frame + desplazamiento_pos, &(mensaje->coordenadasDestino->posX) + cargado, disponible);
 
 				cargado += disponible;
@@ -763,7 +763,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 			}else{
 
-				memcpy(posx_anterior + cargado, frame + desplazamiento, cargar);
+				memcpy(posx_anterior + cargado, frame + desplazamiento_pos, cargar);
 				memcpy(frame + desplazamiento_pos, &(mensaje->coordenadasDestino->posX) + cargado, cargar);
 
 			}
@@ -799,7 +799,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 			if(disponible < cargar){
 
-				memcpy(posy_anterior + cargado, frame + desplazamiento, disponible);
+				memcpy(posy_anterior + cargado, frame + desplazamiento_pos, disponible);
 				memcpy(frame + desplazamiento_pos, &(mensaje->coordenadasDestino->posY) + cargado, disponible);
 
 				cargado += disponible;
@@ -809,7 +809,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 			}else{
 
-				memcpy(posy_anterior + cargado, frame + desplazamiento, cargar);
+				memcpy(posy_anterior + cargado, frame + desplazamiento_pos, cargar);
 				memcpy(frame + desplazamiento_pos, &(mensaje->coordenadasDestino->posY) + cargado, cargar);
 
 			}
@@ -822,16 +822,31 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 		pthread_mutex_unlock(&(tabla->m_TABLA));
 
 		pthread_mutex_lock(&m_LOGGER);
-			log_info(logger, "EL TRIPULANTE %d DE LA PATOTA %d SE MOVIO DE %d|%d a %d|%d\n", mensaje->idTripulante,
+			log_info(logger, "EL TRIPULANTE %d DE LA PATOTA %d SE MOVIO A %d|%d DESDE %d|%d\n", mensaje->idTripulante,
 						mensaje->idPatota, mensaje->coordenadasDestino->posX, mensaje->coordenadasDestino->posY,
 						*posx_anterior, *posy_anterior);
 		pthread_mutex_unlock(&m_LOGGER);
 
 		pthread_mutex_lock(&m_MAPA);
-			//item_desplazar(mapa, get_tripulante_codigo(mensaje->idTripulante),
-			//		offset_movimiento(*posx_anterior, mensaje->coordenadasDestino->posX),
-			//		offset_movimiento(*posy_anterior, mensaje->coordenadasDestino->posY)
-			//);
+
+		if (*posx_anterior != mensaje->coordenadasDestino->posX) {
+			int32_t diferenciaEnX =   *posx_anterior - mensaje->coordenadasDestino->posX;
+			if (diferenciaEnX > 0) {
+				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),-1,0);
+			} else if (diferenciaEnX < 0) {
+				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),1,0);
+			}
+
+		} else if (*posy_anterior != mensaje->coordenadasDestino->posY) {
+
+			int32_t diferenciaEnY =  *posy_anterior - mensaje->coordenadasDestino->posY;
+			if (diferenciaEnY > 0) {
+				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,-1);
+			} else if (diferenciaEnY < 0) {
+				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,1);
+			}
+		}
+
 		pthread_mutex_unlock(&m_MAPA);
 
 		free(posx_anterior);
@@ -845,42 +860,6 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 	free(id_patota_string);
 }
 
-int32_t offset_movimiento(int32_t anterior, int32_t nuevo){
-	if(anterior == nuevo){
-		return 0;
-	}else if(anterior > nuevo){
-		return -1;
-	}else{
-		return 1;
-	}
-	/*
-		int32_t posicionXtripulante = tripulante->coordenadas->posX;
-		int32_t posicionYtripulante = tripulante->coordenadas->posY;
-
-		int32_t posicionXtarea = tripulante->tareaAsignada->coordenadas->posX;
-		int32_t posicionYtarea = tripulante->tareaAsignada->coordenadas->posY;
-
-		if (posicionXtripulante != posicionXtarea) {
-
-			int32_t diferenciaEnX = posicionXtarea - posicionXtripulante;
-			if (diferenciaEnX > 0) {
-				tripulante->coordenadas->posX = posicionXtripulante + 1;
-			} else if (diferenciaEnX < 0) {
-				tripulante->coordenadas->posX = posicionXtripulante - 1;
-			}
-
-		} else if (posicionYtripulante != posicionYtarea) {
-
-			int32_t diferenciaEnY = posicionYtarea - posicionYtripulante;
-			if (diferenciaEnY > 0) {
-				tripulante->coordenadas->posY = posicionYtripulante + 1;
-			} else if (diferenciaEnY < 0) {
-				tripulante->coordenadas->posY = posicionYtripulante - 1;
-			}
-
-		}*/
-
-}
 
 void cambiar_estado_paginacion(cambio_estado_msg* mensaje, bool* status){
 	pthread_mutex_lock(&m_TABLAS_PAGINAS);
