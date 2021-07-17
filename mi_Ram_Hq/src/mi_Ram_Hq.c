@@ -54,13 +54,13 @@ void sig_handler(int n){
 
 		case SIGUSR2:{
 			if(ESQUEMA_MEMORIA == SEGMENTACION_PURA)
-				compactar_memoria(); //ponele
+				compactar_memoria();
 			break;
 		}
 		case SIGINT:{
 			switch(ESQUEMA_MEMORIA){
 				case PAGINACION_VIRTUAL: terminar_paginacion(); break;
-				case SEGMENTACION_PURA: break;
+				case SEGMENTACION_PURA: terminar_segmentacion(); break;
 			}
 			exit(2);
 			break;
@@ -462,6 +462,7 @@ void terminar_paginacion(){
 
 	terminar();
 }
+
 void terminar(){
 
 	log_destroy(logger);
@@ -1820,6 +1821,24 @@ void inicializar_segmentacion(){
 	tablas_seg_patota = dictionary_create();
 }
 
+void terminar_segmentacion(){
+	void destroy(void* a){}
+
+	list_destroy_and_destroy_elements(segmentos_libres, destroy);
+	list_destroy_and_destroy_elements(segmentos_en_memoria, destroy);
+
+	void destroy_dict(tabla_segmentos* elemento){
+
+		list_destroy_and_destroy_elements(elemento->segmentos, destroy);
+		pthread_mutex_destroy(&(elemento->m_TABLA));
+
+	}
+
+	dictionary_destroy_and_destroy_elements(tablas_seg_patota, destroy_dict);
+
+	terminar();
+}
+
 void dump_segmentacion(FILE* dump){
 
 	//char* titulos = string_from_format("PROCESO\t\tSEGMENTO \t\tINICIO\t\TAMANIO\n");
@@ -2445,7 +2464,7 @@ void liberar_segmento(segmento* seg){
 		uint32_t index = 0;
 		uint32_t contador = 0;
 
-		bool index_segmento(segmento* segmento){
+		void index_segmento(segmento* segmento){
 			if(seg->inicio == segmento->inicio){
 				index = contador;
 			}
