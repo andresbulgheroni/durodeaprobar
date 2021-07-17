@@ -25,8 +25,13 @@ uint32_t id_patota = 1;
 
 
 int main(void){
-	inicializarConfig(config);
 
+	printf("\n--------------------------------------\n");
+	printf("Discordiador iniciado!   PID: %d\n",getpid());
+	printf("--------------------------------------\n");
+	char* option = readline("\nSeleccione la configuracion que desea utilizar:\n1.\tGeneral\n2.\tDiscordiador_FIFO\n3.\tDiscordiador_RR\n4.\tMemoria_Paginacion\n5.\tMemoria_Segmentacion\n6.\tFile System\n7.\tSabotaje\n");
+
+	leerConfig(option);
 	iniciarLog();
 	inicializarListasGlobales();
 	int32_t*socketSabotaje = malloc(sizeof(int32_t));
@@ -46,8 +51,6 @@ int main(void){
 	finalizar();
 	//config_destroy(config);
 	log_destroy(logger);
-
-
 
 	return EXIT_SUCCESS;
 
@@ -78,35 +81,6 @@ void inicializarListasGlobales(){
 	sem_init(&sem_hiloTripulante,0,1);
 }
 
-void inicializarConfig(t_config* config){
-
-	config= config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/discordiador/discord.config"); //tp-2021-1c-DuroDeAprobar/discordiador
-	if( config==NULL){
-		printf("no se pudo leer archivo config");
-		exit(2);
-	}
-	IP_MI_RAM_HQ=config_get_string_value(config,"IP_MI_RAM_HQ");
-	PUERTO_MI_RAM_HQ=config_get_string_value(config,"PUERTO_MI_RAM_HQ");
-	IP_I_MONGO_STORE=config_get_string_value(config,"IP_I_MONGO_STORE");
-	ALGORITMO=config_get_string_value(config,"ALGORITMO");
-	PUERTO_I_MONGO_STORE=config_get_string_value(config,"PUERTO_I_MONGO_STORE");
-	GRADO_MULTITAREA=config_get_int_value(config,"GRADO_MULTITAREA");
-	QUANTUM=config_get_int_value(config,"QUANTUM");
-	DURACION_SABOTAJE=config_get_int_value(config,"DURACION_SABOTAJE");
-	RETARDO_CICLO_CPU=config_get_int_value(config,"RETARDO_CICLO_CPU");
-
-	printf("el valor IP RAM: %s\n",IP_MI_RAM_HQ);
-	printf("el valor PUERO RAM: %s\n",PUERTO_MI_RAM_HQ);
-	printf("el valor IP IMONGO: %s\n",IP_I_MONGO_STORE);
-	printf("el valor ALGORITMO: %s\n",ALGORITMO);
-	printf("el valor PUERTO IMONGO: %s\n",PUERTO_I_MONGO_STORE);
-	printf("el valor MULTITAREA: %d\n",GRADO_MULTITAREA);
-	printf("el valor QUANTUM: %d\n",QUANTUM);
-	printf("el valor SABOTAJE: %d\n",DURACION_SABOTAJE);
-	printf("el valor RETARDO: %d\n",RETARDO_CICLO_CPU);
-
-}
-
 void iniciarLog(){
 
 	logger = log_create("discordiador.log", "discordiador", 0, LOG_LEVEL_INFO);
@@ -125,6 +99,33 @@ void inicializarSemaforoPlanificador(){			//Maneja el multiprocesamiento
 	sem_init(&semaforoInicioCicloBloqueado,0,0);
 
 	puts("se inicializaron los semaforos correctamente");
+
+}
+
+void leerConfig(char* option) {
+
+	int opt = atoi(option);
+
+	switch(opt){
+		case 1: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/discordiador/configs/general.config");break;
+		case 2: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/discordiador/configs/discordiador_FIFO.config");break;
+		case 3: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/discordiador/configs/discordiador_RR.config");break;
+		case 4: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/discordiador/configs/memoria_paginacion.config");break;
+		case 5: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/discordiador/configs/memoria_segmentacion.config");break;
+		case 6: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/discordiador/configs/fs.config");break;
+		case 7: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/discordiador/configs/sabotaje.config");break;
+		default: config = config_create("/home/utnso/tp-2021-1c-DuroDeAprobar/discordiador/configs/general.config"); break;
+	}
+
+	IP_MI_RAM_HQ=config_get_string_value(config,"IP_MI_RAM_HQ");
+	PUERTO_MI_RAM_HQ=config_get_string_value(config,"PUERTO_MI_RAM_HQ");
+	IP_I_MONGO_STORE=config_get_string_value(config,"IP_I_MONGO_STORE");
+	ALGORITMO=config_get_string_value(config,"ALGORITMO");
+	PUERTO_I_MONGO_STORE=config_get_string_value(config,"PUERTO_I_MONGO_STORE");
+	GRADO_MULTITAREA=config_get_int_value(config,"GRADO_MULTITAREA");
+	QUANTUM=config_get_int_value(config,"QUANTUM");
+	DURACION_SABOTAJE=config_get_int_value(config,"DURACION_SABOTAJE");
+	RETARDO_CICLO_CPU=config_get_int_value(config,"RETARDO_CICLO_CPU");
 
 }
 

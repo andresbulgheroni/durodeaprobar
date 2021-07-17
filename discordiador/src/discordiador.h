@@ -170,7 +170,6 @@ typedef struct
 //Inicializacion
 void iniciarLog();
 void inicializarListasGlobales();
-void inicializarConfig(t_config*);
 void inicializarSemaforoPlanificador();
 void crearHiloPlanificador();
 
