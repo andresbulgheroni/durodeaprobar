@@ -378,11 +378,7 @@ void init (char* config_elect){
 	}
 
 	iniciarMapa();
-/*
-	pthread_t hilo_mapa;
-	pthread_create(&hilo_mapa,NULL, render_mapa, NULL);
-	pthread_detach(hilo_mapa);
-*/
+
 }
 
 void configurar_paginacion(){
@@ -446,7 +442,7 @@ void configurar_paginacion(){
 	}
 
 }
-/*
+
 void iniciarMapa(){
 
 	int columnas, filas;
@@ -457,7 +453,7 @@ void iniciarMapa(){
 
 	mapa = nivel_crear("Nave");
 
-}*/
+}
 
 void* render_mapa(){
 

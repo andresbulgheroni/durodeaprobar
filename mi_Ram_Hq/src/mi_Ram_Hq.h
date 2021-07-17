@@ -143,7 +143,6 @@ void hilo_servidor();
 void sig_handler(int n);
 char* get_timestamp();
 char* get_config(int opt);
-void* render_mapa();
 char get_tripulante_codigo(int32_t id);
 
 //Paginacion
