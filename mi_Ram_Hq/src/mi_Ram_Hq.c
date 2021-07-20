@@ -515,7 +515,9 @@ void terminar(){
 
 	log_destroy(logger);
 	config_destroy(config);
-	free(memoria_principal);
+	if(memoria_principal != NULL)
+		free(memoria_principal);
+
 	nivel_gui_terminar();
 
 	pthread_mutex_destroy(&m_LISTA_REEMPLAZO);
@@ -1946,8 +1948,10 @@ void inicializar_segmentacion(){
 void terminar_segmentacion(){
 	void destroy(void* a){}
 
-	list_destroy_and_destroy_elements(segmentos_libres, destroy);
-	list_destroy_and_destroy_elements(segmentos_en_memoria, destroy);
+	if(segmentos_libres != NULL)
+		list_destroy_and_destroy_elements(segmentos_libres, destroy);
+	if(segmentos_en_memoria != NULL)
+		list_destroy_and_destroy_elements(segmentos_en_memoria, destroy);
 
 	void destroy_dict(tabla_segmentos* elemento){
 
@@ -1956,7 +1960,8 @@ void terminar_segmentacion(){
 
 	}
 
-	dictionary_destroy_and_destroy_elements(tablas_seg_patota, destroy_dict);
+	if(tablas_seg_patota != NULL)
+		dictionary_destroy_and_destroy_elements(tablas_seg_patota, destroy_dict);
 
 	terminar();
 }

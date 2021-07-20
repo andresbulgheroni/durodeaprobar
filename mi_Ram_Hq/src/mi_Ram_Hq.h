@@ -92,7 +92,7 @@ char* IP;
 char* PUERTO;
 int fileDes;
 bool mapa_mostrar;
-void* memoria_principal;
+void* memoria_principal = NULL;
 
 //Paginacion
 
@@ -101,7 +101,7 @@ t_dictionary* tabla_paginas_patota = NULL;
 t_list* frames_libres_principal = NULL;
 t_list* frames_swap = NULL;
 t_list* lista_para_reemplazo = NULL;
-uint32_t buffer_clock_pos = NULL;
+uint32_t buffer_clock_pos;
 
 t_config* config = NULL;
 t_log* logger = NULL;
@@ -202,7 +202,7 @@ typedef struct{
 }segmento_dump;
 
 //agrupa todas las tablas de segmentos
-t_dictionary* tablas_seg_patota;
+t_dictionary* tablas_seg_patota = NULL;
 
 typedef enum{
 	FF = 0,
@@ -210,10 +210,10 @@ typedef enum{
 } criterio_seleccion;
 
 //lista con todos los segmentos en memoria
-t_list* segmentos_en_memoria;
+t_list* segmentos_en_memoria = NULL;
 
 //lista de segmentos libres
-t_list* segmentos_libres;
+t_list* segmentos_libres = NULL;
 
 int32_t get_criterio(char* cofig);
 void dump_segmentacion(FILE* dump);
