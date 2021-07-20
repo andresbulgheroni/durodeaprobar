@@ -32,8 +32,8 @@ void sig_handler(int n){
 
 
 			char* time_stamp_text = get_timestamp();
-			//char* path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
-			char *path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
+			char* path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
+			//char *path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
 			char* inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
 
 			FILE* dump = fopen(path, "w+");
@@ -71,9 +71,17 @@ void sig_handler(int n){
 
 }
 
-int main(void) {
+void mostrar_mapa_opt(int option){
 
-	//TODO PREPARAR PARA USAR DISTINTOS CONFIG PARA LAS  PRUEBAS FINALES
+	switch(option){
+		case 1: mapa_mostrar = true; break;
+		case 2: mapa_mostrar = false; break;
+		default: printf("Opcion ingresada no valida"); exit(2); break;
+	}
+
+}
+
+int main(void) {
 
 	printf("MIRAMHQ PID: %d ", getpid());
 
@@ -81,8 +89,17 @@ int main(void) {
 	signal(SIGUSR2, sig_handler);
 	signal(SIGINT, sig_handler);
 
+	mapa_mostrar = true;
+
 	char* option = readline("\nSeleccione la configuracion que desea utilizar:\n1-PRUEBA DISC CPU\n2-PRUEBA DISC E/S\n3-PRUEBA SEG FF\n4-PRUEBA SEG BF\n5-PRUEBA PAG LRU\n6-PRUEBA PAG CLOCK\n7-PRUEBA FS\n>");
+	char* mapa_option = readline("\nDesea visualizar el mapa:\n1-SI\n\2-NO\n>");
+
+	mostrar_mapa_opt(atoi(mapa_option));
+
 	init(option);
+
+	free(mapa_option);
+	free(option);
 
 	pthread_t hilo_server;
 	pthread_create(&hilo_server,NULL,(void*)hilo_servidor, NULL);
@@ -377,7 +394,8 @@ void init (char* config_elect){
 		}
 	}
 
-	iniciarMapa();
+	if(mapa_mostrar)
+		iniciarMapa();
 
 }
 
@@ -662,20 +680,24 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 
 			//Guardo tabla de paginas
 			dictionary_put(tabla_paginas_patota, string_itoa(mensaje->idPatota), tabla);
+			if(mapa_mostrar){
 
-			pthread_mutex_lock(&m_MAPA);
+				pthread_mutex_lock(&m_MAPA);
 
-			void cargar_en_mapa(tripulante_data_msg* tripulante){
+				void cargar_en_mapa(tripulante_data_msg* tripulante){
 
-				personaje_crear(mapa, get_tripulante_codigo(tripulante->idTripulante), tripulante->coordenadas->posX, tripulante->coordenadas->posY);
+					personaje_crear(mapa, get_tripulante_codigo(tripulante->idTripulante), tripulante->coordenadas->posX, tripulante->coordenadas->posY);
+				}
+
+
+				list_iterate(mensaje->tripulantes, cargar_en_mapa);
+
+				nivel_gui_dibujar(mapa);
+
+				pthread_mutex_unlock(&m_MAPA);
+
 			}
 
-
-			list_iterate(mensaje->tripulantes, cargar_en_mapa);
-
-			nivel_gui_dibujar(mapa);
-
-			pthread_mutex_unlock(&m_MAPA);
 
 		}
 
@@ -830,29 +852,33 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 						*posx_anterior, *posy_anterior);
 		pthread_mutex_unlock(&m_LOGGER);
 
-		pthread_mutex_lock(&m_MAPA);
+		if(mapa_mostrar){
 
-		if (*posx_anterior != mensaje->coordenadasDestino->posX) {
-			int32_t diferenciaEnX =   *posx_anterior - mensaje->coordenadasDestino->posX;
-			if (diferenciaEnX > 0) {
-				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),-1,0);
-			} else if (diferenciaEnX < 0) {
-				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),1,0);
+			pthread_mutex_lock(&m_MAPA);
+
+			if (*posx_anterior != mensaje->coordenadasDestino->posX) {
+				int32_t diferenciaEnX =   *posx_anterior - mensaje->coordenadasDestino->posX;
+				if (diferenciaEnX > 0) {
+					item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),-1,0);
+				} else if (diferenciaEnX < 0) {
+					item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),1,0);
+				}
+
+			} else if (*posy_anterior != mensaje->coordenadasDestino->posY) {
+
+				int32_t diferenciaEnY =  *posy_anterior - mensaje->coordenadasDestino->posY;
+				if (diferenciaEnY > 0) {
+					item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,-1);
+				} else if (diferenciaEnY < 0) {
+					item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,1);
+				}
 			}
 
-		} else if (*posy_anterior != mensaje->coordenadasDestino->posY) {
+			nivel_gui_dibujar(mapa);
 
-			int32_t diferenciaEnY =  *posy_anterior - mensaje->coordenadasDestino->posY;
-			if (diferenciaEnY > 0) {
-				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,-1);
-			} else if (diferenciaEnY < 0) {
-				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,1);
-			}
+			pthread_mutex_unlock(&m_MAPA);
+
 		}
-
-		nivel_gui_dibujar(mapa);
-
-		pthread_mutex_unlock(&m_MAPA);
 
 		free(posx_anterior);
 		free(posy_anterior);
@@ -1316,11 +1342,15 @@ void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* stat
 			pthread_mutex_unlock(&(tabla->m_TABLA));
 
 		}
+		if(mapa_mostrar){
 
-		pthread_mutex_lock(&m_MAPA);
-			item_borrar(mapa, get_tripulante_codigo(mensaje->idTripulante));
-			nivel_gui_dibujar(mapa);
-		pthread_mutex_unlock(&m_MAPA);
+			pthread_mutex_lock(&m_MAPA);
+				item_borrar(mapa, get_tripulante_codigo(mensaje->idTripulante));
+				nivel_gui_dibujar(mapa);
+			pthread_mutex_unlock(&m_MAPA);
+
+		}
+
 
 	}else{
 		pthread_mutex_unlock(&m_TABLAS_PAGINAS);
@@ -2268,16 +2298,21 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 			pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 			pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
-			pthread_mutex_lock(&m_MAPA);
+			if(mapa_mostrar){
 
-			void cargar_en_mapa(tripulante_data_msg* tripulante){
-				personaje_crear(mapa, get_tripulante_codigo(tripulante->idTripulante), tripulante->coordenadas->posX, tripulante->coordenadas->posY);
+				pthread_mutex_lock(&m_MAPA);
+
+				void cargar_en_mapa(tripulante_data_msg* tripulante){
+					personaje_crear(mapa, get_tripulante_codigo(tripulante->idTripulante), tripulante->coordenadas->posX, tripulante->coordenadas->posY);
+				}
+				list_iterate(mensaje->tripulantes, cargar_en_mapa);
+
+				nivel_gui_dibujar(mapa);
+
+				pthread_mutex_unlock(&m_MAPA);
+
 			}
-			list_iterate(mensaje->tripulantes, cargar_en_mapa);
 
-			nivel_gui_dibujar(mapa);
-
-			pthread_mutex_unlock(&m_MAPA);
 
 			pthread_mutex_lock(&m_LOGGER);
 			log_info(logger, "Se creo la patota %d de tamanio %d con %d tripulantes", mensaje->idPatota, tamanio_necesario, mensaje->cant_tripulantes);
@@ -2338,29 +2373,34 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 	uint32_t x_nuevo = mensaje->coordenadasDestino->posX;
 	uint32_t y_nuevo = mensaje->coordenadasDestino->posY;
 
-	pthread_mutex_lock(&m_MAPA);
+	if(mapa_mostrar){
 
-	if (x_anterior != x_nuevo) {
-		int32_t diferenciaEnX =   x_nuevo - x_anterior;
-		if (diferenciaEnX > 0) {
-			item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),1,0);
-		} else if (diferenciaEnX < 0) {
-			item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),-1,0);
+		pthread_mutex_lock(&m_MAPA);
+
+		if (x_anterior != x_nuevo) {
+			int32_t diferenciaEnX =   x_nuevo - x_anterior;
+			if (diferenciaEnX > 0) {
+				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),1,0);
+			} else if (diferenciaEnX < 0) {
+				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),-1,0);
+			}
+
+		} else if (y_anterior != y_nuevo) {
+
+			int32_t diferenciaEnY =  y_nuevo - y_anterior;
+			if (diferenciaEnY > 0) {
+				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,-1);
+			} else if (diferenciaEnY < 0) {
+				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,1);
+			}
 		}
 
-	} else if (y_anterior != y_nuevo) {
+		nivel_gui_dibujar(mapa);
 
-		int32_t diferenciaEnY =  y_nuevo - y_anterior;
-		if (diferenciaEnY > 0) {
-			item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,-1);
-		} else if (diferenciaEnY < 0) {
-			item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,1);
-		}
+		pthread_mutex_unlock(&m_MAPA);
+
 	}
 
-	nivel_gui_dibujar(mapa);
-
-	pthread_mutex_unlock(&m_MAPA);
 
 	//libero memoria
 	free(buffer);
@@ -2492,12 +2532,17 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 
 		list_iterate(tabla_patota, liberar_segmento); // aca libera el segmento en las tablas
 
-		pthread_mutex_lock(&m_MAPA);
+		if(mapa_mostrar){
 
-		item_borrar(mapa, get_tripulante_codigo(mensaje->idTripulante));
-		nivel_gui_dibujar(mapa);
+			pthread_mutex_lock(&m_MAPA);
 
-		pthread_mutex_unlock(&m_MAPA);
+			item_borrar(mapa, get_tripulante_codigo(mensaje->idTripulante));
+			nivel_gui_dibujar(mapa);
+
+			pthread_mutex_unlock(&m_MAPA);
+
+		}
+
 
 		eliminar_patota(tabla_patota);
 
@@ -2543,13 +2588,18 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
 
-		pthread_mutex_lock(&m_MAPA);
+		if(mapa_mostrar){
 
-		item_borrar(mapa, get_tripulante_codigo(mensaje->idTripulante));
+			pthread_mutex_lock(&m_MAPA);
 
-		nivel_gui_dibujar(mapa);
+			item_borrar(mapa, get_tripulante_codigo(mensaje->idTripulante));
 
-		pthread_mutex_unlock(&m_MAPA);
+			nivel_gui_dibujar(mapa);
+
+			pthread_mutex_unlock(&m_MAPA);
+
+		}
+
 
 		pthread_mutex_lock(&m_LOGGER);
 		log_info(logger, "Se expulso al tripulante %d de la patota %d", mensaje->idTripulante, mensaje->idPatota);

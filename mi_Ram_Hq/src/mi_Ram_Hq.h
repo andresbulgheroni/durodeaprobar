@@ -91,6 +91,7 @@ int32_t ALGORITMO_REEMPLAZO;
 char* IP;
 char* PUERTO;
 int fileDes;
+bool mapa_mostrar;
 void* memoria_principal;
 
 //Paginacion
@@ -144,6 +145,7 @@ void sig_handler(int n);
 char* get_timestamp();
 char* get_config(int opt);
 char get_tripulante_codigo(int32_t id);
+void mostrar_mapa_opt(int option);
 
 //Paginacion
 void configurar_paginacion();
