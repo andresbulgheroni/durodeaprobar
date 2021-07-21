@@ -2543,6 +2543,7 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		pthread_mutex_lock(&m_SEG_EN_MEMORIA);
 
 		list_iterate(tabla_patota, liberar_segmento); // aca libera el segmento en las tablas
+		eliminar_patota(tabla_patota);
 
 		if(mapa_mostrar){
 
@@ -2554,9 +2555,6 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 			pthread_mutex_unlock(&m_MAPA);
 
 		}
-
-
-		eliminar_patota(tabla_patota);
 
 		pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
@@ -2590,11 +2588,9 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 
 		liberar_segmento(seg_tripulante);
 
-		void liberar_seg(segmento* seg){
-			free(seg);
-		}
+		void liberar_seg(segmento* seg){ }
 		// saco el segmento de la tabla de segmentos de la patota
-		list_remove(tabla_patota, index);
+		list_remove_and_destroy_element(tabla_patota, index, liberar_seg);
 
 		pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 		pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
@@ -2611,7 +2607,6 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 			pthread_mutex_unlock(&m_MAPA);
 
 		}
-
 
 		pthread_mutex_lock(&m_LOGGER);
 		log_info(logger, "Se expulso al tripulante %d de la patota %d", mensaje->idTripulante, mensaje->idPatota);
@@ -2664,11 +2659,15 @@ void ordenar_lista_segmentos_libres(){
 } //no lleva semaforos, porque donde la llamo ya estan los semaforos
 
 //agrega el segmento a la lista de segmentos libres y lo saca de segmentos en memoria
-void liberar_segmento(segmento* seg){
+void liberar_segmento(segmento* seg_viejo){
 
 	bool esta_el_segmento(segmento *seg_list){
-		return seg->inicio == seg_list->inicio;
+		return seg_viejo->inicio == seg_list->inicio;
 	}
+
+	segmento* seg = malloc(sizeof(segmento));
+	seg->inicio = seg_viejo->inicio;
+	seg->tamanio = seg_viejo->tamanio;
 
 	if(list_any_satisfy(segmentos_en_memoria, esta_el_segmento)){
 
