@@ -9,10 +9,10 @@ int main(void) {
 	char* option = readline("\nSeleccione la configuracion que desea utilizar:\n1.\tGeneral\n2.\tDiscordiador\n3.\tMemoria\n4.\tFile System\n5.\tSabotaje\n");
 	inicializarSemaforos();
 	leerConfig(option);
+	free(option);
 	crearLog();
 	inicializarFS();
 	signal(SIGINT, cerrarModulo);
-
 	signal(SIGUSR1, sighandler);
 
 	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
@@ -80,17 +80,26 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 			informar_movimiento_mongo_msg* movimientoMsg = deserializar_paquete(paquete);
 			char* cadena = string_new();
 			string_append(&cadena, "Se mueve de ");
-			string_append(&cadena, string_itoa(movimientoMsg->coordenadasOrigen->posX));
+			char* coordOrigenX = string_itoa(movimientoMsg->coordenadasOrigen->posX);
+			string_append(&cadena, coordOrigenX);
 			string_append(&cadena, "|");
-			string_append(&cadena, string_itoa(movimientoMsg->coordenadasOrigen->posY));
+			char* coordOrigenY = string_itoa(movimientoMsg->coordenadasOrigen->posY);
+			string_append(&cadena, coordOrigenY);
 			string_append(&cadena, " a ");
-			string_append(&cadena, string_itoa(movimientoMsg->coordenadasDestino->posX));
+			char* coordDestinoX = string_itoa(movimientoMsg->coordenadasDestino->posX);
+			string_append(&cadena, coordDestinoX);
 			string_append(&cadena, "|");
-			string_append(&cadena, string_itoa(movimientoMsg->coordenadasDestino->posY));
+			char* coordDestinoY = string_itoa(movimientoMsg->coordenadasDestino->posY);
+			string_append(&cadena, coordDestinoY);
 			string_append(&cadena, "\n");
 			writeBitacora(movimientoMsg->idTripulante,cadena);
 
 			printf("\nEscribi en bitacora: %s", cadena);
+
+			free(coordOrigenX);
+			free(coordOrigenY);
+			free(coordDestinoX);
+			free(coordDestinoY);
 
 			free(movimientoMsg->coordenadasOrigen);
 			free(movimientoMsg->coordenadasDestino);
@@ -115,6 +124,7 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 			hacerTarea(tareaMsg);
 
 			free(tareaMsg->nombreTarea->string);
+			free(tareaMsg->nombreTarea);
 			free(tareaMsg);
 			free(cadena);
 
@@ -132,6 +142,7 @@ void recibirMensajeTripulante(int32_t* socketCliente){
 			writeBitacora(tareaMsg->idTripulante,cadena);
 
 			free(tareaMsg->nombreTarea->string);
+			free(tareaMsg->nombreTarea);
 			free(tareaMsg);
 			free(cadena);
 
@@ -754,8 +765,15 @@ int descartarBasura(){
 		// Borro archivo Basura.ims
 		remove(rutaMetadata);
 
+		for(int j=0;j<blockCount;j++){
+						free(bloques[j]);
+					}
+		free(bloques);
+		free(rutaMetadata);
+
 	}else{
 		log_error(logger,"No existe el archivo Basura.ims");
+		free(rutaMetadata);
 		return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;
@@ -1030,7 +1048,7 @@ void sighandler() {
 	sabotaje->idSabotaje = ID_SABOTAJE+1;
 	sabotaje->coordenadas =get_coordenadas(POSICIONES_SABOTAJE[ID_SABOTAJE]);
 
-	enviar_paquete(sabotaje, NOTIFICAR_SABOTAJE,*SOCKET_SABOTAJE);  //TODO falta socket de sabotaje SOCKET_SABOTAJE_GLOBAL?
+	enviar_paquete(sabotaje, NOTIFICAR_SABOTAJE,*SOCKET_SABOTAJE);
 	free(sabotaje->coordenadas);
 	free(sabotaje);
 
