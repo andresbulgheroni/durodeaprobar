@@ -743,7 +743,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 		int32_t* posx_anterior = malloc(sizeof(int32_t));
 		int32_t* posy_anterior = malloc(sizeof(int32_t));
 
-		t_tabla_paginas* tabla =  dictionary_get(tabla_paginas_patota, string_itoa(mensaje->idPatota));
+		t_tabla_paginas* tabla =  dictionary_get(tabla_paginas_patota, id_patota_string);
 
 		pthread_mutex_unlock(&m_TABLAS_PAGINAS);
 		pthread_mutex_lock(&(tabla->m_TABLA));
@@ -908,7 +908,7 @@ void cambiar_estado_paginacion(cambio_estado_msg* mensaje, bool* status){
 
 		char* estado_anterior = malloc(sizeof(char));
 
-		t_tabla_paginas* tabla =  dictionary_get(tabla_paginas_patota, string_itoa(mensaje->idPatota));
+		t_tabla_paginas* tabla =  dictionary_get(tabla_paginas_patota, id_patota_string);
 
 		pthread_mutex_unlock(&m_TABLAS_PAGINAS);
 		pthread_mutex_lock(&(tabla->m_TABLA));
@@ -980,7 +980,7 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 	char* id_patota_string = string_itoa(mensaje->idPatota);
 	if(dictionary_has_key(tabla_paginas_patota, id_patota_string)){
 
-		t_tabla_paginas* tabla =  dictionary_get(tabla_paginas_patota, string_itoa(mensaje->idPatota));
+		t_tabla_paginas* tabla =  dictionary_get(tabla_paginas_patota, id_patota_string);
 
 		pthread_mutex_unlock(&m_TABLAS_PAGINAS);
 		pthread_mutex_lock(&(tabla->m_TABLA));
@@ -1249,7 +1249,7 @@ void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* stat
 	char* id_patota_string = string_itoa(mensaje->idPatota);
 	if(dictionary_has_key(tabla_paginas_patota, id_patota_string)){
 
-		t_tabla_paginas* tabla =  dictionary_get(tabla_paginas_patota, string_itoa(mensaje->idPatota));
+		t_tabla_paginas* tabla =  dictionary_get(tabla_paginas_patota, id_patota_string);
 
 		pthread_mutex_unlock(&m_TABLAS_PAGINAS);
 		pthread_mutex_lock(&(tabla->m_TABLA));
