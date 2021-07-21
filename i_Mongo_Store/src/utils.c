@@ -242,8 +242,11 @@ t_paquete* recibir_paquete(int32_t socket){
 		paquete->buffer->stream = malloc(paquete->buffer->size);
 		status = recv(socket, paquete->buffer->stream, paquete->buffer->size, MSG_WAITALL);
 
-		if(status == 0)
+		if(status == 0){
+			free(paquete->buffer->stream);
 			free(paquete->buffer);
+		}
+
 
 	}
 
