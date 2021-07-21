@@ -32,8 +32,8 @@ void sig_handler(int n){
 
 
 			char* time_stamp_text = get_timestamp();
-			char* path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", temporal_get_string_time());
-			//char *path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", "segmentacion");
+			char* time_stamp_file = temporal_get_string_time("%d_%m_%y_%H:%M:%S");
+			char* path = string_from_format("/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/dump/Dump_%s.dmp", time_stamp_file);
 			char* inicio_texto = string_from_format("Dump: %s\n", time_stamp_text);
 
 			FILE* dump = fopen(path, "w+");
@@ -43,6 +43,7 @@ void sig_handler(int n){
 			free(path);
 			free(inicio_texto);
 			free(time_stamp_text);
+			free(time_stamp_file);
 
 			switch(ESQUEMA_MEMORIA){
 				case PAGINACION_VIRTUAL: dump_paginacion(dump); break;
@@ -83,7 +84,10 @@ void mostrar_mapa_opt(int option){
 
 int main(void) {
 
-	printf("MIRAMHQ PID: %d ", getpid());
+	printf("\n--------------------------------------\n");
+	printf("mi-RAM-HQ iniciado!   PID: %d\n",getpid());
+	printf("Cerrar modulo: ctrl + c");
+	printf("\n--------------------------------------\n");
 
 	signal(SIGUSR1, sig_handler);
 	signal(SIGUSR2, sig_handler);
@@ -91,8 +95,8 @@ int main(void) {
 
 	mapa_mostrar = true;
 
-	char* option = readline("\nSeleccione la configuracion que desea utilizar:\n1-PRUEBA DISC CPU\n2-PRUEBA DISC E/S\n3-PRUEBA SEG FF\n4-PRUEBA SEG BF\n5-PRUEBA PAG LRU\n6-PRUEBA PAG CLOCK\n7-PRUEBA FS\n>");
-	char* mapa_option = readline("\nDesea visualizar el mapa:\n1-SI\n\2-NO\n>");
+	char* option = readline("\nSeleccione la configuracion que desea utilizar:\n1-GENERAL\n2-PRUEBA DISCORDIADOR CPU\n3-PRUEBA DISCORDIADOR E/S\n4-PRUEBA RAM SEGMENTACION FF\n5-PRUEBA RAM SEGMENTACION BF\n6-PRUEBA RAM PAGINACION LRU\n7-PRUEBA RAM PAGINACION CLOCK\n8-PRUEBA FILE SYSTEM\n>");
+	char* mapa_option = readline("\nDesea visualizar el mapa?\n1-SI\n2-NO\n>");
 
 	mostrar_mapa_opt(atoi(mapa_option));
 
@@ -470,6 +474,8 @@ void iniciarMapa(){
 	nivel_gui_get_area_nivel(&columnas, &filas);
 
 	mapa = nivel_crear("Nave");
+
+	nivel_gui_dibujar(mapa);
 
 }
 
@@ -1903,13 +1909,14 @@ char* get_config(int opt){
 	char* config_path = string_new();
 
 	switch(opt){
-		case 1: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg1.config";break;
-		case 2: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg2.config";break;
-		case 3: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg3_1.config";break;
-		case 4: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg3_2.config";break;
-		case 5: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_pag1_1.config";break;
-		case 6: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_pag1_2.config";break;
-		case 7: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg4.config";break;
+		case 1: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_general.config";break;
+		case 2: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg1.config";break;
+		case 3: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg2.config";break;
+		case 4: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg3_1.config";break;
+		case 5: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg3_2.config";break;
+		case 6: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_pag1_1.config";break;
+		case 7: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_pag1_2.config";break;
+		case 8: config_path = "/home/utnso/tp-2021-1c-DuroDeAprobar/mi_Ram_Hq/configs/ram_seg4.config";break;
 
 		default: config_path = "err"; break;
 	}
