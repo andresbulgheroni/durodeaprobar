@@ -2396,16 +2396,16 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 		pthread_mutex_lock(&m_MAPA);
 
 		if (x_anterior != x_nuevo) {
-			int32_t diferenciaEnX =   x_nuevo - x_anterior;
+			int32_t diferenciaEnX =   x_anterior - x_nuevo;
 			if (diferenciaEnX > 0) {
-				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),1,0);
-			} else if (diferenciaEnX < 0) {
 				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),-1,0);
+			} else if (diferenciaEnX < 0) {
+				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),1,0);
 			}
 
 		} else if (y_anterior != y_nuevo) {
 
-			int32_t diferenciaEnY =  y_nuevo - y_anterior;
+			int32_t diferenciaEnY =  y_anterior - y_nuevo;
 			if (diferenciaEnY > 0) {
 				item_desplazar(mapa,get_tripulante_codigo(mensaje->idTripulante),0,-1);
 			} else if (diferenciaEnY < 0) {
