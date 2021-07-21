@@ -2085,7 +2085,8 @@ int32_t get_espacio_libre(uint32_t size){
 segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
-	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
+	char* id_patota_str = string_itoa(id_patota);
+	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, id_patota_str);
 	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
 	t_list* tabla_patota = tabla_seg->segmentos;
@@ -2109,7 +2110,9 @@ segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota)
 		}
 		contador++;
 	}
+
 	free(buffer);
+	free(id_patota_str);
 
 	return seg_tripulante;
 }
@@ -2176,7 +2179,8 @@ bool entra_en_memoria_seg(uint32_t tamanio_necesario){
 void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
-	if(!dictionary_has_key(tablas_seg_patota, string_itoa(mensaje->idPatota))){
+	char* id_patota_str = string_itoa(mensaje->idPatota);
+	if(!dictionary_has_key(tablas_seg_patota, id_patota_str)){
 
 		//creo la estructura de la tabla de segmentos
 		tabla_segmentos* tabla_seg = malloc(sizeof(tabla_segmentos));
@@ -2299,6 +2303,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 			//Libero las estructuras para guardar en memoria
 			free(pcb);
+			free(id_patota_str);
 
 			void liberar_tcbs(t_tcb* tcb){	}
 			list_destroy_and_destroy_elements(tcbs, liberar_tcbs);
@@ -2343,7 +2348,8 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 
 	//no me hacia falta esto, lo hice por el lock de la tabla para buscar offset
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
-	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
+	char* id_patota_str = string_itoa(mensaje->idPatota);
+	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, id_patota_str);
 	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
 	void* buffer = malloc(sizeof(t_tcb));
@@ -2415,6 +2421,7 @@ void informar_movimiento_segmentacion(informar_movimiento_ram_msg* mensaje, bool
 
 
 	//libero memoria
+	free(id_patota_str);
 	free(buffer);
 }
 
@@ -2423,7 +2430,8 @@ void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 
 	//no me hacia falta esto, lo hice por el lock de la tabla para buscar offset
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
-	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
+	char* id_patota_str = string_itoa(mensaje->idPatota);
+	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, id_patota_str);
 	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
 	void* buffer = malloc(sizeof(t_tcb));
@@ -2457,6 +2465,7 @@ void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 	pthread_mutex_unlock(&m_LOGGER);
 
 	//libero memoria
+	free(id_patota_str);
 	free(buffer);
 }
 
@@ -2464,7 +2473,8 @@ void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool* termino, bool* status){
 
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
-	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
+	char* id_patota_str = string_itoa(mensaje->idPatota);
+	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, id_patota_str);
 	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
 	pthread_mutex_lock(&(tabla_seg->m_TABLA));
@@ -2517,6 +2527,7 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 	pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 
 	free(buffer_tcb);
+	free(id_patota_str);
 
 	if(!(*termino)){
 		pthread_mutex_lock(&m_LOGGER);
@@ -2531,11 +2542,14 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* status){
 
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
-	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(mensaje->idPatota));
+	char* id_patota_str = string_itoa(mensaje->idPatota);
+	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, id_patota_str);
 	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
 
 	pthread_mutex_lock(&(tabla_seg->m_TABLA));
 	t_list* tabla_patota = tabla_seg->segmentos;
+
+	free(id_patota_str);
 
 	if(list_size(tabla_patota) == 3){ //osea, es el ultimo tripulante
 
