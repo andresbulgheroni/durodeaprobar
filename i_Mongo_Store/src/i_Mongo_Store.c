@@ -15,7 +15,6 @@ int main(void) {
 	signal(SIGINT, cerrarModulo);
 	signal(SIGUSR1, sighandler);
 
-	fsckFiles_Blocks();
 	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 
 	SOCKET_SABOTAJE= malloc(sizeof(int32_t));
