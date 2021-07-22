@@ -15,6 +15,7 @@ int main(void) {
 	signal(SIGINT, cerrarModulo);
 	signal(SIGUSR1, sighandler);
 
+	fsckFiles_Blocks();
 	int32_t socket_servidor = iniciar_servidor(IP, PUERTO);
 
 	SOCKET_SABOTAJE= malloc(sizeof(int32_t));
@@ -1529,6 +1530,7 @@ void cerrarModulo(){
 }
 
 void corregirSabotajeBlocks(char* ruta, char caracter){
+
 	t_config* metadata = config_create(ruta);
 	int size = config_get_int_value(metadata, "SIZE");
 	int blockCount = config_get_int_value(metadata, "BLOCK_COUNT");
@@ -1552,39 +1554,23 @@ void corregirSabotajeBlocks(char* ruta, char caracter){
 		memcpy(archivo + (BLOCK_SIZE * contador), blocksMap + (BLOCK_SIZE * (atoi(blocksArray[contador]) - 1)), size);
 	}
 
-
 	char* MD5Bloques = calcularMD5(archivo);
 	char* MD5Metadata = config_get_string_value(metadata, "MD5_ARCHIVO");
 
 	if (strcmp(MD5Bloques, MD5Metadata) != 0){
 
-		log_info(logger, "La lista de BLOCKS no coincide con el MD5, generando la diferencia...");
-
-		int cantidad = 0;
-		while(strcmp(MD5Bloques, MD5Metadata)){
-			free(MD5Bloques);
-			cantidad++;
-			char* stringNuevo = string_repeat(caracter, cantidad);
-			char* MD5Bloques = calcularMD5(stringNuevo);
-		}
-
-
-	generarRecurso(caracter, (unsigned)(config_get_int_value(metadata, "SIZE") - cantidad));
-
-
-
+		consumirRecurso((unsigned)(config_get_int_value(metadata, "SIZE")),caracter);
+		generarRecurso((unsigned)(config_get_int_value(metadata, "SIZE")),caracter);
 
 	}else{
 		log_info(logger, "No hay sabotaje del blocks");
 	}
 
-
-
 	for(int i=0;i<blockCount;i++){
 		free(blocksArray[i]);
 	}
+	free(archivo);
 	free(blocksArray);
-	free(ruta);
 	free(blocks);
 	config_destroy(metadata);
 
