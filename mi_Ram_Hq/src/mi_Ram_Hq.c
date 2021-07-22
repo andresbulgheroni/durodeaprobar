@@ -248,8 +248,13 @@ void recibir_mensaje(int32_t* conexion){
 
 				}
 
-				void vaciar_trips(tripulante_data_msg* trip){	}
+				void vaciar_trips(tripulante_data_msg* trip){
+					free(trip);
+				}
 				list_destroy_and_destroy_elements(mensaje->tripulantes, vaciar_trips);
+
+				if(strcmp(mensaje->tareas->string, "") != 0)
+					free(mensaje->tareas->string);
 				free(mensaje->tareas);
 				free(mensaje);
 
@@ -439,21 +444,21 @@ void configurar_paginacion(){
 		lista_para_reemplazo = list_create();
 
 		for(uint32_t i = 0; i < (TAMANIO_SWAP / TAMANIO_PAGINA);i++){
-			t_frame* frame = malloc(sizeof(t_frame));
-			frame->pos = i;
-			list_add(frames_swap, frame);
+			t_frame* frame_swap = malloc(sizeof(t_frame));
+			frame_swap->pos = i;
+			list_add(frames_swap, frame_swap);
 		}
 
 		for(uint32_t i = 0; i < (TAMANIO_MEMORIA / TAMANIO_PAGINA); i++){
-			t_frame_libre* nro_frame = malloc(sizeof(t_frame_libre));
-			nro_frame->pos = i;
-			list_add(frames_libres_principal, nro_frame);
+			t_frame* frame_p = malloc(sizeof(t_frame));
+			frame_p->pos = i;
+			list_add(frames_libres_principal, frame_p);
 		}
 
 		if(ALGORITMO_REEMPLAZO == CLOCK){
 			buffer_clock_pos = 0;
 			for(uint32_t i = 0; i < (TAMANIO_MEMORIA / TAMANIO_PAGINA); i++){
-				t_buffer_clock* frame = malloc(sizeof(t_frame));
+				t_buffer_clock* frame = malloc(sizeof(t_buffer_clock));
 				frame->pagina = NULL;
 				list_add(lista_para_reemplazo, frame);
 			}
@@ -494,7 +499,9 @@ void* render_mapa(){
 
 
 void terminar_paginacion(){
-	void destroy(void* a){}
+	void destroy(void* a){
+		free(a);
+	}
 
 	if(frames_swap != NULL)
 		list_destroy_and_destroy_elements(frames_swap, destroy);
@@ -508,7 +515,7 @@ void terminar_paginacion(){
 		if(lista_para_reemplazo != NULL)
 			list_destroy_and_destroy_elements(elemento->tabla_paginas, destroy);
 		pthread_mutex_destroy(&(elemento->m_TABLA));
-
+		free(elemento);
 	}
 
 	if(tabla_paginas_patota != NULL)
@@ -629,7 +636,9 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 
 			free(pcb);
 
-			void liberar_tcbs(t_tcb* tcb){	}
+			void liberar_tcbs(t_tcb* tcb){
+				free(tcb);
+			}
 
 			list_destroy_and_destroy_elements(tcbs, liberar_tcbs);
 
@@ -1301,8 +1310,11 @@ void expulsar_tripulante_paginacion(expulsar_tripulante_msg* mensaje, bool* stat
 
 				void borrar_pagina(t_pagina_patota* patota){
 
-					liberar_memoria_principal_paginacion(patota);
-					liberar_memoria_virtual(patota);
+					if(patota->presente){
+						liberar_memoria_principal_paginacion(patota);
+					}else{
+						liberar_memoria_virtual(patota);
+					}
 					free(patota);
 
 				}
@@ -1466,10 +1478,7 @@ void* leer_de_memoria_principal(t_pagina_patota* pagina){
 			}
 			free(first_fit);
 
-			void* datos_mv = malloc(TAMANIO_PAGINA);
-
-
-			datos_mv = traer_de_swap(pagina);
+			void* datos_mv =  traer_de_swap(pagina);
 
 
 			liberar_memoria_virtual(pagina);
@@ -1546,15 +1555,15 @@ void* leer_de_memoria_principal(t_pagina_patota* pagina){
 			free(datos_swap);
 
 			pthread_mutex_lock(&m_LOGGER);
-			char* mensaje = string_new();
 			if(nro_frame >= 0){
-				mensaje = string_from_format("Reemplazo en frame %d", nro_frame);
+				char* mensaje = string_from_format("Reemplazo en frame %d", nro_frame);
 				log_info(logger, mensaje);
+				free(mensaje);
 			}else{
-				mensaje = "Fallo reemplazo en memoria principal";
+				char* mensaje = "Fallo reemplazo en memoria principal";
 				log_error(logger, mensaje);
+				free(mensaje);
 			}
-			free(mensaje);
 			pthread_mutex_unlock(&m_LOGGER);
 
 		}
@@ -1675,15 +1684,13 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from){
 			free(datos);
 
 			pthread_mutex_lock(&m_LOGGER);
-			char* mensaje = string_new(); // TODO PONER NULL
 			if(nro_frame >= 0){
-				mensaje = string_from_format("Reemplazo en frame %d", nro_frame);
+				char* mensaje = string_from_format("Reemplazo en frame %d", nro_frame);
 				log_info(logger, mensaje);
+				free(mensaje);
 			}else{
-				mensaje = "Fallo reemplazo en memoria principal";
-				log_error(logger, mensaje);
+				log_error(logger, "Fallo reemplazo en memoria principal");
 			}
-			free(mensaje);
 			pthread_mutex_unlock(&m_LOGGER);
 
 		}
@@ -1704,12 +1711,14 @@ int32_t get_frame_memoria_virtual(){
 
 	if(list_size(frames_swap) > 0){
 
+		void destroyer(t_frame* frame){
 
-		t_frame* frame = (list_remove(frames_swap, 0));
+			pos = frame->pos;
 
-		pos = frame->pos;
+			free(frame);
+		}
 
-		free(frame);
+		list_remove_and_destroy_element(frames_swap, 0, destroyer);
 
 	}
 
@@ -1803,52 +1812,47 @@ char get_status(t_status_code codigo){
 
 void liberar_memoria_principal_paginacion(t_pagina_patota* pagina){
 
-	if(pagina->presente){
+	pthread_mutex_lock(&m_TABLA_LIBRES_P);
+	pthread_mutex_lock(&m_LISTA_REEMPLAZO);
 
-		pthread_mutex_lock(&m_TABLA_LIBRES_P);
-		pthread_mutex_lock(&m_LISTA_REEMPLAZO);
-
-		switch(ALGORITMO_REEMPLAZO){
-			case LRU:{
-				bool encontrado(t_pagina_patota* patota){
-					return patota == pagina;
-				}
-
-				list_remove_by_condition(lista_para_reemplazo, encontrado);
-
-				break;
+	switch(ALGORITMO_REEMPLAZO){
+		case LRU:{
+			bool encontrado(t_pagina_patota* patota){
+				return patota == pagina;
 			}
-			case CLOCK:{
-				t_buffer_clock* buff = list_get(lista_para_reemplazo, pagina->nro_frame);
 
-				buff->pagina = NULL;
+			list_remove_by_condition(lista_para_reemplazo, encontrado);
 
-				break;
-			}
+			break;
 		}
+		case CLOCK:{
+			t_buffer_clock* buff = list_get(lista_para_reemplazo, pagina->nro_frame);
 
-		pthread_mutex_unlock(&m_LISTA_REEMPLAZO);
+			buff->pagina = NULL;
 
-		t_frame_libre* frame = malloc(sizeof(t_frame_libre));
-		frame->pos = pagina->nro_frame;
-		list_add(frames_libres_principal, frame);
-
-		bool cmp_frames_libres (t_frame_libre* frame1, t_frame_libre* frame2){
-			return frame1->pos < frame2->pos;
+			break;
 		}
-
-		list_sort(frames_libres_principal, cmp_frames_libres);
-
-		pthread_mutex_unlock(&m_TABLA_LIBRES_P);
-
-		pthread_mutex_lock(&m_LOGGER);
-			char* mensaje = string_new();
-			mensaje = string_from_format("Liberado frame nro. %d. MEMORIA PRINCIPAL ", frame->pos);
-			log_info(logger, mensaje);
-			free(mensaje);
-		pthread_mutex_unlock(&m_LOGGER);
-
 	}
+
+	pthread_mutex_unlock(&m_LISTA_REEMPLAZO);
+
+	t_frame* frame = malloc(sizeof(t_frame));
+	frame->pos = pagina->nro_frame;
+	list_add(frames_libres_principal, frame);
+
+	bool cmp_frames_libres (t_frame* frame1, t_frame* frame2){
+		return frame1->pos < frame2->pos;
+	}
+
+	list_sort(frames_libres_principal, cmp_frames_libres);
+
+	pthread_mutex_unlock(&m_TABLA_LIBRES_P);
+
+	pthread_mutex_lock(&m_LOGGER);
+		char* mensaje = string_from_format("Liberado frame nro. %d. MEMORIA PRINCIPAL ", frame->pos);
+		log_info(logger, mensaje);
+		free(mensaje);
+	pthread_mutex_unlock(&m_LOGGER);
 
 }
 
@@ -1857,7 +1861,7 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 	pthread_mutex_lock(&m_TABLA_LIBRES_V);
 
 	t_frame* frame = malloc(sizeof(t_frame));
-	frame->pos = pagina->nro_pagina;
+	frame->pos = pagina->nro_frame;
 	list_add(frames_swap, frame);
 
 	bool cmp_frames_libres (t_frame* frame1, t_frame* frame2){
@@ -1869,8 +1873,7 @@ void liberar_memoria_virtual(t_pagina_patota* pagina){
 	pthread_mutex_unlock(&m_TABLA_LIBRES_V);
 
 	pthread_mutex_lock(&m_LOGGER);
-		char* mensaje = string_new(); // TODO PONER NULL
-		mensaje = string_from_format("Liberado frame nro. %d. MEMORIA VIRTUAL ", frame->pos);
+		char* mensaje = string_from_format("Liberado frame nro. %d. MEMORIA VIRTUAL ", frame->pos);
 		log_info(logger, mensaje);
 		free(mensaje);
 	pthread_mutex_unlock(&m_LOGGER);
@@ -1886,16 +1889,18 @@ void borrar_patota(t_tabla_paginas* tabla){
 	void liberar_paginas(t_pagina_patota* pagina){
 
 		if(pagina->presente){
-			liberar_memoria_virtual(pagina);
-		}else{
 			liberar_memoria_principal_paginacion(pagina);
+		}else{
+			liberar_memoria_virtual(pagina);
 		}
-
+		free(pagina);
 	}
 
 	list_destroy_and_destroy_elements(tabla->tabla_paginas, liberar_paginas);
 
-	void liberar_direcciones(t_direcciones_trips* direccion){}
+	void liberar_direcciones(t_direcciones_trips* direccion){
+		free(direccion);
+	}
 
 	list_destroy_and_destroy_elements(tabla->tabla_direcciones, liberar_direcciones);
 

@@ -63,12 +63,8 @@ typedef struct{
 } t_tabla_paginas;
 
 typedef struct{
-	uint32_t pos;
+	int32_t pos;
 } t_frame;
-
-typedef struct{
-	uint32_t pos;
-} t_frame_libre;
 
 typedef struct{
 	t_pagina_patota* pagina;
@@ -126,7 +122,7 @@ typedef  struct  __attribute__((__packed__)) {
 
 typedef struct{
 
-	uint32_t marco;
+	int32_t marco;
 	char* estado;
 	char* proceso;
 	char* pagina;
