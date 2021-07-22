@@ -23,7 +23,7 @@
 
 #define MAX_BUFFER 1024
 
-int ID_SABOTAJE;
+uint32_t ID_SABOTAJE;
 char* PUNTO_MONTAJE;
 char* PUERTO;
 char* IP;

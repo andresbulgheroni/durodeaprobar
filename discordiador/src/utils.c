@@ -242,9 +242,10 @@ t_paquete* recibir_paquete(int32_t socket){
 		paquete->buffer->stream = malloc(paquete->buffer->size);
 		status = recv(socket, paquete->buffer->stream, paquete->buffer->size, MSG_WAITALL);
 
-		if(status == 0)
+		if(status == 0){
+			free(paquete->buffer->stream);
 			free(paquete->buffer);
-
+		}
 	}
 
 	if(status == 0){
@@ -759,6 +760,13 @@ solicitar_siguiente_tarea_rta* desserializar_solicitar_siguiente_tarea_rta(void*
 	mensaje->tarea->coordenadas->posX = atoi(partes[1]);
 	mensaje->tarea->coordenadas->posY = atoi(partes[2]);
 	mensaje->tarea->duracion = atoi(partes[3]);
+
+	int i = 0;
+	while(partes[i] != NULL){
+		free(partes[i]);
+		i++;
+	}
+	free(partes);
 
 	free(tarea_mensaje);
 

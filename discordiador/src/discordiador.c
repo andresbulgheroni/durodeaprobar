@@ -32,6 +32,7 @@ int main(void){
 	char* option = readline("\nSeleccione la configuracion que desea utilizar:\n1.\tGeneral\n2.\tDiscordiador_FIFO\n3.\tDiscordiador_RR\n4.\tMemoria_Paginacion\n5.\tMemoria_Segmentacion\n6.\tFile System\n7.\tSabotaje\n");
 
 	leerConfig(option);
+	free(option);
 	iniciarLog();
 	inicializarListasGlobales();
 	int32_t*socketSabotaje = malloc(sizeof(int32_t));
@@ -1187,6 +1188,13 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 				}
 
+				int i = 0;
+				while(nombreTarea[i] != NULL){
+					free(nombreTarea[i]);
+					i++;
+				}
+				free(nombreTarea);
+
 				log_info(logger,"le asigno la primer tarea al tripulante %d\n",tripulante->idTripulante);
 
 				break;
@@ -1343,6 +1351,12 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 							}
 
+							int i = 0;
+							while(nombreTarea[i] != NULL){
+								free(nombreTarea[i]);
+								i++;
+							}
+							free(nombreTarea);
 
 
 							break;
@@ -1817,6 +1831,12 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 
 						}
 
+						int i = 0;
+						while(nombreTarea[i] != NULL){
+							free(nombreTarea[i]);
+							i++;
+						}
+						free(nombreTarea);
 
 						log_info(logger,"se le asigno otra tarea al tripulante%d",tripulante->idTripulante);
 
@@ -1914,6 +1934,13 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 							}
 
 							agregarTripulanteAListaReadyYAvisar(tripulante);
+
+							int i = 0;
+							while(nombreTarea[i] != NULL){
+								free(nombreTarea[i]);
+								i++;
+							}
+							free(nombreTarea);
 
 							break;
 
@@ -2050,6 +2077,13 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 							tripulante->tareaAsignada->finalizoTarea=false;
 
 						}
+
+						int i = 0;
+						while(nombreTarea[i] != NULL){
+							free(nombreTarea[i]);
+							i++;
+						}
+						free(nombreTarea);
 
 						agregarTripulanteAListaReadyYAvisar(tripulante);
 
