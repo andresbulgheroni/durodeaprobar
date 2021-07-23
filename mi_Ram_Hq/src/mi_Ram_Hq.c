@@ -2373,7 +2373,9 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 
 			pthread_mutex_lock(&m_LOGGER);
-			log_info(logger, "Se creo la patota %d de tamanio %d con %d tripulantes", mensaje->idPatota, tamanio_necesario, mensaje->cant_tripulantes);
+			char* log = string_from_format("Se creo la patota %d de tamanio %d con %d tripulantes", mensaje->idPatota, tamanio_necesario, mensaje->cant_tripulantes);
+			log_info(logger, log);
+			free(log);
 			pthread_mutex_unlock(&m_LOGGER);
 
 		} else {
@@ -2502,7 +2504,9 @@ void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 	pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 	pthread_mutex_lock(&m_LOGGER);
-	log_info(logger, "Se modifico el estado del tripulante %d de la patota %d de %c a %c", mensaje->idTripulante, mensaje->idPatota, estado_anterior, estado);
+	char* log = string_from_format("Se modifico el estado del tripulante %d de la patota %d de %c a %c", mensaje->idTripulante, mensaje->idPatota, estado_anterior, estado);
+	log_info(logger, log);
+	free(log);
 	pthread_mutex_unlock(&m_LOGGER);
 
 	//libero memoria
@@ -2572,7 +2576,9 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 
 	if(!(*termino)){
 		pthread_mutex_lock(&m_LOGGER);
-		log_info(logger, "Al tripulante %d de la patota %d le tocaba la tarea numero %d: %s", mensaje->idTripulante, mensaje->idPatota, proxima_instruccion-1, tarea);
+		char* log = string_from_format("Al tripulante %d de la patota %d le tocaba la tarea numero %d: %s", mensaje->idTripulante, mensaje->idPatota, proxima_instruccion-1, tarea);
+		log_info(logger, log);
+		free(log);
 		pthread_mutex_unlock(&m_LOGGER);
 	}
 
@@ -2650,7 +2656,9 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
 
 		pthread_mutex_lock(&m_LOGGER);
-		log_info(logger, "El tripulante %d era el ultimo, se elimino toda la patota %d", mensaje->idTripulante, mensaje->idPatota);
+		char* log = string_from_format("El tripulante %d era el ultimo, se elimino toda la patota %d", mensaje->idTripulante, mensaje->idPatota);
+		log_info(logger, log);
+		free(log);
 		pthread_mutex_unlock(&m_LOGGER);
 
 		dictionary_remove(tablas_seg_patota, string_itoa(mensaje->idPatota));
