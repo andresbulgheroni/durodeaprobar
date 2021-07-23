@@ -634,6 +634,9 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			//LO SACO DE TODAS LAS LISTAS Y LO SACO DEL WHILE DEL HILO
 			tripulanteExpulsado->fueExpulsado=1;		//ESTO ES UN FLAG.
 
+			if(list_any_satisfy(listaNuevos,tieneMismoNombre)){
+							sacarTripulanteDeLista(tripulanteExpulsado,listaNuevos);
+			}
 			if(list_any_satisfy(listaReady,tieneMismoNombre)){
 				sacarTripulanteDeLista(tripulanteExpulsado,listaReady);
 			}
@@ -643,6 +646,10 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			if(list_any_satisfy(listaBloqueadosPorSabotaje,tieneMismoNombre)){
 				sacarTripulanteDeLista(tripulanteExpulsado,listaBloqueadosPorSabotaje);
 			}
+			if(list_any_satisfy(listaEjecutando,tieneMismoNombre)){
+				sacarTripulanteDeLista(tripulanteExpulsado,listaEjecutando);
+			}
+
 
 			list_remove_by_condition(tripulantes,tieneMismoNombre);
 			log_info(logger,"fui expulsado mi id era:%d",tripulanteExpulsado->idTripulante);
@@ -1283,7 +1290,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 			}
 			if(tripulante->fueExpulsado == 1 && !llegoATarea(tripulante)){
 				sem_post(&sem_planificarMultitarea);
-				agregarTripulanteAListaFinishedYAvisar(tripulante);
+
 				log_info(logger,"me expulsaron y no me dejaron terminar la tarea soy el tripulante con ID: %d",tripulante->idTripulante);
 			}
 
@@ -1451,7 +1458,6 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 
 		if(tripulante->fueExpulsado == 1){		//TODO
 			sem_post(&sem_planificarMultitarea);
-			agregarTripulanteAListaFinishedYAvisar(tripulante);
 			log_info(logger,"me expulsaron soy el tripulante con ID: %d",tripulante->idTripulante);
 		}
 
@@ -1572,7 +1578,7 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 								}
 				}
 			}else if(tripulante->fueExpulsado == 1){
-				agregarTripulanteAListaFinishedYAvisar(tripulante);
+
 				sem_post(&sem_planificarMultitarea);
 				log_info(logger,"fui expulsado soy el tripulante con ID: %d",tripulante->idTripulante);
 			}
@@ -2100,7 +2106,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 			}
 			}
 		} else if(tripulante->fueExpulsado == 1 && tripulante->tareaAsignada->finalizoTarea == false){
-			agregarTripulanteAListaFinishedYAvisar(tripulante);
+
 			sem_post(&sem_planificarMultitarea);
 
 			log_info(logger,"fui expulsado soy el tripulante con ID: %d",tripulante->idTripulante);
