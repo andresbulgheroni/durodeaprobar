@@ -599,7 +599,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			for(i=0; i<list_size(tripulantes);i++){
 				t_tripulante* tripulante = list_get(tripulantes, i);
-				printf("Tripulante: %s Patota: %s Status: %s",
+				printf("Tripulante: %s Patota: %s Status: %s\n",
 						string_itoa(tripulante->idTripulante),
 						string_itoa(tripulante->idPatota),
 						convertirEnumAString(tripulante->estado));
@@ -651,7 +651,10 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			}
 
 
-			list_remove_by_condition(tripulantes,tieneMismoNombre);
+			pthread_mutex_lock(&mutex_listaFinalizados);
+			list_add(listaFinalizados,tripulanteExpulsado);
+			pthread_mutex_unlock(&mutex_listaFinalizados);
+
 			log_info(logger,"fui expulsado mi id era:%d",tripulanteExpulsado->idTripulante);
 
 			free(mensajeExpulsar);
