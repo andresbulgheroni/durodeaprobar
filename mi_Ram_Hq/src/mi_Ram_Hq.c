@@ -2751,6 +2751,8 @@ void liberar_segmento(segmento* seg_viejo){
 //junta todos los segmentos en la parte superior de la memoria y crea un segmento libre con el restante
 void compactar_memoria(){
 
+	print_huecos_libres();
+
 	bool ordenar_segmentos(segmento* seg1, segmento* seg2){
 		return seg1->inicio < seg2->inicio;
 	}
@@ -2771,7 +2773,7 @@ void compactar_memoria(){
 	}
 
 	limite_seg_anterior = obtener_limite(seg_anterior);
-	offset = limite_seg_anterior;
+	offset = limite_seg_anterior + 1;
 
 	void modificar_inicio(segmento *seg){
 		if(seg->inicio != 0){
@@ -2779,13 +2781,13 @@ void compactar_memoria(){
 			//transcribo el segmento al buffer
 			memcpy(buffer + offset, memoria_principal + seg->inicio, seg->tamanio);
 
-			if(limite_seg_anterior != seg->inicio){
-				seg->inicio = limite_seg_anterior;
+			if(offset != seg->inicio){
+				seg->inicio = offset;
 			}
 
 			seg_anterior = seg;
 			limite_seg_anterior = obtener_limite(seg);
-			offset = limite_seg_anterior;
+			offset = limite_seg_anterior + 1;
 		}
 	}
 
@@ -2796,8 +2798,8 @@ void compactar_memoria(){
 	uint32_t tamanio_ocupado_en_memoria = obtener_limite(ult_seg);
 
 	segmento* segmento_libre = malloc(sizeof(segmento));
-	segmento_libre->inicio = tamanio_ocupado_en_memoria;
-	segmento_libre->tamanio = TAMANIO_MEMORIA - tamanio_ocupado_en_memoria;
+	segmento_libre->inicio = tamanio_ocupado_en_memoria + 1;
+	segmento_libre->tamanio = TAMANIO_MEMORIA - (tamanio_ocupado_en_memoria + 1);
 
 	list_clean(segmentos_libres);
 	list_add(segmentos_libres, segmento_libre);
@@ -2807,6 +2809,8 @@ void compactar_memoria(){
 	pthread_mutex_lock(&m_LOGGER);
 	log_info(logger, "Se compacta memoria");
 	pthread_mutex_unlock(&m_LOGGER);
+
+	print_huecos_libres();
 
 	free(buffer);
 } //no lleva semaforos porq tiene en el llamado a la funcion
