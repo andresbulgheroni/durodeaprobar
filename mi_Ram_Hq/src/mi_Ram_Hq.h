@@ -165,8 +165,8 @@ uint32_t generar_direccion_logica_paginacion(uint32_t pagina, uint32_t desplazam
 void obtener_direccion_logica_paginacion(uint32_t* pagina, uint32_t* desplazamiento, uint32_t direccion);
 bool entra_pcb(uint32_t cantidad);
 bool entra_en_memoria(uint32_t size_pcb);
-void* leer_de_memoria_principal(t_pagina_patota* pagina);
-void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from);
+void* leer_de_memoria_principal(t_pagina_patota* pagina, char* id_patota);
+void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from, char* id_patota);
 void liberar_memoria_principal_paginacion(t_pagina_patota* pagina);
 void liberar_memoria_virtual(t_pagina_patota* pagina);
 int32_t paginas_necesarias(uint32_t offset, uint32_t size);

@@ -655,7 +655,7 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 
 
 
-				guardar_en_memoria_principal(pagina, datos + i * TAMANIO_PAGINA);
+				guardar_en_memoria_principal(pagina, datos + i * TAMANIO_PAGINA, id_patota_string);
 
 				list_add(paginas, pagina);
 
@@ -668,7 +668,7 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 			pagina->nuevo = true;
 			pagina->ocupado = TAMANIO_PAGINA - (size - size_pcb);;
 
-			guardar_en_memoria_principal(pagina, datos + (cantidad_frames - 1) * TAMANIO_PAGINA);
+			guardar_en_memoria_principal(pagina, datos + (cantidad_frames - 1) * TAMANIO_PAGINA, id_patota_string);
 
 			list_add(paginas, pagina);
 
@@ -790,7 +790,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 				pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
-				void* frame = leer_de_memoria_principal(pagina_enc);
+				void* frame = leer_de_memoria_principal(pagina_enc, id_patota_string);
 
 				uint32_t disponible = TAMANIO_PAGINA - desplazamiento_pos;
 
@@ -836,7 +836,7 @@ void informar_movimiento_paginacion(informar_movimiento_ram_msg* mensaje, bool* 
 
 				pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
-				void* frame = leer_de_memoria_principal(pagina_enc);
+				void* frame = leer_de_memoria_principal(pagina_enc, id_patota_string);
 
 				uint32_t disponible = TAMANIO_PAGINA - desplazamiento_pos;
 
@@ -966,7 +966,7 @@ void cambiar_estado_paginacion(cambio_estado_msg* mensaje, bool* status){
 
 			*estado_nuevo = get_status(mensaje->estado);
 
-			void* frame = leer_de_memoria_principal(pagina_enc);
+			void* frame = leer_de_memoria_principal(pagina_enc, id_patota_string);
 
 			memcpy(estado_anterior, frame + desplazamiento_pos, cargar);
 			memcpy(frame + desplazamiento_pos, estado_nuevo, cargar);
@@ -1039,7 +1039,7 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 			pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
-			void* frame = leer_de_memoria_principal(pagina_enc);
+			void* frame = leer_de_memoria_principal(pagina_enc, id_patota_string);
 
 			uint32_t disponible = TAMANIO_PAGINA - despl_direccion_tareas;
 
@@ -1099,7 +1099,7 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 				pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
-				void* frame = leer_de_memoria_principal(pagina_enc);
+				void* frame = leer_de_memoria_principal(pagina_enc, id_patota_string);
 
 				uint32_t disponible = TAMANIO_PAGINA - desplazamiento_pos;
 
@@ -1156,7 +1156,7 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 					pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
-					frame = leer_de_memoria_principal(pagina_enc);
+					frame = leer_de_memoria_principal(pagina_enc, id_patota_string);
 
 					memcpy(frame_tareas, frame, TAMANIO_PAGINA);
 
@@ -1237,7 +1237,7 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 					pthread_mutex_lock(&m_MEM_PRINCIPAL);
 
-					void* frame = leer_de_memoria_principal(pagina_enc);
+					void* frame = leer_de_memoria_principal(pagina_enc, id_patota_string);
 
 					uint32_t disponible = TAMANIO_PAGINA - desplazamiento_pos;
 
@@ -1484,7 +1484,7 @@ bool swap_lleno(){
 	return valor;
 }
 
-void* leer_de_memoria_principal(t_pagina_patota* pagina){
+void* leer_de_memoria_principal(t_pagina_patota* pagina, char* id_patota){
 
 	void* frame;
 
@@ -1541,6 +1541,10 @@ void* leer_de_memoria_principal(t_pagina_patota* pagina){
 			pthread_mutex_unlock(&m_LISTA_REEMPLAZO);
 			pthread_mutex_unlock(&m_MEM_VIRTUAL);
 
+			char* mensaje = string_from_format("Pagina %d de la patota %s ingreso en frame %d que estaba libre", pagina->nro_pagina, id_patota, pagina->nro_frame);
+			log_info(logger, mensaje);
+			free(mensaje);
+
 		}else{
 
 			t_pagina_patota* reemplazo = NULL;
@@ -1592,7 +1596,7 @@ void* leer_de_memoria_principal(t_pagina_patota* pagina){
 
 			pthread_mutex_lock(&m_LOGGER);
 			if(nro_frame >= 0){
-				char* mensaje = string_from_format("Reemplazo en frame %d", nro_frame);
+				char* mensaje = string_from_format("Pagina %d de la patota %s reeemplazo en frame %d", pagina->nro_pagina, id_patota,nro_frame);
 				log_info(logger, mensaje);
 				free(mensaje);
 			}else{
@@ -1613,7 +1617,7 @@ void* leer_de_memoria_principal(t_pagina_patota* pagina){
 	return frame;
 }
 
-void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from){
+void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from, char* id_patota){
 
 	pthread_mutex_lock(&m_MEM_PRINCIPAL);
 	pthread_mutex_lock(&m_LISTA_REEMPLAZO);
@@ -1662,6 +1666,10 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from){
 			pthread_mutex_unlock(&m_LISTA_REEMPLAZO);
 			pthread_mutex_unlock(&m_MEM_VIRTUAL);
 			pthread_mutex_unlock(&m_MEM_PRINCIPAL);
+
+			char* mensaje = string_from_format("Pagina %d de la patota %s ingreso en frame %d que estaba libre", pagina->nro_pagina, id_patota, pagina->nro_frame);
+			log_info(logger, mensaje);
+			free(mensaje);
 
 		}else{
 
@@ -1721,7 +1729,7 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from){
 
 			pthread_mutex_lock(&m_LOGGER);
 			if(nro_frame >= 0){
-				char* mensaje = string_from_format("Reemplazo en frame %d", nro_frame);
+				char* mensaje = string_from_format("Pagina %d de la patota %s reeemplazo en frame %d", pagina->nro_pagina, id_patota,nro_frame);
 				log_info(logger, mensaje);
 				free(mensaje);
 			}else{
@@ -2373,9 +2381,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 
 			pthread_mutex_lock(&m_LOGGER);
-			char* log = string_from_format("Se creo la patota %d de tamanio %d con %d tripulantes", mensaje->idPatota, tamanio_necesario, mensaje->cant_tripulantes);
-			log_info(logger, log);
-			free(log);
+			log_info(logger, "Se creo la patota %d de tamanio %d con %d tripulantes", mensaje->idPatota, tamanio_necesario, mensaje->cant_tripulantes);
 			pthread_mutex_unlock(&m_LOGGER);
 
 		} else {
@@ -2504,9 +2510,7 @@ void cambiar_estado_segmentacion(cambio_estado_msg* mensaje, bool* status){
 	pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
 	pthread_mutex_lock(&m_LOGGER);
-	char* log = string_from_format("Se modifico el estado del tripulante %d de la patota %d de %c a %c", mensaje->idTripulante, mensaje->idPatota, estado_anterior, estado);
-	log_info(logger, log);
-	free(log);
+	log_info(logger, "Se modifico el estado del tripulante %d de la patota %d de %c a %c", mensaje->idTripulante, mensaje->idPatota, estado_anterior, estado);
 	pthread_mutex_unlock(&m_LOGGER);
 
 	//libero memoria
@@ -2576,9 +2580,7 @@ char* siguiente_tarea_segmentacion(solicitar_siguiente_tarea_msg* mensaje, bool*
 
 	if(!(*termino)){
 		pthread_mutex_lock(&m_LOGGER);
-		char* log = string_from_format("Al tripulante %d de la patota %d le tocaba la tarea numero %d: %s", mensaje->idTripulante, mensaje->idPatota, proxima_instruccion-1, tarea);
-		log_info(logger, log);
-		free(log);
+		log_info(logger, "Al tripulante %d de la patota %d le tocaba la tarea numero %d: %s", mensaje->idTripulante, mensaje->idPatota, proxima_instruccion-1, tarea);
 		pthread_mutex_unlock(&m_LOGGER);
 	}
 
@@ -2656,9 +2658,7 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
 
 		pthread_mutex_lock(&m_LOGGER);
-		char* log = string_from_format("El tripulante %d era el ultimo, se elimino toda la patota %d", mensaje->idTripulante, mensaje->idPatota);
-		log_info(logger, log);
-		free(log);
+		log_info(logger, "El tripulante %d era el ultimo, se elimino toda la patota %d", mensaje->idTripulante, mensaje->idPatota);
 		pthread_mutex_unlock(&m_LOGGER);
 
 		dictionary_remove(tablas_seg_patota, string_itoa(mensaje->idPatota));
