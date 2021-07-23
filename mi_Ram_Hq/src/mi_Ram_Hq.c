@@ -2169,8 +2169,11 @@ segmento* buscar_segmento_tripulante(uint32_t id_tripulante, uint32_t id_patota)
 uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 
 	pthread_mutex_lock(&m_TABLAS_SEGMENTOS);
-	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, string_itoa(id_patota));
+	char* id_patota_str = string_itoa(id_patota);
+	tabla_segmentos* tabla_seg = dictionary_get(tablas_seg_patota, id_patota_str);
 	pthread_mutex_unlock(&m_TABLAS_SEGMENTOS);
+
+	free(id_patota_str);
 
 	t_list* tabla_patota = tabla_seg->segmentos;
 	uint32_t contador = 2;
@@ -2350,14 +2353,14 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 
 			list_iterate(tcbs, cargarTcbDatos);
 
-			//Libero las estructuras para guardar en memoria
-			free(pcb);
-			free(id_patota_str);
-
 			void liberar_tcbs(t_tcb* tcb){ free(tcb); }
 			list_destroy_and_destroy_elements(tcbs, liberar_tcbs);
 
-			dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_seg);
+			dictionary_put(tablas_seg_patota, id_patota_str, tabla_seg);
+
+			//Libero las estructuras para guardar en memoria
+			free(pcb);
+			free(id_patota_str);
 
 			pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 			pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
@@ -2598,8 +2601,6 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 	pthread_mutex_lock(&(tabla_seg->m_TABLA));
 	t_list* tabla_patota = tabla_seg->segmentos;
 
-	free(id_patota_str);
-
 	//busco el segmento
 	segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
 
@@ -2661,13 +2662,15 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		log_info(logger, "El tripulante %d era el ultimo, se elimino toda la patota %d", mensaje->idTripulante, mensaje->idPatota);
 		pthread_mutex_unlock(&m_LOGGER);
 
-		dictionary_remove(tablas_seg_patota, string_itoa(mensaje->idPatota));
+		dictionary_remove(tablas_seg_patota, id_patota_str);
 		pthread_mutex_destroy(&(tabla_seg->m_TABLA));
 		free(tabla_seg);
 
 	} else {
 	pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 	}
+
+	free(id_patota_str);
 }
 
 //saca un segmento de la lista libres, si sobraba segmento guarda el sobrante, falta revision y free
