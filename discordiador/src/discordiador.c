@@ -592,14 +592,14 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			time_t tiempo = time(0);
 			struct tm *tlocal = localtime(&tiempo);
 			char output[128];
-			strftime(output,128,"%d/%m/%y %H:%M:%S",tlocal);
-			printf("\nEstado de la Nave: %s",output);
+			strftime(output,128,"%d/%m/%y %H:%M:%S\n",tlocal);
+			printf("Estado de la Nave: %s\n",output);
 			log_info(logger,"Estado de la Nave: %s",output);
 			uint32_t i = 0;
 
 			for(i=0; i<list_size(tripulantes);i++){
 				t_tripulante* tripulante = list_get(tripulantes, i);
-				printf("Tripulante: %s Patota: %s Status: %s",
+				printf("Tripulante: %s Patota: %s Status: %s\n",
 						string_itoa(tripulante->idTripulante),
 						string_itoa(tripulante->idPatota),
 						convertirEnumAString(tripulante->estado));
@@ -634,6 +634,9 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			//LO SACO DE TODAS LAS LISTAS Y LO SACO DEL WHILE DEL HILO
 			tripulanteExpulsado->fueExpulsado=1;		//ESTO ES UN FLAG.
 
+			if(list_any_satisfy(listaNuevos,tieneMismoNombre)){
+							sacarTripulanteDeLista(tripulanteExpulsado,listaNuevos);
+			}
 			if(list_any_satisfy(listaReady,tieneMismoNombre)){
 				sacarTripulanteDeLista(tripulanteExpulsado,listaReady);
 			}
@@ -643,8 +646,15 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			if(list_any_satisfy(listaBloqueadosPorSabotaje,tieneMismoNombre)){
 				sacarTripulanteDeLista(tripulanteExpulsado,listaBloqueadosPorSabotaje);
 			}
+			if(list_any_satisfy(listaEjecutando,tieneMismoNombre)){
+				sacarTripulanteDeLista(tripulanteExpulsado,listaEjecutando);
+			}
 
-			list_remove_by_condition(tripulantes,tieneMismoNombre);
+			tripulanteExpulsado->estado =FINISHED;
+			pthread_mutex_lock(&mutex_listaFinalizados);
+			list_add(listaFinalizados,tripulanteExpulsado);
+			pthread_mutex_unlock(&mutex_listaFinalizados);
+
 			log_info(logger,"fui expulsado mi id era:%d",tripulanteExpulsado->idTripulante);
 
 			free(mensajeExpulsar);
@@ -1283,7 +1293,7 @@ void ejecutarTripulante(t_tripulante* tripulante){
 			}
 			if(tripulante->fueExpulsado == 1 && !llegoATarea(tripulante)){
 				sem_post(&sem_planificarMultitarea);
-				agregarTripulanteAListaFinishedYAvisar(tripulante);
+
 				log_info(logger,"me expulsaron y no me dejaron terminar la tarea soy el tripulante con ID: %d",tripulante->idTripulante);
 			}
 
@@ -1451,7 +1461,6 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 
 		if(tripulante->fueExpulsado == 1){		//TODO
 			sem_post(&sem_planificarMultitarea);
-			agregarTripulanteAListaFinishedYAvisar(tripulante);
 			log_info(logger,"me expulsaron soy el tripulante con ID: %d",tripulante->idTripulante);
 		}
 
@@ -1572,7 +1581,7 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 								}
 				}
 			}else if(tripulante->fueExpulsado == 1){
-				agregarTripulanteAListaFinishedYAvisar(tripulante);
+
 				sem_post(&sem_planificarMultitarea);
 				log_info(logger,"fui expulsado soy el tripulante con ID: %d",tripulante->idTripulante);
 			}
@@ -2100,7 +2109,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 			}
 			}
 		} else if(tripulante->fueExpulsado == 1 && tripulante->tareaAsignada->finalizoTarea == false){
-			agregarTripulanteAListaFinishedYAvisar(tripulante);
+
 			sem_post(&sem_planificarMultitarea);
 
 			log_info(logger,"fui expulsado soy el tripulante con ID: %d",tripulante->idTripulante);
