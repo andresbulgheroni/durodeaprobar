@@ -2157,7 +2157,7 @@ uint32_t buscar_offset_tripulante(uint32_t id_tripulante, uint32_t id_patota){
 
 void eliminar_patota(t_list* tabla){
 
-	void liberar_segmentos(segmento* seg){ }
+	void liberar_segmentos(segmento* seg){ free(seg); }
 	list_destroy_and_destroy_elements(tabla, liberar_segmentos);
 }
 
@@ -2556,7 +2556,53 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 
 	free(id_patota_str);
 
-	if(list_size(tabla_patota) == 3){ //osea, es el ultimo tripulante
+	//busco el segmento
+	segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
+
+	uint32_t index = 0;
+	uint32_t contador = 0;
+
+	void index_del_segmento(segmento* seg){
+		if(seg->inicio == seg_tripulante->inicio){
+			index = contador;
+		}
+		contador++;
+	}
+
+	list_iterate(tabla_patota, index_del_segmento);
+
+	pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
+	pthread_mutex_lock(&m_SEG_EN_MEMORIA);
+
+	// saco el segmento de las tablas globales
+	liberar_segmento(seg_tripulante);
+
+	// saco el segmento de la tabla de segmentos de la patota
+	void liberar_seg(segmento* seg){
+		free(seg);
+	}
+	list_remove_and_destroy_element(tabla_patota, index, liberar_seg);
+
+	pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
+	pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
+
+	if(mapa_mostrar){
+
+		pthread_mutex_lock(&m_MAPA);
+
+		item_borrar(mapa, get_tripulante_codigo(mensaje->idTripulante));
+
+		nivel_gui_dibujar(mapa);
+
+		pthread_mutex_unlock(&m_MAPA);
+
+	}
+
+	pthread_mutex_lock(&m_LOGGER);
+	log_info(logger, "Se expulso al tripulante %d de la patota %d", mensaje->idTripulante, mensaje->idPatota);
+	pthread_mutex_unlock(&m_LOGGER);
+
+	if(list_size(tabla_patota) == 2){ //osea, es el ultimo tripulante
 
 		pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_lock(&m_SEG_EN_MEMORIA);
@@ -2564,20 +2610,8 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		list_iterate(tabla_patota, liberar_segmento); // aca libera el segmento en las tablas
 		eliminar_patota(tabla_patota);
 
-		if(mapa_mostrar){
-
-			pthread_mutex_lock(&m_MAPA);
-
-			item_borrar(mapa, get_tripulante_codigo(mensaje->idTripulante));
-			nivel_gui_dibujar(mapa);
-
-			pthread_mutex_unlock(&m_MAPA);
-
-		}
-
 		pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
 		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
-		pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 
 		pthread_mutex_lock(&m_LOGGER);
 		log_info(logger, "El tripulante %d era el ultimo, se elimino toda la patota %d", mensaje->idTripulante, mensaje->idPatota);
@@ -2587,50 +2621,8 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		pthread_mutex_destroy(&(tabla_seg->m_TABLA));
 		free(tabla_seg);
 
-	} else {
-		segmento* seg_tripulante = buscar_segmento_tripulante(mensaje->idTripulante, mensaje->idPatota);
-
-		uint32_t index = 0; // = seg_tripulante->numero_segmento;
-		uint32_t contador = 0;
-
-		void index_del_segmento(segmento* seg){
-			if(seg->inicio == seg_tripulante->inicio){
-				index = contador;
-			}
-			contador++;
-		}
-
-		list_iterate(tabla_patota, index_del_segmento);
-
-		pthread_mutex_lock(&m_SEGMENTOS_LIBRES);
-		pthread_mutex_lock(&m_SEG_EN_MEMORIA);
-
-		liberar_segmento(seg_tripulante);
-
-		void liberar_seg(segmento* seg){ }
-		// saco el segmento de la tabla de segmentos de la patota
-		list_remove_and_destroy_element(tabla_patota, index, liberar_seg);
-
-		pthread_mutex_unlock(&(tabla_seg->m_TABLA));
-		pthread_mutex_unlock(&m_SEGMENTOS_LIBRES);
-		pthread_mutex_unlock(&m_SEG_EN_MEMORIA);
-
-		if(mapa_mostrar){
-
-			pthread_mutex_lock(&m_MAPA);
-
-			item_borrar(mapa, get_tripulante_codigo(mensaje->idTripulante));
-
-			nivel_gui_dibujar(mapa);
-
-			pthread_mutex_unlock(&m_MAPA);
-
-		}
-
-		pthread_mutex_lock(&m_LOGGER);
-		log_info(logger, "Se expulso al tripulante %d de la patota %d", mensaje->idTripulante, mensaje->idPatota);
-		pthread_mutex_unlock(&m_LOGGER);
 	}
+	pthread_mutex_unlock(&(tabla_seg->m_TABLA));
 }
 
 //saca un segmento de la lista libres, si sobraba segmento guarda el sobrante, falta revision y free
@@ -2738,20 +2730,19 @@ void liberar_segmento(segmento* seg_viejo){
 			}
 		}
 
-		//lo saca de la lista de segmentos en memoria
-		bool es_el_segmento(segmento* seg_a_comparar){
-			return seg->inicio == seg_a_comparar->inicio && seg->tamanio == seg_a_comparar->tamanio;
-		}
+		// saco el segmento de la lista de segmentos en memoria
+		index = 0;
+		contador = 0;
 
-		//todo ver si cambiar esto
-		list_remove_by_condition(segmentos_en_memoria, es_el_segmento);
+		list_iterate(segmentos_en_memoria, index_segmento);
+
+		list_remove(segmentos_en_memoria, index);
+
 	}
 }//no lleva semaforos, porque donde la llamo ya estan los semaforos
 
 //junta todos los segmentos en la parte superior de la memoria y crea un segmento libre con el restante
 void compactar_memoria(){
-
-	print_huecos_libres();
 
 	bool ordenar_segmentos(segmento* seg1, segmento* seg2){
 		return seg1->inicio < seg2->inicio;
@@ -2795,11 +2786,11 @@ void compactar_memoria(){
 
 	uint32_t cant_segmentos = list_size(segmentos_en_memoria);
 	segmento* ult_seg = list_get(segmentos_en_memoria, cant_segmentos - 1);
-	uint32_t tamanio_ocupado_en_memoria = obtener_limite(ult_seg);
+	uint32_t tamanio_ocupado_en_memoria = obtener_limite(ult_seg) + 1;
 
 	segmento* segmento_libre = malloc(sizeof(segmento));
-	segmento_libre->inicio = tamanio_ocupado_en_memoria + 1;
-	segmento_libre->tamanio = TAMANIO_MEMORIA - (tamanio_ocupado_en_memoria + 1);
+	segmento_libre->inicio = tamanio_ocupado_en_memoria;
+	segmento_libre->tamanio = TAMANIO_MEMORIA - tamanio_ocupado_en_memoria;
 
 	list_clean(segmentos_libres);
 	list_add(segmentos_libres, segmento_libre);
@@ -2809,8 +2800,6 @@ void compactar_memoria(){
 	pthread_mutex_lock(&m_LOGGER);
 	log_info(logger, "Se compacta memoria");
 	pthread_mutex_unlock(&m_LOGGER);
-
-	print_huecos_libres();
 
 	free(buffer);
 } //no lleva semaforos porq tiene en el llamado a la funcion
