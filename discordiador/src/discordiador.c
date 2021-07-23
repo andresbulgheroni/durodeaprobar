@@ -627,6 +627,8 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			t_tripulante*tripulanteExpulsado = list_find(tripulantes,tieneMismoNombre);
 
+			if(tripulanteExpulsado !=NULL){
+
 			mensajeExpulsar->idTripulante= tripulanteExpulsado->idTripulante;
 			mensajeExpulsar->idPatota= tripulanteExpulsado->idPatota;
 			enviar_paquete(mensajeExpulsar,EXPULSAR_TRIPULANTE_MSG,*socketDiscordiador);
@@ -659,6 +661,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 			free(mensajeExpulsar);
 
+			}
 
 			break;
 		}
