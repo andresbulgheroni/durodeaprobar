@@ -2265,12 +2265,11 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 			seg_tareas->tamanio = size_tareas;
 			list_add(tabla_seg->segmentos, seg_tareas);
 
-			segmento* seg_tcb[mensaje->cant_tripulantes];
 			for(uint32_t j = 0; j < mensaje->cant_tripulantes; j++){
-				seg_tcb[j] = malloc(sizeof(segmento));
-				seg_tcb[j]->numero_segmento = j+2;
-				seg_tcb[j]->tamanio = sizeof(t_tcb);
-				list_add(tabla_seg->segmentos, seg_tcb[j]);
+				segmento* seg_tcb = malloc(sizeof(segmento));
+				seg_tcb->numero_segmento = j+2;
+				seg_tcb->tamanio = sizeof(t_tcb);
+				list_add(tabla_seg->segmentos, seg_tcb);
 			}
 
 			//Cargo datos para copiarlos a memoria
@@ -2328,22 +2327,23 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 				agregar_seg_listas(seg_tareas);
 			}
 
-			uint32_t orden_seg_tcb = 0;
+			uint32_t orden_seg_tcb = 2;
 
 			//guarda los tcb
 			void cargarTcbDatos(t_tcb* tcb){
+				segmento* seg_tcb = list_get(tabla_seg->segmentos, orden_seg_tcb);
 				if(entra_en_un_seg_libre(sizeof(t_tcb))){
 					offset = get_espacio_libre(sizeof(t_tcb));
-					seg_tcb[orden_seg_tcb]->inicio = offset;
+					seg_tcb->inicio = offset;
 					memcpy(memoria_principal + offset, tcb, sizeof(t_tcb));
-					agregar_seg_listas(seg_tcb[orden_seg_tcb]);
+					agregar_seg_listas(seg_tcb);
 					orden_seg_tcb ++;
 				} else {
 					compactar_memoria();
 					offset = get_espacio_libre(sizeof(t_tcb));
-					seg_tcb[orden_seg_tcb]->inicio = offset;
+					seg_tcb->inicio = offset;
 					memcpy(memoria_principal + offset, tcb, sizeof(t_tcb));
-					agregar_seg_listas(seg_tcb[orden_seg_tcb]);
+					agregar_seg_listas(seg_tcb);
 					orden_seg_tcb ++;
 				}
 			}
@@ -2354,7 +2354,7 @@ void crear_patota_segmentacion(iniciar_patota_msg* mensaje, bool* status){
 			free(pcb);
 			free(id_patota_str);
 
-			void liberar_tcbs(t_tcb* tcb){	}
+			void liberar_tcbs(t_tcb* tcb){ free(tcb); }
 			list_destroy_and_destroy_elements(tcbs, liberar_tcbs);
 
 			dictionary_put(tablas_seg_patota, string_itoa(mensaje->idPatota), tabla_seg);
@@ -2665,8 +2665,9 @@ void expulsar_tripulante_segmentacion(expulsar_tripulante_msg* mensaje, bool* st
 		pthread_mutex_destroy(&(tabla_seg->m_TABLA));
 		free(tabla_seg);
 
-	}
+	} else {
 	pthread_mutex_unlock(&(tabla_seg->m_TABLA));
+	}
 }
 
 //saca un segmento de la lista libres, si sobraba segmento guarda el sobrante, falta revision y free
