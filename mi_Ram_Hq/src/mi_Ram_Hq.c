@@ -2682,10 +2682,7 @@ void liberar_segmento(segmento* seg_viejo){
 
 	if(list_any_satisfy(segmentos_en_memoria, esta_el_segmento)){
 
-		//agrega a la lista de segmentos libres
-		list_add(segmentos_libres, seg);
-		ordenar_lista_segmentos_libres();
-
+		// saco el segmento de la lista de segmentos en memoria
 		uint32_t index = 0;
 		uint32_t contador = 0;
 
@@ -2695,6 +2692,19 @@ void liberar_segmento(segmento* seg_viejo){
 			}
 			contador++;
 		}
+
+		list_iterate(segmentos_en_memoria, index_segmento);
+
+		list_remove(segmentos_en_memoria, index);
+
+		index = 0;
+		contador = 0;
+
+		///////
+
+		//agregO a la lista de segmentos libres
+		list_add(segmentos_libres, seg);
+		ordenar_lista_segmentos_libres();
 
 		//busca el index del segmento que acaba de agregar
 		list_iterate(segmentos_libres, index_segmento);
@@ -2729,14 +2739,6 @@ void liberar_segmento(segmento* seg_viejo){
 				ordenar_lista_segmentos_libres();
 			}
 		}
-
-		// saco el segmento de la lista de segmentos en memoria
-		index = 0;
-		contador = 0;
-
-		list_iterate(segmentos_en_memoria, index_segmento);
-
-		list_remove(segmentos_en_memoria, index);
 
 	}
 }//no lleva semaforos, porque donde la llamo ya estan los semaforos
@@ -2806,8 +2808,15 @@ void compactar_memoria(){
 
 void print_huecos_libres(){
 
+	printf("HUECOS LIBRES");
 	for(int32_t i = 0; i<list_size(segmentos_libres); i++){
 		segmento* seg = list_get(segmentos_libres, i);
+		printf("Inicio: %d, tamanio: %d, limite: %d\n", seg->inicio, seg->tamanio, obtener_limite(seg));
+	}
+
+	printf("SEGMENTOS EN MEMORIA");
+	for(int32_t i = 0; i<list_size(segmentos_en_memoria); i++){
+		segmento* seg = list_get(segmentos_en_memoria, i);
 		printf("Inicio: %d, tamanio: %d, limite: %d\n", seg->inicio, seg->tamanio, obtener_limite(seg));
 	}
 
