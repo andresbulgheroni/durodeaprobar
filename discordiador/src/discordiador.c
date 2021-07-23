@@ -592,8 +592,8 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			time_t tiempo = time(0);
 			struct tm *tlocal = localtime(&tiempo);
 			char output[128];
-			strftime(output,128,"%d/%m/%y %H:%M:%S",tlocal);
-			printf("\nEstado de la Nave: %s",output);
+			strftime(output,128,"%d/%m/%y %H:%M:%S\n",tlocal);
+			printf("Estado de la Nave: %s\n",output);
 			log_info(logger,"Estado de la Nave: %s",output);
 			uint32_t i = 0;
 
@@ -650,7 +650,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 				sacarTripulanteDeLista(tripulanteExpulsado,listaEjecutando);
 			}
 
-
+			tripulanteExpulsado->estado =FINISHED;
 			pthread_mutex_lock(&mutex_listaFinalizados);
 			list_add(listaFinalizados,tripulanteExpulsado);
 			pthread_mutex_unlock(&mutex_listaFinalizados);
