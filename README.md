@@ -24,7 +24,7 @@ Si solo se desea compilar los modulos, ejecutar `install.sh -c`
 
 ## Iniciando módulos
 
-Cada módulo podrá iniciarse ejecutando `mongo.sh`, `ram.sh` y `discordiador.sh`, en ese orden, con el parámetro correspondiente:
+Los módulos podrán iniciarse ejecutando `mongo.sh`, `ram.sh` y `discordiador.sh`, en ese orden, con el parámetro correspondiente:
 
 ### Solo compilar:
 ```
