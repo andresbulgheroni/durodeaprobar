@@ -15,6 +15,7 @@ Para instalar las dependencias y compilar el proyecto, ejecutar `install.sh` con
 ```
 git clone https://github.com/sisoputnfrba/tp-2021-1c-DuroDeAprobar.git
 cd tp-2021-1c-DuroDeAprobar
+git checkout deploy2
 ./install.sh -f
 ```
 
