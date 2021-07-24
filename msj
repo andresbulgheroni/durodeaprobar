@@ -27,4 +27,25 @@ INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/PAG_PatotaB.txt 3|3
 INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/PAG_PatotaC.txt 5|5
 INICIAR_PLANIFICACION
 
+Discordiador CPU
+INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/CPU_Patota1.txt 1|1
+INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/CPU_Patota2.txt 1|0
+INICIAR_PLANIFICACION
+LISTAR_TRIPULANTES
+
+DETENER_PLANIFICACION
+INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/CPU_Patota3.txt 0|1
+INICIAR_PLANIFICACION
+LISTAR_TRIPULANTES
+
+DIscordiador E/S
+
+INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/IO_Patota1.txt 1|1
+INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/IO_Patota2.txt 1|0
+INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/IO_Patota3.txt 0|1
+INICIAR_PLANIFICACION
+LISTAR_TRIPULANTES
+
+
+
 
