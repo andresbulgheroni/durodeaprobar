@@ -10,29 +10,34 @@
 
 ## Guía de deploy
 
-Para instalar las dependencias y compilar el proyecto, ejecutar `script.sh` con el parámetro `-c`:
+Para instalar las dependencias y compilar el proyecto, ejecutar `install.sh` con el parámetro `-f`:
 
 ```
 git clone https://github.com/sisoputnfrba/tp-2021-1c-DuroDeAprobar.git
 cd tp-2021-1c-DuroDeAprobar
-./script.sh -c
+./install.sh -f
 ```
+
+Si solo se desea instalar las dependencias, ejecutar `install.sh -d`
+
+Si solo se desea compilar los modulos, ejecutar `install.sh -c`
 
 ## Iniciando módulos
 
-Cada módulo podrá iniciarse ejecutando `script.sh` con el parámetro correspondiente, en el siguiente orden:
+Cada módulo podrá iniciarse ejecutando `mongo.sh`, `ram.sh` y `discordiador.sh`, en ese orden, con el parámetro correspondiente:
 
-### i_Mongo_Store
+### Solo compilar:
 ```
-./script.sh -i
-```
-
-### mi_Ram_Hq
-```
-./script.sh -m
+./<modulo> -c
 ```
 
-### discordiador
+### Correr modulo con valgrind:
 ```
-./script.sh -d
+./<modulo> -v
 ```
+
+### Iniciar modulo normalmente:
+```
+./<modulo> -i
+```
+
