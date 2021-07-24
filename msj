@@ -1,6 +1,6 @@
 General
 
-INICIAR_PATOTA 3  home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/ES3_Patota1.txt 9|9 0|0 5|5
+INICIAR_PATOTA 3 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/ES3_Patota1.txt 9|9 0|0 5|5
 INICIAR_PATOTA 3 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/ES3_Patota2.txt 4|0 2|6 8|2
 INICIAR_PATOTA 3 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/ES3_Patota3.txt 2|3 5|8 5|3
 INICIAR_PATOTA 3 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/ES3_Patota4.txt 0|9 4|4 9|0
@@ -45,6 +45,21 @@ INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/IO_Patota2.txt 1|0
 INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/IO_Patota3.txt 0|1
 INICIAR_PLANIFICACION
 LISTAR_TRIPULANTES
+
+File System - normal
+
+INICIAR_PATOTA 3 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/FS_PatotaA.txt
+INICIAR_PATOTA 3 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/FS_PatotaB.txt
+INICIAR_PLANIFICACION
+
+File System - sabotajes
+
+INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/FSCK_PatotaA.txt 0|0
+INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/FSCK_PatotaB.txt 8|0
+INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/FSCK_PatotaC.txt 8|8
+INICIAR_PATOTA 1 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/FSCK_PatotaD.txt 0|8
+INICIAR_PLANIFICACION
+
 
 
 
