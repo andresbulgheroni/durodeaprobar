@@ -2161,7 +2161,7 @@ int32_t get_espacio_libre(uint32_t size){
 	t_list* lista_auxiliar = list_create();
 
 	bool entra_en_el_segmento(segmento* seg){
-		return seg->tamanio > size;
+		return seg->tamanio >= size;
 	}
 
 	uint32_t criterio_seleccion = CRITERIO_SELECCION;
