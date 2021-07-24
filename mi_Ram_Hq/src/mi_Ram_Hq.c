@@ -1542,7 +1542,7 @@ void* leer_de_memoria_principal(t_pagina_patota* pagina, char* id_patota){
 
 			t_frame* first_fit = list_remove(frames_libres_principal, 0);
 			nro_frame = first_fit->pos;
-			if(ALGORITMO_REEMPLAZO == LRU){
+			if(ALGORITMO_REEMPLAZO == CLOCK){
 				buffer_clock_pos = nro_frame + 1;
 				if(buffer_clock_pos == (TAMANIO_MEMORIA / 32)){
 					buffer_clock_pos = 0;
@@ -1702,7 +1702,7 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from, char* id_
 
 			t_frame* first_fit = list_remove(frames_libres_principal, 0);
 			nro_frame = first_fit->pos;
-			if(ALGORITMO_REEMPLAZO == LRU){
+			if(ALGORITMO_REEMPLAZO == CLOCK){
 				buffer_clock_pos = nro_frame + 1;
 				if(buffer_clock_pos == (TAMANIO_MEMORIA / 32)){
 					buffer_clock_pos = 0;
