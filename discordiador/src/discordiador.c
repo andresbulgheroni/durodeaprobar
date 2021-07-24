@@ -1271,29 +1271,11 @@ void ejecutarTripulante(t_tripulante* tripulante){
 
 					distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
 
-					if(llegoATarea(tripulante) && tripulante->fueExpulsado != 1 && haySabotaje != 1){
 
-						log_info(logger,"llego a la tarea el tripulante %d",tripulante->idTripulante);
-
-						if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)==TAREA_CPU){
-
-							log_info(logger,"la tarea es de CPU del tripulante %d",tripulante->idTripulante);
-
-														inicio_tarea_msg* mandarTareaCpu=malloc(sizeof(inicio_tarea_msg));
-														mandarTareaCpu->idTripulante = tripulante->idTripulante;
-														mandarTareaCpu->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
-														mandarTareaCpu->parametros =tripulante->tareaAsignada->parametros;
-
-														enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
-														free(mandarTareaCpu);
-
-						}
-
-
-					}
 				}
 
 			}
+
 
 
 
@@ -1432,6 +1414,14 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 
 	if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)==TAREA_CPU){
 		log_info(logger, "el tripulante %d esta realizando una tarea de CPU ",tripulante->idTripulante);
+		inicio_tarea_msg* mandarTareaCpu=malloc(sizeof(inicio_tarea_msg));
+		mandarTareaCpu->idTripulante = tripulante->idTripulante;
+		mandarTareaCpu->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
+		mandarTareaCpu->parametros =0;
+
+		enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
+		free(mandarTareaCpu);
+
 		while(tripulante->misCiclosDeCPU<tripulante->tareaAsignada->duracion && tripulante->fueExpulsado != 1 && haySabotaje != 1){
 
 			if(estaPlanificando==0){
@@ -1449,7 +1439,7 @@ void ejecucionDeTareaTripulanteFIFO(t_tripulante*tripulante){
 
 		if(tripulante->misCiclosDeCPU==tripulante->tareaAsignada->duracion && tripulante->fueExpulsado != 1 && haySabotaje != 1){
 
-			fin_tarea_msg* mandarTareaCPU=malloc(sizeof(inicio_tarea_msg));
+			fin_tarea_msg* mandarTareaCPU=malloc(sizeof(fin_tarea_msg));
 					mandarTareaCPU->idTripulante = tripulante->idTripulante;
 					mandarTareaCPU->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);		//mando el fin de la tarea
 					enviar_paquete(mandarTareaCPU, FIN_TAREA,tripulante->socketTripulanteImongo);
@@ -1700,18 +1690,6 @@ void ejecucionRR(t_tripulante*tripulante){
 			distancia = distanciaA(tripulante->coordenadas, tripulante->tareaAsignada != NULL ? tripulante->tareaAsignada->coordenadas : 0);
 
 		}
-		if(distancia == 0 && (string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)==TAREA_CPU)){			//ME ESTA FALTANDO ALGO PARA QUE NO VUELVA A ENTRAR SI YA MANDO LA TAREA 		TODO
-
-			inicio_tarea_msg* mandarTareaCpu=malloc(sizeof(inicio_tarea_msg));
-										mandarTareaCpu->idTripulante = tripulante->idTripulante;
-										mandarTareaCpu->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
-										mandarTareaCpu->parametros =0;
-
-										enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
-			free(mandarTareaCpu);
-
-		}
-
 	}
 
 
@@ -1754,6 +1732,12 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 	if(string_to_op_code_tareas(tripulante->tareaAsignada->nombreTarea)==TAREA_CPU){
 		log_info(logger, "el tripulante %d esta realizando una tarea de CPU ",tripulante->idTripulante);
 
+		inicio_tarea_msg* mandarTareaCpu=malloc(sizeof(inicio_tarea_msg));
+				mandarTareaCpu->idTripulante = tripulante->idTripulante;
+				mandarTareaCpu->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);
+				mandarTareaCpu->parametros =0;
+				enviar_paquete(mandarTareaCpu, INICIO_TAREA,tripulante->socketTripulanteImongo);
+				free(mandarTareaCpu);
 
 
 		while(tripulante->misCiclosDeCPU<tripulante->tareaAsignada->duracion && (tripulante->quantumDisponible)>0 && tripulante->fueExpulsado!=1 && haySabotaje !=1){
@@ -1775,7 +1759,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 			tripulante->tareaAsignada->finalizoTarea=true;
 
 			//le mando el FIN tarea a MONGO  	TODO
-			fin_tarea_msg* mandarTareaCPU=malloc(sizeof(inicio_tarea_msg));
+			fin_tarea_msg* mandarTareaCPU=malloc(sizeof(fin_tarea_msg));
 			mandarTareaCPU->idTripulante = tripulante->idTripulante;
 			mandarTareaCPU->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);		//mando el fin de la tarea
 			enviar_paquete(mandarTareaCPU, FIN_TAREA,tripulante->socketTripulanteImongo);
@@ -1871,7 +1855,7 @@ void ejecucionDeTareaTripulanteRR(t_tripulante*tripulante){
 			tripulante->tareaAsignada->finalizoTarea=true;
 
 						//le mando el FIN tarea a MONGO
-			fin_tarea_msg* mandarTareaCPU=malloc(sizeof(inicio_tarea_msg));
+			fin_tarea_msg* mandarTareaCPU=malloc(sizeof(fin_tarea_msg));
 			mandarTareaCPU->idTripulante = tripulante->idTripulante;
 			mandarTareaCPU->nombreTarea =get_t_string(tripulante->tareaAsignada->nombreTarea);		//mando el fin de la tarea
 			enviar_paquete(mandarTareaCPU, FIN_TAREA,tripulante->socketTripulanteImongo);
