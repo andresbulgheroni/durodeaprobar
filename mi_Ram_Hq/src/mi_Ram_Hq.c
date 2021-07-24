@@ -552,7 +552,7 @@ uint32_t generar_direccion_logica_paginacion(uint32_t pagina, uint32_t desplazam
 
 	uint32_t direccion = 0;
 
-	uint32_t bits_derecha = floor(log(TAMANIO_PAGINA) / log(2)) + 1;
+	uint32_t bits_derecha = floor(log((double)TAMANIO_PAGINA) / log(2)) + 1;
 
 	direccion = (pagina << bits_derecha) | desplazamiento;
 
@@ -562,7 +562,7 @@ uint32_t generar_direccion_logica_paginacion(uint32_t pagina, uint32_t desplazam
 
 void obtener_direccion_logica_paginacion(uint32_t* pagina, uint32_t* desplazamiento, uint32_t direccion){
 
-	uint32_t bits_derecha = floor(log(TAMANIO_PAGINA) / log(2)) + 1;
+	uint32_t bits_derecha = floor(log((double)TAMANIO_PAGINA) / log(2)) + 1;
 	uint32_t bits_izquierda = 32  - bits_derecha;
 
 	*pagina = (direccion >> bits_derecha);
@@ -1512,8 +1512,27 @@ void* leer_de_memoria_principal(t_pagina_patota* pagina, char* id_patota){
 
 		frame = memoria_principal + (pagina->nro_frame * TAMANIO_PAGINA);
 
+		switch(ALGORITMO_REEMPLAZO){
+			case LRU:{
+				bool encontrado(t_pagina_patota* patota){
+					return patota == pagina;
+				}
+
+				t_pagina_patota* aux = list_remove_by_condition(lista_para_reemplazo, encontrado);
+
+				list_add(lista_para_reemplazo, aux);
+				break;
+			}case CLOCK:{break;	}
+		}
+
 		pthread_mutex_unlock(&m_LISTA_REEMPLAZO);
 		pthread_mutex_unlock(&m_MEM_VIRTUAL);
+
+		pthread_mutex_lock(&m_LOGGER);
+		char* mensaje = string_from_format("Patota %s accedio a frame %d sin PF", id_patota, pagina->nro_frame);
+		log_info(logger, mensaje);
+		free(mensaje);
+		pthread_mutex_unlock(&m_LOGGER);
 
 	}else{
 
@@ -1557,10 +1576,15 @@ void* leer_de_memoria_principal(t_pagina_patota* pagina, char* id_patota){
 			}
 			pthread_mutex_unlock(&m_LISTA_REEMPLAZO);
 			pthread_mutex_unlock(&m_MEM_VIRTUAL);
+			pthread_mutex_lock(&m_LOGGER);
 
 			char* mensaje = string_from_format("Pagina %d de la patota %s ingreso en frame %d que estaba libre", pagina->nro_pagina, id_patota, pagina->nro_frame);
 			log_info(logger, mensaje);
 			free(mensaje);
+			mensaje = string_from_format("Patota %s accedio a frame %d con PF sin reemplazo", id_patota, pagina->nro_frame);
+			log_info(logger, mensaje);
+			free(mensaje);
+			pthread_mutex_unlock(&m_LOGGER);
 
 		}else{
 
@@ -1616,6 +1640,9 @@ void* leer_de_memoria_principal(t_pagina_patota* pagina, char* id_patota){
 				char* mensaje = string_from_format("Pagina %d de la patota %s reeemplazo en frame %d", pagina->nro_pagina, id_patota,nro_frame);
 				log_info(logger, mensaje);
 				free(mensaje);
+				mensaje = string_from_format("Patota %s accedio a frame %d con PF con reemplazo", id_patota, nro_frame);
+				log_info(logger, mensaje);
+				free(mensaje);
 			}else{
 				char* mensaje = "Fallo reemplazo en memoria principal";
 				log_error(logger, mensaje);
@@ -1644,9 +1671,28 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from, char* id_
 
 		memcpy( memoria_principal + (pagina->nro_frame * TAMANIO_PAGINA), from, TAMANIO_PAGINA);
 
+		switch(ALGORITMO_REEMPLAZO){
+			case LRU:{
+				bool encontrado(t_pagina_patota* patota){
+					return patota == pagina;
+				}
+
+				t_pagina_patota* aux = list_remove_by_condition(lista_para_reemplazo, encontrado);
+
+				list_add(lista_para_reemplazo, aux);
+				break;
+			}case CLOCK:{break;	}
+		}
+
 		pthread_mutex_unlock(&m_LISTA_REEMPLAZO);
 		pthread_mutex_unlock(&m_MEM_VIRTUAL);
 		pthread_mutex_unlock(&m_MEM_PRINCIPAL);
+
+		pthread_mutex_lock(&m_LOGGER);
+		char* mensaje = string_from_format("Patota %s accedio a frame %d sin PF", id_patota, pagina->nro_frame);
+		log_info(logger, mensaje);
+		free(mensaje);
+		pthread_mutex_unlock(&m_LOGGER);
 
 	}else{
 
@@ -1684,9 +1730,14 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from, char* id_
 			pthread_mutex_unlock(&m_MEM_VIRTUAL);
 			pthread_mutex_unlock(&m_MEM_PRINCIPAL);
 
+			pthread_mutex_lock(&m_LOGGER);
 			char* mensaje = string_from_format("Pagina %d de la patota %s ingreso en frame %d que estaba libre", pagina->nro_pagina, id_patota, pagina->nro_frame);
 			log_info(logger, mensaje);
 			free(mensaje);
+			mensaje = string_from_format("Patota %s accedio a frame %d con PF sin reemplazo", id_patota, pagina->nro_frame);
+			log_info(logger, mensaje);
+			free(mensaje);
+			pthread_mutex_unlock(&m_LOGGER);
 
 		}else{
 
@@ -1747,6 +1798,9 @@ void guardar_en_memoria_principal(t_pagina_patota* pagina, void* from, char* id_
 			pthread_mutex_lock(&m_LOGGER);
 			if(nro_frame >= 0){
 				char* mensaje = string_from_format("Pagina %d de la patota %s reeemplazo en frame %d", pagina->nro_pagina, id_patota,nro_frame);
+				log_info(logger, mensaje);
+				free(mensaje);
+				mensaje = string_from_format("Patota %s accedio a frame %d con PF con reemplazo", id_patota, pagina->nro_frame);
 				log_info(logger, mensaje);
 				free(mensaje);
 			}else{
