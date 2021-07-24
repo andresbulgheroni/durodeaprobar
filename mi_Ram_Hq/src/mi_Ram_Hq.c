@@ -666,7 +666,7 @@ void crear_patota_paginacion(iniciar_patota_msg* mensaje, bool* status){
 			pagina->presente = false;
 			pagina->uso = false;
 			pagina->nuevo = true;
-			pagina->ocupado = TAMANIO_PAGINA - (size - size_pcb);;
+			pagina->ocupado = TAMANIO_PAGINA - (size_pcb - size);;
 
 			guardar_en_memoria_principal(pagina, datos + (cantidad_frames - 1) * TAMANIO_PAGINA, id_patota_string);
 
@@ -1139,10 +1139,11 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 
 				}
 
+				t_pagina_patota* pagina_enc = list_find(tabla->tabla_paginas, es_la_pagina);
+
 				if(leer_siguiente_pagina){
 
 
-					t_pagina_patota* pagina_enc = list_find(tabla->tabla_paginas, es_la_pagina);
 
 					if(pagina_enc == NULL){
 
@@ -1161,6 +1162,22 @@ char* siguiente_tarea_paginacion(solicitar_siguiente_tarea_msg* mensaje, bool* t
 					memcpy(frame_tareas, frame, TAMANIO_PAGINA);
 
 					pthread_mutex_unlock(&m_MEM_PRINCIPAL);
+
+				}
+
+				t_pagina_patota* ultima_pagina = list_get(tabla->tabla_paginas, list_size(tabla->tabla_paginas) - 1);
+
+				if(pagina_enc->nro_pagina == ultima_pagina->nro_pagina){
+
+					if(desp_tareas == (pagina_enc->ocupado - 1) && i < tarea_actual){
+
+						if(strcmp(tarea, "") != 0)
+							free(tarea);
+
+						tarea = "";
+						break;
+
+					}
 
 				}
 
