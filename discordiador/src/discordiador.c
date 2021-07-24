@@ -494,7 +494,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 
 				uint32_t cantidadDeTripulantes= atoi(mensaje[1]);
 
-				log_info("tareas que van a ser asignadas son:%s",buffer);
+				log_info(logger,"tareas que van a ser asignadas son:%s",buffer);
 
 
 				iniciar_patota_msg* mensajePatota=malloc(sizeof(iniciar_patota_msg));
@@ -1140,7 +1140,7 @@ algoritmo_code stringACodigoAlgoritmo(const char* string) {
 void ejecutarTripulante(t_tripulante* tripulante){
 	//INICIAR_PATOTA 2 /home/utnso/tp-2021-1c-DuroDeAprobar/Tareas/tareasPatota1.txt 1|1
 
-	log_info("hola soy el tripulante con ID:%d\n",tripulante->idTripulante);
+	log_info(logger,"hola soy el tripulante con ID:%d\n",tripulante->idTripulante);
 
 	uint32_t socketDelTripulanteConImongo = crear_conexion(IP_I_MONGO_STORE,PUERTO_I_MONGO_STORE);		//TODO
 	tripulante->socketTripulanteImongo = socketDelTripulanteConImongo;
