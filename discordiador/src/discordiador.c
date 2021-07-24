@@ -185,6 +185,7 @@ void planificarSabotaje(int32_t*socketSabotaje){
 	while(true){
 
 		t_paquete*paqueteSabotaje=recibir_paquete(*socketSabotaje);
+		if(paqueteSabotaje->codigo != DESCONECTADO){
 		notificar_sabotaje_msg*mensajeDeSabotaje=deserializar_paquete(paqueteSabotaje);
 
 		log_info(logger,"recibi el paquete de un sabotaje");
@@ -196,7 +197,7 @@ void planificarSabotaje(int32_t*socketSabotaje){
 		sabotajeActivo->coordenadas->posY = mensajeDeSabotaje->coordenadas->posY;
 		sabotajeActivo->id_sabotaje = mensajeDeSabotaje->idSabotaje;
 
-		log_info(logger,"llego el sabotaje con ID: %d",sabotajeActivo->id_sabotaje);
+		log_info(logger,"llego el sabotaje con ID: %d",(int32_t) sabotajeActivo->id_sabotaje);
 
 		haySabotaje=1;
 
@@ -234,6 +235,7 @@ void planificarSabotaje(int32_t*socketSabotaje){
 		sem_post(&sem_sabotaje);
 		free(sabotajeActivo->coordenadas);
 		free(sabotajeActivo);
+	}
 	}
 }
 
@@ -732,6 +734,8 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			//recibirMensaje()
 			t_paquete*paqueteBitacora = recibir_paquete(*socketBitacora);
 
+			if(paqueteBitacora->codigo != DESCONECTADO){
+
 
 			obtener_bitacora_rta*mensajeBitacoraRta = deserializar_paquete(paqueteBitacora);
 
@@ -741,6 +745,7 @@ void leer_consola(){ // proximamente recibe como parm uint32_t* socket_server
 			log_info(logger,"el contenido de la bitacora del ID: %d es:\n%s",id,mensajeBitacoraRta->bitacora->string);
 
 
+			}
 
 
 			break;
