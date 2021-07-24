@@ -10,7 +10,7 @@ cd i_Mongo_Store
 make clean
 make
 cd bin 
-lxterminal -e bash -c 'valgrind --leak-check=full --log-file=/home/utnso/Escritorio/vlgnd_imongo_$(date '+%d-%m_%H:%M:%S').log ./i_Mongo_Store; bash'
+lxterminal -e bash -c 'valgrind --leak-check=full --log-file=/home/utnso/Escritorio/v_mongo_$(date '+%d-%m_%H:%M:%S').log ./i_Mongo_Store; bash'
 cd ..
 cd ..
 
@@ -18,7 +18,7 @@ cd mi_Ram_Hq
 make clean
 make
 cd bin
-lxterminal -e bash -c 'valgrind --leak-check=full --log-file=/home/utnso/Escritorio/vlgnd_ram_$(date '+%d-%m_%H:%M:%S').log ./mi_Ram_Hq; bash'
+lxterminal -e bash -c 'valgrind --leak-check=full --log-file=/home/utnso/Escritorio/v_ram_$(date '+%d-%m_%H:%M:%S').log ./mi_Ram_Hq; bash'
 cd ..
 cd ..
 
@@ -26,4 +26,7 @@ cd discordiador
 make clean
 make
 cd bin
-lxterminal -e bash -c 'valgrind --leak-check=full --log-file=/home/utnso/Escritorio/vlgnd_discordiador_$(date '+%d-%m_%H:%M:%S').log ./discordiador; bash'
+lxterminal -e bash -c 'valgrind --leak-check=full --log-file=/home/utnso/Escritorio/v_disc_$(date '+%d-%m_%H:%M:%S').log ./discordiador; bash'
+
+esac
+done

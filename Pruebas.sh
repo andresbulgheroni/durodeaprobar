@@ -27,3 +27,6 @@ make clean
 make
 cd bin
 lxterminal -e bash -c './discordiador; bash'
+
+esac
+done
