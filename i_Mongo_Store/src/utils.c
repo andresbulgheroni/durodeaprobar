@@ -980,4 +980,3 @@ void liberar_conexion(uint32_t socketCliente){
 	close(socketCliente);
 
 }
-

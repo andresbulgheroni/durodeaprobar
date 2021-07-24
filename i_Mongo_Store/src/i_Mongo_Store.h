@@ -89,11 +89,13 @@ int fsckFiles_Size();
 int fsckFiles_BlockCount();
 int fsckFiles_Blocks();
 void actualizarBitmap(char*);
-void haySabotajeCountEnElArchivo(char*);
+void haySabotajeCountEnElArchivo(char*, char);
 void liberarRecursos();
 void iniciarProtocoloFSCK();
 void cerrarModulo();
 void corregirSabotajeBlocks(char* , char);
+void haySabotajeSizeEn(char*, char );
+
 
 // FUNCIONES PARA TESTING:
 void estadoSuperBloque(){

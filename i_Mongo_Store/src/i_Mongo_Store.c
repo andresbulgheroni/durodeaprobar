@@ -20,7 +20,6 @@ int main(void) {
 	SOCKET_SABOTAJE= malloc(sizeof(int32_t));
 	*SOCKET_SABOTAJE=esperar_cliente(socket_servidor);
 
-
 	while(true){
 
 		int32_t*socket_cliente =  malloc(sizeof(int32_t));
@@ -766,8 +765,8 @@ int descartarBasura(){
 		remove(rutaMetadata);
 
 		for(int j=0;j<blockCount;j++){
-						free(bloques[j]);
-					}
+			free(bloques[j]);
+		}
 		free(bloques);
 		free(rutaMetadata);
 
@@ -784,6 +783,7 @@ int consumirRecurso(int32_t cantidad, char recurso){
 	char* rutaMetadata;
 	if(recurso == 'O')	rutaMetadata = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
 	else if(recurso == 'C') rutaMetadata = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
+	else if(recurso == 'B') rutaMetadata = string_from_format("%s/Files/Basura.ims", PUNTO_MONTAJE);
 	else{
 		log_error(logger, "Recurso a consumir invalido");
 		return EXIT_FAILURE;
@@ -1074,9 +1074,9 @@ int fsckSuperBloque_Bloques(){
 
 	if(blocksReales != blocksSaboteado){
 		memcpy(superBloqueMap + sizeof(uint32_t), &blocksReales, sizeof(uint32_t));
-		log_info(logger, "Sabotaje en superbloque corregido, cambio BLOCKS = %d por BLOCKS = %d", blocksSaboteado, blocksReales);
+		log_info(logger, "Sabotaje superbloque/bloques: DETECTADO, cambio BLOCKS = %d por BLOCKS = %d", blocksSaboteado, blocksReales);
 	}else{
-		log_info(logger, "La cantidad de bloques es correcta, no hubo sabotaje rey");
+		log_info(logger, "Sabotaje superbloque/bloques: No hay sabotaje rey");
 	}
 
 	fclose(superbloque);
@@ -1134,7 +1134,7 @@ int fsckSuperBloque_Bitmap(){
 		closedir(d);
 	}
 
-	log_info(logger, "Restaurado bitmap segun metadatas, anda a sabotear a otra parte");
+	log_info(logger, "Sabotaje superbloque/bitmap: Restaurado bitmap segun metadata de los archivos");
 
 	free(rutaBitacoras);
 	free(rutaArchivoOxigeno);
@@ -1151,192 +1151,22 @@ int fsckFiles_Size(){
 	char* rutaArchivoComida = string_from_format("%s/Files/Comida.ims", PUNTO_MONTAJE);
 	char* rutaArchivoBasura = string_from_format("%s/Files/Basura.ims", PUNTO_MONTAJE);
 
+
 	if(existeArchivo(rutaArchivoOxigeno)){
 
-		t_config* metadata = config_create(rutaArchivoOxigeno);
-
-		int blockCountBloques = config_get_int_value(metadata, "BLOCK_COUNT");
-
-		char* archivoMD5 = config_get_string_value(metadata, "MD5_ARCHIVO");
-		int size = config_get_int_value(metadata, "SIZE");
-		char* md5oxigeno = string_repeat('O',size);
-		char* md5archivo = calcularMD5(md5oxigeno);
-
-		int totalIteraciones = blockCountBloques * BLOCK_SIZE;
-		int sizeCorregido = 0;
-
-		if (strcmp(md5archivo,archivoMD5)){
-
-			int count = 1;
-			while(count <= totalIteraciones){
-				char* md5oxigenoCorregido = string_repeat('O',count);	// no es el md5, pone "archivoPosible" por ej
-				char* md5archivoCalculado = calcularMD5(md5oxigenoCorregido);
-				if(!strcmp(md5archivoCalculado,archivoMD5)){
-					sizeCorregido = count;
-				}
-				count++;
-				free(md5oxigenoCorregido);
-				free(md5archivoCalculado);
-			}
-			log_info(logger, "Sabotaje en el SIZE, corrijo %d a %d", size, sizeCorregido);
-
-			char* sizeCorrect = string_itoa(sizeCorregido);
-			config_set_value(metadata,"SIZE", sizeCorrect);
-			free(sizeCorrect);
-
-		}else{
-
-			log_info(logger, "No hay sabotaje del SIZE");
-
-		}
-
-		free(md5archivo);
-
-		char* metadataFiles = string_new();
-		string_append(&metadataFiles,"SIZE=");
-		string_append(&metadataFiles, config_get_string_value(metadata, "SIZE"));
-		string_append(&metadataFiles,"\nBLOCK_COUNT=");
-		string_append(&metadataFiles, config_get_string_value(metadata, "BLOCK_COUNT"));
-		string_append(&metadataFiles,"\nBLOCKS=");
-		string_append(&metadataFiles,config_get_string_value(metadata, "BLOCKS"));
-		string_append(&metadataFiles,"\nCARACTER_LLENADO=");
-		string_append(&metadataFiles,config_get_string_value(metadata, "CARACTER_LLENADO"));
-		string_append(&metadataFiles,"\nMD5_ARCHIVO=");
-		string_append(&metadataFiles,config_get_string_value(metadata, "MD5_ARCHIVO"));
-
-		FILE* fp = fopen(rutaArchivoOxigeno, "w+");
-		txt_write_in_file(fp, metadataFiles);
-		txt_close_file(fp);
-
-		free(metadataFiles);
-		free(md5oxigeno);
-		config_destroy(metadata);
+		haySabotajeSizeEn(rutaArchivoOxigeno, 'O');
 
 	}
 
 	if(existeArchivo(rutaArchivoComida)){
 
-		t_config* metadata = config_create(rutaArchivoOxigeno);
-
-		int blockCountBloques = config_get_int_value(metadata, "BLOCK_COUNT");
-
-		char* archivoMD5 = config_get_string_value(metadata, "MD5_ARCHIVO");
-		int size = config_get_int_value(metadata, "SIZE");
-		char* md5comida = string_repeat('C',size);
-		char* md5archivo = calcularMD5(md5comida);
-
-		int totalIteraciones = blockCountBloques * BLOCK_SIZE;
-		int sizeCorregido = 0;
-
-		if (strcmp(md5archivo,archivoMD5)){
-
-			int count = 1;
-			while(count <= totalIteraciones){
-				char* md5comidaCorregido = string_repeat('C',count);
-				char* md5archivoCalculado = calcularMD5(md5comidaCorregido);
-				if(!strcmp(md5archivoCalculado,archivoMD5)){
-					sizeCorregido = count;
-				}
-				count++;
-				free(md5comidaCorregido);
-				free(md5archivoCalculado);
-			}
-			log_info(logger, "Sabotaje en el SIZE, corrijo %d a %d", size, sizeCorregido);
-
-			char* sizeCorrect = string_itoa(sizeCorregido);
-			config_set_value(metadata,"SIZE", sizeCorrect);
-			free(sizeCorrect);
-
-		}else{
-
-			log_info(logger, "No hay sabotaje del SIZE");
-
-		}
-
-		free(md5archivo);
-
-		char* metadataFiles = string_new();
-		string_append(&metadataFiles,"SIZE=");
-		string_append(&metadataFiles, config_get_string_value(metadata, "SIZE"));
-		string_append(&metadataFiles,"\nBLOCK_COUNT=");
-		string_append(&metadataFiles, config_get_string_value(metadata, "BLOCK_COUNT"));
-		string_append(&metadataFiles,"\nBLOCKS=");
-		string_append(&metadataFiles,config_get_string_value(metadata, "BLOCKS"));
-		string_append(&metadataFiles,"\nCARACTER_LLENADO=");
-		string_append(&metadataFiles,config_get_string_value(metadata, "CARACTER_LLENADO"));
-		string_append(&metadataFiles,"\nMD5_ARCHIVO=");
-		string_append(&metadataFiles,config_get_string_value(metadata, "MD5_ARCHIVO"));
-
-		FILE* fp = fopen(rutaArchivoOxigeno, "w+");
-		txt_write_in_file(fp, metadataFiles);
-		txt_close_file(fp);
-
-		free(metadataFiles);
-		free(md5comida);
-		config_destroy(metadata);
+		haySabotajeSizeEn(rutaArchivoComida, 'C');
 
 	}
 
 	if(existeArchivo(rutaArchivoBasura)){
 
-		t_config* metadata = config_create(rutaArchivoOxigeno);
-
-		int blockCountBloques = config_get_int_value(metadata, "BLOCK_COUNT");
-
-		char* archivoMD5 = config_get_string_value(metadata, "MD5_ARCHIVO");
-		int size = config_get_int_value(metadata, "SIZE");
-		char* md5basura = string_repeat('B',size);
-		char* md5archivo = calcularMD5(md5basura);	// El nombre se confunde con archivoMD5
-
-		int totalIteraciones = blockCountBloques * BLOCK_SIZE;
-		int sizeCorregido = 0;
-
-		if (strcmp(md5archivo,archivoMD5)){
-
-			int count = 1;
-			while(count <= totalIteraciones){
-				char* md5basuraCorregido = string_repeat('B',count);
-				char* md5archivoCalculado = calcularMD5(md5basuraCorregido);
-				if(!strcmp(md5archivoCalculado,archivoMD5)){
-					sizeCorregido = count;
-				}
-				count++;
-				free(md5basuraCorregido);
-				free(md5archivoCalculado);
-			}
-			log_info(logger, "Sabotaje en el SIZE, corrijo %d a %d", size, sizeCorregido);
-
-			char* sizeCorrect = string_itoa(sizeCorregido);
-			config_set_value(metadata,"SIZE", sizeCorrect);
-			free(sizeCorrect);
-
-		}else{
-
-			log_info(logger, "No hay sabotaje del SIZE");
-
-		}
-
-		free(md5archivo);
-
-		char* metadataFiles = string_new();
-		string_append(&metadataFiles,"SIZE=");
-		string_append(&metadataFiles, config_get_string_value(metadata, "SIZE"));
-		string_append(&metadataFiles,"\nBLOCK_COUNT=");
-		string_append(&metadataFiles, config_get_string_value(metadata, "BLOCK_COUNT"));
-		string_append(&metadataFiles,"\nBLOCKS=");
-		string_append(&metadataFiles,config_get_string_value(metadata, "BLOCKS"));
-		string_append(&metadataFiles,"\nCARACTER_LLENADO=");
-		string_append(&metadataFiles,config_get_string_value(metadata, "CARACTER_LLENADO"));
-		string_append(&metadataFiles,"\nMD5_ARCHIVO=");
-		string_append(&metadataFiles,config_get_string_value(metadata, "MD5_ARCHIVO"));
-
-		FILE* fp = fopen(rutaArchivoOxigeno, "w+");
-		txt_write_in_file(fp, metadataFiles);
-		txt_close_file(fp);
-
-		free(metadataFiles);
-		free(md5basura);
-		config_destroy(metadata);
+		haySabotajeSizeEn(rutaArchivoBasura, 'B');
 
 	}
 
@@ -1348,6 +1178,70 @@ int fsckFiles_Size(){
 
 }
 
+void haySabotajeSizeEn(char* rutaArchivo, char recurso){
+	t_config* metadata = config_create(rutaArchivo);
+
+	int blockCount = config_get_int_value(metadata, "BLOCK_COUNT");
+	char* MD5SegunMetadata = config_get_string_value(metadata, "MD5_ARCHIVO");
+	int size = config_get_int_value(metadata, "SIZE");
+
+	char* archivoSegunSize = string_repeat(recurso, size);
+	char* MD5SegunSize = calcularMD5(archivoSegunSize);
+	int totalIteraciones = blockCount * BLOCK_SIZE;
+
+	if (strcmp(MD5SegunMetadata,MD5SegunSize)){	// Los MD5 no coinciden, hay sabotaje!
+		int nuevoSize = 1;
+
+		while(nuevoSize <= totalIteraciones){
+
+			char* archivoPosible = string_repeat(recurso, nuevoSize);
+			char* MD5Posible = calcularMD5(archivoPosible);
+
+			if(!strcmp(MD5Posible, MD5SegunMetadata)){
+				free(MD5Posible);
+				free(archivoPosible);
+				break;
+			}
+
+			free(MD5Posible);
+			free(archivoPosible);
+			nuevoSize++;
+		}
+
+		log_info(logger, "Sabotaje files/size: Corrijo SIZE=%d a %d en el recurso %c", size, nuevoSize, recurso);
+
+		char* metadataFiles = string_new();
+		string_append(&metadataFiles,"SIZE=");
+		char* nuevoSizeString = string_itoa(nuevoSize);
+		string_append(&metadataFiles, nuevoSizeString);
+		string_append(&metadataFiles,"\nBLOCK_COUNT=");
+		string_append(&metadataFiles, config_get_string_value(metadata, "BLOCK_COUNT"));
+		string_append(&metadataFiles,"\nBLOCKS=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "BLOCKS"));
+		string_append(&metadataFiles,"\nCARACTER_LLENADO=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "CARACTER_LLENADO"));
+		string_append(&metadataFiles,"\nMD5_ARCHIVO=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "MD5_ARCHIVO"));
+
+		FILE* fp = fopen(rutaArchivo, "w+");
+		txt_write_in_file(fp, metadataFiles);
+		txt_close_file(fp);
+
+		free(nuevoSizeString);
+		free(metadataFiles);
+
+	}else{	// Los MD5 coinciden, no hay sabotaje
+
+		log_info(logger, "Sabotaje files/size: El recurso %c esta correctox", recurso);
+
+	}
+
+	free(archivoSegunSize);
+	free(MD5SegunSize);
+	config_destroy(metadata);
+}
+
+
 int fsckFiles_BlockCount(){
 
 	char* rutaArchivoOxigeno = string_from_format("%s/Files/Oxigeno.ims", PUNTO_MONTAJE);
@@ -1356,19 +1250,19 @@ int fsckFiles_BlockCount(){
 
 	if(existeArchivo(rutaArchivoOxigeno)){
 
-		haySabotajeCountEnElArchivo(rutaArchivoOxigeno);
+		haySabotajeCountEnElArchivo(rutaArchivoOxigeno, 'O');
 
 	}
 
 	if(existeArchivo(rutaArchivoComida)){
 
-		haySabotajeCountEnElArchivo(rutaArchivoComida);
+		haySabotajeCountEnElArchivo(rutaArchivoComida, 'C');
 
 	}
 
 	if(existeArchivo(rutaArchivoBasura)){
 
-		haySabotajeCountEnElArchivo(rutaArchivoBasura);
+		haySabotajeCountEnElArchivo(rutaArchivoBasura, 'B');
 
 	}
 
@@ -1421,7 +1315,6 @@ void actualizarBitmap(char* rutaArchivo){
 	while(blocks[j]!=NULL){
 
 		setBitmap(1, atoi(blocks[j]));
-		log_info(logger, "Seteo BLOCK = %d en 1 en el Bitmap ", atoi(blocks[j])-1);
 		j++;
 
 	}
@@ -1436,7 +1329,7 @@ void actualizarBitmap(char* rutaArchivo){
 
 }
 
-void haySabotajeCountEnElArchivo(char* directorio){
+void haySabotajeCountEnElArchivo(char* directorio, char recurso){
 
 	t_config* metadata = config_create(directorio);
 
@@ -1447,37 +1340,35 @@ void haySabotajeCountEnElArchivo(char* directorio){
 	int blockCountMetadata = config_get_int_value(metadata, "BLOCK_COUNT");
 
 	if (blockCountBloques == blockCountMetadata){
-		log_info(logger, "No hay sabotaje del BLOCK_COUNT, todo piola rey");
+		log_info(logger, "Sabotaje files/block_count: El recurso %c esta en orden", recurso);
 	}else{
-		log_info(logger, "Sabotaje en el BLOCK_COUNT, corrijo %d a %d", blockCountMetadata, blockCountBloques);
+		log_info(logger, "Sabotaje files/block_count: Corrijo count %d a %d en el recurso %c", blockCountMetadata, blockCountBloques, recurso);
 		char* blockCountCorregido = string_itoa(blockCountBloques);
 		config_set_value(metadata,"BLOCK_COUNT", blockCountCorregido);
 		free(blockCountCorregido);
+
+		char* metadataFiles = string_new();
+		string_append(&metadataFiles,"SIZE=");
+		string_append(&metadataFiles, config_get_string_value(metadata, "SIZE"));
+		string_append(&metadataFiles,"\nBLOCK_COUNT=");
+		string_append(&metadataFiles, config_get_string_value(metadata, "BLOCK_COUNT"));
+		string_append(&metadataFiles,"\nBLOCKS=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "BLOCKS"));
+		string_append(&metadataFiles,"\nCARACTER_LLENADO=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "CARACTER_LLENADO"));
+		string_append(&metadataFiles,"\nMD5_ARCHIVO=");
+		string_append(&metadataFiles,config_get_string_value(metadata, "MD5_ARCHIVO"));
+
+		FILE* fp = fopen(directorio, "w+");
+		txt_write_in_file(fp, metadataFiles);
+		txt_close_file(fp);
+
+		free(metadataFiles);
 	}
-
-	char* metadataFiles = string_new();
-	string_append(&metadataFiles,"SIZE=");
-	string_append(&metadataFiles, config_get_string_value(metadata, "SIZE"));
-	string_append(&metadataFiles,"\nBLOCK_COUNT=");
-	string_append(&metadataFiles, config_get_string_value(metadata, "BLOCK_COUNT"));
-	string_append(&metadataFiles,"\nBLOCKS=");
-	string_append(&metadataFiles,config_get_string_value(metadata, "BLOCKS"));
-	string_append(&metadataFiles,"\nCARACTER_LLENADO=");
-	string_append(&metadataFiles,config_get_string_value(metadata, "CARACTER_LLENADO"));
-	string_append(&metadataFiles,"\nMD5_ARCHIVO=");
-	string_append(&metadataFiles,config_get_string_value(metadata, "MD5_ARCHIVO"));
-
-	FILE* fp = fopen(directorio, "w+");
-	txt_write_in_file(fp, metadataFiles);
-	txt_close_file(fp);
-
-
 	for(int i=0;i<blockCountBloques;i++){
 		free(arrayBlocks[i]);
 	}
 	free(arrayBlocks);
-	free(metadataFiles);
-
 	config_destroy(metadata);
 
 }
@@ -1561,8 +1452,10 @@ void corregirSabotajeBlocks(char* ruta, char caracter){
 		consumirRecurso((unsigned)(config_get_int_value(metadata, "SIZE")),caracter);
 		generarRecurso((unsigned)(config_get_int_value(metadata, "SIZE")),caracter);
 
+		log_info(logger, "Sabotaje files/blocks: Se corrige el recurso %c, anda a sabotear a otra parte", caracter);
+
 	}else{
-		log_info(logger, "No hay sabotaje del blocks");
+		log_info(logger, "Sabotaje files/blocks: El recurso %c esta ordenado, todo en calma", caracter);
 	}
 
 	for(int i=0;i<blockCount;i++){
@@ -1571,6 +1464,7 @@ void corregirSabotajeBlocks(char* ruta, char caracter){
 	free(archivo);
 	free(blocksArray);
 	free(blocks);
+	free(MD5Bloques);
 	config_destroy(metadata);
 
 }
